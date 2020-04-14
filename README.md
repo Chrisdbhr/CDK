@@ -1,5 +1,3 @@
-<iframe src="https://ghbtns.com/github-btn.html?user=Chrisdbhr&repo=CDK&type=star&count=true" frameborder="0" scrolling="0" width="170px" height="20px"></iframe> 
-<iframe src="https://ghbtns.com/github-btn.html?user=Chrisdbhr&type=follow&count=true" frameborder="0" scrolling="0" width="170px" height="20px"></iframe>
 <a href="https://www.buymeacoffee.com/chrisdbhr" target="_blank"><img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" alt="Buy Me A Coffee" style="height: 41px !important;width: 174px !important;box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;-webkit-box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;" ></a>
 
 # README #
