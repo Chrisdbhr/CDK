@@ -25,7 +25,7 @@ namespace CDK {
 		public void LoadScene() {
 
 			var a = SceneManager.GetSceneByName(this.sceneToLoad);
-			if (a != null && a.isLoaded) {
+			if (a.isLoaded && !this.loadIfAlreadyLoaded) {
 				Debug.Log($"Scene {this.sceneToLoad} is already loaded.");
 				return;
 			}
@@ -42,7 +42,7 @@ namespace CDK {
 					this.sceneEnabledEvent?.Invoke();
 				}
 
-				if (this.unloadThisSceneOnComplete) {
+				if (this != null && this.unloadThisSceneOnComplete) {
 					SceneManager.UnloadSceneAsync(this.gameObject.scene);
 				}
 			};
