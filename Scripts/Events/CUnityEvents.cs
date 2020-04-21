@@ -22,5 +22,7 @@ namespace CDK
     [System.Serializable]
     public class CUnityEventColor : UnityEvent<Color> {}
 
-    
+    [System.Serializable]
+    public class CUnityEventTransform : UnityEvent<Transform> {}
+
 }
