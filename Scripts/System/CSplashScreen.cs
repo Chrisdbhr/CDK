@@ -1,7 +1,5 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.SceneManagement;
 
 namespace CDK
@@ -15,21 +13,18 @@ namespace CDK
         [Header("Active scene will be the first of the list")]
         [SerializeField] CSceneField[] firstScenes;
 	
-        public UnityEventFloat onLoadingProgressChanged;
+        public CUnityEventFloat onLoadingProgressChanged;
 	
-        [System.Serializable]
-        public class UnityEventFloat : UnityEvent<float>{}
-
 
         private IEnumerator Start()
         {
-            Scene currentScene = gameObject.scene;
+            Scene currentScene = this.gameObject.scene;
 
-            SceneManager.LoadScene(systemAditiveScene, LoadSceneMode.Additive);
+            SceneManager.LoadScene(this.systemAditiveScene, LoadSceneMode.Additive);
 
             CSceneField isFirstScene = null;
 
-            foreach (var scene in firstScenes)
+            foreach (var scene in this.firstScenes)
             {
                 SceneManager.LoadScene(scene, LoadSceneMode.Additive);
 
@@ -42,7 +37,7 @@ namespace CDK
             yield return null;
 
             var firstSceneName = SceneManager.GetSceneByName(isFirstScene);
-            if(isFirstScene != null && firstSceneName != null) SceneManager.SetActiveScene(firstSceneName);
+            if(isFirstScene != null) SceneManager.SetActiveScene(firstSceneName);
 
             SceneManager.UnloadSceneAsync(currentScene);
 
