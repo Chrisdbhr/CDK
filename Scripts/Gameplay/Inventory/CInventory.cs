@@ -3,6 +3,7 @@ using CDK.Inventory;
 using CDK.Weapons;
 using UniRx;
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace CDK {
 	public class CInventory : MonoBehaviour {
@@ -26,6 +27,9 @@ namespace CDK {
 
 		// equipament
 		[SerializeField] private Transform _handTransform;
+		[SerializeField] private UnityEvent _onAttackEvent;
+		[SerializeField] private CUnityEventFloat _onAttackRecoilEvent;
+		
 		[NonSerialized] private CEquippedWeaponGameObject _currentSpawnedWeapon;
 
 		public CWeaponBaseData EquippedWeapon {
@@ -45,7 +49,9 @@ namespace CDK {
 		#region <<---------- MonoBehaviour ---------->>
 		private void Awake() {
 			this._equippedWeaponRx = new ReactiveProperty<CWeaponBaseData>();
-			
+			if (this._handTransform) {
+				Debug.Log($"HandTransform object is null!");
+			}
 			this.InventoryItems = new CItemBaseData[this.Size];
 		}
 
@@ -223,6 +229,11 @@ namespace CDK {
 
 		#endregion <<---------- Actions ---------->>
 
+		private void OnAttack(float damage) {
+			this._onAttackEvent?.Invoke();
+			Debug.Log($"Camera shake");
+		}
+
 		/// <summary>
 		/// Returns ammo data consumed by the weapon.
 		/// </summary>
@@ -237,10 +248,14 @@ namespace CDK {
 				Debug.Log($"Cant fire gun because its has no more ammo.");
 				return null;
 			}
+			float damage = ((CAmmoScriptableObject) weapon.EquippedAmmoData.ScriptableObject).HitInfo.ScriptableObject.Damage;
 
+			this._onAttackRecoilEvent?.Invoke(damage * 0.1f);
+			
+			this.OnAttack(damage);
 			weapon.EquippedAmmoData.ConsumeAmmo();
 			return weapon.EquippedAmmoData;
 		}
-		
+
 	}
 }
