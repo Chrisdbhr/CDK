@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace CDK.Weapons {
 	public class CPlayerAttack : MonoBehaviour {
-		[SerializeField] private CCharacterBase ciCharacterBase;
+		[SerializeField] private CCharacterBase _characterBase;
 		[SerializeField] private CInventory _inventory;
 		[SerializeField] private CAim _aim;
 		[SerializeField] private Animator _characterAnimator;
@@ -20,7 +20,7 @@ namespace CDK.Weapons {
 		#region <<---------- MonoBehaviour ---------->>
 		private void Update() {
 			if (Input.GetButtonDown(CInputKeys.ATTACK) && 
-				this.ciCharacterBase.IsAiming &&
+				this._characterBase.IsAiming &&
 				this._inventory.EquippedWeapon != null &&
 				!CBlockingEventsManager.get.IsBlockingEventHappening
 				) {
@@ -56,13 +56,13 @@ namespace CDK.Weapons {
 									
 									// prevent self damage
 									var rootHitCharacter = hitInfo.transform.root.GetComponent<CCharacterBase>();
-									if (rootHitCharacter != null && rootHitCharacter == this.ciCharacterBase) {
+									if (rootHitCharacter != null && rootHitCharacter == this._characterBase) {
 										Debug.Log($"Will not apply damage to character itself.");
 										return;
 									}
 									
 									// set hit info properties
-									ammo.HitInfo.Attacker = this.ciCharacterBase;
+									ammo.HitInfo.Attacker = this._characterBase;
 									ammo.HitInfo.HitPointPosition = hitInfo.point;
 
 									float damage = ammo.HitInfo.ScriptableObject.Damage;
