@@ -20,7 +20,7 @@ namespace CDK {
 		
 		
 		private const string VERSION_FILE_PATH = "CDK/Resources/CDKVersion.txt";
-		private const string VERSION_UPDATE_URL = "https://raw.githubusercontent.com/Chrisdbhr/CDK/release-latest/Resources/CDKVersion.txt";
+		private const string VERSION_UPDATE_URL = "https://raw.githubusercontent.com/Chrisdbhr/CDK/master/Resources/CDKVersion.txt";
 		
 		
 		
