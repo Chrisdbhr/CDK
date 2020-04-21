@@ -11,7 +11,7 @@ CDK (Chris Development Kit) is a useful set of tools to speedup development of c
 
 ### How do I get set up? ###
 
-* Preferably, create and import this as a submodule inside **Assets/CDK/** folder.
+* Preferably, create and import this as a submodule inside **Assets/CDK/** folder. If you don't know how to do that, just download [this](https://github.com/Chrisdbhr/CDK/archive/master.zip) and put inside **Assets/CDK/** folder.
 * Pay attention for any new warning that will be logged on console.
 * There are some dependency imported inside ThirdPartyDependencies folder.
 * There are still no Unit Test implemented since this repository is still in active change.
@@ -20,7 +20,7 @@ CDK (Chris Development Kit) is a useful set of tools to speedup development of c
 ### Contribution guidelines ###
 
 * Fell free to open a pull request for fixes or new versions.
-* Try to follow some code conventions like using **this** on variables.
+* Try to follow some code conventions like using "**this.**" on variables.
 
 ### Who do I talk to? ###
 
