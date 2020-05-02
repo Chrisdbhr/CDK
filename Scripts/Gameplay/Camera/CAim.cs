@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using CDK.Inventory;
 using UnityEngine;
 
 namespace CDK {
@@ -27,8 +28,10 @@ namespace CDK {
 				
 				// set aim progress
 				if(this._aimProgressCoroutine != null) this.StopCoroutine(this._aimProgressCoroutine);
-				
-				this._aimProgressCoroutine = this.StartCoroutine(this._isAiming ? this.SmoothSetAimProgress(1f) : this.SmoothSetAimProgress(0f));
+				this._aimProgressCoroutine = this.StartCoroutine(
+					this._isAiming && (this._ownerCharInventory != null && this._ownerCharInventory.EquippedWeapon is CGunData)? 
+							this.SmoothSetAimProgress(1f) : 
+							this.SmoothSetAimProgress(0f));
 			}
 		}
 		[NonSerialized] private bool _isAiming;
