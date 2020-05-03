@@ -8,10 +8,17 @@ namespace CDK {
 
 		#region <<---------- CIInteractable ---------->>
 
-		public void OnInteract(CCharacterBase interactingCharacter) {
+		public void OnInteract(Transform interactingTransform) {
+			if (interactingTransform == null) {
+				Debug.Log($"Something interacted with {this.name} but interacting transform was null.");
+				return;
+			}
 			// try to get object
-			var inventory = interactingCharacter.GetComponent<CInventory>();
-			if (inventory == null) return;
+			var inventory = interactingTransform.root.GetComponent<CInventory>();
+			if (inventory == null) {
+				Debug.Log($"{interactingTransform}");
+				return;
+			}
 
 			bool itemCollected = false;
 

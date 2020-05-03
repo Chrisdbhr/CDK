@@ -1,5 +1,7 @@
+using UnityEngine;
+
 namespace CDK {
 	public interface CIInteractable {
-		void OnInteract(CCharacterBase interactingCharacter);
+		void OnInteract(Transform interactingTransform);
 	}
 }

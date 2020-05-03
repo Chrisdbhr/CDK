@@ -7,7 +7,7 @@ namespace CDK {
 		[SerializeField] private bool onlyWorkOneTimePerSceneLoad;
 		[SerializeField] private UnityEvent InteractEvent;
 
-		public void OnInteract(CCharacterBase interactingCharacter) {
+		public void OnInteract(Transform interactingTransform) {
 			if (!this.enabled || !this.gameObject.activeInHierarchy) return;
 			
 			this.InteractEvent?.Invoke();

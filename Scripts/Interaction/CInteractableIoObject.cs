@@ -70,7 +70,7 @@ namespace CDK {
 		#endregion <<---------- MonoBehaviour ---------->>
 		
 		
-		public void OnInteract(CCharacterBase interactingCharacter) {
+		public void OnInteract(Transform interactingTransform) {
 			if (!this.enabled || !this.gameObject.activeInHierarchy) return;
 
 			if (this.Locked) {
