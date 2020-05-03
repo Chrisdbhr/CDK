@@ -1,7 +1,7 @@
 using UnityEngine;
 
 namespace CDK {
-	[CreateAssetMenu(fileName = "Hit info", menuName = "Data/Hit info data", order = 51)]
+	[CreateAssetMenu(fileName = "Hit info", menuName = CConst.EDITOR_SCRIPTABLEOBJECT_CREATION_PREFIX + "Hit info data", order = 51)]
 	public class CHitInfoScriptableObject : ScriptableObject {
 		
 		public float Damage {

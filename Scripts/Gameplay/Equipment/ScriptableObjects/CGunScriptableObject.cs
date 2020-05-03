@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace CDK.Weapons {
 	
-	[CreateAssetMenu(fileName = "Gun data", menuName = "Data/Gun data", order = 51)]
+	[CreateAssetMenu(fileName = "Gun data", menuName = CConst.EDITOR_SCRIPTABLEOBJECT_CREATION_PREFIX + "Gun data", order = 51)]
 	public class CGunScriptableObject : CWeaponBaseScriptableObject {
 		
 		// ammo

@@ -4,7 +4,7 @@ using CDK.Weapons.Enums;
 using UnityEngine;
 
 namespace CDK.Weapons {
-	[CreateAssetMenu(fileName = "Ammo data", menuName = "Data/Ammo data", order = 51)]
+	[CreateAssetMenu(fileName = "Ammo data", menuName = CConst.EDITOR_SCRIPTABLEOBJECT_CREATION_PREFIX + "Ammo data", order = 51)]
 	public class CAmmoScriptableObject : CItemBaseScriptableObject, CIDamageDealer {
 		public CHitInfoData HitInfo {
 			get { return this.hitInfo; }

@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace CDK {
 	[RequireComponent(typeof(CCharacterBase))]
-	public class CPlayerController : MonoBehaviour {
+	public class CPlayerControllerBase : MonoBehaviour {
 		#region <<---------- Properties and Fields ---------->>
 		[SerializeField] private Camera _playerCamera;
 
