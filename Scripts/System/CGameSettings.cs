@@ -27,9 +27,6 @@ namespace CDK {
 		public LayerMask WalkableLayers = 1;
 		public CanvasGroup FadeCanvasGroupPrefab;
 
-		private void OnEnable() {
-			this.FadeCanvasGroupPrefab = Resources.Load<CanvasGroup>("FadeCanvas");
-		}
 
 		#if UNITY_EDITOR
 		[MenuItem("Tools/Open GameSettings")]

@@ -4,11 +4,12 @@ using UnityEngine;
 namespace CDK {
 	[RequireComponent(typeof(SphereCollider), typeof(Rigidbody))]
 	[SelectionBase]
-	public abstract class CCollectableItemGameObject : MonoBehaviour, CIInteractable  {
+	public abstract class CCollectableItemGameObject : MonoBehaviour, CIInteractable {
 
 		#region <<---------- CIInteractable ---------->>
 
 		public void OnInteract(Transform interactingTransform) {
+			if (!this.enabled || !this.gameObject.activeInHierarchy || CBlockingEventsManager.get.IsBlockingEventHappening) return;
 			if (interactingTransform == null) {
 				Debug.Log($"Something interacted with {this.name} but interacting transform was null.");
 				return;
@@ -35,6 +36,7 @@ namespace CDK {
 			}
 			if (!itemCollected) return;
 			Destroy(this.gameObject);
+			return;
 		}
 
 		#endregion <<---------- CIInteractable ---------->>

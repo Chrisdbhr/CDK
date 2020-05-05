@@ -18,7 +18,7 @@ namespace CDK {
 			if (interactable == null) return;
 			Gizmos.color = Color.green;
 			Gizmos.DrawLine(this._originTransform.position, this._hitInfo.point);
-			Handles.Label(this._hitInfo.point, this._hitInfo.transform.root.name);
+			Handles.Label(this._hitInfo.point, $"Interactable object: {this._hitInfo.transform.root.name}");
 		}
 		#endif
 
