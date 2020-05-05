@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace CDK.Interaction {
+namespace CDK {
 	public abstract class CPlayerInteractionBase : MonoBehaviour {
 		
 		[SerializeField] protected LayerMask _interactionLayerMask;

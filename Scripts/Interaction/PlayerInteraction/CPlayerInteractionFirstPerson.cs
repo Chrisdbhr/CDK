@@ -1,13 +1,47 @@
 ﻿using System;
-using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 
-namespace CDK.Interaction {
+namespace CDK {
 	public class CPlayerInteractionFirstPerson : CPlayerInteractionBase {
-		[NonSerialized] private float _interactionSphereCheckRadius = 0.75f;
+		[SerializeField] private Transform _originTransform;
+		[NonSerialized] private float _maxInteractionDistance = 2.2f;
+		[NonSerialized] private RaycastHit _hitInfo;
+
+
+		#if UNITY_EDITOR
+		private void OnDrawGizmosSelected() {
+			if (this._originTransform == null) return;
+			Gizmos.color = Color.red;
+			Gizmos.DrawRay(this._originTransform.position, this._originTransform.forward * this._maxInteractionDistance);
+			var interactable = this.GetCollisionInteractable();
+			if (interactable == null) return;
+			Gizmos.color = Color.green;
+			Gizmos.DrawLine(this._originTransform.position, this._hitInfo.point);
+			Handles.Label(this._hitInfo.point, this._hitInfo.transform.root.name);
+		}
+		#endif
 
 		protected override void TryToInteract() {
-			
+			var interactable = this.GetCollisionInteractable();
+			if (interactable == null) return;
+			interactable.OnInteract(this.transform.root);
+
+		}
+
+		private CIInteractable GetCollisionInteractable() {
+			var collided = Physics.Raycast(
+				this._originTransform.transform.position,
+				this._originTransform.forward,
+				out this._hitInfo,
+				this._maxInteractionDistance,
+				this._interactionLayerMask,
+				QueryTriggerInteraction.Collide
+			);
+
+			if (!collided) return null;
+
+			return this._hitInfo.transform.GetComponent<CIInteractable>();
 		}
 	}
 }

@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace CDK.Interaction {
+namespace CDK {
 	public class CPlayerInteractionThirdPerson : CPlayerInteractionBase {
 
 		[NonSerialized] private float _interactionSphereCheckRadius = 0.75f;
