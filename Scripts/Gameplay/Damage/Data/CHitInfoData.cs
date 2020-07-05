@@ -6,13 +6,13 @@ namespace CDK.Data {
 	public class CHitInfoData {
 
 		public CHitInfoScriptableObject ScriptableObject;
-		[NonSerialized] public CCharacterBase Attacker;
+		[NonSerialized] public Transform AttackerTransform;
 		[NonSerialized] public Vector3 HitPointPosition;
 
 
-		public CHitInfoData(CHitInfoScriptableObject scriptableObject, Vector3 hitPointPosition, CCharacterBase attacker) {
+		public CHitInfoData(CHitInfoScriptableObject scriptableObject, Vector3 hitPointPosition, Transform attackerTransform) {
 			this.ScriptableObject = scriptableObject;
-			this.Attacker = attacker;
+			this.AttackerTransform = attackerTransform;
 			this.HitPointPosition = hitPointPosition;
 		}
 		

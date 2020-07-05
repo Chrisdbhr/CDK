@@ -4,18 +4,7 @@ using CDK.Data;
 using UnityEngine;
 
 namespace CDK {
-	public class DamageDealerMonoBehaviour : MonoBehaviour, CIDamageDealer {
-
-		#region <<---------- Initializers ---------->>
-
-		public void Initialize(Transform ownerAttacker) {
-			this._rootAttacker = ownerAttacker;
-		}
-		
-		#endregion <<---------- Initializers ---------->>
-
-		
-		
+	public class CDamageDealerMonoBehaviour : MonoBehaviour, CIDamageDealer {
 		
 		#region <<---------- Properties and Fields ---------->>
 		
@@ -27,7 +16,6 @@ namespace CDK {
 		[SerializeField] private CHitInfoData _hitInfo;
 
 		[SerializeField] private bool _destroyOnCollide;
-		[SerializeField] private Transform _rootAttacker;
 		
 
 		#endregion <<---------- Properties and Fields ---------->>
@@ -37,13 +25,31 @@ namespace CDK {
 
 		#region <<---------- MonoBehaviour ---------->>
 		
+		private void Awake() {
+			
+		}
+
 		private void OnTriggerEnter(Collider other) {
-			if (other.transform.root == this._rootAttacker) return;
+			if (other.transform.root == this._hitInfo.AttackerTransform) return;
 			this.DoDamage(other.gameObject);
 		}
 
 		private void OnCollisionEnter(Collision other) {
-			if (other.transform.root == this._rootAttacker) return;
+			if (other.transform.root == this._hitInfo.AttackerTransform) return;
+			bool didDamage = this.DoDamage(other.gameObject);
+			if (!didDamage) return;
+			if (this._destroyOnCollide) {
+				this.gameObject.CDestroy();
+			}
+		}
+
+		private void OnTriggerEnter2D(Collider2D other) {
+			if (other.transform.root == this._hitInfo.AttackerTransform) return;
+			this.DoDamage(other.gameObject);
+		}
+
+		private void OnCollisionEnter2D(Collision2D other) {
+			if (other.transform.root == this._hitInfo.AttackerTransform) return;
 			bool didDamage = this.DoDamage(other.gameObject);
 			if (!didDamage) return;
 			if (this._destroyOnCollide) {

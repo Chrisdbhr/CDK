@@ -3,7 +3,6 @@ using CDK.Damage;
 using CDK.Data;
 using CDK.Enums;
 using UnityEngine;
-using UnityEngine.Events;
 
 namespace CDK {
 	/// <summary>
@@ -16,7 +15,7 @@ namespace CDK {
 		#region <<---------- References ---------->>
 
 		[SerializeField] private Animator _animator;
-		[NonSerialized] private CCharacterBase _lastAttacker;
+		[NonSerialized] private Transform _lastAttacker;
 		
 		#endregion <<---------- References ---------->>
 
@@ -73,7 +72,7 @@ namespace CDK {
 					obj.SetActive(true);
 				}
 				foreach (var obj in this._destroyOnDie) {
-					obj.CDestroy();
+					Destroy(obj.gameObject);
 				}
 			}
 		}
@@ -113,13 +112,16 @@ namespace CDK {
 		#endregion <<---------- Stun ---------->>
 		
 		
-		#region <<---------- Properties and Fields ---------->>
-
 		[SerializeField] private Transform[] _unparentOnDie;
 		[SerializeField] private GameObject[] _activateOnDie;
 		[SerializeField] private GameObject[] _destroyOnDie;
+
+		#region <<---------- Actions ---------->>
+
+		public event Action<float, CHitInfoData> OnTakeDamage;
 		
-		#endregion <<---------- Properties and Fields ---------->>
+		#endregion <<---------- Actions ---------->>
+		
 
 		#endregion <<---------- Properties and Fields ---------->>
 
@@ -162,12 +164,12 @@ namespace CDK {
 		}
 
 
-		public void TakeDamage(CHitInfoData hitInfo) {
-			if (this.IsDead) return;
+		public bool TakeDamage(CHitInfoData hitInfo) {
+			if (this.IsDead) return false;
 			var hitScriptObj = hitInfo.ScriptableObject;
-			if (hitScriptObj.Damage <= 0f) return;
+			if (hitScriptObj.Damage <= 0f) return false;
 
-			this._lastAttacker = hitInfo.Attacker;
+			this._lastAttacker = hitInfo.AttackerTransform;
 
 			// Start total damage calculation.
 			float finalDamage = hitScriptObj.Damage;
@@ -178,14 +180,18 @@ namespace CDK {
 			//todo play damage animation if apply
 
 			if (hitScriptObj.LookAtAttacker) {
-				this.transform.LookAt(hitInfo.Attacker.transform);
+				this.transform.LookAt(hitInfo.AttackerTransform.transform);
 				this.transform.eulerAngles = new Vector3(0f, this.transform.eulerAngles.y, 0f);
 			}
-			
+
+
+			if (finalDamage > 0f) {
+				this.OnTakeDamage?.Invoke(finalDamage, hitInfo);
+			}
 			this.CurrentHealth -= finalDamage;
 			
 			//TODO camera shake
-
+			return true;
 		}
 
 	}

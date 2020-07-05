@@ -10,8 +10,13 @@ namespace CDK {
 		#region <<---------- Properties and Fields ---------->>
 		
 		[SerializeField] private CMonobehaviourExecutionLoop executionLoop;
+		[Obsolete("OBSOLETE, use public property instead.")]
 		[SerializeField] private Transform _transformToFollow;
-		[SerializeField] private Vector3 _followOffset = Vector3.zero;
+		public Transform TransformToFollow {
+			get { return this._transformToFollow; }
+			set { this._transformToFollow = value; }
+		}
+		private Vector3 _followOffset = Vector3.zero;
 		[SerializeField] private FollowTypeEnum _followType;
 		[SerializeField] private float _followSpeed = 10f;
 		[NonSerialized] private Transform _myTransform;
