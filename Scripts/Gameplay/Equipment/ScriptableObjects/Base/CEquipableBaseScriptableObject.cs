@@ -4,7 +4,7 @@ using UnityEngine;
 namespace CDK.Weapons {
 	public abstract class CEquipableBaseScriptableObject : CItemBaseScriptableObject {
 		public enum AnimEquipStringType {
-			equipPistol, equipShotgun
+			noEquip, equipPistol, equipShotgun
 		}
 
 		public AnimEquipStringType AnimEquipString {

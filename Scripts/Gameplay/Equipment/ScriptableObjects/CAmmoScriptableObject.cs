@@ -21,5 +21,26 @@ namespace CDK.Weapons {
 			get { return this.cProjectileType; }
 		}
 		[SerializeField] private CProjectileType cProjectileType;
+
+		public GameObject ProjectilePrefabToSpawn {
+			get { return this._projectilePrefabToSpawn;  }
+		}
+		[SerializeField] private GameObject _projectilePrefabToSpawn;
+
+		public float ProjectileInitialSpeed {
+			get { return this._projectileInitialSpeed; }
+		}
+		[SerializeField] private float _projectileInitialSpeed;
+	
+		public float ProjectileLifetime {
+			get { return this._projectileLifetime; }
+		}
+		[SerializeField] private float _projectileLifetime;
+
+		public float SelfRepulsionMultiplier {
+			get { return this._selfRepulsionMultiplier; }
+		}
+		[SerializeField] private float _selfRepulsionMultiplier = 10f;
+
 	}
 }

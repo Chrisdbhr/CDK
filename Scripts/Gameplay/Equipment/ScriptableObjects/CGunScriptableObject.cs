@@ -10,6 +10,7 @@ namespace CDK.Weapons {
 		public CAmmoType SupportedAmmo {
 			get { return this.supportedAmmo; }
 		}
+		[Header("Ammo")]
 		[SerializeField] private CAmmoType supportedAmmo;
 
 		public CAmmoScriptableObject InitiallyLoadedAmmo {
@@ -21,23 +22,23 @@ namespace CDK.Weapons {
 			get { return this._maxAmmo; }
 		}
 		[SerializeField] private int _maxAmmo;
-
-		// fire
-		public float RateOfFire {
-			get { return this._rateOfFire; }
-		}
-		[SerializeField] private float _rateOfFire;
-
+		
 		public bool IsAutoFire {
 			get { return _isAutoFire; }
 		}
 		
 		[SerializeField] private bool _isAutoFire;
 
+		public bool AmmoSpawnAsChild {
+			get { return this.ammoSpawnAsChild; }
+		}
+		[SerializeField] private bool ammoSpawnAsChild;
+
 		// recoil
 		public float RecoilDefault {
 			get { return this._recoilDefault; }
 		}
+		[Header("Recoil")]
 		[SerializeField] private float _recoilDefault;
 		
 		public float RecoilChangeOnFire {
