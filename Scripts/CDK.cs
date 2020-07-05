@@ -1,17 +1,16 @@
 // CDK (Chris Development Kit) is developed and frequently updated by @Chrisdbhr
 // Those are part of Source Code of all my games developed with Unity
 // Don't forget to Star and check https://github.com/Chrisdbhr/CDK for updates. 
+#if UNITY_EDITOR
 using System;
 using System.IO;
 using UnityEngine;
 using UnityEngine.Networking;
-#if UNITY_EDITOR
 using UnityEditor;
-#endif
 
 namespace CDK {
 	[InitializeOnLoad]
-	public static class CDK {
+	static class CDK {
 
 		static CDK() {
 			CheckForUpdatedVersion();
@@ -38,7 +37,7 @@ namespace CDK {
 		/// Notify if a update is available for download.
 		/// </summary>
 		[MenuItem("CDK/Check for update")]
-		public static void CheckForUpdatedVersion() {
+		private static void CheckForUpdatedVersion() {
 			var request = UnityWebRequest.Get(VERSION_UPDATE_URL);
 			request.SendWebRequest().completed += asyncOp => {
 				if (request.isHttpError || request.isNetworkError) {
@@ -59,3 +58,4 @@ namespace CDK {
 
 	}
 }
+#endif
