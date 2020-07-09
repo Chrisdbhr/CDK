@@ -34,11 +34,19 @@ namespace CDK {
 		
 		[Header("Health")]
 		[SerializeField] protected float _maxHealth = 100f;
+		public float MaxHealth {
+			get {
+				return this._maxHealth;
+			}
+		}
 		
 		public float CurrentHealth {
 			get { return this._currentHealth; }
 			private set {
 				if (value == this._currentHealth) return;
+
+				this.OnHealthChanged?.Invoke(value);
+				
 				float oldHealth = this._currentHealth;
 				this._currentHealth = value;
 				
@@ -118,6 +126,7 @@ namespace CDK {
 
 		#region <<---------- Actions ---------->>
 
+		public event Action<float> OnHealthChanged;
 		public event Action<float, CHitInfoData> OnTakeDamage;
 		
 		#endregion <<---------- Actions ---------->>

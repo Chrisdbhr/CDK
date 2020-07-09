@@ -96,7 +96,7 @@ namespace CDK {
 
 			// input menu
 			if (Input.GetButtonDown(CInputKeys.MENU) && this._inventoryViewPrefab != null) {
-				this.CreateView();
+				this.PauseGame();
 			}
 		}
 		
@@ -106,6 +106,11 @@ namespace CDK {
 		
 		
 		#region <<---------- Managment ---------->>
+
+		public void PauseGame() {
+			this.CreateView();
+
+		}
 
 		private void CreateView() {
 			this._inventoryViewSpawned = Instantiate(this._inventoryViewPrefab, this.transform);

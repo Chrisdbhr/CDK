@@ -17,6 +17,9 @@ namespace CDK {
 		private static CBlockingEventsManager _instance;
 		#endregion <<---------- Singleton ---------->>
 		
+		
+		
+		
 		public CBlockingEventsManager() {
 			// blocking events happening
 			Observable.CombineLatest(
@@ -32,8 +35,15 @@ namespace CDK {
 			
 			// on menu
 			this.IsOnMenu.Subscribe(onMenu => {
-				Cursor.visible = onMenu;
-				Cursor.lockState = onMenu ? Cursor.lockState = CursorLockMode.None : CursorLockMode.Locked;
+				if (onMenu) {
+					Cursor.visible = true;
+					Cursor.lockState = CursorLockMode.None;
+				}
+				else if (CGameSettings.get.HideCursorOnGame) {
+					Cursor.visible = false;
+					Cursor.lockState = CursorLockMode.Locked;
+				}
+				
 			});
 		}
 		

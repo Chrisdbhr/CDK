@@ -26,15 +26,15 @@ namespace CDK {
 		public LayerMask AttackableLayers = 1;
 		public LayerMask WalkableLayers = 1;
 		public CanvasGroup FadeCanvasGroupPrefab;
-
-
+		public bool HideCursorOnGame = true;
+		
+		
 		#if UNITY_EDITOR
 		[MenuItem("Tools/Open GameSettings")]
 		private static void OpenGameSettingsData() {
 			var gameSettings = get;
 			if (gameSettings == null) {
-				Debug.LogError("Could not open Game Settings data. Create a GameSettings scriptable object inside a Resources folder.");
-				return;
+				gameSettings = CDK.CreateGameSettingsResourceIfNeeded();
 			}
 			Selection.activeObject = gameSettings;
 			AssetDatabase.OpenAsset(gameSettings);

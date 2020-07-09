@@ -1,19 +1,42 @@
+using System;
 using CDK.Inventory;
 using UnityEngine;
 
 namespace CDK {
-	[RequireComponent(typeof(SphereCollider), typeof(Rigidbody))]
 	[SelectionBase]
 	public abstract class CCollectableItemGameObject : MonoBehaviour, CIInteractable {
+
+
+
+		#region <<---------- Properties and Fields ---------->>
+
+		[SerializeField] private bool _collectOnCollision;
+		
+		#endregion <<---------- Properties and Fields ---------->>
+
+
+
+
+		#region <<---------- MonoBehaviour ---------->>
+		private void OnCollisionEnter(Collision other) {
+			if (!this._collectOnCollision) return;
+			this.OnInteract(other.transform);
+		}
+
+		private void OnCollisionEnter2D(Collision2D other) {
+			if (!this._collectOnCollision) return;
+			this.OnInteract(other.transform);
+		}
+		
+		#endregion <<---------- MonoBehaviour ---------->>
+		
+		
+		
 
 		#region <<---------- CIInteractable ---------->>
 
 		public void OnInteract(Transform interactingTransform) {
 			if (!this.enabled || !this.gameObject.activeInHierarchy || CBlockingEventsManager.get.IsBlockingEventHappening) return;
-			if (interactingTransform == null) {
-				Debug.Log($"Something interacted with {this.name} but interacting transform was null.");
-				return;
-			}
 			// try to get object
 			var inventory = interactingTransform.root.GetComponent<CInventory>();
 			if (inventory == null) {

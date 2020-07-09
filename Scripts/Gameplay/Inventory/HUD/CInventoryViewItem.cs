@@ -30,13 +30,17 @@ namespace CDK {
 			bool slotEmpty = item == null;
 			
 			// is an empty slot
-			this._quantityText.text = item != null ? (item is CGunData gunScriptObj ? gunScriptObj.GetAmmoCount().ToString() : item.Count.ToString()) : string.Empty;
-			this._thumbnailSprite.color = slotEmpty ? Color.clear : this._thumbColor;
-			this._thumbnailSprite.sprite = 
-					!slotEmpty && item.ScriptableObject ? item.ScriptableObject.ItemThumbnail : null;
-			this._nameText.text = 
-					!slotEmpty  && item.ScriptableObject ? item.ScriptableObject.ItemName : string.Empty;
-			this._nameText.gameObject.SetActive(!slotEmpty);
+			if (this._quantityText) {
+				this._quantityText.text = item != null ? (item is CGunData gunScriptObj ? gunScriptObj.GetAmmoCount().ToString() : item.Count.ToString()) : string.Empty;
+			}
+			if (this._thumbnailSprite) {
+				this._thumbnailSprite.color = slotEmpty ? Color.clear : this._thumbColor;
+				this._thumbnailSprite.sprite = !slotEmpty && item.ScriptableObject ? item.ScriptableObject.ItemThumbnail : null;
+			}
+			if (this._nameText != null) {
+				this._nameText.text = !slotEmpty  && item.ScriptableObject ? item.ScriptableObject.ItemName : string.Empty;
+				this._nameText.gameObject.SetActive(!slotEmpty);
+			}
 		}
 
 		private void OpenItemOptionsMenu() {

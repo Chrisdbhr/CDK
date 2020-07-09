@@ -9,7 +9,7 @@ namespace CDK {
 		#region <<---------- Properties and Fields ---------->>
 		
 		[SerializeField] private CInventoryViewItem _prefabInventoryViewItem;
-		[SerializeField] private Transform _itemsGridTransform;
+		[SerializeField] private Transform _itemsGridParent;
 
 		[NonSerialized] private List<CInventoryViewItem> _inventoryViewItemList = new List<CInventoryViewItem>();
 		[NonSerialized] private CInventory _inventory;
@@ -21,16 +21,34 @@ namespace CDK {
 		
 		
 		#region <<---------- MonoBehaviour ---------->>
-		
+		private void Awake() {
+			// destroy all child on item grid parent
+			foreach (var child in this._itemsGridParent.GetComponentsInChildren<Transform>()) {
+				if (child == this._itemsGridParent.transform) continue;
+				child.gameObject.CDestroy();
+			}
+		}
+
 		private void Update() {
 			if (Input.GetButtonDown(CInputKeys.MENU)) {
-				this.OnInventoryClose?.Invoke();
-				Destroy(this.gameObject);
+				this.Unpause();
 			}
 		}
 
 		#endregion <<---------- MonoBehaviour ---------->>
 
+
+
+
+		#region <<---------- Managment ---------->>
+
+		public void Unpause() {
+			this.OnInventoryClose?.Invoke();
+			Destroy(this.gameObject);
+		}
+		
+		#endregion <<---------- Managment ---------->>
+		
 		
 		
 
@@ -42,14 +60,12 @@ namespace CDK {
 			this._inventoryViewItemList.Clear();
 			// create new child game objects
 			for (int i = 0; i < this._inventory.Size; i++) {
-				this._inventoryViewItemList.Add(Instantiate(this._prefabInventoryViewItem.gameObject, this._itemsGridTransform).GetComponent<CInventoryViewItem>());
+				this._inventoryViewItemList.Add(Instantiate(this._prefabInventoryViewItem.gameObject, this._itemsGridParent).GetComponent<CInventoryViewItem>());
 			}
 			this.UpdateInventoryView();
 		}
 		
 		public void UpdateInventoryView() {
-			var viewItems = this._itemsGridTransform.gameObject.Children().ToArray();
-			Debug.Log($"View itens count: {viewItems.Length}");
 			
 			// update itens on grid
 			for (int i = 0; i < this._inventory.Size; i++) {

@@ -1,10 +1,23 @@
-using System;
 using CDK.Damage;
 using CDK.Data;
 using UnityEngine;
 
 namespace CDK {
 	public class CDamageDealerMonoBehaviour : MonoBehaviour, CIDamageDealer {
+
+
+		#region <<---------- Initializers ---------->>
+		
+		public void Initialize(CHitInfoData hitInfo, Transform attackerTransform) {
+			this._hitInfo = hitInfo;
+			this._hitInfo.AttackerTransform = attackerTransform;
+		}
+		
+		#endregion <<---------- Initializers ---------->>
+		
+		
+		
+
 		
 		#region <<---------- Properties and Fields ---------->>
 		
