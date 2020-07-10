@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using Unity.Linq;
 
 namespace CDK {
 	public class CInventoryView : MonoBehaviour {
