@@ -282,7 +282,7 @@ namespace CDK {
 				&& this.CurrentMovState != CMovState.Sliding
 			) {
 				this.CurrentMovState = CMovState.Idle;
-				this.charController.Move(Physics.gravity * Time.deltaTime);
+				this.charController.Move(Physics.gravity * CTime.DeltaTimeScaled);
 				return;
 			}
 			
@@ -317,7 +317,7 @@ namespace CDK {
 			
 			this.charController.Move(
 				(targetMotion  * targetMovSpeed + Physics.gravity) 
-				* (Time.deltaTime * Time.timeScale) );
+				* CTime.DeltaTimeScaled );
 		}
 		
 		protected void CheckIfIsGrounded() {
@@ -379,7 +379,7 @@ namespace CDK {
 			this._myTransform.rotation = Quaternion.RotateTowards(
 				this._myTransform.rotation,
 				Quaternion.LookRotation(lookRotationTarget),
-				this.rotateTowardsLookTargetSpeed * Time.deltaTime);
+				this.rotateTowardsLookTargetSpeed * CTime.DeltaTimeScaled);
 		}
 		
 		protected void RotateTowardsDirection(Vector3 dir) {
@@ -390,7 +390,7 @@ namespace CDK {
 			this._myTransform.rotation = Quaternion.Lerp(
 				this._myTransform.rotation,
 				this._targetLookRotation,
-				this._rotateTowardsSpeed * Time.deltaTime);
+				this._rotateTowardsSpeed * CTime.DeltaTimeScaled);
 			
 			/*
 			 // Rotate towards

@@ -2,6 +2,7 @@ using System;
 using CDK.Damage;
 using CDK.Data;
 using CDK.Enums;
+using UniRx;
 using UnityEngine;
 
 namespace CDK {
@@ -46,9 +47,16 @@ namespace CDK {
 				if (value == this._currentHealth) return;
 
 				this.OnHealthChanged?.Invoke(value);
-				
+
 				float oldHealth = this._currentHealth;
 				this._currentHealth = value;
+
+				if (this._currentHealth > oldHealth) {
+					this.OnRecoverHealth?.Invoke(this._currentHealth);
+				}
+				else {
+					this.OnLostHealth?.Invoke(this._currentHealth);
+				}
 				
 				if (this._currentHealth <= 0f) {
 					this.IsDead = true;
@@ -69,7 +77,11 @@ namespace CDK {
 			private set {
 				if (this._isDead == value) return;
 				this._isDead = value;
+				
+				this.OnDie?.Invoke();
+				
 				Debug.Log($"{this.name} died.");
+				
 				if (this._currentHealth > 0f) {
 					this._currentHealth = 0f;
 				}
@@ -88,6 +100,14 @@ namespace CDK {
 		
 		#endregion <<---------- Health ---------->>
 
+
+		#region <<---------- Partial Health Regeneration ---------->>
+
+		[NonSerialized] private float _regenRatePerSecond = 1f;
+		[NonSerialized] private float _regenDelayAfterHit = 3f;
+
+		#endregion <<---------- Partial Health Regeneration ---------->>
+		
 
 		#region <<---------- Stun ---------->>
 
@@ -124,14 +144,19 @@ namespace CDK {
 		[SerializeField] private GameObject[] _activateOnDie;
 		[SerializeField] private GameObject[] _destroyOnDie;
 
+		
+		
+		
 		#region <<---------- Actions ---------->>
 
 		public event Action<float> OnHealthChanged;
+		public event Action<float> OnRecoverHealth;
+		public event Action<float> OnLostHealth;
+		public event Action OnDie;
 		public event Action<float, CHitInfoData> OnTakeDamage;
 		
 		#endregion <<---------- Actions ---------->>
 		
-
 		#endregion <<---------- Properties and Fields ---------->>
 
 		
@@ -154,12 +179,19 @@ namespace CDK {
 			this.Revive();
 		}
 
-		private void Update() {
-			if (this.IsDead) return;
-			
-			if (!this._stunned) {
-				this._stunProgress -= this._stunRecoveryRatePerSecond * Time.deltaTime * Time.timeScale;
-			}
+		private void OnEnable() {
+			// regen
+			Observable.Timer(TimeSpan.FromSeconds(this._regenRatePerSecond)).RepeatUntilDisable(this).Subscribe(_ => {
+				if (this.IsDead) return;
+				Debug.Log("Regen");
+			});
+
+			// stun
+			Observable.Timer(TimeSpan.FromSeconds(this._stunRecoveryRatePerSecond)).RepeatUntilDisable(this).Subscribe(_ => {
+				if (this.IsDead) return;
+				this._stunProgress -= this._stunRecoveryRatePerSecond;
+			});
+
 		}
 
 		#endregion <<---------- MonoBehaviour ---------->>

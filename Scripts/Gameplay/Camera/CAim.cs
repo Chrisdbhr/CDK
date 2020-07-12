@@ -92,7 +92,7 @@ namespace CDK {
 
 			this._aimTargetPosition.position = hit ? 
 					this._hitInfo.point : 
-					Vector3.Lerp(this._aimTargetPosition.position, this._aimTargetStartPosition, this._aimSpeed * Time.deltaTime * Time.timeScale);
+					Vector3.Lerp(this._aimTargetPosition.position, this._aimTargetStartPosition, this._aimSpeed * CTime.DeltaTimeScaled);
 			
 			this._ownerCharacter.SetAimDirection(this._forward);
 		}
@@ -108,7 +108,7 @@ namespace CDK {
 			float elapsedTime = 0f;
 			while (elapsedTime < this._aimSpeed) {
 				this.AimProgress = this._aimProgress.CLerp(targetValue, (elapsedTime / this._aimSpeed));
-				elapsedTime += Time.deltaTime * Time.timeScale;
+				elapsedTime += CTime.DeltaTimeScaled;
 				yield return null;
 			}
 		}
@@ -119,7 +119,7 @@ namespace CDK {
 				float fov = this._camera.fieldOfView;
 				float lerpTime = (elapsedTime / time);
 				this._camera.fieldOfView = fov.CLerp(targetFov, lerpTime);
-				elapsedTime += Time.deltaTime * Time.timeScale;
+				elapsedTime += CTime.DeltaTimeScaled;
 				yield return null;
 			}
 			this._camera.fieldOfView = targetFov;

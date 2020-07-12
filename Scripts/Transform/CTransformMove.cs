@@ -17,9 +17,9 @@ namespace CDK {
 
 		private void Update() {
 			this._newPosition = this._transform.position;
-			this._newPosition += this._transform.forward * (this._localDirectionAndSpeed.z * Time.deltaTime);
-			this._newPosition += this._transform.right * (this._localDirectionAndSpeed.x * Time.deltaTime);
-			this._newPosition += this._transform.up * (this._localDirectionAndSpeed.y * Time.deltaTime);
+			this._newPosition += this._transform.forward * (this._localDirectionAndSpeed.z * CTime.DeltaTimeScaled);
+			this._newPosition += this._transform.right * (this._localDirectionAndSpeed.x * CTime.DeltaTimeScaled);
+			this._newPosition += this._transform.up * (this._localDirectionAndSpeed.y * CTime.DeltaTimeScaled);
 			this._transform.position = this._newPosition;
 		}
 		

@@ -28,10 +28,10 @@ namespace CDK {
 
 			// rotate camera
 			this._transform.Rotate(Vector3.up,
-				this._inputLook.x * (Screen.width <= 0 ? 1f : (float) Screen.width) * this._rotationSpeed.x * Time.deltaTime * Time.timeScale,
+				this._inputLook.x * (Screen.width <= 0 ? 1f : (float) Screen.width) * this._rotationSpeed.x * CTime.DeltaTimeScaled,
 				Space.World);
 			this._transform.Rotate(this._transform.right,
-				this._inputLook.y * (Screen.height <= 0 ? 1f : (float) Screen.height) * -1 * this._rotationSpeed.y * Time.deltaTime * Time.timeScale,
+				this._inputLook.y * (Screen.height <= 0 ? 1f : (float) Screen.height) * -1 * this._rotationSpeed.y * CTime.DeltaTimeScaled,
 				Space.World);
 
 			// clamp rotation

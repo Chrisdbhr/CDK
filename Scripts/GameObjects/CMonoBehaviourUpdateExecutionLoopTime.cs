@@ -11,17 +11,17 @@ namespace CDK {
 
 		private void Update() {
 			if (this._executionTime != CMonobehaviourExecutionLoop.Update) return;
-			this.Execute(Time.deltaTime);
+			this.Execute(CTime.DeltaTimeScaled);
 		}
 
 		private void FixedUpdate() {
 			if (this._executionTime != CMonobehaviourExecutionLoop.FixedUpdate) return;
-			this.Execute(Time.fixedDeltaTime);
+			this.Execute(CTime.FixedDeltaTimeScaled);
 		}
 
 		private void LateUpdate() {
 			if (this._executionTime != CMonobehaviourExecutionLoop.LateUpdate) return;
-			this.Execute(Time.deltaTime);
+			this.Execute(CTime.DeltaTimeScaled);
 		}
 
 		#endregion <<---------- MonoBehaviour ---------->>

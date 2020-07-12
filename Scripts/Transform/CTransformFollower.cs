@@ -45,17 +45,17 @@ namespace CDK {
 
 		private void Update() {
 			if (this.executionLoop != CMonobehaviourExecutionLoop.Update) return;
-			this.FollowTarget(Time.deltaTime);
+			this.FollowTarget(CTime.DeltaTimeScaled);
 		}
 
 		private void FixedUpdate() {
 			if (this.executionLoop != CMonobehaviourExecutionLoop.FixedUpdate) return;
-			this.FollowTarget(Time.fixedDeltaTime);
+			this.FollowTarget(CTime.FixedDeltaTimeScaled);
 		}
 
 		private void LateUpdate() {
 			if (this.executionLoop != CMonobehaviourExecutionLoop.LateUpdate) return;
-			this.FollowTarget(Time.deltaTime);
+			this.FollowTarget(CTime.DeltaTimeScaled);
 		}
 
 		#if UNITY_EDITOR

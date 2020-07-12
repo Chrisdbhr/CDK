@@ -24,12 +24,13 @@ namespace CDK {
 		public CIItemBase[] InventoryItems { get; private set; }
 
 		// equipament
+		[SerializeField] private CWeaponData _firstEquipedWeapon;
 		[SerializeField] private Transform _handTransform;
 		[SerializeField] private UnityEvent _onAttackEvent;
 		[SerializeField] private CUnityEventFloat _onAttackRecoilEvent;
 		
 		[NonSerialized] private CWeaponGameObject _currentSpawnedWeapon;
-
+		
 		public CWeaponData EquippedWeapon {
 			get { return this._equippedWeaponRx.Value; }
 		}
@@ -56,6 +57,8 @@ namespace CDK {
 		private void OnEnable() {
 			this._compositeDisposable?.Dispose();
 			this._compositeDisposable = new CompositeDisposable();
+
+			this._equippedWeaponRx.Value = this._firstEquipedWeapon;
 
 			this._equippedWeaponRx.Subscribe(newWeapon => {
 				if(this._currentSpawnedWeapon != null) this._currentSpawnedWeapon.gameObject.CDestroy();
