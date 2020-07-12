@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 namespace CDK {
-	public class CThirdPersonPlayerController : CPlayerControllerBase {
+	public class CThirdPersonPlayerController : CCharacterControllerBase {
 
 		
 

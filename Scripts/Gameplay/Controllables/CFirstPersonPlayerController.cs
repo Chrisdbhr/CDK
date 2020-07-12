@@ -1,5 +1,5 @@
 namespace CDK {
-	public class CFirstPersonPlayerController : CPlayerControllerBase {
+	public class CFirstPersonPlayerController : CCharacterControllerBase {
 		
 	}
 }

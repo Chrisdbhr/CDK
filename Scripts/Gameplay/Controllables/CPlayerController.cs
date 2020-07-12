@@ -18,7 +18,7 @@ namespace CDK {
 		[NonSerialized] private Vector2 _inputDir;
 		[NonSerialized] private Vector3 camF = Vector3.forward;
 		[NonSerialized] private Vector3 camR = Vector3.right;
-		[NonSerialized] private CCharacterBase _ciCharacterBase;
+		[NonSerialized] private CCharacterBase _characterBase;
 		[NonSerialized] private const float INTERACT_SPHERE_CHECK_MULTIPLIER = 0.75f;
 		
 		#endregion <<---------- Properties and Fields ---------->>
@@ -30,8 +30,8 @@ namespace CDK {
 
 		private void Awake() {
 			this._myTransform = this.transform;
-			this._ciCharacterBase = this.GetComponent<CCharacterBase>();
-			if (this._ciCharacterBase == null) {
+			this._characterBase = this.GetComponent<CCharacterBase>();
+			if (this._characterBase == null) {
 				Debug.LogError($"Cant find any Character on {this.name}, removing component, character will not be controllable.");
 				Destroy(this);
 			}
@@ -43,10 +43,10 @@ namespace CDK {
 			
 			// input movement
 			this._inputDir = new Vector2(Input.GetAxisRaw(CInputKeys.MOV_X), Input.GetAxisRaw(CInputKeys.MOV_Y));
-			this._ciCharacterBase.InputDirRelativeToCam = this.camF * this._inputDir.y + this.camR * this._inputDir.x;
+			this._characterBase.InputDirRelativeToCam = this.camF * this._inputDir.y + this.camR * this._inputDir.x;
 
 			// input walk
-			this._ciCharacterBase.InputSlowWalk = Input.GetButton(CInputKeys.SLOW_WALK);
+			this._characterBase.InputSlowWalk = Input.GetButton(CInputKeys.SLOW_WALK);
 			
 			// input interaction
 			bool inputDownInteract = Input.GetButtonDown(CInputKeys.INTERACT);
@@ -56,7 +56,7 @@ namespace CDK {
 			
 			// aim _playerCamera
 			bool inputAim = Input.GetButton(CInputKeys.AIM);
-			this._ciCharacterBase.InputAim = inputAim;
+			this._characterBase.InputAim = inputAim;
 
 			if (this._playerCamera == null) return;
 
@@ -91,10 +91,10 @@ namespace CDK {
 			this.camR.Normalize();
 
 			// absolute input
-			this._ciCharacterBase.InputDirAbsolute = this._inputDir;
+			this._characterBase.InputDirAbsolute = this._inputDir;
 			
 			// relative to camera input
-			this._ciCharacterBase.InputDirRelativeToCam = this.camF * this._inputDir.y + this.camR * this._inputDir.x;
+			this._characterBase.InputDirRelativeToCam = this.camF * this._inputDir.y + this.camR * this._inputDir.x;
 		}
 
 		private void TryToInteract() {
@@ -147,7 +147,7 @@ namespace CDK {
 			if (hasSomethingBlockingLineOfSight) return;
 				
 			var choosenInteractable = interactableColliders[closestColliderIndex].GetComponent<CIInteractable>();
-			choosenInteractable.OnInteract(this._ciCharacterBase.transform);
+			choosenInteractable.OnInteract(this._characterBase.transform);
 			
 		}
 		

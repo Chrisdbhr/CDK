@@ -8,7 +8,7 @@ namespace CDK {
 	/// <summary>
 	/// Makes something have health, can be hit and die.
 	/// </summary>
-	public class CHealthComponent : MonoBehaviour, CIDamageable {
+	public class CHealthComponent : MonoBehaviour, ICDamageable {
 
 		#region <<---------- Properties and Fields ---------->>
 	

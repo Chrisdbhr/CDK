@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 
 namespace CDK {
-	public class CCharacterBiped : CCharacterBase, CICharacterBase {
+	public class CCharacterBiped : CCharacterBase, ICCharacterBase {
 		
 		#region <<---------- MonoBehaviour ---------->>
 		protected override void Awake() {

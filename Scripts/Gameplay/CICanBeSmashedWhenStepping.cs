@@ -1,4 +1,3 @@
-using UnityEngine.Events;
 
 namespace CDK {
 	public interface CICanBeSmashedWhenStepping {

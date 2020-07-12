@@ -3,7 +3,7 @@ using CDK.Data;
 using UnityEngine;
 
 namespace CDK {
-	public class CDamageDealerMonoBehaviour : MonoBehaviour, CIDamageDealer {
+	public class CDamageDealerMonoBehaviour : MonoBehaviour, ICDamageDealerItem {
 
 
 		#region <<---------- Initializers ---------->>
@@ -76,7 +76,7 @@ namespace CDK {
 		
 		
 		private bool DoDamage(GameObject go) {
-			var damageable = go.GetComponent<CIDamageable>();
+			var damageable = go.GetComponent<ICDamageable>();
 			if (damageable == null) return false;
 			damageable.TakeDamage(this._hitInfo);
 			if (this._destroyOnCollide) {

@@ -7,7 +7,7 @@ using UnityEditor;
 
 namespace CDK {
 	[SelectionBase][RequireComponent(typeof(CharacterController))]
-	public abstract class CCharacterBase : MonoBehaviour, CICharacterBase {
+	public abstract class CCharacterBase : MonoBehaviour, ICCharacterBase {
 
 		#region <<---------- Properties ---------->>
 		#region <<---------- Cache and References ---------->>
