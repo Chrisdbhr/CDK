@@ -11,9 +11,9 @@ namespace CDK {
 		[SerializeField] private CHitInfoData hitInfo;
 
 		public CAmmoType CAmmoType {
-			get { return this.cAmmoType; }
+			get { return this._ammoType; }
 		}
-		[SerializeField] private CAmmoType cAmmoType;
+		[SerializeField] private CAmmoType _ammoType;
 
 
 		public CProjectileType CProjectileType {
@@ -29,12 +29,17 @@ namespace CDK {
 		public float ProjectileInitialSpeed {
 			get { return this._projectileInitialSpeed; }
 		}
-		[SerializeField] private float _projectileInitialSpeed;
+		[SerializeField] private float _projectileInitialSpeed = 1f;
 	
 		public float ProjectileLifetime {
 			get { return this._projectileLifetime; }
 		}
-		[SerializeField] private float _projectileLifetime;
+		[SerializeField] private float _projectileLifetime = 0.1f;
+
+		public bool IsInfinite {
+			get { return this._isInfinite; }
+		}
+		[SerializeField] private bool _isInfinite;
 
 		public float SelfRepulsionMultiplier {
 			get { return this._selfRepulsionMultiplier; }

@@ -55,9 +55,16 @@ namespace CDK {
 		
 	
 		public bool HasAmmo() {
-			return this.EquippedAmmoData != null && this.EquippedAmmoData.Count > 0;
+			if (this.EquippedAmmoData == null) return false;
+			if (this.EquippedAmmoData.GetScriptableObject() is CAmmoScriptableObject ammoScriptObj && ammoScriptObj.IsInfinite) return true;
+			return this.EquippedAmmoData.Count > 0;
 		}
 
+		public bool IsLoadedWithInfiniteAmmo() {
+			if (this.EquippedAmmoData == null) return false;
+			return this.EquippedAmmoData.GetScriptableObject() is CAmmoScriptableObject ammoScriptObj && ammoScriptObj.IsInfinite;
+		}
+		
 		public int GetAmmoCount() {
 			return this.EquippedAmmoData?.Count ?? 0;
 		}

@@ -9,6 +9,7 @@ namespace CDK {
 		public const string LOOK_Y = "Mouse Y";
 		public const string AIM = "Aim";
 		public const string ATTACK = "Fire";
+		public const string SPECIAL_ATTACK = "SpecialAttack";
 
 		public const string SLOW_WALK = "SlowWalk";
 

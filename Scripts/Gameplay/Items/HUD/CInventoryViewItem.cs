@@ -27,9 +27,8 @@ namespace CDK {
 
 			bool slotEmpty = item == null;
 			
-			// is an empty slot
-			if (this._quantityText) {
-				this._quantityText.text = item != null ? (item is CWeaponData gunScriptObj ? gunScriptObj.GetAmmoCount().ToString() : item.Count.ToString()) : string.Empty;
+			if (this._quantityText != null) {
+				this._quantityText.text = item != null ? (item is CWeaponData weaponData && !weaponData.IsLoadedWithInfiniteAmmo() ? weaponData.GetAmmoCount().ToString() : item.Count.ToString()) : string.Empty;
 			}
 			if (this._thumbnailSprite) {
 				this._thumbnailSprite.color = slotEmpty ? Color.clear : this._thumbColor;
