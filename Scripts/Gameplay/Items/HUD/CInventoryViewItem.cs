@@ -28,7 +28,17 @@ namespace CDK {
 			bool slotEmpty = item == null;
 			
 			if (this._quantityText != null) {
-				this._quantityText.text = item != null ? (item is CWeaponData weaponData && !weaponData.IsLoadedWithInfiniteAmmo() ? weaponData.GetAmmoCount().ToString() : item.Count.ToString()) : string.Empty;
+				if (item == null) {
+					this._quantityText.text = string.Empty;
+				}
+				else {
+					if (item is CWeaponData weaponData) {
+						this._quantityText.text = weaponData.IsLoadedWithInfiniteAmmo() ? string.Empty : weaponData.GetAmmoCount().ToString();
+					}
+					else {
+						this._quantityText.text = item.Count.ToString();
+					}
+				}
 			}
 			if (this._thumbnailSprite) {
 				this._thumbnailSprite.color = slotEmpty ? Color.clear : this._thumbColor;
