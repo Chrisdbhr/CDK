@@ -14,6 +14,10 @@ namespace CDK
             return Mathf.Clamp(value, min, max);
         }
 
+        public static float CClamp(this float value, float min, float max) {
+            return Mathf.Clamp(value, min, max);
+        }
+
         public static float CRemap(this float value, float beginOld, float endOld, float beginNew, float endNew) {
             return (value - beginOld) / (endOld - beginOld) * (endNew - beginNew) + beginNew;
         }

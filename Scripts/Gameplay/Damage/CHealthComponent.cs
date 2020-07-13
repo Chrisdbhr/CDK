@@ -44,18 +44,19 @@ namespace CDK {
 		public float CurrentHealth {
 			get { return this._currentHealth; }
 			private set {
-				if (value == this._currentHealth) return;
-
-				this.OnHealthChanged?.Invoke(value);
+				if (value == this._currentHealth || this._currentHealth == this._maxHealth && value == this._maxHealth) return;
 
 				float oldHealth = this._currentHealth;
-				this._currentHealth = value;
+				this._currentHealth = value > this._maxHealth ? this._maxHealth : value;
 
+				this.OnHealthChanged?.Invoke(this._currentHealth);
+				
 				if (this._currentHealth > oldHealth) {
 					this.OnRecoverHealth?.Invoke(this._currentHealth);
 				}
 				else {
 					this.OnLostHealth?.Invoke(this._currentHealth);
+					this._lastDamageTakenTime = Time.timeSinceLevelLoad;
 				}
 				
 				if (this._currentHealth <= 0f) {
@@ -103,8 +104,10 @@ namespace CDK {
 
 		#region <<---------- Partial Health Regeneration ---------->>
 
-		[NonSerialized] private float _regenRatePerSecond = 1f;
-		[NonSerialized] private float _regenDelayAfterHit = 3f;
+		[SerializeField] private float _regenRatePerSecond = 0.25f;
+		[SerializeField] private float _regenDelayAfterHit = 3f;
+		[NonSerialized] private float _lastDamageTakenTime;
+		[NonSerialized] private float _lastDamageValue;
 
 		#endregion <<---------- Partial Health Regeneration ---------->>
 		
@@ -180,10 +183,13 @@ namespace CDK {
 		}
 
 		private void OnEnable() {
-			// regen
-			Observable.Timer(TimeSpan.FromSeconds(this._regenRatePerSecond)).RepeatUntilDisable(this).Subscribe(_ => {
+			// regen only one hearth
+			Observable.Timer(TimeSpan.FromSeconds(1f)).RepeatUntilDisable(this).Subscribe(_ => {
 				if (this.IsDead) return;
-				Debug.Log("Regen");
+				if (Time.timeSinceLevelLoad < (this._lastDamageTakenTime + this._regenDelayAfterHit)) return;
+				float mod = this.CurrentHealth % 10;
+				if (mod <= 0) return;
+				this.CurrentHealth += this._regenRatePerSecond;
 			});
 
 			// stun

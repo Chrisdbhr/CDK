@@ -5,6 +5,7 @@ namespace CDK {
 		public string ItemName {
 			get { return this._itemName; }
 		}
+		[Header("Item information")]
 		[SerializeField] private string _itemName = "?";
 
 		public string ItemDescription {

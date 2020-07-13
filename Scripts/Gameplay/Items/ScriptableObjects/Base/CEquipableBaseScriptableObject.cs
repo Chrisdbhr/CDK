@@ -12,6 +12,7 @@ namespace CDK {
 				return this._animEquipString;
 			}
 		}
+		[Header("Equipable")]
 		[SerializeField] private AnimEquipStringType _animEquipString;
 	}
 }

@@ -9,9 +9,7 @@ namespace CDK {
 			get { return this._equippedWeaponPrefab; }
 		}
 		[SerializeField] private CWeaponGameObject _equippedWeaponPrefab;
-		
-		
-		
+	
 		
 		// ammo
 		public CAmmoType SupportedAmmo {
@@ -24,6 +22,11 @@ namespace CDK {
 			get { return this._initiallyLoadedAmmoData; }	
 		}
 		[SerializeField] private CAmmoScriptableObject _initiallyLoadedAmmoData;
+	
+		public float AmmoRateOfFire {
+			get { return this._ammoRateOfFire; }
+		}
+		[SerializeField] private float _ammoRateOfFire;
 		
 		public int MaxAmmo {
 			get { return this._maxAmmo; }
@@ -62,15 +65,6 @@ namespace CDK {
 			get { return this._recoilRecoverRate; }
 		}
 		[SerializeField] private float _recoilRecoverRate;
-		
-		
-		
-
-		// attack/fire
-		public float RateOfFireOrAttack {
-			get { return this.rateOfFireOrAttack; }
-		}
-		[SerializeField] private float rateOfFireOrAttack;
 
 	}
 }
