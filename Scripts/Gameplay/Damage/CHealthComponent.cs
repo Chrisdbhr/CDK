@@ -16,6 +16,10 @@ namespace CDK {
 		#region <<---------- References ---------->>
 
 		[SerializeField] private Animator _animator;
+		[Space]
+		[SerializeField] private CTransformShake _transformShake; // TODO shake only near cameras
+
+		[NonSerialized] private Transform _transform;
 		[NonSerialized] private Transform _lastAttacker;
 		
 		#endregion <<---------- References ---------->>
@@ -34,7 +38,7 @@ namespace CDK {
 		#region <<---------- Health ---------->>
 		
 		[Header("Health")]
-		[SerializeField] protected float _maxHealth = 100f;
+		[SerializeField] protected float _maxHealth = 3f;
 		public float MaxHealth {
 			get {
 				return this._maxHealth;
@@ -44,31 +48,25 @@ namespace CDK {
 		public float CurrentHealth {
 			get { return this._currentHealth; }
 			private set {
-				if (value == this._currentHealth || this._currentHealth == this._maxHealth && value == this._maxHealth) return;
+				if (value == this._currentHealth || value == this._maxHealth && this._currentHealth == this._maxHealth) return;
 
 				float oldHealth = this._currentHealth;
 				this._currentHealth = value > this._maxHealth ? this._maxHealth : value;
 
 				this.OnHealthChanged?.Invoke(this._currentHealth);
-				
-				if (this._currentHealth > oldHealth) {
-					this.OnRecoverHealth?.Invoke(this._currentHealth);
-				}
-				else {
-					this.OnLostHealth?.Invoke(this._currentHealth);
-					this._lastDamageTakenTime = Time.timeSinceLevelLoad;
-				}
-				
+
 				if (this._currentHealth <= 0f) {
 					this.IsDead = true;
 					return;
 				}
-				
-				if (oldHealth > this._currentHealth) {
-					float damage = oldHealth - this._currentHealth;
-					this._stunProgress += damage;
-				}
 
+				if (this._currentHealth > oldHealth) {
+					this.OnRecoverHealth?.Invoke(this._currentHealth);
+				}
+				else {
+					this._lastDamageTakenTime = Time.timeSinceLevelLoad;
+				}
+				
 			}
 		}
 		[SerializeField] private float _currentHealth;
@@ -104,61 +102,28 @@ namespace CDK {
 
 		#region <<---------- Partial Health Regeneration ---------->>
 
-		[SerializeField] private float _regenRatePerSecond = 0.25f;
+		[SerializeField] private float _regenAmountPerTick = 0.20f;
 		[SerializeField] private float _regenDelayAfterHit = 3f;
 		[NonSerialized] private float _lastDamageTakenTime;
 		[NonSerialized] private float _lastDamageValue;
 
 		#endregion <<---------- Partial Health Regeneration ---------->>
 		
+		
+		#region <<---------- Events ---------->>
 
-		#region <<---------- Stun ---------->>
-
-		[NonSerialized] private bool _stunned;
-		
-		public CStunStatus StunStatus {
-			get { return this._stunStatus; }
-			set {
-				if (this._stunStatus == value) return;
-				this._stunStatus = value;
-				
-			}
-		}
-		private CStunStatus _stunStatus;
-		
-		[SerializeField] private float _stunRecoveryRatePerSecond = 4f;
-		[SerializeField] private float _heavyStunResistance = 50f;
-
-		private float StunProgress {
-			get { return this._stunProgress; }
-			set {
-				if (this._stunProgress == value) return;
-				
-			}
-		}
-		[NonSerialized] private float _stunProgress;
-		private const float LIGHT_STUN_MULTIPLIER = 0.20f;
-		private const float MEDIUM_STUN_MULTIPLIER = 0.60f;
-		
-		#endregion <<---------- Stun ---------->>
-		
-		
 		[SerializeField] private Transform[] _unparentOnDie;
 		[SerializeField] private GameObject[] _activateOnDie;
 		[SerializeField] private GameObject[] _destroyOnDie;
-
 		
-		
-		
-		#region <<---------- Actions ---------->>
-
 		public event Action<float> OnHealthChanged;
+		public event Action<float, CHitInfoData> OnDamageTaken;
 		public event Action<float> OnRecoverHealth;
-		public event Action<float> OnLostHealth;
 		public event Action OnDie;
-		public event Action<float, CHitInfoData> OnTakeDamage;
-		
-		#endregion <<---------- Actions ---------->>
+
+		public event Action OnRevive;
+
+		#endregion <<---------- Events ---------->>
 		
 		#endregion <<---------- Properties and Fields ---------->>
 
@@ -176,7 +141,8 @@ namespace CDK {
 		#endif
 		
 		private void Awake() {
-			if (this.transform != this.transform.root) {
+			this._transform = this.transform;
+			if (this._transform != this._transform.root) {
 				Debug.LogWarning("Health component is not on a root transform! This object will not take damage!");
 			}
 			this.Revive();
@@ -187,15 +153,20 @@ namespace CDK {
 			Observable.Timer(TimeSpan.FromSeconds(1f)).RepeatUntilDisable(this).Subscribe(_ => {
 				if (this.IsDead) return;
 				if (Time.timeSinceLevelLoad < (this._lastDamageTakenTime + this._regenDelayAfterHit)) return;
-				float mod = this.CurrentHealth % 10;
-				if (mod <= 0) return;
-				this.CurrentHealth += this._regenRatePerSecond;
-			});
 
-			// stun
-			Observable.Timer(TimeSpan.FromSeconds(this._stunRecoveryRatePerSecond)).RepeatUntilDisable(this).Subscribe(_ => {
-				if (this.IsDead) return;
-				this._stunProgress -= this._stunRecoveryRatePerSecond;
+				int healthInt = (int)this.CurrentHealth;
+
+				// dont heal if full hearth.
+				if (healthInt == this.CurrentHealth) return;
+
+				// check if will heal all
+				float nextHealth = this.CurrentHealth + this._regenAmountPerTick;
+				if (nextHealth > healthInt + 1) {
+					// will heal more than necessary, fix it
+					nextHealth = healthInt + 1;
+				}
+
+				this.CurrentHealth = nextHealth;
 			});
 
 		}
@@ -206,8 +177,8 @@ namespace CDK {
 
 
 		private void Revive() {
-			this._currentHealth = this._maxHealth;
-			this._stunProgress = 0f;
+			this.CurrentHealth = this._maxHealth;
+			this.OnRevive?.Invoke();
 		}
 
 
@@ -227,17 +198,23 @@ namespace CDK {
 			//todo play damage animation if apply
 
 			if (hitScriptObj.LookAtAttacker) {
-				this.transform.LookAt(hitInfo.AttackerTransform.transform);
-				this.transform.eulerAngles = new Vector3(0f, this.transform.eulerAngles.y, 0f);
+				this._transform.LookAt(hitInfo.AttackerTransform.transform);
+				this._transform.eulerAngles = new Vector3(0f, this._transform.eulerAngles.y, 0f);
 			}
-
 
 			if (finalDamage > 0f) {
-				this.OnTakeDamage?.Invoke(finalDamage, hitInfo);
+				this.OnDamageTaken?.Invoke(finalDamage, hitInfo);
 			}
 			this.CurrentHealth -= finalDamage;
+
+			// camera shake
+			if (this._transformShake != null) {
+				this._transformShake.RequestShake(
+					(hitInfo.AttackerTransform.transform.position - this._transform.position).normalized * (finalDamage * 0.01f), 
+					hitScriptObj.DamageShakePattern
+					);
+			}
 			
-			//TODO camera shake
 			return true;
 		}
 

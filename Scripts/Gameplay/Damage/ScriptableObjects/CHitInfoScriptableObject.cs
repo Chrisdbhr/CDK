@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace CDK {
@@ -13,6 +14,17 @@ namespace CDK {
 			get { return this._lookAtAttacker; }
 		}
 		[SerializeField] private bool _lookAtAttacker;
+
+		public AnimationCurve DamageShakePattern {
+			get {
+				return this._damageShakePattern;
+			}	
+		}
+		[SerializeField] private AnimationCurve _damageShakePattern = new AnimationCurve(new [] {
+																									new Keyframe(0f, 1f), 
+																									new Keyframe(0.1f,-0.5f),
+																									new Keyframe(0.2f,0f)
+																								});
 
 	}
 }
