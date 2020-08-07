@@ -1,5 +1,5 @@
 namespace CDK.Enums {
 	public enum CStunStatus {
-		none, lightStun, mediumStun, heavyStun, fallen
+		none, lightStun, mediumStun, heavyStun
 	}
 }

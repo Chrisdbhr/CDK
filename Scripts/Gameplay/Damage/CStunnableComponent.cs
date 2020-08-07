@@ -3,6 +3,7 @@ using CDK.Data;
 using CDK.Enums;
 using UniRx;
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace CDK {
 	/// <summary>
@@ -12,7 +13,8 @@ namespace CDK {
 	public class CStunnableComponent : MonoBehaviour {
 		
 		#region <<---------- Properties and Fields ---------->>
-		
+
+		[NonSerialized] private CHitInfoData _lastHitInfoData;
 		[NonSerialized] private CHealthComponent _health;
 		[NonSerialized] private bool _stunned;
 		
@@ -21,7 +23,31 @@ namespace CDK {
 			set {
 				if (this._stunStatus == value) return;
 				this._stunStatus = value;
-				
+
+				switch (this._stunStatus) {
+					case CStunStatus.lightStun: {
+						this.OnLightStun?.Invoke();
+						break;
+					}
+					case CStunStatus.mediumStun: {
+						this.OnMediumStun?.Invoke();
+						break;
+					}
+					case CStunStatus.heavyStun: {
+						this.OnHeavyStun?.Invoke();
+						break;
+					}
+					default: {
+						this.OnNotStunned?.Invoke();
+						break;
+					}
+				}
+
+
+				if (this._lastHitInfoData.ScriptableObject != null && this._lastHitInfoData.ScriptableObject.LookAtAttacker) {
+					Debug.Log("TODO look to attacker");
+				}
+
 			}
 		}
 		private CStunStatus _stunStatus;
@@ -33,20 +59,44 @@ namespace CDK {
 			get { return this._stunProgress; }
 			set {
 				if (this._stunProgress == value) return;
-				
+				this._stunProgress = value;
 				if (this._stunProgress < 0) {
 					this._stunProgress = 0f;
 					return;
 				}
-				
+
+				float stunPercentage = this._stunProgress / this._heavyStunResistance;
+
+				if (stunPercentage >= 1f) {
+					this.StunStatus = CStunStatus.heavyStun;
+				}else if (stunPercentage >= MEDIUM_STUN_FRACTION) {
+					this.StunStatus = CStunStatus.mediumStun;
+				}else if (stunPercentage >= LIGHT_STUN_FRACTION) {
+					this.StunStatus = CStunStatus.lightStun;
+				}
+				else {
+					this.StunStatus = CStunStatus.none;
+				}
 				
 			}
 		}
 		[NonSerialized] private float _stunProgress;
-		private const float LIGHT_STUN_MULTIPLIER = 0.20f;
-		private const float MEDIUM_STUN_MULTIPLIER = 0.60f;
+		private const float LIGHT_STUN_FRACTION = 0.20f;
+		private const float MEDIUM_STUN_FRACTION = 0.60f;
 		
 		#endregion <<---------- Properties and Fields ---------->>
+
+
+
+
+		#region <<---------- Events ---------->>
+
+		[SerializeField] private UnityEvent OnNotStunned;
+		[SerializeField] private UnityEvent OnLightStun;
+		[SerializeField] private UnityEvent OnMediumStun;
+		[SerializeField] private UnityEvent OnHeavyStun;
+
+		#endregion <<---------- Events ---------->>
 		
 		
 		
@@ -84,6 +134,7 @@ namespace CDK {
 		
 		private void DamageTake(float dmgAmount, CHitInfoData hitInfo) {
 			this.StunProgress += dmgAmount;
+			this._lastHitInfoData = hitInfo;
 		}
 
 		private void Revived() {
