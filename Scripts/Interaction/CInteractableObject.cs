@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -7,6 +8,10 @@ namespace CDK {
 		[SerializeField] private bool onlyWorkOneTimePerSceneLoad;
 		[SerializeField] private UnityEvent InteractEvent;
 
+		private void OnEnable() {
+			// show enable checkbox
+		}
+
 		public void OnInteract(Transform interactingTransform) {
 			if (!this.enabled || !this.gameObject.activeInHierarchy || CBlockingEventsManager.get.IsBlockingEventHappening) return;
 			this.InteractEvent?.Invoke();
@@ -15,10 +20,5 @@ namespace CDK {
 			}
 		}
 
-		#if UNITY_EDITOR
-		private void Reset() {
-			this.gameObject.layer = 15;
-		}
-		#endif
 	}
 }
