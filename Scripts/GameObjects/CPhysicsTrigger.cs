@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -12,7 +13,15 @@ namespace CDK {
 			this.TriggerEnter?.Invoke();
 		}
 
+		private void OnTriggerEnter2D(Collider2D other) {
+			this.TriggerEnter?.Invoke();
+		}
+
 		private void OnTriggerExit(Collider other) {
+			this.TriggerExit?.Invoke();
+		}
+
+		private void OnTriggerExit2D(Collider2D other) {
 			this.TriggerExit?.Invoke();
 		}
 	}
