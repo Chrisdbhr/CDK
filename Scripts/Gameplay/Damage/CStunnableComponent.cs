@@ -3,7 +3,6 @@ using CDK.Data;
 using CDK.Enums;
 using UniRx;
 using UnityEngine;
-using UnityEngine.Events;
 
 namespace CDK {
 	/// <summary>
@@ -13,32 +12,41 @@ namespace CDK {
 	public class CStunnableComponent : MonoBehaviour {
 		
 		#region <<---------- Properties and Fields ---------->>
-
+		
+		// References
 		[NonSerialized] private CHitInfoData _lastHitInfoData;
 		[NonSerialized] private CHealthComponent _health;
+		
+		// Animation
+		[NonSerialized] private Animator _animator;
+		[NonSerialized] private int ANIM_LIGHTSTUN = Animator.StringToHash("stunLight");
+		[NonSerialized] private int ANIM_MEDIUMSTUN = Animator.StringToHash("stunMedium");
+		[NonSerialized] private int ANIM_HEAVYSTUN = Animator.StringToHash("stunHeavy");
+		
+		// Stun
+		private const float LIGHT_STUN_FRACTION = 0.20f;
+		private const float MEDIUM_STUN_FRACTION = 0.60f;
 		[NonSerialized] private bool _stunned;
+		[SerializeField] private float _stunRecoveryRatePerSecond = 0.3f;
+		[SerializeField] private float _heavyStunResistance = 50f;
 		
 		public CStunStatus StunStatus {
 			get { return this._stunStatus; }
-			set {
+			private set {
 				if (this._stunStatus == value) return;
 				this._stunStatus = value;
 
 				switch (this._stunStatus) {
 					case CStunStatus.lightStun: {
-						this.OnLightStun?.Invoke();
+						this._animator.SetTrigger(this.ANIM_LIGHTSTUN);
 						break;
 					}
 					case CStunStatus.mediumStun: {
-						this.OnMediumStun?.Invoke();
+						this._animator.SetTrigger(this.ANIM_MEDIUMSTUN);
 						break;
 					}
 					case CStunStatus.heavyStun: {
-						this.OnHeavyStun?.Invoke();
-						break;
-					}
-					default: {
-						this.OnNotStunned?.Invoke();
+						this._animator.SetTrigger(this.ANIM_HEAVYSTUN);
 						break;
 					}
 				}
@@ -52,9 +60,6 @@ namespace CDK {
 		}
 		private CStunStatus _stunStatus;
 		
-		[SerializeField] private float _stunRecoveryRatePerSecond = 0.3f;
-		[SerializeField] private float _heavyStunResistance = 50f;
-
 		private float StunProgress {
 			get { return this._stunProgress; }
 			set {
@@ -81,32 +86,17 @@ namespace CDK {
 			}
 		}
 		[NonSerialized] private float _stunProgress;
-		private const float LIGHT_STUN_FRACTION = 0.20f;
-		private const float MEDIUM_STUN_FRACTION = 0.60f;
 		
 		#endregion <<---------- Properties and Fields ---------->>
 
-
-
-
-		#region <<---------- Events ---------->>
-
-		[SerializeField] private UnityEvent OnNotStunned;
-		[SerializeField] private UnityEvent OnLightStun;
-		[SerializeField] private UnityEvent OnMediumStun;
-		[SerializeField] private UnityEvent OnHeavyStun;
-
-		#endregion <<---------- Events ---------->>
 		
-		
-		
+
 		
 		#region <<---------- MonBehaviour ---------->>
 		
 		private void Awake() {
 			this._health = this.GetComponent<CHealthComponent>();
-
-			
+			this._animator = this.GetComponent<Animator>();
 		}
 
 		private void OnEnable() {
