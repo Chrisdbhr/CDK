@@ -51,11 +51,6 @@ namespace CDK {
 					}
 				}
 
-
-				if (this._lastHitInfoData.ScriptableObject != null && this._lastHitInfoData.ScriptableObject.LookAtAttacker) {
-					Debug.Log("TODO look to attacker");
-				}
-
 			}
 		}
 		private CStunStatus _stunStatus;

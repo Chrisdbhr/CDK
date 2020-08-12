@@ -143,7 +143,7 @@ namespace CDK {
 		private void Awake() {
 			this._transform = this.transform;
 			if (this._transform != this._transform.root) {
-				Debug.LogWarning("Health component is not on a root transform! This object will not take damage!");
+				Debug.LogWarning("Health component is not on a root transform! This object will not take damage!", this.gameObject);
 			}
 			this.Revive();
 		}

@@ -39,7 +39,7 @@ namespace CDK {
 					Cursor.visible = true;
 					Cursor.lockState = CursorLockMode.None;
 				}
-				else if (CGameSettings.get.HideCursorOnGame) {
+				else if (CGameSettings.get.HideCursorInGame) {
 					Cursor.visible = false;
 					Cursor.lockState = CursorLockMode.Locked;
 				}

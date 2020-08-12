@@ -43,31 +43,27 @@ namespace CDK {
 		}
 
 		private void OnTriggerEnter(Collider other) {
-			if (other.transform.root == this._hitInfo.AttackerTransform) return;
-			this.DoDamage(other.gameObject);
+			var rootTransform = other.transform.root;
+			if (rootTransform == this._hitInfo.AttackerTransform) return;
+			this.DoDamage(rootTransform);
 		}
 
 		private void OnCollisionEnter(Collision other) {
-			if (other.transform.root == this._hitInfo.AttackerTransform) return;
-			bool didDamage = this.DoDamage(other.gameObject);
-			if (!didDamage) return;
-			if (this._destroyOnCollide) {
-				this.gameObject.CDestroy();
-			}
+			var rootTransform = other.transform.root;
+			if (rootTransform == this._hitInfo.AttackerTransform) return;
+			this.DoDamage(rootTransform);
 		}
 
 		private void OnTriggerEnter2D(Collider2D other) {
-			if (other.transform.root == this._hitInfo.AttackerTransform) return;
-			this.DoDamage(other.gameObject);
+			var rootTransform = other.transform.root;
+			if (rootTransform == this._hitInfo.AttackerTransform) return;
+			this.DoDamage(rootTransform);
 		}
 
 		private void OnCollisionEnter2D(Collision2D other) {
-			if (other.transform.root == this._hitInfo.AttackerTransform) return;
-			bool didDamage = this.DoDamage(other.gameObject);
-			if (!didDamage) return;
-			if (this._destroyOnCollide) {
-				this.gameObject.CDestroy();
-			}
+			var rootTransform = other.transform.root;
+			if (rootTransform == this._hitInfo.AttackerTransform) return;
+			this.DoDamage(rootTransform);
 		}
 		
 		#endregion <<---------- MonoBehaviour ---------->>
@@ -75,14 +71,13 @@ namespace CDK {
 		
 		
 		
-		private bool DoDamage(GameObject go) {
+		private void DoDamage(Component go) {
 			var damageable = go.GetComponent<ICDamageable>();
-			if (damageable == null) return false;
+			if (damageable == null) return;
 			damageable.TakeDamage(this._hitInfo);
 			if (this._destroyOnCollide) {
 				this.gameObject.CDestroy();
 			}
-			return true;
 		}
 		
 	}
