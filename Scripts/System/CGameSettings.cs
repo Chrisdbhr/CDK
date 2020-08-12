@@ -22,13 +22,17 @@ namespace CDK {
 
 		public const float MAX_NAVMESH_FINDPOSITION_DISTANCE = 1000f;
 		public const float ANGLE_TO_BEGIN_SLIDING = 80;
+		public bool HideCursorInGame = false;
+		public bool isGame2Dimension = true;
 		public LayerMask LineOfSightBlockingLayers = 1;
 		public LayerMask AttackableLayers = 1;
 		public LayerMask WalkableLayers = 1;
 		public CanvasGroup FadeCanvasGroupPrefab;
-		public bool HideCursorOnGame = true;
-		
-		
+
+		private void OnEnable() {
+			if (!this.FadeCanvasGroupPrefab) this.FadeCanvasGroupPrefab = Resources.Load<CanvasGroup>("CDK/Resources/FadeCanvas");
+		}
+
 		#if UNITY_EDITOR
 		[MenuItem("Tools/Open GameSettings")]
 		private static void OpenGameSettingsData() {
