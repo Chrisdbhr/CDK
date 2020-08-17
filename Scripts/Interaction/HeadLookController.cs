@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 [System.Serializable]
@@ -29,6 +30,8 @@ public class NonAffectedJoints {
 /// Not in CDK namespace yet because of that.
 /// </summary>
 public class HeadLookController : MonoBehaviour {
+	[SerializeField] private Transform _targetTransform;
+	
 	public Transform rootNode;
 	public BendingSegment[] segments;
 	public NonAffectedJoints[] nonAffectedJoints;
@@ -69,6 +72,10 @@ public class HeadLookController : MonoBehaviour {
 				t = t.parent;
 			}
 		}
+	}
+
+	private void Update() {
+		if(this._targetTransform) this.target = this._targetTransform.position;
 	}
 
 	// TODO improve performance in this LateUpdate

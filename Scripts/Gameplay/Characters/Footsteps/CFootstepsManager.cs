@@ -1,27 +1,27 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Linq;
+using CDK.Audio;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace CDK {
 	public class CFootstepsManager : MonoBehaviour {
+		
 		#region <<---------- Properties and Fields ---------->>
-		[SerializeField] private AudioSource audioSource;
-
-		[SerializeField, FormerlySerializedAs("footstepSourcesLayers")]
-		private LayerMask footColisionLayers = 1;
-
+		
+		[SerializeField] private CRandomAudioPlayer _randomAudioPlayer;
 		[SerializeField] private Transform footL;
 		[SerializeField] private Transform footR;
-		[NonSerialized] private float _feetSizeForSphereCast = 0.1f;
-
-		[NonSerialized] private Queue<int> _lastPlayedClipsIds = new Queue<int>();
-
+		[SerializeField] private LayerMask footColisionLayers = 1;
+		[SerializeField] private Transform _defaultRayOriginTransform;
+		
 		[NonSerialized] private RaycastHit _raycastHit;
+		[NonSerialized] private float _feetSizeForSphereCast = 0.1f;
+		
 
 		public enum FootstepFeet {
 			left, right
 		}
+		
 		#endregion <<---------- Properties and Fields ---------->>
 
 		#region <<---------- Cache Vars ---------->>
@@ -30,17 +30,23 @@ namespace CDK {
 		#endregion <<---------- Cache Vars ---------->>
 
 		#region <<---------- MonoBehaviour ---------->>
-		#if UNITY_EDITOR
+		private void Awake() {
+			if (!this._defaultRayOriginTransform) {
+				Debug.Log($"[FootstepManager] {this.name} doest have an {nameof(this._defaultRayOriginTransform)} value. Setting as root transform.", this);
+				this._defaultRayOriginTransform = this.transform.root;
+			}
+		}
 
+		#if UNITY_EDITOR
 		private void OnDrawGizmos() {
 			Gizmos.color = Color.white;
-			Gizmos.DrawWireSphere(this.footL.position, this._feetSizeForSphereCast);
-			Gizmos.DrawWireSphere(this.footR.position, this._feetSizeForSphereCast);
+			if(this.footL) Gizmos.DrawWireSphere(this.footL.position, this._feetSizeForSphereCast);
+			if(this.footR) Gizmos.DrawWireSphere(this.footR.position, this._feetSizeForSphereCast);
 		}
 
 		private void OnValidate() {
-			if (this.transform.parent != null) {
-				Debug.LogError($"[{this.GetType().Name}] need to be on root object to receive Animation Events!");
+			if (this.GetComponent<Animator>() == null) {
+				Debug.LogError($"[{this.GetType().Name}] need to have also an Animator to receive Animation Trigger.");
 			}
 		}
 		#endif
@@ -50,9 +56,10 @@ namespace CDK {
 		/// Do a footstep
 		/// </summary>
 		public void Footstep(FootstepFeet feet) {
-			this.currentFeet = feet == FootstepFeet.left ? this.footL : this.footR;
+			var rayOrigin = feet == FootstepFeet.left ? (this.footL ? this.footL : this._defaultRayOriginTransform) : (this.footR ? this.footR : this._defaultRayOriginTransform);
+				
 			bool feetHitSomething = Physics.SphereCast(
-				this.currentFeet.position + Vector3.up,
+				rayOrigin.position + Vector3.up,
 				this._feetSizeForSphereCast,
 				Vector3.down,
 				out this._raycastHit,
@@ -84,29 +91,11 @@ namespace CDK {
 				}
 			}
 
-			if (this.footstepSource.footstepDataHere.audiosHere == null || this.footstepSource.footstepDataHere.audiosHere.Length <= 0) return;
-			this.audioSource.Stop();
-			this.audioSource.clip = this.SelectAudioFromList(this.footstepSource.footstepDataHere);
-			this._lastPlayedClipsIds.Enqueue(this.audioSource.clip.GetInstanceID());
-			this.audioSource.Play();
-		}
-
-		private AudioClip SelectAudioFromList(CFootstepData fData) {
-			if (this._lastPlayedClipsIds.Count >= fData.audiosHere.Length * 0.5f) {
-				while (this._lastPlayedClipsIds.Count >= (fData.audiosHere.Length * 0.5f)) {
-					this._lastPlayedClipsIds.Dequeue();
-				}
-			}
-			else {
-				return fData.audiosHere.GetRandomElement();
-			}
-
-			var selected = fData.audiosHere.GetRandomElement();
-			if (this._lastPlayedClipsIds.Contains(selected.GetInstanceID())) {
-				selected = this.SelectAudioFromList(fData);
-			}
-
-			return selected;
+			// play random audio
+			var audiosList = this.footstepSource.footstepDataHere.audiosHere;
+			if (audiosList == null || audiosList.Count <= 0) return;
+			this._randomAudioPlayer.SetAudioClips(audiosList);
+			this._randomAudioPlayer.PlayAudio();
 		}
 	}
 }

@@ -39,7 +39,7 @@ namespace CDK {
 
 			// input movement
 			this._inputDir = new Vector2(Input.GetAxisRaw(CInputKeys.MOV_X), Input.GetAxisRaw(CInputKeys.MOV_Y));
-			this._characterBase.InputDirRelativeToCam = this.camF * this._inputDir.y + this.camR * this._inputDir.x;
+			this._characterBase.InputMovementDirRelativeToCam = this.camF * this._inputDir.y + this.camR * this._inputDir.x;
 
 			// input walk
 			this._characterBase.InputSlowWalk = Input.GetButton(CInputKeys.SLOW_WALK);
@@ -70,10 +70,10 @@ namespace CDK {
 			this.camR.Normalize();
 
 			// absolute input
-			this._characterBase.InputDirAbsolute = this._inputDir;
+			this._characterBase.InputMovementDirAbsolute = this._inputDir;
 
 			// relative to camera input
-			this._characterBase.InputDirRelativeToCam = this.camF * this._inputDir.y + this.camR * this._inputDir.x;
+			this._characterBase.InputMovementDirRelativeToCam = this.camF * this._inputDir.y + this.camR * this._inputDir.x;
 		}
 	}
 }

@@ -10,6 +10,7 @@ namespace CDK {
 		[SerializeField] private Camera _playerCamera;
 		[SerializeField] private LayerMask _interactionLayerMask;
 
+		[NonSerialized] private CCharacterBase _characterBase;
 		[NonSerialized] private float _interactionSphereCheckRadius = 0.75f;
 		[NonSerialized] private float _yCheckOffset = 0.5f;
 		[NonSerialized] private Transform _myTransform;
@@ -18,7 +19,6 @@ namespace CDK {
 		[NonSerialized] private Vector2 _inputDir;
 		[NonSerialized] private Vector3 camF = Vector3.forward;
 		[NonSerialized] private Vector3 camR = Vector3.right;
-		[NonSerialized] private CCharacterBase _characterBase;
 		[NonSerialized] private const float INTERACT_SPHERE_CHECK_MULTIPLIER = 0.75f;
 		
 		#endregion <<---------- Properties and Fields ---------->>
@@ -43,7 +43,7 @@ namespace CDK {
 			
 			// input movement
 			this._inputDir = new Vector2(Input.GetAxisRaw(CInputKeys.MOV_X), Input.GetAxisRaw(CInputKeys.MOV_Y));
-			this._characterBase.InputDirRelativeToCam = this.camF * this._inputDir.y + this.camR * this._inputDir.x;
+			this._characterBase.InputMovementDirRelativeToCam = this.camF * this._inputDir.y + this.camR * this._inputDir.x;
 
 			// input walk
 			this._characterBase.InputSlowWalk = Input.GetButton(CInputKeys.SLOW_WALK);
@@ -91,10 +91,10 @@ namespace CDK {
 			this.camR.Normalize();
 
 			// absolute input
-			this._characterBase.InputDirAbsolute = this._inputDir;
+			this._characterBase.InputMovementDirAbsolute = this._inputDir;
 			
 			// relative to camera input
-			this._characterBase.InputDirRelativeToCam = this.camF * this._inputDir.y + this.camR * this._inputDir.x;
+			this._characterBase.InputMovementDirRelativeToCam = this.camF * this._inputDir.y + this.camR * this._inputDir.x;
 		}
 
 		private void TryToInteract() {

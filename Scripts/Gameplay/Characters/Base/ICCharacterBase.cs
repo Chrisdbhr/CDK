@@ -4,8 +4,8 @@ using UnityEngine;
 namespace CDK {
 	public interface ICCharacterBase {
 		CMovState CurrentMovState { get; }
-		Vector2 InputDirAbsolute { get; set; }
-		Vector3 InputDirRelativeToCam { get; set; }
+		Vector2 InputMovementDirAbsolute { get; set; }
+		Vector3 InputMovementDirRelativeToCam { get; set; }
 		bool InputSlowWalk { get; set; }
 		bool InputAim { get; set; }
 		float WalkSpeed { get; }

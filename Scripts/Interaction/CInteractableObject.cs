@@ -11,6 +11,7 @@ namespace CDK {
 		private void OnEnable() {
 			// show enable checkbox
 		}
+		
 
 		public void OnInteract(Transform interactingTransform) {
 			if (!this.enabled || !this.gameObject.activeInHierarchy || CBlockingEventsManager.get.IsBlockingEventHappening) return;
@@ -18,6 +19,11 @@ namespace CDK {
 			if (this.onlyWorkOneTimePerSceneLoad) {
 				Destroy(this);
 			}
+		}
+		
+		public void OnLookTo(Transform lookingTransform) {
+			if (!this.enabled || !this.gameObject.activeInHierarchy || CBlockingEventsManager.get.IsBlockingEventHappening) return;
+			Debug.Log($"{this.name} looked at by {lookingTransform.name}");	
 		}
 
 	}

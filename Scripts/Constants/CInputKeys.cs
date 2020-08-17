@@ -12,6 +12,7 @@ namespace CDK {
 		public const string SPECIAL_ATTACK = "SpecialAttack";
 
 		public const string SLOW_WALK = "SlowWalk";
+		public const string CROUCH = "Crouch";
 
 		// Menu
 		public const string MENU = "Menu";

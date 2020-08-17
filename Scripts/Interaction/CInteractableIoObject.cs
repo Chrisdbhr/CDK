@@ -68,8 +68,14 @@ namespace CDK {
 		#endif
 		
 		#endregion <<---------- MonoBehaviour ---------->>
-		
-		
+
+
+
+		#region <<---------- CInteractable ---------->>
+		public void OnLookTo(Transform lookingTransform) {
+			
+		}
+
 		public void OnInteract(Transform interactingTransform) {
 			if (!this.enabled || !this.gameObject.activeInHierarchy || CBlockingEventsManager.get.IsBlockingEventHappening) return; 
 			if (this.Locked) {
@@ -78,6 +84,10 @@ namespace CDK {
 			}
 			this.SwitchState();
 		}
+
+		#endregion <<---------- CInteractable ---------->>
+		
+		
 
 		public void SwitchState() {
 			if (this.Locked) return;

@@ -1,4 +1,7 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using UniRx;
 using UnityEngine;
 #if UNITY_EDITOR
@@ -11,16 +14,20 @@ namespace CDK {
 
 		#region <<---------- Properties ---------->>
 		#region <<---------- Cache and References ---------->>
+		
 		[Header("Cache and References")]
 		[SerializeField] public Animator Anim;
 		[SerializeField] protected CharacterController charController;
+		
 		[NonSerialized] protected Transform _myTransform;
 		[NonSerialized] protected CompositeDisposable _compositeDisposable = new CompositeDisposable();
+		[NonSerialized] private float _charInitialHeight;
+		
 		#endregion <<---------- References ---------->>
 		
 		#region <<---------- Input ---------->>
-		public Vector2 InputDirAbsolute { get; set; }
-		public Vector3 InputDirRelativeToCam { get; set; }
+		public Vector2 InputMovementDirAbsolute { get; set; }
+		public Vector3 InputMovementDirRelativeToCam { get; set; }
 		public bool InputSlowWalk { get; set; }
 		public bool InputAim { get; set; }
 		#endregion <<---------- Input ---------->>
@@ -46,14 +53,16 @@ namespace CDK {
 				else if (oldValue == CMovState.Sliding && value != CMovState.Sliding) {
 					// was sliding
 					if (Time.timeSinceLevelLoad >= this._slideBeginTime + this._slideTimeToStumble) {
-						this.Anim.SetTrigger(this.ANIM_CHAR_STUMBLE);
+						if(this.Anim) this.Anim.SetTrigger(this.ANIM_CHAR_STUMBLE);
 					}
 				}
 				
 				// set animators
-				this.Anim.SetBool(this.ANIM_CHAR_IS_SLIDING, value == CMovState.Sliding);
-				this.Anim.SetBool(this.ANIM_CHAR_IS_WALKING, value == CMovState.Walking);
-				this.Anim.SetBool(this.ANIM_CHAR_IS_RUNNING, value == CMovState.Running);
+				if (this.Anim) {
+					this.Anim.SetBool(this.ANIM_CHAR_IS_SLIDING, value == CMovState.Sliding);
+					this.Anim.SetBool(this.ANIM_CHAR_IS_WALKING, value == CMovState.Walking);
+					this.Anim.SetBool(this.ANIM_CHAR_IS_RUNNING, value == CMovState.Running);
+				}
 			}
 		}
 		private CMovState _currentMovState;
@@ -106,6 +115,19 @@ namespace CDK {
 		[NonSerialized] protected ReactiveProperty<bool> IsStrafingRx;
 		#endregion <<---------- Strafe ---------->>
 
+		#region <<---------- Crouch ---------->>
+
+		public bool IsCrouched {
+			get {
+				return this._isCrouched.Value;
+			}
+		}
+
+		[SerializeField] private ReactiveProperty<bool> _isCrouched;
+		public Action<bool> OnCrouchedStateChanged;
+
+		#endregion <<---------- Crouch ---------->>
+
 		#region <<---------- Aim ---------->>
 		public bool IsAiming {
 			get { return this._isAimingRx.Value; }
@@ -131,6 +153,7 @@ namespace CDK {
 		protected readonly int ANIM_CHAR_IS_RUNNING = Animator.StringToHash("isRunning");
 		protected readonly int ANIM_CHAR_IS_FALLING = Animator.StringToHash("isFalling");
 		protected readonly int ANIM_CHAR_IS_AIMING = Animator.StringToHash("isAiming");
+		protected readonly int ANIM_CHAR_IS_CROUCHING = Animator.StringToHash("isCrouching");
 		
 		// Stun
 		protected readonly int ANIM_CHAR_IS_STUNNED_LIGHT = Animator.StringToHash("stunL");
@@ -151,6 +174,7 @@ namespace CDK {
 		#region <<---------- MonoBehaviour ---------->>
 		protected virtual void Awake() {
 			this._myTransform = this.transform;
+			this._charInitialHeight = this.charController.height;
 		}
 
 		protected virtual void OnEnable() {
@@ -207,15 +231,16 @@ namespace CDK {
 			this.IsStrafingRx = new ReactiveProperty<bool>();
 			this.RunningRx = new ReactiveProperty<bool>(false);
 			this.CanRunRx = new ReactiveProperty<bool>(true);
+			this._isCrouched = new ReactiveProperty<bool>();
 
 			// strafe
 			this.IsStrafingRx.Subscribe(isStrafing => {
-				this.Anim.SetBool(this.ANIM_CHAR_IS_STRAFING, isStrafing);
+				if(this.Anim) this.Anim.SetBool(this.ANIM_CHAR_IS_STRAFING, isStrafing);
 			}).AddTo(this._compositeDisposable);
 
 			// aiming
 			this._isAimingRx.Subscribe(isAiming => { 
-				this.Anim.SetBool(this.ANIM_CHAR_IS_AIMING, isAiming);
+				if(this.Anim) this.Anim.SetBool(this.ANIM_CHAR_IS_AIMING, isAiming);
 			}).AddTo(this._compositeDisposable);
 			
 			// can slide
@@ -247,7 +272,7 @@ namespace CDK {
 			
 			// is touching the ground
 			this._isTouchingTheGroundRx.DistinctUntilChanged().Subscribe(isTouchingTheGround => {
-				this.Anim.SetBool(this.ANIM_CHAR_IS_FALLING, !isTouchingTheGround);
+				if(this.Anim) this.Anim.SetBool(this.ANIM_CHAR_IS_FALLING, !isTouchingTheGround);
 			}).AddTo(this._compositeDisposable);
 			
 			// can run
@@ -256,12 +281,19 @@ namespace CDK {
 					this.CurrentMovState = CMovState.Walking;
 				}
 			}).AddTo(this._compositeDisposable);
+
+			// crouch
+			this._isCrouched.Subscribe(isCrouched => {
+				this.OnCrouchedStateChanged?.Invoke(isCrouched);
+				this.Anim.SetBool(this.ANIM_CHAR_IS_CROUCHING, isCrouched);
+			}).AddTo(this._compositeDisposable);
 		}
 
 		protected virtual void UnsubscribeToEvents() {
 			this._compositeDisposable?.Dispose();
 			this._compositeDisposable = null;
 		}
+		
 		#endregion <<---------- Events ---------->>
 
 
@@ -278,7 +310,7 @@ namespace CDK {
 			
 			// idle
 			if (!this.CanMoveRx.Value
-				|| this.InputDirRelativeToCam == Vector3.zero
+				|| this.InputMovementDirRelativeToCam == Vector3.zero
 				&& this.CurrentMovState != CMovState.Sliding
 			) {
 				this.CurrentMovState = CMovState.Idle;
@@ -308,11 +340,11 @@ namespace CDK {
 			// move the character
 			Vector3 targetMotion;
 			if (this.CurrentMovState == CMovState.Sliding) {
-				targetMotion = this.InputDirRelativeToCam * this.SlideControlAmmount
+				targetMotion = this.InputMovementDirRelativeToCam * this.SlideControlAmmount
 						+ (new Vector3(this._groundNormal.x, 0f, this._groundNormal.z).normalized);
 			}
 			else {
-				targetMotion = this.InputDirRelativeToCam;
+				targetMotion = this.InputMovementDirRelativeToCam;
 			}
 			
 			this.charController.Move(
@@ -345,8 +377,8 @@ namespace CDK {
 				&& this.CurrentMovState != CMovState.Walking
 				&& this.CurrentMovState.IsMoving()
 				&& this._isTouchingTheGroundRx.Value
-				&& this.InputDirRelativeToCam != Vector3.zero 
-				&& Vector3.Angle(this.InputDirRelativeToCam, this._groundNormal) <= CGameSettings.ANGLE_TO_BEGIN_SLIDING
+				&& this.InputMovementDirRelativeToCam != Vector3.zero 
+				&& Vector3.Angle(this.InputMovementDirRelativeToCam, this._groundNormal) <= CGameSettings.ANGLE_TO_BEGIN_SLIDING
 			) {
 				this.CurrentMovState = CMovState.Sliding;
 			}else if (this.CurrentMovState == CMovState.Sliding) {
@@ -367,7 +399,7 @@ namespace CDK {
 				this.RotateTowardsDirection(this._aimTargetDirection);
 			}
 			else {
-				this.RotateTowardsDirection(this.InputDirRelativeToCam);
+				this.RotateTowardsDirection(this.InputMovementDirRelativeToCam);
 			}
 		}
 		
@@ -420,18 +452,70 @@ namespace CDK {
 		}
 
 		#endregion <<---------- Aim ---------->>
+
+
+
+
+		#region <<---------- Crouch ---------->>
+
+		public void ToggleCrouch() {
+			var oldCrouchState = this.IsCrouched;
+			
+			if (this.IsCrouched) {
+				// get up
+				var transformUp = this._myTransform.up;
+				var origin = this._myTransform.position + (transformUp * this.charController.height);
+				var collidersWithSelf = Physics.SphereCastAll(
+					origin,
+					this.charController.radius,
+					transformUp.normalized,
+					this.charController.height,
+					CGameSettings.get.WalkableLayers
+				).Select(x => x.collider);
+
+				var allSelfColliders = this.transform.root.GetComponentsInChildren<Collider>();
+
+				var colliders = collidersWithSelf.Except(allSelfColliders).ToArray();
+
+				if (colliders.Length > 0) {
+					try {
+						var sb = new StringBuilder();
+						sb.AppendLine($"{this.name} cant get up, head collided with {colliders.Length} objects:");
+						foreach (var col in colliders) {
+							sb.AppendLine($"{col.name}");
+						}
+						Debug.Log(sb.ToString());
+					} catch (Exception e) {
+						Console.WriteLine(e);
+					}
+					return;
+				}
+			}
+			
+			// get down
+			this.charController.height = this._charInitialHeight * (oldCrouchState ? 1f : 0.5f);  
+
+			var center = this.charController.center;
+			center.y = this.charController.height * 0.5f;
+			this.charController.center = center;
+				
+			this._isCrouched.Value = !oldCrouchState;
+		}
+		
+		#endregion <<---------- Crouch ---------->>
+		
 		
 		
 		
 
 		#region <<---------- Animations State Machine Behaviours ---------->>
 		public void StopAndBlockMovement() {
-			this.Anim.applyRootMotion = true;
+			if(this.Anim) this.Anim.applyRootMotion = true;
 			this._isPlayingBlockingAnimationRx.Value = true;
 		}
 
 		public void ReleaseMovement() {
-			this.Anim.applyRootMotion = false;
+			if(this.Anim) this.Anim.applyRootMotion = false;
 			this._isPlayingBlockingAnimationRx.Value = false;
 		}
 		#endregion <<---------- Animations State Machine Behaviours ---------->>
