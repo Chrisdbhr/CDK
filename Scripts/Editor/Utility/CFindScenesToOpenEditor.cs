@@ -33,7 +33,7 @@ public class CFindScenesToOpenEditor : EditorWindow {
     
 
 
-    [MenuItem( "Tools/Find scene to open... %e", false, 180 )]
+    [MenuItem( "Tools/Find scene to open... %q", false, 180 )]
     public static void OpenWindow() {
         if (window != null) {
             CloseWindow();
