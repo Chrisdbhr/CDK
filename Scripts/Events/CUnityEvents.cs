@@ -4,25 +4,31 @@ using UnityEngine.Events;
 
 namespace CDK
 {
-    [System.Serializable]
+    [Serializable]
     public class CUnityEvent : UnityEvent {}
     
-    [System.Serializable]
+    [Serializable]
     public class CUnityEventBool : UnityEvent<bool> {}
     
-    [System.Serializable]
+    [Serializable]
     public class CUnityEventFloat : UnityEvent<float> {}
     
-    [System.Serializable]
+    [Serializable]
     public class CUnityEventInt : UnityEvent<int> {}
 
-    [System.Serializable]
+    [Serializable]
     public class CUnityEventString : UnityEvent<string> {}
     
-    [System.Serializable]
+    [Serializable]
     public class CUnityEventColor : UnityEvent<Color> {}
 
-    [System.Serializable]
+    [Serializable]
     public class CUnityEventTransform : UnityEvent<Transform> {}
+    
+    [Serializable]
+    public class CUnityEventCollision : UnityEvent<Collision> {}
+
+    [Serializable]
+    public class CUnityEventCollision2D : UnityEvent<Collision2D> {}
 
 }
