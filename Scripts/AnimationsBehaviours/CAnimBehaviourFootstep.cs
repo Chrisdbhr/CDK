@@ -6,7 +6,7 @@ namespace CDK {
 
 		public float FootstepInterval = 0.4f;
 		[NonSerialized] private float _nextFootstepTime;
-		[NonSerialized] private CFootstepsManager.FootstepFeet _lastFeet;
+		[NonSerialized] private CFootstepsSource.FootstepFeet _lastFeet;
     
 		// OnStateEnter is called when a transition starts and the state machine starts to evaluate this state
 		override public void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex) {
@@ -17,8 +17,8 @@ namespace CDK {
 		override public void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex) {
 			if (Time.timeSinceLevelLoad >= this._nextFootstepTime) {
 				this._nextFootstepTime = Time.timeSinceLevelLoad + this.FootstepInterval;
-				this._lastFeet = this._lastFeet == CFootstepsManager.FootstepFeet.left ? CFootstepsManager.FootstepFeet.right : CFootstepsManager.FootstepFeet.left;
-				animator.SendMessage(nameof(CFootstepsManager.Footstep), this._lastFeet, SendMessageOptions.DontRequireReceiver);
+				this._lastFeet = this._lastFeet == CFootstepsSource.FootstepFeet.left ? CFootstepsSource.FootstepFeet.right : CFootstepsSource.FootstepFeet.left;
+				animator.SendMessage(nameof(CFootstepsSource.Footstep), this._lastFeet, SendMessageOptions.DontRequireReceiver);
 			}
 		}
 
