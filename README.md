@@ -11,9 +11,8 @@ CDK (Chris Development Kit) is a useful set of tools to speedup development of c
 
 * Preferably, create and import this as a submodule inside **Assets/CDK/** folder. If you don't know how to do that, just download [this](https://github.com/Chrisdbhr/CDK/archive/master.zip) and put inside **Assets/CDK/** folder.
 * Pay attention for any new warning that will be logged on console.
-* There are some dependency imported inside ThirdPartyDependencies folder.
 * There are still no Unit Test implemented since this repository is still in active change.
-* Be aware that before version 1.0.0.0 there will have some code modifications that can break some Inspector references. Pay atention when upgrading version.
+* Be aware that before version 1.0.0 there will have some code modifications that can break some Inspector references. Pay atention when upgrading version.
 
 ### Contribution guidelines ###
 
