@@ -43,6 +43,9 @@ namespace CDK
         public static float CLerp(this float a, float b, float time) {
             return Mathf.Lerp(a, b, time);
         }
-        
+
+        public static float CImprecise(this float value) {
+            return ((int) (value * 1000)) * 0.001f;
+        }
     }
 }

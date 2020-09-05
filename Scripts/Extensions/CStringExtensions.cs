@@ -28,5 +28,13 @@ namespace CDK {
 		public static bool CIsNullOrWhitespace(this string str) {
 			return string.IsNullOrWhiteSpace(str);
 		}
+
+		public static string CSubstring(this string input, int startIndex, int length) {
+			if (string.IsNullOrEmpty(input)) return null;
+			if (length >= input.Length) {
+				return input;
+			}
+			return input.Substring(startIndex, length);
+		}
 	}
 }
