@@ -6,6 +6,6 @@ AnimatorOverrideController:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: FPSController
+  m_Name: FPS_Camera
   m_Controller: {fileID: 9100000, guid: b73487fcc5029104881c81163731c899, type: 2}
   m_Clips: []
