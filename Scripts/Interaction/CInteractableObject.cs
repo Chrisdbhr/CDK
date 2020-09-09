@@ -23,7 +23,7 @@ namespace CDK {
 		
 		public void OnLookTo(Transform lookingTransform) {
 			if (!this.enabled || !this.gameObject.activeInHierarchy || CBlockingEventsManager.get.IsBlockingEventHappening) return;
-			Debug.Log($"{this.name} looked at by {lookingTransform.name}");	
+			Debug.Log($"{lookingTransform.name} looked to {this.name} in its interactable range.");	
 		}
 
 	}

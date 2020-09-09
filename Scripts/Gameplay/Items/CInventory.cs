@@ -96,7 +96,7 @@ namespace CDK {
 			if (CBlockingEventsManager.get.IsBlockingEventHappening) return;
 
 			// input menu
-			if (Input.GetButtonDown(CInputKeys.MENU) && this._inventoryViewPrefab != null) {
+			if (Input.GetButtonDown(CInputKeys.MENU_INVENTORY) && this._inventoryViewPrefab != null) {
 				this.PauseGame();
 			}
 		}
