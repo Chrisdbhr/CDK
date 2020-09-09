@@ -55,10 +55,10 @@ namespace CDK {
 
 		private void Update() {
 
-			this.ProcessLookingInteractable();
-
 			if (CBlockingEventsManager.get.IsBlockingEventHappening) return;
 			
+			this.ProcessLookingInteractable();
+
 			// input movement
 			this._movementInputDir = new Vector2(Input.GetAxisRaw(CInputKeys.MOV_X), Input.GetAxisRaw(CInputKeys.MOV_Y));
 			this._characterBase.InputMovementDirRelativeToCam = this.camF * this._movementInputDir.y + this.camR * this._movementInputDir.x;

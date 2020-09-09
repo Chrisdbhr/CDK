@@ -92,7 +92,7 @@ namespace CDK {
 		{
 			DrawDefaultInspector();
         
-			CChildrenPositionAndRotationRandomizer myScript = (CChildrenPositionAndRotationRandomizer)target;
+			var myScript = (CChildrenPositionAndRotationRandomizer)target;
 			if(GUILayout.Button(nameof(CTransformExtensions.DeleteAllChildren)))
 			{
 				myScript.transform.DeleteAllChildren();
