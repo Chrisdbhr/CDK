@@ -18,7 +18,10 @@ namespace CDK
 
     [Serializable]
     public class CUnityEventString : UnityEvent<string> {}
-    
+
+    [Serializable]
+    public class CUnityEventGameObject : UnityEvent<GameObject> {}
+
     [Serializable]
     public class CUnityEventColor : UnityEvent<Color> {}
 
@@ -30,5 +33,6 @@ namespace CDK
 
     [Serializable]
     public class CUnityEventCollision2D : UnityEvent<Collision2D> {}
+    
 
 }

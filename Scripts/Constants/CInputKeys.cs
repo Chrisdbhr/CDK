@@ -15,7 +15,8 @@ namespace CDK {
 		public const string CROUCH = "Crouch";
 
 		// Menu
-		public const string MENU = "Menu";
+		public const string MENU_PAUSE = "MenuPause";
+		public const string MENU_INVENTORY = "MenuInventory";
 		public const string INTERACT = "Submit";
 
 	}

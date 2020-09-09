@@ -10,6 +10,7 @@ namespace CDK {
 		
 		
 		private void OnCollisionEnter(Collision other) {
+			Debug.Log($"{this.name} collided with {other.transform.name}");
 			this.CollisionEnter?.Invoke(other.transform);
 		}
 
