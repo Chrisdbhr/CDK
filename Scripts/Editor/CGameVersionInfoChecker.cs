@@ -1,4 +1,6 @@
 using System.IO;
+using System.Threading.Tasks;
+using UniRx;
 using UnityEngine;
 using UnityEditor;
 
@@ -10,18 +12,20 @@ namespace CDK {
 		private const string GAME_VERSION_FILE_NAME = "GameVersion";
 		private static readonly string TARGET_FOLDER = Application.dataPath + "/Resources";
 		static CGameVersionInfoChecker () {
-			CheckVersion();
+			CheckVersion().CAwait();
 		}
 
 		[MenuItem("Tools/Check game version info")]
-		private static void CheckVersion() {
+		private static async Task CheckVersion() {
 			var textAsset = (TextAsset)Resources.Load(GAME_VERSION_FILE_NAME);
 			if (textAsset == null) {
 				Directory.CreateDirectory(TARGET_FOLDER);
 				WriteFileWithGameVersion();
 			}
+
+			await Observable.NextFrame();
+
 			textAsset = (TextAsset)Resources.Load(GAME_VERSION_FILE_NAME);
-			
 			//TODO fix error on first project import here.
 			
 			string lastVersion = textAsset.text;

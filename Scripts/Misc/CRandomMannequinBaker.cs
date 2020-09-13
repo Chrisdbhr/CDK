@@ -54,7 +54,7 @@ namespace CDK {
 			meshFilter.sharedMesh = new Mesh();
 			meshFilter.sharedMesh.CombineMeshes(combine);
 			var meshRenderer = createdGo.AddComponent<MeshRenderer>();
-			meshRenderer.sharedMaterial = this._mannequinMaterial ?? allSkinned[0].sharedMaterial;
+			meshRenderer.sharedMaterial = this._mannequinMaterial == null ? allSkinned[0].sharedMaterial : this._mannequinMaterial;
 
 			this._mannequinBakedEvent?.Invoke(createdGo);
 
