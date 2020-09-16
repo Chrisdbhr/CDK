@@ -36,5 +36,17 @@ namespace CDK {
 			}
 			return input.Substring(startIndex, length);
 		}
+		
+		/// <summary>
+		/// Returns the input string with the first character converted to uppercase, or mutates any nulls passed into string.Empty
+		/// </summary>
+		public static string CFirstLetterToUpperCase(this string s) {
+			// from https://stackoverflow.com/questions/4135317/make-first-letter-of-a-string-upper-case-with-maximum-performance/27073919#27073919
+			if (string.IsNullOrEmpty(s)) return string.Empty;
+
+			char[] a = s.ToCharArray();
+			a[0] = char.ToUpper(a[0]);
+			return new string(a);
+		}
 	}
 }
