@@ -28,7 +28,10 @@ namespace CDK {
 		public LayerMask AttackableLayers = 1;
 		public LayerMask WalkableLayers = 1;
 		public CanvasGroup FadeCanvasGroupPrefab;
-
+		[HideInInspector] public long DiscordClientId;
+		
+		
+		
 		private void OnEnable() {
 			if (!this.FadeCanvasGroupPrefab) this.FadeCanvasGroupPrefab = Resources.Load<CanvasGroup>("CDK/Resources/FadeCanvas");
 		}
@@ -45,4 +48,17 @@ namespace CDK {
 		}
 		#endif
 	}
+
+	#if UNITY_EDITOR
+	[CustomEditor(typeof(CGameSettings))]
+	public class CGameSettingsEditor : Editor {
+		public override void OnInspectorGUI() {
+			if (!(this.target is CGameSettings myScript)) return;
+			base.OnInspectorGUI();
+
+			myScript.DiscordClientId = Convert.ToInt64(EditorGUILayout.PasswordField("Discord Client Id", myScript.DiscordClientId.ToString()));
+		}
+
+	}
+	#endif
 }
