@@ -3,7 +3,8 @@
     "references": [
         "UniRx",
         "Unity.TextMeshPro",
-        "LINQtoGameObject"
+        "LINQtoGameObject",
+        "DiscordGameSDK"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
