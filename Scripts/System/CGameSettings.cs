@@ -27,6 +27,7 @@ namespace CDK {
 		public LayerMask LineOfSightBlockingLayers = 1;
 		public LayerMask AttackableLayers = 1;
 		public LayerMask WalkableLayers = 1;
+		public SortingLayer FadeCanvasSortingLayer;
 		public CanvasGroup FadeCanvasGroupPrefab;
 		[HideInInspector] public long DiscordClientId;
 		
