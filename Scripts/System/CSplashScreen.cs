@@ -1,48 +1,80 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.SceneManagement;
 
-namespace CDK
-{
-    
-    public class CSplashScreen : MonoBehaviour
-    {
-        [Header("System persistent aditive scene. Loaded first with important references.")]
-        [SerializeField] CSceneField systemAditiveScene;
-	
+namespace CDK {
+    public class CSplashScreen : MonoBehaviour {
+
+        #region <<---------- Properties and Fields ---------->>
+        
         [Header("Active scene will be the first of the list")]
-        [SerializeField] CSceneField[] firstScenes;
-	
-        public CUnityEventFloat onLoadingProgressChanged;
-	
+        [SerializeField] private CSceneField[] _firstScenes;
 
-        private IEnumerator Start()
-        {
-            Scene currentScene = this.gameObject.scene;
+        [SerializeField] private float _timeToWaitBeforeNextScene = 2f;
+        [NonSerialized] private bool _pressedSkip;
 
-            SceneManager.LoadScene(this.systemAditiveScene, LoadSceneMode.Additive);
+        #endregion <<---------- Properties and Fields ---------->>
 
-            CSceneField isFirstScene = null;
+        
 
-            foreach (var scene in this.firstScenes)
-            {
-                SceneManager.LoadScene(scene, LoadSceneMode.Additive);
 
-                if(isFirstScene == null){				
-                    isFirstScene = scene;
+        #region <<---------- Events ---------->>
 
+        [SerializeField] private UnityEvent OnTriggerFadeOut;
+
+        #endregion <<---------- Events ---------->>
+
+
+        
+        
+        #region <<---------- MonoBehaviour ---------->>
+        
+        private IEnumerator Start() {
+            var currentScene = this.gameObject.scene;
+            
+            CSceneField firstScene = null;
+            AsyncOperation firstSceneAsyncOperation = null;
+
+            foreach (var scene in this._firstScenes) {
+                var asyncOp = SceneManager.LoadSceneAsync(scene, LoadSceneMode.Additive);
+                asyncOp.allowSceneActivation = false;
+                
+                if (firstScene == null) {
+                    firstScene = scene;
+                    firstSceneAsyncOperation = asyncOp;
                 }
             }
 
-            yield return null;
+            float remainingTime = this._timeToWaitBeforeNextScene;
+            while (remainingTime > 0f) {
+                remainingTime -= Time.deltaTime; // must not be time scaled
+            }
 
-            var firstSceneName = SceneManager.GetSceneByName(isFirstScene);
-            if(isFirstScene != null) SceneManager.SetActiveScene(firstSceneName);
+            yield return null;
+            
+            this.OnTriggerFadeOut?.Invoke();
+            
+            yield return new WaitForSeconds(1f);
+
+            firstSceneAsyncOperation.allowSceneActivation = true;
+            
+            var firstSceneName = SceneManager.GetSceneByName(firstScene);
+            SceneManager.SetActiveScene(firstSceneName);
 
             SceneManager.UnloadSceneAsync(currentScene);
-
-
         }
-    }
 
+        private void Update() {
+            this._pressedSkip 
+                    = Input.GetKeyDown(CInputKeys.INTERACT) 
+                    || Input.GetKeyDown(CInputKeys.MENU_INVENTORY)
+                    || Input.GetKeyDown(CInputKeys.MENU_PAUSE)
+                    ;
+        }
+        
+        #endregion <<---------- MonoBehaviour ---------->>
+
+    }
 }
