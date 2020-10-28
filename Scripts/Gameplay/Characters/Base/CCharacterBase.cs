@@ -206,7 +206,7 @@ namespace CDK {
 		}
 
 		#if UNITY_EDITOR
-		protected void OnDrawGizmosSelected() {
+		protected virtual void OnDrawGizmosSelected() {
 			Gizmos.color = Color.red;
 			Gizmos.DrawWireSphere(this._aimTargetPos, 0.05f);	
 			Handles.Label(this._aimTargetPos, $"{this.name} aimTargetPos");
@@ -301,7 +301,7 @@ namespace CDK {
 
 		#region <<---------- Movement ---------->>
 		
-		protected void ProcessMovement() {
+		protected virtual void ProcessMovement() {
 			if (!this.charController.enabled) return;
 			
 			// set is strafing
