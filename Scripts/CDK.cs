@@ -14,7 +14,7 @@ namespace CDK {
 
 		static CDK() {
 			CheckForUpdatedVersion();
-			CreateGameSettingsResourceIfNeeded();
+			CGameSettings.EditorCreateGameSettingsResourceIfNeeded();
 		} 
 		
 		
@@ -23,14 +23,6 @@ namespace CDK {
 		private const string VERSION_UPDATE_URL = "https://raw.githubusercontent.com/Chrisdbhr/CDK/master/Resources/CDKVersion.txt";
 
 
-
-		public static CGameSettings CreateGameSettingsResourceIfNeeded() {
-			var gameSettingsScriptObj = Resources.Load<CGameSettings>("GameSettings");
-			if (gameSettingsScriptObj != null) return gameSettingsScriptObj;
-			gameSettingsScriptObj = ScriptableObject.CreateInstance<CGameSettings>();
-			AssetDatabase.CreateAsset(gameSettingsScriptObj, "Assets/Resources/GameSettings.asset");
-			return gameSettingsScriptObj;
-		}
 		
 		
 		private static string GetCurrentVersion() {

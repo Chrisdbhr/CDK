@@ -4,7 +4,9 @@
         "UniRx",
         "Unity.TextMeshPro",
         "LINQtoGameObject",
-        "DiscordGameSDK"
+        "DiscordGameSDK",
+        "GameInput",
+        "Unity.InputSystem"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
