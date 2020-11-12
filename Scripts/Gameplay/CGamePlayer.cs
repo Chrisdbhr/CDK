@@ -3,23 +3,24 @@ using System.Collections.Generic;
 using UnityEngine;
 
 namespace CDK {
-	public class CPlayerController : MonoBehaviour {
+	public class CGamePlayer {
 
 		#region <<---------- Properties and Fields ---------->>
 		
-		[SerializeField] private Camera _playerCamera;
-		[SerializeField] private LayerMask _interactionLayerMask;
+		public int PlayerNumber { get; } = 0;
+		private const float INTERACT_SPHERE_CHECK_MULTIPLIER = 0.75f;
+		[NonSerialized] private readonly LayerMask _interactionLayerMask = 1; // Default
 
-		[NonSerialized] private CCharacterBase _characterBase;
+		[SerializeField] private Camera _playerCamera;
+		[SerializeField] private CCharacterBase _controllingCharacter;
+		
 		[NonSerialized] private float _interactionSphereCheckRadius = 0.75f;
 		[NonSerialized] private float _yCheckOffset = 0.5f;
-		[NonSerialized] private Transform _myTransform;
 		[NonSerialized] private Transform _cameraTransform;
 		[NonSerialized] private Quaternion _targetLookRotation;
 		[NonSerialized] private Vector2 _inputDir;
 		[NonSerialized] private Vector3 camF = Vector3.forward;
 		[NonSerialized] private Vector3 camR = Vector3.right;
-		[NonSerialized] private const float INTERACT_SPHERE_CHECK_MULTIPLIER = 0.75f;
 		
 		#endregion <<---------- Properties and Fields ---------->>
 
@@ -27,15 +28,6 @@ namespace CDK {
 
 		
 		#region <<---------- MonoBehaviour ---------->>
-
-		private void Awake() {
-			this._myTransform = this.transform;
-			this._characterBase = this.GetComponent<CCharacterBase>();
-			if (this._characterBase == null) {
-				Debug.LogError($"Cant find any Character on {this.name}, removing component, character will not be controllable.");
-				Destroy(this);
-			}
-		}
 		
 		private void Update() {
 
@@ -43,10 +35,10 @@ namespace CDK {
 			
 			// input movement
 			this._inputDir = new Vector2(Input.GetAxisRaw(CInputKeys.MOV_X), Input.GetAxisRaw(CInputKeys.MOV_Y));
-			this._characterBase.InputMovementDirRelativeToCam = this.camF * this._inputDir.y + this.camR * this._inputDir.x;
+			this._controllingCharacter.InputMovementDirRelativeToCam = this.camF * this._inputDir.y + this.camR * this._inputDir.x;
 
 			// input walk
-			this._characterBase.InputSlowWalk = Input.GetButton(CInputKeys.SLOW_WALK);
+			this._controllingCharacter.InputSlowWalk = Input.GetButton(CInputKeys.SLOW_WALK);
 			
 			// input interaction
 			bool inputDownInteract = Input.GetButtonDown(CInputKeys.INTERACT);
@@ -56,7 +48,7 @@ namespace CDK {
 			
 			// aim _playerCamera
 			bool inputAim = Input.GetButton(CInputKeys.AIM);
-			this._characterBase.InputAim = inputAim;
+			this._controllingCharacter.InputAim = inputAim;
 
 			if (this._playerCamera == null) return;
 
@@ -67,16 +59,6 @@ namespace CDK {
 			this.ProcessInputDirection();
 		}
 
-		#if UNITY_EDITOR
-		private void OnDrawGizmosSelected() {
-			this._myTransform = this.transform;
-			Gizmos.color = Color.cyan;
-			Gizmos.DrawWireSphere(
-				this.GetCenterSphereCheckPosition(), 
-				this._interactionSphereCheckRadius);
-		}
-		#endif
-		
 		#endregion <<---------- MonoBehaviour ---------->>
 
 		
@@ -91,14 +73,14 @@ namespace CDK {
 			this.camR.Normalize();
 
 			// absolute input
-			this._characterBase.InputMovementDirAbsolute = this._inputDir;
+			this._controllingCharacter.InputMovementDirAbsolute = this._inputDir;
 			
 			// relative to camera input
-			this._characterBase.InputMovementDirRelativeToCam = this.camF * this._inputDir.y + this.camR * this._inputDir.x;
+			this._controllingCharacter.InputMovementDirRelativeToCam = this.camF * this._inputDir.y + this.camR * this._inputDir.x;
 		}
 
 		private void TryToInteract() {
-			var originPos = this.GetCenterSphereCheckPosition();
+			var originPos = Vector3.zero;
 
 			var colliders = Physics.OverlapSphere(
 				originPos,
@@ -119,9 +101,9 @@ namespace CDK {
 			
 			if (interactableColliders.Count <= 0) return;
 			
-			originPos.x = this._myTransform.position.x;
-			originPos.z = this._myTransform.position.z;
-			
+			// originPos.x = this._myTransform.position.x;
+			// originPos.z = this._myTransform.position.z;
+			//
 			// get closest interactable collider index
 			int closestColliderIndex = 0;
 			if (interactableColliders.Count == 1) closestColliderIndex = 0;
@@ -147,13 +129,13 @@ namespace CDK {
 			if (hasSomethingBlockingLineOfSight) return;
 				
 			var choosenInteractable = interactableColliders[closestColliderIndex].GetComponent<CIInteractable>();
-			choosenInteractable.OnInteract(this._characterBase.transform);
+			choosenInteractable.OnInteract(this._controllingCharacter.transform);
 			
 		}
 		
-		private Vector3 GetCenterSphereCheckPosition() {
-			return this._myTransform.position + this._myTransform.forward * (this._interactionSphereCheckRadius * INTERACT_SPHERE_CHECK_MULTIPLIER) + (Vector3.up * this._yCheckOffset);
-		}
+		// private Vector3 GetCenterSphereCheckPosition() {
+		// 	return this._myTransform.position + this._myTransform.forward * (this._interactionSphereCheckRadius * INTERACT_SPHERE_CHECK_MULTIPLIER) + (Vector3.up * this._yCheckOffset);
+		// }
 
 	}
 }
