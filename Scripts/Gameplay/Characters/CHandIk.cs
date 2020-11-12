@@ -16,7 +16,6 @@ namespace CDK {
 		[SerializeField, Range(0f, 1f)] private float _handIkWeight = 1f;
 
 		// cache
-		[NonSerialized] private LayerMask _steppableLayers;
 		[NonSerialized] private Vector3 _direction;
 		[NonSerialized] private RaycastHit[] _hits = new RaycastHit[1];
 		
@@ -27,10 +26,6 @@ namespace CDK {
 		
 		#region <<---------- MonoBehaviour ---------->>
 		
-		private void Awake() {
-			this._steppableLayers = CGameSettings.get.WalkableLayers;
-		}
-
 		private void OnAnimatorIK(int layerIndex) {
 			this.ProcessIk(this.leftHandOrigin.position, this.leftHand.position, AvatarIKGoal.LeftHand);
 			this.ProcessIk(this.rightHandOrigin.position, this.rightHand.position, AvatarIKGoal.RightHand);
@@ -50,7 +45,7 @@ namespace CDK {
 				this._direction,
 				this._hits,
 				checkDistance,
-				this._steppableLayers,
+				1,
 				QueryTriggerInteraction.Ignore
 			) > 0; 
 			if (hitSomething) {

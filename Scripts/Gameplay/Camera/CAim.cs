@@ -86,7 +86,7 @@ namespace CDK {
 				this._forward,
 				out this._hitInfo,
 				MAX_RAYCAST_DISTANCE,
-				CGameSettings.get.AttackableLayers,
+				1,
 				QueryTriggerInteraction.Collide
 			);
 

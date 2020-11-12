@@ -26,9 +26,9 @@ namespace CDK {
 		#endregion <<---------- References ---------->>
 		
 		#region <<---------- Input ---------->>
-		public Vector2 InputMovementDirAbsolute { get; set; }
+		public Vector2 InputMovementRaw { get; set; }
 		public Vector3 InputMovementDirRelativeToCam { get; set; }
-		public bool InputSlowWalk { get; set; }
+		public bool InputRun { get; set; }
 		public bool InputAim { get; set; }
 		#endregion <<---------- Input ---------->>
 
@@ -305,7 +305,7 @@ namespace CDK {
 			if (!this.charController.enabled) return;
 			
 			// set is strafing
-			this.RunningRx.Value = !this.InputSlowWalk && this.CanRunRx.Value && !this._isAimingRx.Value;
+			this.RunningRx.Value = this.InputRun && this.CanRunRx.Value && !this._isAimingRx.Value;
 			this.IsStrafingRx.Value = this._isAimingRx.Value || !this.RunningRx.Value;
 			
 			// idle
@@ -359,7 +359,7 @@ namespace CDK {
 				Vector3.down,
 				out var hitInfo,
 				1f,
-				CGameSettings.get.WalkableLayers,
+				1,
 				QueryTriggerInteraction.Ignore
 			);
 			if (isGrounded) {
@@ -470,7 +470,7 @@ namespace CDK {
 					this.charController.radius,
 					transformUp.normalized,
 					this.charController.height,
-					CGameSettings.get.WalkableLayers
+					1
 				).Select(x => x.collider);
 
 				var allSelfColliders = this.transform.root.GetComponentsInChildren<Collider>();

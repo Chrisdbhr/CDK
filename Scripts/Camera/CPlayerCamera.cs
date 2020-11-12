@@ -2,34 +2,28 @@ using System;
 using UnityEngine;
 
 namespace CDK {
-	
-	[RequireComponent(typeof(Camera))]
 	public class CPlayerCamera : MonoBehaviour {
 
-		[NonSerialized] private Camera _camera;
+		#region <<---------- Properties and Fields ---------->>
 		
+		[SerializeField] private float _rotationSpeed = 10f;
+		[SerializeField] private Camera _camera;
 		
-		
-		
-		private void Awake() {
-			this._camera = this.GetComponent<Camera>();
-		}
+		#endregion <<---------- Properties and Fields ---------->>
 
 
+
+		#region <<---------- General ---------->>
+		
 		public void SetCameraEnabled(bool enabled) {
 			this._camera.enabled = enabled;
 		}
 
-
-		public void SetRotation(Quaternion newRotation) {
-			this._camera.transform.rotation = newRotation;
+		public void Rotate(Vector2 inputRotation) {
+			this.transform.Rotate(inputRotation.y * this._rotationSpeed, inputRotation.x * this._rotationSpeed, 0f);
 		}
-		public void SetPositionAndRotation(Transform transformToCopy) {
-			this.SetPositionAndRotation(transformToCopy.position, transformToCopy.rotation);
-		}
-		public void SetPositionAndRotation(Vector3 position, Quaternion rotation) {
-			this._camera.transform.position = position;
-			this._camera.transform.rotation = rotation;
-		}
+		
+		#endregion <<---------- General ---------->>
+		
 	}
 }

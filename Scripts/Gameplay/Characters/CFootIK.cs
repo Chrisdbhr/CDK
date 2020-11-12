@@ -14,12 +14,7 @@ namespace CDK {
 		[SerializeField, Range(0f, 1f)] private float rightFootIkWeight = 1f;
 		[SerializeField, Range(0f, 1f)] private float leftFootIkWeight = 1f;
 
-		[NonSerialized] private LayerMask _steppableLayers;
 		#endregion <<---------- Properties and Fields ---------->>
-
-		private void Awake() {
-			this._steppableLayers = CGameSettings.get.WalkableLayers;
-		}
 
 		private void OnAnimatorIK(int layerIndex) {
 			this.animator.SetIKPositionWeight(AvatarIKGoal.LeftFoot, this.leftFootIkWeight);
@@ -38,7 +33,7 @@ namespace CDK {
 				Vector3.down * checkDistance,
 				hits,
 				checkDistance,
-				this._steppableLayers,
+				1,
 				QueryTriggerInteraction.Ignore
 			) > 0) {
 				if (feetPos.y - this._footSize < hits[0].point.y) {

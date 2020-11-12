@@ -1,91 +1,88 @@
-using System;
 using System.Collections.Generic;
+using GameInput;
 using UnityEngine;
 
 namespace CDK {
 	public class CGamePlayer {
 
+		#region <<---------- Initializers ---------->>
+
+		public CGamePlayer(int playerNumber) {
+			this.PlayerNumber = playerNumber;
+
+			// movement
+			this._playerInputActions.gameplay.move.performed += context => {
+				var inputMove = context.ReadValue<Vector2>();
+
+				this._controllingCharacter.InputMovementRaw = inputMove;
+				
+				var camF = Vector3.forward;
+				var camR = Vector3.right;
+				if (this._playerCamera != null) {
+					var camTransform = this._playerCamera.transform;
+					camF = camTransform.forward;
+					camF.y = 0;
+					camF = camF.normalized;
+					camR = camTransform.right;
+					camR.y = 0;
+					camR = camR.normalized;
+				}
+				
+				this._controllingCharacter.InputMovementDirRelativeToCam = camF * inputMove.y + camR * inputMove.x;
+			};
+			
+			// look
+			this._playerInputActions.gameplay.look.performed += context => {
+				var inputLook = context.ReadValue<Vector2>();
+				this._playerCamera.Rotate(inputLook);
+			};
+
+			Debug.Log($"Instantiating game player {playerNumber}");
+		}
+		
+		#endregion <<---------- Initializers ---------->>
+		
+		
+		
+		
 		#region <<---------- Properties and Fields ---------->>
 		
 		public int PlayerNumber { get; } = 0;
-		private const float INTERACT_SPHERE_CHECK_MULTIPLIER = 0.75f;
-		[NonSerialized] private readonly LayerMask _interactionLayerMask = 1; // Default
 
-		[SerializeField] private Camera _playerCamera;
-		[SerializeField] private CCharacterBase _controllingCharacter;
+		private DefaultPlayerInputActions _playerInputActions = new DefaultPlayerInputActions();
 		
-		[NonSerialized] private float _interactionSphereCheckRadius = 0.75f;
-		[NonSerialized] private float _yCheckOffset = 0.5f;
-		[NonSerialized] private Transform _cameraTransform;
-		[NonSerialized] private Quaternion _targetLookRotation;
-		[NonSerialized] private Vector2 _inputDir;
-		[NonSerialized] private Vector3 camF = Vector3.forward;
-		[NonSerialized] private Vector3 camR = Vector3.right;
-		
+		private CPlayerCamera _playerCamera;
+		private CCharacterBase _controllingCharacter;
+
 		#endregion <<---------- Properties and Fields ---------->>
 
 		
-
 		
-		#region <<---------- MonoBehaviour ---------->>
 		
 		private void Update() {
 
 			if (CBlockingEventsManager.get.IsBlockingEventHappening) return;
 			
-			// input movement
-			this._inputDir = new Vector2(Input.GetAxisRaw(CInputKeys.MOV_X), Input.GetAxisRaw(CInputKeys.MOV_Y));
-			this._controllingCharacter.InputMovementDirRelativeToCam = this.camF * this._inputDir.y + this.camR * this._inputDir.x;
-
+			
 			// input walk
-			this._controllingCharacter.InputSlowWalk = Input.GetButton(CInputKeys.SLOW_WALK);
+			this._controllingCharacter.InputRun = Input.GetButton(CInputKeys.SLOW_WALK);
 			
-			// input interaction
-			bool inputDownInteract = Input.GetButtonDown(CInputKeys.INTERACT);
-			if (inputDownInteract) {
-				this.TryToInteract();	
-			}
+			// // input interaction
+			// bool inputDownInteract = Input.GetButtonDown(CInputKeys.INTERACT);
+			// if (inputDownInteract) {
+			// 	this.TryToInteract();	
+			// }
 			
-			// aim _playerCamera
-			bool inputAim = Input.GetButton(CInputKeys.AIM);
-			this._controllingCharacter.InputAim = inputAim;
-
-			if (this._playerCamera == null) return;
-
-			var aimCamera = this._playerCamera.GetComponent<CAim>();
-			if (aimCamera != null) {
-				aimCamera.IsAiming = inputAim;
-			}
-			this.ProcessInputDirection();
 		}
-
-		#endregion <<---------- MonoBehaviour ---------->>
-
 		
-		
-
-		private void ProcessInputDirection() {
-			var camTransform = this._playerCamera.transform;
-			this.camF = camTransform.forward;
-			this.camR = camTransform.right;
-			this.camF.y = this.camR.y = 0f;
-			this.camF.Normalize();
-			this.camR.Normalize();
-
-			// absolute input
-			this._controllingCharacter.InputMovementDirAbsolute = this._inputDir;
-			
-			// relative to camera input
-			this._controllingCharacter.InputMovementDirRelativeToCam = this.camF * this._inputDir.y + this.camR * this._inputDir.x;
-		}
-
+		/*
 		private void TryToInteract() {
 			var originPos = Vector3.zero;
 
 			var colliders = Physics.OverlapSphere(
 				originPos,
 				this._interactionSphereCheckRadius,
-				this._interactionLayerMask,
+				1,
 				QueryTriggerInteraction.Collide
 			);
 			
@@ -133,9 +130,10 @@ namespace CDK {
 			
 		}
 		
-		// private Vector3 GetCenterSphereCheckPosition() {
-		// 	return this._myTransform.position + this._myTransform.forward * (this._interactionSphereCheckRadius * INTERACT_SPHERE_CHECK_MULTIPLIER) + (Vector3.up * this._yCheckOffset);
-		// }
+		private Vector3 GetCenterSphereCheckPosition() {
+			return this._myTransform.position + this._myTransform.forward * (this._interactionSphereCheckRadius * INTERACT_SPHERE_CHECK_MULTIPLIER) + (Vector3.up * this._yCheckOffset);
+		}
+		*/
 
 	}
 }

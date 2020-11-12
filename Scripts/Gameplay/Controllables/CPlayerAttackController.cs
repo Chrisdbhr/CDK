@@ -46,7 +46,7 @@ namespace CDK.Weapons {
 									this._aim.transform.forward,
 									out var hitInfo,
 									Mathf.Infinity,
-									CGameSettings.get.AttackableLayers,
+									1,
 									QueryTriggerInteraction.Ignore
 								);
 								if (hitSomething) {
