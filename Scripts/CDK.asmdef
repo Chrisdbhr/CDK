@@ -5,8 +5,12 @@
         "Unity.TextMeshPro",
         "LINQtoGameObject",
         "DiscordGameSDK",
-        "GameInput",
-        "Unity.InputSystem"
+        "CGameInput",
+        "Unity.InputSystem",
+        "Unity.Addressables",
+        "Unity.ResourceManager",
+        "UniTask.Addressables",
+        "IngameDebugConsole"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
