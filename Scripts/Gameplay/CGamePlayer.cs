@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using GameInput;
 using UnityEngine;
 
@@ -9,34 +10,7 @@ namespace CDK {
 
 		public CGamePlayer(int playerNumber) {
 			this.PlayerNumber = playerNumber;
-
-			// movement
-			this._playerInputActions.gameplay.move.performed += context => {
-				var inputMove = context.ReadValue<Vector2>();
-
-				this._controllingCharacter.InputMovementRaw = inputMove;
-				
-				var camF = Vector3.forward;
-				var camR = Vector3.right;
-				if (this._playerCamera != null) {
-					var camTransform = this._playerCamera.transform;
-					camF = camTransform.forward;
-					camF.y = 0;
-					camF = camF.normalized;
-					camR = camTransform.right;
-					camR.y = 0;
-					camR = camR.normalized;
-				}
-				
-				this._controllingCharacter.InputMovementDirRelativeToCam = camF * inputMove.y + camR * inputMove.x;
-			};
-			
-			// look
-			this._playerInputActions.gameplay.look.performed += context => {
-				var inputLook = context.ReadValue<Vector2>();
-				this._playerCamera.Rotate(inputLook);
-			};
-
+			this.SignToInputEvents();
 			Debug.Log($"Instantiating game player {playerNumber}");
 		}
 		
@@ -49,31 +23,82 @@ namespace CDK {
 		
 		public int PlayerNumber { get; } = 0;
 
-		private DefaultPlayerInputActions _playerInputActions = new DefaultPlayerInputActions();
+		private readonly DefaultPlayerInputActions _playerInputActions = new DefaultPlayerInputActions();
 		
 		private CPlayerCamera _playerCamera;
-		private CCharacterBase _controllingCharacter;
+		private List<CCharacterBase> _controllingCharacter = new List<CCharacterBase>();
 
 		#endregion <<---------- Properties and Fields ---------->>
 
-		
-		
-		
-		private void Update() {
 
-			if (CBlockingEventsManager.get.IsBlockingEventHappening) return;
+		private void SignToInputEvents() {
+			// movement
+			this._playerInputActions.gameplay.move.performed += context => {
+				if (CBlockingEventsManager.IsBlockingEventHappening) return;
+				if (this._controllingCharacter == null) return;
+				
+				// input movement raw
+				var inputMove = context.ReadValue<Vector2>();
+				
+				// input relative to cam direction
+				var camF = Vector3.forward;
+				var camR = Vector3.right;
+				if (this._playerCamera != null) {
+					var camTransform = this._playerCamera.transform;
+					camF = camTransform.forward;
+					camF.y = 0;
+					camF = camF.normalized;
+					camR = camTransform.right;
+					camR.y = 0;
+					camR = camR.normalized;
+				}
+				
+				foreach (var character in this._controllingCharacter.Where(character => character != null)) {
+					character.InputMovementRaw = inputMove;
+					character.InputMovementDirRelativeToCam = camF * inputMove.y + camR * inputMove.x;
+				}
+			};
 			
+			// look
+			this._playerInputActions.gameplay.look.performed += context => {
+				if (CBlockingEventsManager.IsBlockingEventHappening) return;
+				if (this._controllingCharacter == null) return;
+				
+				var inputLook = context.ReadValue<Vector2>();
+				this._playerCamera.Rotate(inputLook);
+			};
 			
-			// input walk
-			this._controllingCharacter.InputRun = Input.GetButton(CInputKeys.SLOW_WALK);
-			
-			// // input interaction
-			// bool inputDownInteract = Input.GetButtonDown(CInputKeys.INTERACT);
-			// if (inputDownInteract) {
-			// 	this.TryToInteract();	
-			// }
-			
+			// run
+			this._playerInputActions.gameplay.run.performed += context => {
+				if (CBlockingEventsManager.IsBlockingEventHappening) return;
+				if (this._controllingCharacter == null) return;
+				
+				var inputRun = context.ReadValueAsButton();
+
+				foreach (var character in this._controllingCharacter.Where(character => character != null)) {
+					character.InputRun = inputRun;
+				}
+			};
 		}
+
+
+		#region <<---------- Character Control ---------->>
+
+		public void AddControllingCharacter(CCharacterBase character) {
+			if (this._controllingCharacter.Contains(character)) {
+				Debug.LogError($"Will not add {character.name} to player {this.PlayerNumber} control because it is already controlling it!");
+				return;
+			}
+
+			Object.Instantiate(character.gameObject);
+			
+			Debug.Log("TODO create character at a teleport point.");
+
+			this._controllingCharacter.Add(character);
+		}
+		
+		#endregion <<---------- Character Control ---------->>
+		
 		
 		/*
 		private void TryToInteract() {

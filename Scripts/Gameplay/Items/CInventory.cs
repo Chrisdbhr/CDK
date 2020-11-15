@@ -93,7 +93,7 @@ namespace CDK {
 		}
 
 		private void Update() {
-			if (CBlockingEventsManager.get.IsBlockingEventHappening) return;
+			if (CBlockingEventsManager.IsBlockingEventHappening) return;
 
 			// input menu
 			if (Input.GetButtonDown(CInputKeys.MENU_INVENTORY) && this._inventoryViewPrefab != null) {
@@ -116,9 +116,9 @@ namespace CDK {
 		private void CreateView() {
 			this._inventoryViewSpawned = Instantiate(this._inventoryViewPrefab, this.transform);
 			this._inventoryViewSpawned.CreateInventoryViewItens(this);
-			CBlockingEventsManager.get.IsOnMenu.Value = true;
+			CBlockingEventsManager.IsOnMenu = true;
 			this._inventoryViewSpawned.OnInventoryClose += () => {
-				CBlockingEventsManager.get.IsOnMenu.Value = false;
+				CBlockingEventsManager.IsOnMenu = false;
 			};
 		}
 

@@ -18,7 +18,6 @@ namespace CDK {
 				if (_instance == null) {
 					_instance = Resources.Load<CGameSettings>("GameSettings");
 				}
-
 				return _instance;
 			}
 		}

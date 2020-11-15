@@ -77,7 +77,7 @@ namespace CDK {
 		}
 
 		public void OnInteract(Transform interactingTransform) {
-			if (!this.enabled || !this.gameObject.activeInHierarchy || CBlockingEventsManager.get.IsBlockingEventHappening) return; 
+			if (!this.enabled || !this.gameObject.activeInHierarchy || CBlockingEventsManager.IsBlockingEventHappening) return; 
 			if (this.Locked) {
 				this.TryToOpenWhenLocked();
 				return;

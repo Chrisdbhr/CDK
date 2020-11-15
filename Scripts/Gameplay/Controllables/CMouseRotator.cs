@@ -22,7 +22,7 @@ namespace CDK {
 
 		private void Update() {
 
-			if (CBlockingEventsManager.get.IsBlockingEventHappening) return;
+			if (CBlockingEventsManager.IsBlockingEventHappening) return;
 			
 			this._inputLook = new Vector2(Input.GetAxisRaw(CInputKeys.LOOK_X), Input.GetAxisRaw(CInputKeys.LOOK_Y));
 

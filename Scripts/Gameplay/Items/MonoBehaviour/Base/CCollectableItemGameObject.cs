@@ -37,7 +37,7 @@ namespace CDK {
 		}
 
 		public void OnInteract(Transform interactingTransform) {
-			if (!this.enabled || !this.gameObject.activeInHierarchy || CBlockingEventsManager.get.IsBlockingEventHappening) return;
+			if (!this.enabled || !this.gameObject.activeInHierarchy || CBlockingEventsManager.IsBlockingEventHappening) return;
 			// try to get object
 			var inventory = interactingTransform.root.GetComponent<CInventory>();
 			if (inventory == null) {

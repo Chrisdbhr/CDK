@@ -59,7 +59,7 @@ namespace CDK {
 		
 		private void Update() {
 
-			if (CBlockingEventsManager.get.IsBlockingEventHappening) {
+			if (CBlockingEventsManager.IsBlockingEventHappening) {
 				this._jumpNextFrame = true;
 				return;
 			}
