@@ -20,6 +20,8 @@ namespace CDK {
 		#endif
 
 		protected override void TryToInteract() {
+			if (CBlockingEventsManager.IsBlockingEventHappening) return;
+
 			var originPos = this.GetCenterSphereCheckPosition();
 
 			var colliders = Physics.OverlapSphere(
