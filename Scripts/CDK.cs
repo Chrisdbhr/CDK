@@ -8,15 +8,15 @@ using UnityEditor;
 
 namespace CDK {
 	[InitializeOnLoad]
-	static class CDK {
+	public static class CDK {
 
 		#if UNITY_EDITOR
 		static CDK() {
 			CGameSettings.EditorCreateGameSettingsResourceIfNeeded();
 		} 
 		#endif
-
-		private static readonly Version VERSION = new Version(0,1,1);
+		
+		public static readonly Version VERSION = new Version(0,1,1);
 		private const string VERSION_UPDATE_URL = "https://raw.githubusercontent.com/Chrisdbhr/CDK/master/Resources/CDKVersion.txt";
 
 	}

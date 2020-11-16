@@ -20,5 +20,13 @@ namespace CDK {
 				return Time.fixedDeltaTime * Time.timeScale;
 			}
 		}
+
+		/// <summary>
+		/// Set time scale logging this action on console.
+		/// </summary>
+		public static void SetTimeScale(float targetTimeScale) {
+			Debug.Log($"Settings time scale to {targetTimeScale}");
+			Time.timeScale = targetTimeScale;
+		}
 	}
 }

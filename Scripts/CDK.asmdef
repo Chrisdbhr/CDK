@@ -10,7 +10,8 @@
         "Unity.Addressables",
         "Unity.ResourceManager",
         "UniTask.Addressables",
-        "IngameDebugConsole"
+        "IngameDebugConsole",
+        "UniTask"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
