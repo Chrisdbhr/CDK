@@ -22,10 +22,10 @@ namespace CDK {
 		#region <<---------- Properties and Fields ---------->>
 		
 		public int PlayerNumber { get; } = 0;
+		public CPlayerCamera PlayerCamera { get; private set; }
 
 		private readonly DefaultPlayerInputActions _playerInputActions = new DefaultPlayerInputActions();
-		
-		private CPlayerCamera _playerCamera;
+
 		private List<CCharacterBase> _controllingCharacter = new List<CCharacterBase>();
 
 		#endregion <<---------- Properties and Fields ---------->>
@@ -43,8 +43,8 @@ namespace CDK {
 				// input relative to cam direction
 				var camF = Vector3.forward;
 				var camR = Vector3.right;
-				if (this._playerCamera != null) {
-					var camTransform = this._playerCamera.transform;
+				if (this.PlayerCamera != null) {
+					var camTransform = this.PlayerCamera.transform;
 					camF = camTransform.forward;
 					camF.y = 0;
 					camF = camF.normalized;
@@ -65,7 +65,7 @@ namespace CDK {
 				if (this._controllingCharacter == null) return;
 				
 				var inputLook = context.ReadValue<Vector2>();
-				this._playerCamera.Rotate(inputLook);
+				this.PlayerCamera.Rotate(inputLook);
 			};
 			
 			// run
@@ -96,8 +96,14 @@ namespace CDK {
 
 			this._controllingCharacter.Add(character);
 		}
+
+		public CCharacterBase GetMainCharacter() {
+			return this._controllingCharacter.Count > 0 ? this._controllingCharacter[0] : null;
+		}
 		
 		#endregion <<---------- Character Control ---------->>
+
+
 		
 		
 		/*

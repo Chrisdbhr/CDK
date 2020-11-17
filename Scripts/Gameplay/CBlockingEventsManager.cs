@@ -1,3 +1,4 @@
+using System;
 using UniRx;
 using UnityEngine;
 
@@ -42,6 +43,23 @@ namespace CDK {
 		#endregion <<---------- Properties ---------->>
 
 
+		#region <<---------- Events ---------->>
+		
+		public static event Action<bool> PlayingCutsceneEvent {
+			add {
+				var instance = (_instance ?? new CBlockingEventsManager());
+				instance._playingCutsceneEvent -= value;
+				instance._playingCutsceneEvent += value;
+			}
+			remove {
+				(_instance ?? new CBlockingEventsManager())._playingCutsceneEvent -= value;
+			}
+		}
+		private event Action<bool> _playingCutsceneEvent;
+		
+		#endregion <<---------- Events ---------->>
+
+		
 		
 
 		#region <<---------- Initializers ---------->>
@@ -71,7 +89,8 @@ namespace CDK {
 
 			// playing cutscene
 			this.IsPlayingCutsceneRx.Subscribe(isPlayingCutscene => {
-				Debug.Log($"[BlockingEventsManager] IsPlayingCutscene: {isPlayingCutscene}");
+				Debug.Log($"IsPlayingCutscene: {isPlayingCutscene}");
+				this._playingCutsceneEvent?.Invoke(isPlayingCutscene);
 			});
 
 			// blocking Event Happening
