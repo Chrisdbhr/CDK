@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using CDK.Characters.Enums;
+using CDK.Characters.Interfaces;
 using UniRx;
 using UnityEngine;
 #if UNITY_EDITOR
@@ -10,7 +12,7 @@ using UnityEditor;
 
 namespace CDK {
 	[SelectionBase][RequireComponent(typeof(CharacterController))]
-	public abstract class CCharacterBase : MonoBehaviour, ICCharacterBase {
+	public abstract class CCharacterBase : MonoBehaviour, ICCharacterBase, ICStunnable {
 
 		#region <<---------- Properties ---------->>
 		#region <<---------- Cache and References ---------->>
@@ -503,8 +505,27 @@ namespace CDK {
 		}
 		
 		#endregion <<---------- Crouch ---------->>
+
+
+
+
+		#region <<---------- ICStunnable ---------->>
 		
+		public void Stun(CEnumStunType stunType) {
+			switch (stunType) {
+				case CEnumStunType.medium:
+					this.Anim.SetTrigger(this.ANIM_CHAR_IS_STUNNED_MEDIUM);
+					break;
+				case CEnumStunType.heavy:
+					this.Anim.SetTrigger(this.ANIM_CHAR_IS_STUNNED_HEAVY);
+					break;
+				default:
+					this.Anim.SetTrigger(this.ANIM_CHAR_IS_STUNNED_LIGHT);
+					break;
+			}
+		}
 		
+		#endregion <<---------- ICStunnable ---------->>
 		
 		
 

@@ -16,7 +16,7 @@ namespace CDK {
 		private static CPlayerManager _instance;
 
 
-		private List<CGamePlayer> _gamePlayers = new List<CGamePlayer>();
+		private readonly List<CGamePlayer> _gamePlayers = new List<CGamePlayer>();
 		
 		#endregion <<---------- Properties ---------->>
 
