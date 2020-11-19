@@ -117,6 +117,7 @@ namespace CDK {
 		
 		private void TryToInteract() {
 			if (!this._currentInteractable.Value) return;
+			if (CBlockingEventsManager.IsBlockingEventHappening) return;
 			this._currentInteractable.Value.OnInteract(this._characterBase.transform);
 		}
 		

@@ -11,10 +11,29 @@ using UnityEngine.SceneManagement;
 namespace CDK {
 	public static class CSceneManager {
 
+		#region <<---------- Properties ---------->>
+
 		public static int EntryPointsAmount { get; private set; }
 
+		#endregion <<---------- Properties ---------->>
 
+		#region <<---------- Events ---------->>
+		
+		public static event Action NewSceneLoaded {
+			add {
+				_newSceneLoaded -= value;
+				_newSceneLoaded += value;
+			}
+			remove {
+				_newSceneLoaded -= value;
+			}
+		}
+		private static event Action _newSceneLoaded;
 
+		#endregion <<---------- Events ---------->>
+
+		
+		
 
 		#region <<---------- Initializers ---------->>
 		
@@ -44,7 +63,7 @@ namespace CDK {
 			SceneManager.LoadSceneAsync(sceneName);
 		}
 
-		public static async Task Teleport(string sceneToLoad, int entryPointNumber, List<GameObject> gameObjectsToTeleport) {
+		public static async Task Teleport(string sceneToLoad, int entryPointNumber, IEnumerable<GameObject> gameObjectsToTeleport) {
 
 			CTime.SetTimeScale(0f);
 			CBlockingEventsManager.IsPlayingCutscene = true;
@@ -97,6 +116,8 @@ namespace CDK {
 			}
 
 			Debug.Log($"TODO remove loading screen");
+			
+			_newSceneLoaded?.Invoke();
 			
 			CBlockingEventsManager.IsPlayingCutscene = false;
 			CTime.SetTimeScale(1f);
