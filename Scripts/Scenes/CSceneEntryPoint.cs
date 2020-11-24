@@ -20,7 +20,7 @@ namespace CDK {
 			Handles.color = Color.white;
 			var pos = this.transform.position;
 			Handles.Label(pos, $"Entry point {this._number}/{CSceneManager.EntryPointsAmount}");
-			Gizmos.DrawWireSphere(pos, 0.01f);
+			Gizmos.DrawWireSphere(pos, 0.5f);
 		}
 		#endif
 	}
