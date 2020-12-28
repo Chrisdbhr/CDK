@@ -6,19 +6,20 @@ using CDK.Characters.Enums;
 using CDK.Characters.Interfaces;
 using UniRx;
 using UnityEngine;
+using UnityEngine.InputSystem;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
 
 namespace CDK {
 	[SelectionBase][RequireComponent(typeof(CharacterController))]
-	public abstract class CCharacterBase : MonoBehaviour, ICCharacterBase, ICStunnable {
+	public abstract class CCharacterBase : MonoBehaviour, ICStunnable {
 
 		#region <<---------- Properties ---------->>
 		#region <<---------- Cache and References ---------->>
 		
 		[Header("Cache and References")]
-		[SerializeField] public Animator Anim;
+		[SerializeField] protected Animator Anim;
 		[SerializeField] protected CharacterController charController;
 		
 		[NonSerialized] protected Transform _myTransform;
@@ -40,6 +41,9 @@ namespace CDK {
 		[NonSerialized] protected Vector3 myVelocity;
 		[NonSerialized] protected Vector3 myVelocityXZ;
 
+		[NonSerialized] public Vector3 AdditiveMovement = Vector3.zero;
+		
+
 		#region <<---------- Run and Walk ---------->>
 		public CMovState CurrentMovState {
 			get { return this._currentMovState; }
@@ -52,7 +56,7 @@ namespace CDK {
 					// is sliding now
 					this._slideBeginTime = Time.timeSinceLevelLoad;
 				}
-				else if (oldValue == CMovState.Sliding && value != CMovState.Sliding) {
+				else if (oldValue == CMovState.Sliding) {
 					// was sliding
 					if (Time.timeSinceLevelLoad >= this._slideBeginTime + this._slideTimeToStumble) {
 						if(this.Anim) this.Anim.SetTrigger(this.ANIM_CHAR_STUMBLE);
@@ -64,38 +68,44 @@ namespace CDK {
 					this.Anim.SetBool(this.ANIM_CHAR_IS_SLIDING, value == CMovState.Sliding);
 					this.Anim.SetBool(this.ANIM_CHAR_IS_WALKING, value == CMovState.Walking);
 					this.Anim.SetBool(this.ANIM_CHAR_IS_RUNNING, value == CMovState.Running);
+					this.Anim.SetBool(this.ANIM_CHAR_IS_SPRINTING, value == CMovState.Sprint);
 				}
 			}
 		}
 		private CMovState _currentMovState;
-		public float WalkSpeed {
-			get { return this._walkSpeed; }
+		
+		public float MovementSpeed {
+			get { return this._movementSpeed; }
 		}
-		[SerializeField] private float _walkSpeed = 2.5f;
+		[SerializeField] private float _movementSpeed = 1.5f;
+		
+		public float WalkMultiplier {
+			get { return this._walkMultiplier; }
+		}
+		private float _walkMultiplier = 0.6f;
 
-		public float RunSpeed {
-			get { return this._runSpeed; }
+		public float RunSpeedMultiplier {
+			get { return this._runSpeedMultiplier; }
 		}
-		[SerializeField] private float _runSpeed = 3.5f;
+		private float _runSpeedMultiplier = 2f;
 		
 		public ReactiveProperty<bool> CanMoveRx { get; protected set; }
 		public ReactiveProperty<bool> CanRunRx { get; protected set; }
-		public ReactiveProperty<bool> RunningRx { get; protected set; }
 		#endregion <<---------- Run and Walk ---------->>
 		
 		#region <<---------- Sliding ---------->>
 
 		protected ReactiveProperty<bool> _canSlideRx;
 
-		public float SlideSpeed {
-			get { return this._slideSpeed; }
+		public float SlideSpeedMultiplier {
+			get { return this._slideSpeedMultiplier; }
 		}
-		[SerializeField] private float _slideSpeed = 2.5f;
+		[NonSerialized] private float _slideSpeedMultiplier = 1.4f;
 		public virtual float SlideControlAmmount => 0.5f;
 		/// <summary>
 		/// tempo para tropecar
 		/// </summary>
-		[NonSerialized] protected float _slideTimeToStumble = 1.5f;
+		[NonSerialized] protected float _slideTimeToStumble = 1.0f;
 		[NonSerialized] protected float _slideBeginTime;
 		
 		#endregion <<---------- Sliding ---------->>
@@ -106,7 +116,7 @@ namespace CDK {
 		#endregion <<---------- Aerial Movement ---------->>
 		
 		#region <<---------- Rotation ---------->>
-		[SerializeField] private float _rotateTowardsSpeed = 5f;
+		[SerializeField] private float _rotateTowardsSpeed = 20f;
 		
 		[NonSerialized] protected Quaternion _targetLookRotation;
 		[NonSerialized] protected float rotateTowardsLookTargetSpeed = 800f;
@@ -153,6 +163,7 @@ namespace CDK {
 		protected readonly int ANIM_CHAR_IS_SLIDING = Animator.StringToHash("isSliding");
 		protected readonly int ANIM_CHAR_IS_WALKING = Animator.StringToHash("isWalking");
 		protected readonly int ANIM_CHAR_IS_RUNNING = Animator.StringToHash("isRunning");
+		protected readonly int ANIM_CHAR_IS_SPRINTING = Animator.StringToHash("isSprinting");
 		protected readonly int ANIM_CHAR_IS_FALLING = Animator.StringToHash("isFalling");
 		protected readonly int ANIM_CHAR_IS_AIMING = Animator.StringToHash("isAiming");
 		protected readonly int ANIM_CHAR_IS_CROUCHING = Animator.StringToHash("isCrouching");
@@ -231,7 +242,6 @@ namespace CDK {
 			this._isPlayingBlockingAnimationRx = new ReactiveProperty<bool>(false);
 			this._isAimingRx = new ReactiveProperty<bool>();
 			this.IsStrafingRx = new ReactiveProperty<bool>();
-			this.RunningRx = new ReactiveProperty<bool>(false);
 			this.CanRunRx = new ReactiveProperty<bool>(true);
 			this._isCrouched = new ReactiveProperty<bool>();
 
@@ -247,6 +257,7 @@ namespace CDK {
 			
 			// can slide
 			this._canSlideRx.Subscribe(canSlide => {
+				// stopped sliding
 				if (!canSlide && this.CurrentMovState == CMovState.Sliding) {
 					this.CurrentMovState = CMovState.Walking;
 				}
@@ -303,55 +314,71 @@ namespace CDK {
 
 		#region <<---------- Movement ---------->>
 		
-		protected virtual void ProcessMovement() {
+		protected void ProcessMovement() {
 			if (!this.charController.enabled) return;
 			
-			// set is strafing
-			this.RunningRx.Value = this.InputRun && this.CanRunRx.Value && !this._isAimingRx.Value;
-			this.IsStrafingRx.Value = this._isAimingRx.Value || !this.RunningRx.Value;
-			
-			// idle
-			if (!this.CanMoveRx.Value
-				|| this.InputMovementDirRelativeToCam == Vector3.zero
-				&& this.CurrentMovState != CMovState.Sliding
-			) {
-				this.CurrentMovState = CMovState.Idle;
-				this.charController.Move(Physics.gravity * CTime.DeltaTimeScaled);
-				return;
-			}
-			
-			// process mov speed
-			float targetMovSpeed;
-			if (this.CurrentMovState == CMovState.Sliding) {
-				targetMovSpeed = this.SlideSpeed;
-			}
-			else {
-				this.CurrentMovState = this.RunningRx.Value ? CMovState.Running : CMovState.Walking;
-				if (this._isAimingRx.Value) {
-					targetMovSpeed = this.WalkSpeed * 0.5f;
+			Vector3 targetMotion = this.InputMovementDirRelativeToCam;
+			float targetMovSpeed = 0f;
+
+			// manual movement
+			if (this.CanMoveRx.Value) {
+				
+				// input movement
+				if (targetMotion != Vector3.zero) {
+					if (this.InputRun && this.CanRunRx.Value && !this._isAimingRx.Value) {
+						this.CurrentMovState = CMovState.Running;
+					}
+					else {
+						this.CurrentMovState = CMovState.Walking;
+					}
 				}
 				else {
-					targetMovSpeed = this.RunningRx.Value ? this.RunSpeed : this.WalkSpeed;
+					this.CurrentMovState = CMovState.Idle;
+				}
+			
+				// set is strafing
+				this.IsStrafingRx.Value = this._isAimingRx.Value && this.CurrentMovState <= CMovState.Walking;
+				
+				// target movement speed
+				switch (this.CurrentMovState) {
+					case CMovState.Walking: {
+						targetMovSpeed = this.MovementSpeed * this.WalkMultiplier;
+						break;
+					}
+					case CMovState.Running: {
+						targetMovSpeed = this.MovementSpeed * this.RunSpeedMultiplier;
+						break;
+					}
+					default: {
+						targetMovSpeed = this.MovementSpeed;
+						break;
+					}
+				}
+
+				if (this.IsAiming) {
+					targetMovSpeed *= 0.5f;
+				}
+
+				if (Debug.isDebugBuild && Keyboard.current.rightShiftKey.isPressed) {
+					targetMovSpeed *= 20f;
 				}
 			}
-			
-			if (Debug.isDebugBuild && Input.GetKey(KeyCode.RightShift)) {
-				targetMovSpeed *= 20f;
-			}
 
-			// move the character
-			Vector3 targetMotion;
+			// is sliding
 			if (this.CurrentMovState == CMovState.Sliding) {
 				targetMotion = this.InputMovementDirRelativeToCam * this.SlideControlAmmount
 						+ (new Vector3(this._groundNormal.x, 0f, this._groundNormal.z).normalized);
+				targetMovSpeed = this.MovementSpeed * (this.RunSpeedMultiplier * this.SlideSpeedMultiplier);
 			}
-			else {
-				targetMotion = this.InputMovementDirRelativeToCam;
+
+			if (this.AdditiveMovement != Vector3.zero) {
+				targetMotion += this.AdditiveMovement;
+				this.AdditiveMovement = Vector3.zero;
 			}
 			
-			this.charController.Move(
-				(targetMotion  * targetMovSpeed + Physics.gravity) 
-				* CTime.DeltaTimeScaled );
+			// move character
+			this.charController.Move((targetMotion * targetMovSpeed + Physics.gravity) 
+				* CTime.DeltaTimeScaled);
 		}
 		
 		protected void CheckIfIsGrounded() {
@@ -376,8 +403,7 @@ namespace CDK {
 		protected void ProcessSlide() {
 			if (
 				this._canSlideRx.Value 
-				&& this.CurrentMovState != CMovState.Walking
-				&& this.CurrentMovState.IsMoving()
+				&& this.CurrentMovState > CMovState.Walking
 				&& this._isTouchingTheGroundRx.Value
 				&& this.InputMovementDirRelativeToCam != Vector3.zero 
 				&& Vector3.Angle(this.InputMovementDirRelativeToCam, this._groundNormal) <= CGameSettings.ANGLE_TO_BEGIN_SLIDING
@@ -528,17 +554,18 @@ namespace CDK {
 		#endregion <<---------- ICStunnable ---------->>
 		
 		
+		
 
 		#region <<---------- Animations State Machine Behaviours ---------->>
-		public void StopAndBlockMovement() {
-			if(this.Anim) this.Anim.applyRootMotion = true;
-			this._isPlayingBlockingAnimationRx.Value = true;
+		
+		public void SetPlayingBlockingAnimation(bool state) {
+			this._isPlayingBlockingAnimationRx.Value = state;
 		}
-
-		public void ReleaseMovement() {
-			if(this.Anim) this.Anim.applyRootMotion = false;
-			this._isPlayingBlockingAnimationRx.Value = false;
+		
+		public void SetAnimationRootMotion(bool state) {
+			if(this.Anim) this.Anim.applyRootMotion = state;
 		}
+		
 		#endregion <<---------- Animations State Machine Behaviours ---------->>
 		
 	}

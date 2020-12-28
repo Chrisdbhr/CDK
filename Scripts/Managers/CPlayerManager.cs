@@ -57,8 +57,15 @@ namespace CDK {
 					Debug.LogWarning($"Created player {pNumber} but cant find character '{controllingCharName}' to control.");
 					return;
 				}
-				
-				var character = handle.Result.GetComponent<CCharacterBase>();
+
+				var createdGo = Object.Instantiate(handle.Result);
+				createdGo.name = $"[Character] {controllingCharName}";
+				var character = createdGo.GetComponent<CCharacterBase>();
+
+				if (character == null) {
+					Debug.LogError($"{controllingCharName} gameobject doesnt have a {nameof(CCharacterBase)} component on it! could not create player!");
+					return;
+				}
 				
 				player.AddControllingCharacter(character);
 				
