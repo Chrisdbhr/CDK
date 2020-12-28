@@ -2,13 +2,67 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using DG.Tweening;
+using FMODUnity;
 using UniRx;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace CDK {
-	[RequireComponent(typeof(SphereCollider))]
 	public class CPlayerCamera : MonoBehaviour {
+
+		#region <<---------- Initializers ---------->>
+
+		public void Initialze(CGamePlayer ownerPlayer) {
+			
+			// owner player
+			if (ownerPlayer == null) {
+				Debug.LogError($"Could not create player camera of a null player.");
+				return;
+			}
+			this._ownerPlayer = ownerPlayer;
+			
+			// cache
+			var thisGo = this.gameObject;
+			
+			// sphere collider
+			var sphere = thisGo.AddComponent<SphereCollider>();
+			sphere.isTrigger = true;
+			
+			// canvas for crossfade
+			var crossFadeCanvasGo = new GameObject("Crossfade Canvas");
+			crossFadeCanvasGo.transform.parent = this.transform;
+			var crossFadeCanvas = crossFadeCanvasGo.AddComponent<Canvas>();
+			crossFadeCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
+			crossFadeCanvas.sortingOrder = -100;
+		
+			// raw image for crossfade
+			var rawImgGo = new GameObject("Crossfade Raw Image");
+			rawImgGo.transform.parent = crossFadeCanvasGo.transform;
+			this._screenCrossfadeRawImage = rawImgGo.AddComponent<RawImage>();
+			this._screenCrossfadeRawImage.raycastTarget = false;
+			this._screenCrossfadeRawImage.color = new Color(255, 255, 255, 0);
+			// fill entire screen
+			var rawImgRectTransform = rawImgGo.GetComponent<RectTransform>();
+			rawImgRectTransform.anchorMin = Vector2.zero;
+			rawImgRectTransform.anchorMax = Vector2.one;
+			rawImgRectTransform.sizeDelta = Vector2.zero;
+
+			// unity camera
+			this._unityCamera = thisGo.AddComponent<Camera>();
+			this._unityCamera.backgroundColor = Color.black;
+			this._unityCamera.fov = 50;
+			this._unityCamera.nearClipPlane = 0.01f;
+			this._unityCamera.farClipPlane = 1500;
+			this._unityCamera.depth = -1;
+			
+			// fmod listener
+			var fmodStudioListener = this.gameObject.AddComponent<StudioListener>();
+			fmodStudioListener.ListenerNumber = this._ownerPlayer.PlayerNumber;
+			fmodStudioListener.attenuationObject = this._ownerPlayer.GetMainControllingCharacter().gameObject;
+		}
+		
+		#endregion <<---------- Initializers ---------->>
+		
 
 		#region <<---------- Enums ---------->>
 
@@ -23,15 +77,15 @@ namespace CDK {
 		#region <<---------- Properties and Fields ---------->>
 		
 		// Main refs
-		[SerializeField] private CGamePlayer _ownerPlayer;
-		[SerializeField] private Camera _unityCamera;
+		[NonSerialized] private CGamePlayer _ownerPlayer;
+		[NonSerialized] private UnityEngine.Camera _unityCamera;
 		
 		// Position
-		[NonSerialized] private Vector3 FreeCamPosition;
+		[SerializeField] private Vector3 _offset = Vector3.up * 1.6f;
 		[NonSerialized] private Vector3 newPosition;
+		
 
 		// Rotation
-		[NonSerialized] private Quaternion FreeCamRotation;
 		[NonSerialized] private Quaternion newRotation;
 		[SerializeField] private float _rotationSpeed = 10f;
 		public float RotationX { get; private set; }
@@ -53,14 +107,14 @@ namespace CDK {
 		[NonSerialized] private float _clampMaxDistanceSpeed = 3f;
 
 		// Screen print
-		[SerializeField] private RawImage _screenPrintFrameRawImage;
+		[NonSerialized] private RawImage _screenCrossfadeRawImage;
 		[NonSerialized] private bool _getRenderImgOnNextFrame;
 		[NonSerialized] private Texture2D _screenShootTexture2d;
 		
 		// Camera profiles
-		private ReactiveProperty<CCameraAreaProfileData> ActiveProfileRx = new ReactiveProperty<CCameraAreaProfileData>();
+		private ReactiveProperty<CCameraAreaProfileData> ActiveProfileRx;
 		[SerializeField] private CCameraAreaProfileData defaultProfile;
-		private HashSet<CCameraAreaProfileData> _activeCameraProfilesList = new HashSet<CCameraAreaProfileData>();
+		private readonly HashSet<CCameraAreaProfileData> _activeCameraProfilesList = new HashSet<CCameraAreaProfileData>();
 
 		// Cache
 		[NonSerialized] private Transform _transform;
@@ -73,20 +127,25 @@ namespace CDK {
 
 
 		#region <<---------- MonoBehaviour ---------->>
-		
+
 		private void Awake() {
-			this.ActiveProfileRx.Value = this.defaultProfile;
-			
 			this._transform = this.transform;
 
-			Vector3 angles = this._transform.eulerAngles;
-			this.RotationY = angles.y;
-			this.RotationX = angles.x;
-		}
+			this.defaultProfile = ScriptableObject.CreateInstance<CCameraAreaProfileData>();
+			
+			// active camera profile
+			this.ActiveProfileRx = new ReactiveProperty<CCameraAreaProfileData>();
+			this.ActiveProfileRx.Value = this.defaultProfile;
 
+		}
+		
 		private void OnEnable() {
 			this._compositeDisposable?.Dispose();
 			this._compositeDisposable = new CompositeDisposable();
+			
+			var angles = this._transform.eulerAngles;
+			this.RotationY = angles.y;
+			this.RotationX = angles.x;
 
 			this.SubscribeToEvents();
 			
@@ -103,12 +162,14 @@ namespace CDK {
 		private void OnDestroy() {
 			Destroy(this._screenShootTexture2d);
 			this._screenShootTexture2d = null;
+			
+			this.defaultProfile.CDestroy();
 		}
 		
 		private void LateUpdate() {
-			var camTransform = this._unityCamera.transform;
-			this.FreeCamPosition = camTransform.position;
-			this.FreeCamRotation = camTransform.rotation;
+			// var camTransform = this._unityCamera.transform;
+			// this.FreeCamPosition = camTransform.position;
+			// this.FreeCamRotation = camTransform.rotation;
 
 			// camera distance
 			bool camIsCloseToTheCharacter = this._currentDistanceFromTarget <= this._distanceToConsiderCloseForCharacter;
@@ -145,8 +206,8 @@ namespace CDK {
 				this._screenShootTexture2d.Resize(Screen.width, Screen.height);
 				this._screenShootTexture2d.ReadPixels(new Rect(0, 0, Screen.width, Screen.height), 0, 0);
 				this._screenShootTexture2d.Apply();
-				this._screenPrintFrameRawImage.texture = this._screenShootTexture2d;
-				this._screenPrintFrameRawImage.color = Color.white;
+				this._screenCrossfadeRawImage.texture = this._screenShootTexture2d;
+				this._screenCrossfadeRawImage.color = Color.white;
 				this._getRenderImgOnNextFrame = false;
 			}
 		}
@@ -190,8 +251,10 @@ namespace CDK {
 			
 			// is close to the character?
 			this._isCloseToTheCharacterRx.Subscribe(isClose => {
+				if (this._renderToHideWhenCameraIsClose == null) return;
 				// disable renderers
 				foreach (var objToDisable in this._renderToHideWhenCameraIsClose) {
+					if (objToDisable == null) continue;
 					objToDisable.enabled = !isClose;
 				}
 			}).AddTo(this._compositeDisposable);
@@ -207,14 +270,10 @@ namespace CDK {
 
 		#region <<---------- General ---------->>
 		
-		public void SetCameraEnabled(bool enabledState) {
-			this._unityCamera.enabled = enabledState;
-		}
-
 		public void Rotate(Vector2 inputRotation) {
 			#if !UNITY_ANDROID
-			this.RotationY += inputRotation.x * this.xSpeed * Time.deltaTime; // * this.currentDistanceFromTarget; // make it rotate faster when very far from target.
-			this.RotationX -= inputRotation.y * this.ySpeed * Time.deltaTime;
+			this.RotationY += inputRotation.x * this.xSpeed * CTime.DeltaTimeScaled; // * this.currentDistanceFromTarget; // make it rotate faster when very far from target.
+			this.RotationX -= inputRotation.y * this.ySpeed * CTime.DeltaTimeScaled;
 			#endif
 			this.transform.Rotate(inputRotation.y * this._rotationSpeed, inputRotation.x * this._rotationSpeed, 0f);
 		}
@@ -256,10 +315,10 @@ namespace CDK {
 					break;
 				case CameraTransitionType.crossfade:
 					print($"[CPlayerCamera] Reverse {CameraTransitionType.crossfade.ToString()} transition with duration {duration}.");
-					this._tween = DOVirtual.Float(this._screenPrintFrameRawImage.color.a, 0f, duration, value => {
-						var color = this._screenPrintFrameRawImage.color;
+					this._tween = DOVirtual.Float(this._screenCrossfadeRawImage.color.a, 0f, duration, value => {
+						var color = this._screenCrossfadeRawImage.color;
 						color = new Color(color.r, color.g, color.b, value);
-						this._screenPrintFrameRawImage.color = color;
+						this._screenCrossfadeRawImage.color = color;
 					});
 					break;
 			}
@@ -307,16 +366,17 @@ namespace CDK {
 		}
 
 		private void ProcessPosition() {
-			var character = this._ownerPlayer.GetMainCharacter();
+			var character = this._ownerPlayer.GetMainControllingCharacter();
 			if (character == null) return;
 			
 			// clamp max distance
+			this._currentDistanceFromTarget += this.ActiveProfileRx.Value.RecoverFromWallSpeed * CTime.DeltaTimeScaled;
 			var clampedDistance = Mathf.Clamp(this._currentDistanceFromTarget, 0f, this.ActiveProfileRx.Value.maxDistanceFromPlayer);
-			this._currentDistanceFromTarget = Mathf.Lerp(this._currentDistanceFromTarget, clampedDistance, this._clampMaxDistanceSpeed * Time.deltaTime);
+			this._currentDistanceFromTarget = Mathf.Lerp(this._currentDistanceFromTarget, clampedDistance, this._clampMaxDistanceSpeed * CTime.DeltaTimeScaled);
 			if (this._currentDistanceFromTarget < 0f) this._currentDistanceFromTarget = 0f;
 			
 			// set position
-			var finalPosition = character.transform.position;
+			var finalPosition = character.transform.position + this._offset;
 			this.newPosition = this.newRotation
 					* new Vector3(0f, 0f, -(this._currentDistanceFromTarget))
 					+ finalPosition;
