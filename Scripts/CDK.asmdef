@@ -11,7 +11,8 @@
         "Unity.ResourceManager",
         "UniTask.Addressables",
         "IngameDebugConsole",
-        "UniTask"
+        "UniTask",
+        "FMODUnity"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
