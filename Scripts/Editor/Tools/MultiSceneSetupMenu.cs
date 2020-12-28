@@ -3,13 +3,12 @@ using System.IO;
 using UnityEngine;
 using UnityEditor.SceneManagement;
 using UnityEditor;
-using System.Collections;
 using System.Linq;
 
 namespace CDK
 {
   [CustomEditor(typeof(MultiSceneSetup))]
-    public class ObjectBuilderEditor : Editor
+    public class ObjectBuilderEditor : UnityEditor.Editor
     {
         public override void OnInspectorGUI()
         {
