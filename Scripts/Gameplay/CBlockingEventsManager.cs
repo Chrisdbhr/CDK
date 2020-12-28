@@ -86,6 +86,7 @@ namespace CDK {
 				Cursor.visible = onMenu;
 				Cursor.lockState = onMenu ? Cursor.lockState = CursorLockMode.None : CursorLockMode.Locked;
 			});
+			Cursor.visible = !CGameSettings.get.CursorStartsHidden;
 
 			// playing cutscene
 			this.IsPlayingCutsceneRx.Subscribe(isPlayingCutscene => {
