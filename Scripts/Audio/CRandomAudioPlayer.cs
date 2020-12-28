@@ -2,53 +2,45 @@ using System;
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
+using FMODUnity;
 
 namespace CDK.Audio {
-	[RequireComponent(typeof(AudioSource))]
+	[RequireComponent(typeof(StudioEventEmitter))]
 	public class CRandomAudioPlayer : MonoBehaviour {
 
-		[SerializeField] private List<AudioClip> _audioClips = new List<AudioClip>();
-		[NonSerialized] private readonly Queue<AudioClip> _lastPlayedClips = new Queue<AudioClip>();
-		[NonSerialized] private AudioSource _audioSource;
-
+		[SerializeField] private StudioEventEmitter _audioEmitter;
+		[NonSerialized] private string[] _audios;
+		[NonSerialized] private readonly Queue<string> _lastPlayedAudios = new Queue<string>();
 		
 		
-		
-		private void Awake() {
-			this._audioSource = this.GetComponent<AudioSource>();
-		}
 
 
-
-
-		public void SetAudioClips(List<AudioClip> clips) {
-			if (clips == this._audioClips) return;
-			this._lastPlayedClips.Clear();
-			this._audioClips = clips;
+		public void SetAudioEvents(string[] clips) {
+			if (Equals(clips, this._audios)) return;
+			this._lastPlayedAudios.Clear();
+			this._audios = clips;
 		}
 
 		public void PlayAudio() {
-			var audioClip = this.GetRandomFromListNotRepeating();
-			if (!audioClip) return;
+			var audioEvent = this.GetRandomFromListNotRepeating();
+			if (audioEvent.CIsNullOrEmpty()) return;
 
-			this._lastPlayedClips.Enqueue(audioClip);
-			
-			this._audioSource.Stop();
-			this._audioSource.clip = audioClip;
-			this._audioSource.Play();
+			this._lastPlayedAudios.Enqueue(audioEvent);
+
+			this._audioEmitter.Event = audioEvent;
+			this._audioEmitter.Play();
 		}
 
-		public AudioClip GetRandomFromListNotRepeating() {
-			if (this._audioClips == null) return null;
-			int count = this._audioClips.Count;
-			if (count <= 0) return null;
-			if (count == 1) return this._audioClips[0];
+		private string GetRandomFromListNotRepeating() {
+			if (this._audios == null) return null;
+			int count = this._audios.Length;
+			if (count == 1) return this._audios[0];
 			
-			if (this._lastPlayedClips.Count >= count * 0.5f) {
-				this._lastPlayedClips.Dequeue();
+			if (this._lastPlayedAudios.Count >= count * 0.5f) {
+				this._lastPlayedAudios.Dequeue();
 			}
 			
-			return this._audioClips.Except(this._lastPlayedClips).RandomElement();
+			return this._audios.Except(this._lastPlayedAudios).RandomElement();
 		}
 	}
 }
