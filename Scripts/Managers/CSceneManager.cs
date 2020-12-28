@@ -11,12 +11,6 @@ using UnityEngine.SceneManagement;
 namespace CDK {
 	public static class CSceneManager {
 
-		#region <<---------- Properties ---------->>
-
-		public static int EntryPointsAmount { get; private set; }
-
-		#endregion <<---------- Properties ---------->>
-
 		#region <<---------- Events ---------->>
 		
 		public static event Action NewSceneLoaded {
@@ -51,9 +45,8 @@ namespace CDK {
 		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
 		private static void InitializeAfterSceneLoad() {
 			
-			var allEntryPoints = GameObject.FindObjectsOfType<CSceneEntryPoint>();
-			EntryPointsAmount = allEntryPoints.Length;
-
+			//var allEntryPoints = GameObject.FindObjectsOfType<CSceneEntryPoint>();
+		
 		}
 
 		#endregion <<---------- Initializers ---------->>
@@ -83,23 +76,10 @@ namespace CDK {
 			
 			await sceneToLoadAsyncOp;
 			
-			// Move objects
-			var targetPos = Vector3.zero;
-			var allEntryPoints = GameObject.FindObjectsOfType<CSceneEntryPoint>();
-			if (!allEntryPoints.Any() || entryPointNumber >= allEntryPoints.Length) {
-				Debug.LogWarning($"Cant find any level entry point {entryPointNumber} OR it is invalid.");
-			}
-			else {
-				var selectedEntryPoint = allEntryPoints.FirstOrDefault(ep => ep.Number == entryPointNumber);
-				if (selectedEntryPoint != null) {
-					Debug.Log($"Setting default entry point to {selectedEntryPoint.name}");
-					targetPos = selectedEntryPoint.transform.position;
-				}
-			}
-
+			
+			
 			foreach (var rootGo in gameObjectsToTeleport.Select(go => go.transform.root)) {
-				Debug.Log($"Teleporting {rootGo.name}");
-				rootGo.position = targetPos;
+				PositionTransformToSceneEntryPoint(rootGo.transform, entryPointNumber);
 			}
 
 			sceneToLoadAsyncOp.allowSceneActivation = true;
@@ -122,6 +102,29 @@ namespace CDK {
 			CBlockingEventsManager.IsPlayingCutscene = false;
 			CTime.SetTimeScale(1f);
 			await CFadeCanvas.FadeToTransparent(1f);
+		}
+
+		public static void PositionTransformToSceneEntryPoint(Transform transf, int entryPointNumber = 0) {
+			if (transf == null) {
+				Debug.LogError("Cant move a null game object.");
+				return;
+			}
+
+			var targetPos = Vector3.zero;
+
+			var allEntryPoints = GameObject.FindObjectsOfType<CSceneEntryPoint>();
+			if (!allEntryPoints.Any() || entryPointNumber >= allEntryPoints.Length) {
+				Debug.LogWarning($"Cant find any level entry point {entryPointNumber} OR it is invalid.");
+			}
+			else {
+				var selectedEntryPoint = allEntryPoints.FirstOrDefault(ep => ep.Number == entryPointNumber);
+				if (selectedEntryPoint != null) {
+					targetPos = selectedEntryPoint.transform.position;
+				}
+			}
+
+			transf.position = targetPos;
+			Debug.Log($"Moving {transf.name} to {nameof(entryPointNumber)} at position {targetPos}");
 		}
 
 
