@@ -29,9 +29,9 @@ namespace CDK {
 		public LayerMask LineOfSightBlockingLayers { get { return this._lineOfSightBlockingLayers; } }
 		[SerializeField] private LayerMask _lineOfSightBlockingLayers = 1;
 
-		public CanvasGroup FadeCanvasGroupPrefab { get { return this._fadeCanvasGroupPrefab; } }
-		[SerializeField] private CanvasGroup _fadeCanvasGroupPrefab;
-		
+		// public CCameraAreaProfileData DefaultCameraProfile { get { return this._defaultCameraProfile; } }
+		// [SerializeField] private CCameraAreaProfileData _defaultCameraProfile;
+
 		public long DiscordClientId { get { return this._discordClientId; } }
 		[HideInInspector] private long _discordClientId;
 		
