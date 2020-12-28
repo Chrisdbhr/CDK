@@ -1,10 +1,12 @@
+using FMODUnity;
 using UnityEngine;
 
 namespace CDK {
 	[System.Serializable]
 	public class CFootstepInfo {
 		public Material[] Materials;
-		public CAudioClipListScriptableObject AudioClipList;
+		[EventRef]
+		public string Audio;
 
 		[SerializeField] private ParticleSystem[] _particleSystems;
 		

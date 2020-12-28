@@ -1,5 +1,5 @@
 ﻿using System;
-using CDK.Audio;
+using FMODUnity;
 using UnityEngine;
 
 namespace CDK {
@@ -19,7 +19,7 @@ namespace CDK {
 		#region <<---------- Properties and Fields ---------->>
 
 		[SerializeField] private CFootstepDatabase _database;
-		[SerializeField] private CRandomAudioPlayer _randomAudioPlayer;
+		[SerializeField] private StudioEventEmitter _audioEmitter;
 		[SerializeField] private Transform _footL;
 		[SerializeField] private Transform _footR;
 		[SerializeField] private LayerMask _footCollisionLayers = 1;
@@ -149,10 +149,9 @@ namespace CDK {
 			}
 
 			// play random audio
-			var audiosList = footstepInfo.AudioClipList.AudioClipList;
-			if (audiosList == null) return;
-			this._randomAudioPlayer.SetAudioClips(audiosList);
-			this._randomAudioPlayer.PlayAudio();
+			if (!footstepInfo.Audio.CIsNullOrEmpty()) {
+				this._audioEmitter.Event = footstepInfo.Audio;
+			}
 		}
 		
 		#endregion <<---------- General ---------->>
