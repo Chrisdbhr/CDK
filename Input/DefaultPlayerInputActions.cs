@@ -103,6 +103,17 @@ namespace GameInput
                 },
                 {
                     ""name"": """",
+                    ""id"": ""8b01e112-7767-4bf7-8abb-fa3849c8c0e3"",
+                    ""path"": ""<Gamepad>/leftStick"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Controller"",
+                    ""action"": ""move"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
                     ""id"": ""3225bb9f-ac8b-45d3-990f-c7fc5c3ab2e7"",
                     ""path"": ""<Pointer>/delta"",
                     ""interactions"": """",
@@ -114,11 +125,33 @@ namespace GameInput
                 },
                 {
                     ""name"": """",
+                    ""id"": ""cb283fa1-9738-4144-9c24-3ceac9c230f6"",
+                    ""path"": ""<Gamepad>/rightStick"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Controller"",
+                    ""action"": ""look"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
                     ""id"": ""0cc6396b-2502-447c-a242-1c0819bdcd7a"",
                     ""path"": ""<Keyboard>/shift"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": ""Keyboard and Mouse"",
+                    ""action"": ""run"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""279c4f42-b5c5-49bc-9d39-363a85b4c555"",
+                    ""path"": ""<XInputController>/buttonSouth"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Controller"",
                     ""action"": ""run"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
@@ -139,6 +172,17 @@ namespace GameInput
                 {
                     ""devicePath"": ""<Mouse>"",
                     ""isOptional"": false,
+                    ""isOR"": false
+                }
+            ]
+        },
+        {
+            ""name"": ""Controller"",
+            ""bindingGroup"": ""Controller"",
+            ""devices"": [
+                {
+                    ""devicePath"": ""<XInputController>"",
+                    ""isOptional"": true,
                     ""isOR"": false
                 }
             ]
@@ -251,6 +295,15 @@ namespace GameInput
             {
                 if (m_KeyboardandMouseSchemeIndex == -1) m_KeyboardandMouseSchemeIndex = asset.FindControlSchemeIndex("Keyboard and Mouse");
                 return asset.controlSchemes[m_KeyboardandMouseSchemeIndex];
+            }
+        }
+        private int m_ControllerSchemeIndex = -1;
+        public InputControlScheme ControllerScheme
+        {
+            get
+            {
+                if (m_ControllerSchemeIndex == -1) m_ControllerSchemeIndex = asset.FindControlSchemeIndex("Controller");
+                return asset.controlSchemes[m_ControllerSchemeIndex];
             }
         }
         public interface IGameplayActions
