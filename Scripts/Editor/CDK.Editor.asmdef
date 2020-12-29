@@ -4,8 +4,7 @@
         "Unity.TextMeshPro",
         "UniRx",
         "CDK",
-        "FMODUnity",
-        "Mochineko.SimpleReorderableList.Editor"
+        "FMODUnity"
     ],
     "includePlatforms": [
         "Editor"
