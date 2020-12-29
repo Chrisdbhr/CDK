@@ -32,7 +32,7 @@ namespace CDK {
 		
 		#region <<---------- CPlayerInteractionBase ---------->>
 		
-		protected override void TryToInteract() {
+		public override void TryToInteract() {
 			var allObjs = Physics2D.CircleCastAll(
 				this.GetCenterCircleCheckPosition(), 
 				this._interactionSphereCheckRadius,

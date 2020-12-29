@@ -1,12 +1,11 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using CDK.Characters.Enums;
 using CDK.Characters.Interfaces;
 using UniRx;
 using UnityEngine;
-using UnityEngine.InputSystem;
+
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -72,7 +71,7 @@ namespace CDK {
 				}
 			}
 		}
-		private CMovState _currentMovState;
+		[SerializeField] private CMovState _currentMovState;
 		
 		public float MovementSpeed {
 			get { return this._movementSpeed; }
@@ -359,7 +358,7 @@ namespace CDK {
 					targetMovSpeed *= 0.5f;
 				}
 
-				if (Debug.isDebugBuild && Keyboard.current.rightShiftKey.isPressed) {
+				if (Debug.isDebugBuild && Input.GetKey(KeyCode.RightShift)) {
 					targetMovSpeed *= 20f;
 				}
 			}

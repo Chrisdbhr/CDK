@@ -1,10 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using GameInput;
+using Rewired;
 using UniRx;
 using UnityEngine;
-using UnityEngine.InputSystem;
 using Object = UnityEngine.Object;
 
 namespace CDK {
@@ -30,13 +29,13 @@ namespace CDK {
 		#region <<---------- Properties and Fields ---------->>
 		
 		public int PlayerNumber { get; } = 0;
+		private Rewired.Player _rePlayer;
 		public CPlayerCamera PlayerCamera { get; private set; }
-
-		private readonly DefaultPlayerInputActions _playerInputActions = new DefaultPlayerInputActions();
 
 		private List<CCharacterBase> _controllingCharacter = new List<CCharacterBase>();
 
 		[NonSerialized] private CompositeDisposable _compositeDisposable;
+		[NonSerialized] private Vector2 _inputMovement;
 		
 		
 		#endregion <<---------- Properties and Fields ---------->>
@@ -47,15 +46,15 @@ namespace CDK {
 		#region <<---------- Events ---------->>
 		
 		private void SignToInputEvents() {
-			
-			this._playerInputActions.Enable();
+
+			this._rePlayer = ReInput.players.GetPlayer(this.PlayerNumber);
+
+			this._rePlayer.AddInputEventDelegate(data => { this._inputMovement.x = data.GetAxis(); }, UpdateLoopType.Update, InputActionEventType.AxisActiveOrJustInactive, CInputKeys.MOV_X);
+			this._rePlayer.AddInputEventDelegate(data => { this._inputMovement.y = data.GetAxis(); }, UpdateLoopType.Update, InputActionEventType.AxisActiveOrJustInactive, CInputKeys.MOV_Y);
 			
 			// movement
 			Observable.EveryUpdate().Subscribe(_ => {
 				if (this._controllingCharacter.Count <= 0) return;
-				
-				// input movement raw
-				var inputMove = this._playerInputActions.gameplay.move.ReadValue<Vector2>();
 				
 				// input relative to cam direction
 				var camF = Vector3.forward;
@@ -71,30 +70,27 @@ namespace CDK {
 				}
 				
 				foreach (var character in this._controllingCharacter.Where(character => character != null)) {
-					character.InputMovementRaw = inputMove.normalized;
-					character.InputMovementDirRelativeToCam = (camF * inputMove.y + camR * inputMove.x).normalized;
+					character.InputMovementRaw = this._inputMovement.normalized;
+					character.InputMovementDirRelativeToCam = (camF * this._inputMovement.y + camR * this._inputMovement.x).normalized;
 				}
 			}).AddTo(this._compositeDisposable);
 			
 			// look
 			Observable.EveryLateUpdate().Subscribe(context => {
-				var inputLook = this._playerInputActions.gameplay.look.ReadValue<Vector2>();
+				var inputLook = this._rePlayer.GetAxis2D(CInputKeys.LOOK_X, CInputKeys.LOOK_Y);
 				if (inputLook == Vector2.zero) return;
 				if (this.PlayerCamera == null) return;
 				this.PlayerCamera.Rotate(inputLook);
 			}).AddTo(this._compositeDisposable);
 			
-			// run
-			this._playerInputActions.gameplay.run.started += this.InputRunOnCanceled;
-			this._playerInputActions.gameplay.run.canceled += this.InputRunOnCanceled;
+			this._rePlayer.AddInputEventDelegate(this.InputInteract, UpdateLoopType.Update, InputActionEventType.ButtonJustPressed, CInputKeys.INTERACT);
+			this._rePlayer.AddInputEventDelegate(this.InputRun, UpdateLoopType.Update, CInputKeys.RUN);
 
 		}
 
-		private void UnsignFromEvents() {
-			// run
-			this._playerInputActions.gameplay.run.started -= this.InputRunOnCanceled;
-			this._playerInputActions.gameplay.run.canceled -= this.InputRunOnCanceled;
-
+		private void UnsignFromInputEvents() {
+			this._rePlayer?.RemoveInputEventDelegate(this.InputInteract);
+			this._rePlayer?.RemoveInputEventDelegate(this.InputRun);
 		}
 
 		#endregion <<---------- Events ---------->>
@@ -103,12 +99,20 @@ namespace CDK {
 
 		#region <<---------- Input ---------->>
 		
-		private void InputRunOnCanceled(InputAction.CallbackContext context) {
+		private void InputRun(InputActionEventData data) {
 			if (this._controllingCharacter.Count <= 0) return;
-			var inputRun = context.ReadValueAsButton();
+			var inputRun = data.GetButton();
 			foreach (var character in this._controllingCharacter.Where(character => character != null)) {
 				character.InputRun = inputRun;
 			}
+		}
+		
+		private void InputInteract(InputActionEventData data) {
+			var character = this.GetMainControllingCharacter();
+			if (character == null) return;
+			var interactionComponent = character.GetComponent<CPlayerInteractionBase>();
+			if (interactionComponent == null) return;
+			interactionComponent.TryToInteract();
 		}
 		
 		
@@ -165,10 +169,9 @@ namespace CDK {
 		#region <<---------- Disposable ---------->>
 		
 		public void Dispose() {
-			this._playerInputActions?.Dispose();
 			this._compositeDisposable?.Dispose();
 			
-			this.UnsignFromEvents();
+			this.UnsignFromInputEvents();
 		}
 		
 		#endregion <<---------- Disposable ---------->>

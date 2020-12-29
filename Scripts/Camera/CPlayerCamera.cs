@@ -371,7 +371,7 @@ namespace CDK {
 			
 			// clamp max distance
 			this._currentDistanceFromTarget += this.ActiveProfileRx.Value.RecoverFromWallSpeed * CTime.DeltaTimeScaled;
-			var clampedDistance = Mathf.Clamp(this._currentDistanceFromTarget, 0f, this.ActiveProfileRx.Value.maxDistanceFromPlayer);
+			var clampedDistance = this._currentDistanceFromTarget.CClamp(0f, this.ActiveProfileRx.Value.maxDistanceFromPlayer);
 			this._currentDistanceFromTarget = Mathf.Lerp(this._currentDistanceFromTarget, clampedDistance, this._clampMaxDistanceSpeed * CTime.DeltaTimeScaled);
 			if (this._currentDistanceFromTarget < 0f) this._currentDistanceFromTarget = 0f;
 			

@@ -1,8 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using IngameDebugConsole;
+using UniRx;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
 using Object = UnityEngine.Object;
 
 namespace CDK {
@@ -17,6 +20,8 @@ namespace CDK {
 
 
 		private readonly List<CGamePlayer> _gamePlayers = new List<CGamePlayer>();
+
+		private static AsyncOperationHandle<GameObject> _rewiredLoaded;
 		
 		#endregion <<---------- Properties ---------->>
 
@@ -31,7 +36,12 @@ namespace CDK {
 		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
 		private static void InitializeBeforeSceneLoad() {
 			get?.Dispose();
-			
+
+			_rewiredLoaded = Addressables.LoadAssetAsync<GameObject>("RewiredInputManager");
+			_rewiredLoaded.Completed += handle => {
+				Object.Instantiate(handle.Result);
+			};
+
 			DebugLogConsole.AddCommandInstance("createplayer", "Creates a player with a controlling character or none.", nameof(CreatePlayer), get);
 		}
 
@@ -42,7 +52,10 @@ namespace CDK {
 
 		#region <<---------- General ---------->>
 
-		public void CreatePlayer(string controllingCharName = null) {
+		public async Task CreatePlayer(string controllingCharName = null) {
+
+			await _rewiredLoaded.Task;
+			
 			var pNumber = this._gamePlayers.Count;
 			var player = new CGamePlayer(pNumber);
 			this._gamePlayers.Add(player);

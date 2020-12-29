@@ -22,7 +22,7 @@ namespace CDK {
 		}
 		#endif
 
-		protected override void TryToInteract() {
+		public override void TryToInteract() {
 			if (CBlockingEventsManager.IsBlockingEventHappening) return;
 			var interactable = this.GetCollisionInteractable();
 			if (interactable == null) return;

@@ -19,7 +19,7 @@ namespace CDK {
 		}
 		#endif
 
-		protected override void TryToInteract() {
+		public override void TryToInteract() {
 			if (CBlockingEventsManager.IsBlockingEventHappening) return;
 
 			var originPos = this.GetCenterSphereCheckPosition();
@@ -59,19 +59,26 @@ namespace CDK {
 				}
 			}
 
-			var direction = interactableColliders[closestColliderIndex].transform.position - originPos;
+			// get target interactable to try to interact
+			var targetInteractableCollider = interactableColliders[closestColliderIndex];
+			var direction = targetInteractableCollider.transform.position - originPos;
+			
 			bool hasSomethingBlockingLineOfSight = Physics.Raycast(
 				originPos,
 				direction,
+				out var rayInfo,
 				direction.magnitude,
 				CGameSettings.get.LineOfSightBlockingLayers,
 				QueryTriggerInteraction.Collide
 			);
 
-			if (hasSomethingBlockingLineOfSight) return;
+			if (hasSomethingBlockingLineOfSight && rayInfo.collider != targetInteractableCollider) {
+				Debug.Log($"{this.name} cant interact, {rayInfo.collider.name} is blocking line of sight.", rayInfo.collider);
+				return;
+			}
 
-			var choosenInteractable = interactableColliders[closestColliderIndex].GetComponent<CIInteractable>();
-			choosenInteractable.OnInteract(this._myTransform);
+			var chosenInteractable = targetInteractableCollider.GetComponent<CIInteractable>();
+			chosenInteractable.OnInteract(this._myTransform);
 		}
 		
 		protected Vector3 GetCenterSphereCheckPosition() {
