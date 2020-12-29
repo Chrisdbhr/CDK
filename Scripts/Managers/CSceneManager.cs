@@ -2,11 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Cysharp.Threading.Tasks;
 using IngameDebugConsole;
 using UniRx;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Object = UnityEngine.Object;
 
 namespace CDK {
 	public static class CSceneManager {
@@ -70,29 +70,33 @@ namespace CDK {
 			
 			sceneToLoadAsyncOp.allowSceneActivation = false;
 			
-			await CFadeCanvas.FadeToBlack(1f);
+			await CFadeCanvas.FadeToBlack(0.5f);
 
 			Debug.Log($"TODO implement loading screen");
-			
-			await sceneToLoadAsyncOp;
-			
-			
-			
-			foreach (var rootGo in gameObjectsToTeleport.Select(go => go.transform.root)) {
-				PositionTransformToSceneEntryPoint(rootGo.transform, entryPointNumber);
-			}
 
+			var rootGameObjects = gameObjectsToTeleport.Select(go => go.transform.root).ToArray();
+			
 			sceneToLoadAsyncOp.allowSceneActivation = true;
 
 			while (sceneToLoadAsyncOp.progress < 1f) {
 				await Observable.NextFrame();
 			}
 
-			SceneManager.SetActiveScene(new Scene {name = sceneToLoad});
+			var targetScene = SceneManager.GetSceneByName(sceneToLoad);
+			
+			SceneManager.SetActiveScene(targetScene);
 
+			foreach (var rootGo in rootGameObjects) {
+				PositionTransformToSceneEntryPoint(rootGo.transform, entryPointNumber);
+				SceneManager.MoveGameObjectToScene(rootGo.gameObject, targetScene);
+			}
+			
 			// unload last scenes
 			foreach (var loadedScene in allLoadedScenes) {
-				await SceneManager.UnloadSceneAsync(loadedScene, UnloadSceneOptions.None);
+				var unloadAsyncOp = SceneManager.UnloadSceneAsync(loadedScene, UnloadSceneOptions.None);
+				while (unloadAsyncOp.progress < 1f) {
+					await Observable.NextFrame();
+				}
 			}
 
 			Debug.Log($"TODO remove loading screen");
