@@ -27,7 +27,7 @@ namespace CDK {
 			while (_fadeCanvasGroup.alpha < 1f) {
 				await Observable.NextFrame();
 				
-				_fadeCanvasGroup.alpha += Time.deltaTime / fadeTime;
+				_fadeCanvasGroup.alpha += Time.unscaledDeltaTime / fadeTime;
 			}
 			
 		}
@@ -42,7 +42,7 @@ namespace CDK {
 			while (_fadeCanvasGroup.alpha > 0f) {
 				await Observable.NextFrame();
 				
-				_fadeCanvasGroup.alpha -= Time.deltaTime / fadeTime;
+				_fadeCanvasGroup.alpha -= Time.unscaledDeltaTime / fadeTime;
 			}
 		}
 		
