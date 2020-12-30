@@ -15,7 +15,12 @@ namespace CDK.Integration {
 			_compositeDisposable?.Dispose();
 			discord?.Dispose();
 
-			var clientId = CGameSettings.get.DiscordClientId;
+			long clientId = 0;
+			try {
+				clientId = Convert.ToInt64(CGameSettings.get.DiscordClientId);
+			} catch (Exception e) {
+				Debug.LogError(e);
+			}
 			if (clientId == 0) return;
 			
 			discord = new Discord.Discord(clientId, (UInt64)Discord.CreateFlags.NoRequireDiscord);
