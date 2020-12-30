@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 #if UNITY_EDITOR
@@ -19,8 +18,8 @@ namespace CDK {
 		private void OnDrawGizmos() {
 			Handles.color = Color.white;
 			var pos = this.transform.position;
+			DebugExtension.DrawArrow(pos, this.transform.forward, Color.white);
 			Handles.Label(pos, $"Entry point {this._number}");
-			Gizmos.DrawWireSphere(pos, 0.5f);
 		}
 		#endif
 	}

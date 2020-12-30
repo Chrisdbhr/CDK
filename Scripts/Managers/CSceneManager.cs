@@ -26,7 +26,7 @@ namespace CDK {
 
 		#endregion <<---------- Events ---------->>
 
-		
+		private static CSceneEntryPoint[] _sceneEntryPoints;
 		
 
 		#region <<---------- Initializers ---------->>
@@ -44,9 +44,8 @@ namespace CDK {
 		/// </summary>
 		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
 		private static void InitializeAfterSceneLoad() {
-			
-			//var allEntryPoints = GameObject.FindObjectsOfType<CSceneEntryPoint>();
-		
+			UpdateSceneEntryPointsList();
+
 		}
 
 		#endregion <<---------- Initializers ---------->>
@@ -56,16 +55,22 @@ namespace CDK {
 			SceneManager.LoadSceneAsync(sceneName);
 		}
 
-		public static async Task Teleport(string sceneToLoad, int entryPointNumber, IEnumerable<GameObject> gameObjectsToTeleport) {
+		public static async Task Teleport(string sceneToLoad, int entryPointNumber, IReadOnlyList<GameObject> gameObjectsToTeleport) {
 
+			if (gameObjectsToTeleport == null || !gameObjectsToTeleport.Any()) {
+				Debug.LogError($"List of null objects tried to Teleport, canceling operation.");
+				return;
+			}
+			
 			CTime.SetTimeScale(0f);
 			CBlockingEventsManager.IsPlayingCutscene = true;
 
 			Debug.Log($"Loading scene {sceneToLoad}");
 			
-			// load scenes
 			var allLoadedScenes = GetAllLoadedScenes();
 			
+			
+			// Load scenes
 			var sceneToLoadAsyncOp = SceneManager.LoadSceneAsync(sceneToLoad, LoadSceneMode.Additive);
 			
 			sceneToLoadAsyncOp.allowSceneActivation = false;
@@ -74,29 +79,35 @@ namespace CDK {
 
 			Debug.Log($"TODO implement loading screen");
 
-			var rootGameObjects = gameObjectsToTeleport.Select(go => go.transform.root).ToArray();
 			
+			// Activate loaded scenes
 			sceneToLoadAsyncOp.allowSceneActivation = true;
 
-			while (sceneToLoadAsyncOp.progress < 1f) {
+			do {
 				await Observable.NextFrame();
-			}
-
+			} while (sceneToLoadAsyncOp.progress < 1f);
+			
 			var targetScene = SceneManager.GetSceneByName(sceneToLoad);
 			
 			SceneManager.SetActiveScene(targetScene);
-
-			foreach (var rootGo in rootGameObjects) {
-				PositionTransformToSceneEntryPoint(rootGo.transform, entryPointNumber);
+			
+			foreach (var rootGo in gameObjectsToTeleport) {
 				SceneManager.MoveGameObjectToScene(rootGo.gameObject, targetScene);
 			}
+			
 			
 			// unload last scenes
 			foreach (var loadedScene in allLoadedScenes) {
 				var unloadAsyncOp = SceneManager.UnloadSceneAsync(loadedScene, UnloadSceneOptions.None);
-				while (unloadAsyncOp.progress < 1f) {
+				do {
 					await Observable.NextFrame();
-				}
+				} while (unloadAsyncOp.progress < 1f);
+			}
+
+			UpdateSceneEntryPointsList();
+
+			foreach (var rootGo in gameObjectsToTeleport) {
+				SetTransformToSceneEntryPoint(rootGo.transform, entryPointNumber);
 			}
 
 			Debug.Log($"TODO remove loading screen");
@@ -108,39 +119,49 @@ namespace CDK {
 			await CFadeCanvas.FadeToTransparent(1f);
 		}
 
-		public static void PositionTransformToSceneEntryPoint(Transform transf, int entryPointNumber = 0) {
-			if (transf == null) {
+		public static void SetTransformToSceneEntryPoint(Transform transformToMove, int entryPointNumber = 0) {
+			if (transformToMove == null) {
 				Debug.LogError("Cant move a null game object.");
 				return;
 			}
 
-			var targetPos = Vector3.zero;
+			Transform targetTransform = null;
 
-			var allEntryPoints = GameObject.FindObjectsOfType<CSceneEntryPoint>();
-			if (!allEntryPoints.Any() || entryPointNumber >= allEntryPoints.Length) {
+			if (!_sceneEntryPoints.Any() || entryPointNumber >= _sceneEntryPoints.Length) {
 				Debug.LogWarning($"Cant find any level entry point {entryPointNumber} OR it is invalid.");
 			}
 			else {
-				var selectedEntryPoint = allEntryPoints.FirstOrDefault(ep => ep.Number == entryPointNumber);
+				var selectedEntryPoint = _sceneEntryPoints.FirstOrDefault(ep => ep.Number == entryPointNumber);
 				if (selectedEntryPoint != null) {
-					targetPos = selectedEntryPoint.transform.position;
+					targetTransform = selectedEntryPoint.transform;
 				}
 			}
 
-			transf.position = targetPos;
-			Debug.Log($"Moving {transf.name} to {nameof(entryPointNumber)} at position {targetPos}");
+			if (targetTransform == null) {
+				transformToMove.position = Vector3.zero;
+				transformToMove.rotation = Quaternion.identity;
+			}
+			else {
+				transformToMove.position = targetTransform.position;
+				transformToMove.rotation = targetTransform.rotation;
+			}
+			
+			Debug.Log($"Moving {transformToMove.name} to {nameof(entryPointNumber)} at position {transformToMove.position}");
 		}
 
+		public static void UpdateSceneEntryPointsList() {
+			_sceneEntryPoints = GameObject.FindObjectsOfType<CSceneEntryPoint>();
+		}
+		
 
-		#region <<---------- Static ---------->>
+		#region <<---------- Scene All Objects ---------->>
 		
 		public static Scene[] GetAllLoadedScenes() {
 			
 			int countLoaded = SceneManager.sceneCount;
 			Scene[] loadedScenes = new Scene[countLoaded];
  
-			for (int i = 0; i < countLoaded; i++)
-			{
+			for (int i = 0; i < countLoaded; i++) {
 				loadedScenes[i] = SceneManager.GetSceneAt(i);
 			}
 
@@ -157,6 +178,6 @@ namespace CDK {
 			return rootTransformObjects;
 		}
 		
-		#endregion <<---------- Static ---------->>
+		#endregion <<---------- Scene All Objects ---------->>
 	}
 }

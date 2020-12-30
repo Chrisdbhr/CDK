@@ -58,7 +58,7 @@ namespace CDK {
 			// fmod listener
 			var fmodStudioListener = this.gameObject.AddComponent<StudioListener>();
 			fmodStudioListener.ListenerNumber = this._ownerPlayer.PlayerNumber;
-			fmodStudioListener.attenuationObject = this._ownerPlayer.GetMainControllingCharacter().gameObject;
+			fmodStudioListener.attenuationObject = this._ownerPlayer.GetControllingCharacter().gameObject;
 		}
 		
 		#endregion <<---------- Initializers ---------->>
@@ -366,7 +366,7 @@ namespace CDK {
 		}
 
 		private void ProcessPosition() {
-			var character = this._ownerPlayer.GetMainControllingCharacter();
+			var character = this._ownerPlayer.GetControllingCharacter();
 			if (character == null) return;
 			
 			// clamp max distance

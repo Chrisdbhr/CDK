@@ -18,7 +18,7 @@ namespace CDK {
 			
 			this.PlayerNumber = playerNumber;
 			this.SignToInputEvents();
-			Debug.Log($"Instantiating game player {playerNumber}");
+			Debug.Log($"Instantiating a new game player number {playerNumber}");
 		}
 		
 		#endregion <<---------- Initializers ---------->>
@@ -32,7 +32,7 @@ namespace CDK {
 		private Rewired.Player _rePlayer;
 		public CPlayerCamera PlayerCamera { get; private set; }
 
-		private List<CCharacterBase> _controllingCharacter = new List<CCharacterBase>();
+		private readonly List<CCharacterBase> _characters = new List<CCharacterBase>();
 
 		[NonSerialized] private CompositeDisposable _compositeDisposable;
 		[NonSerialized] private Vector2 _inputMovement;
@@ -54,7 +54,7 @@ namespace CDK {
 			
 			// movement
 			Observable.EveryUpdate().Subscribe(_ => {
-				if (this._controllingCharacter.Count <= 0) return;
+				if (this._characters.Count <= 0) return;
 				
 				// input relative to cam direction
 				var camF = Vector3.forward;
@@ -69,7 +69,7 @@ namespace CDK {
 					camR = camR.normalized;
 				}
 				
-				foreach (var character in this._controllingCharacter.Where(character => character != null)) {
+				foreach (var character in this._characters.Where(character => character != null)) {
 					character.InputMovementRaw = this._inputMovement.normalized;
 					character.InputMovementDirRelativeToCam = (camF * this._inputMovement.y + camR * this._inputMovement.x).normalized;
 				}
@@ -96,19 +96,19 @@ namespace CDK {
 		#endregion <<---------- Events ---------->>
 
 
+		
 
 		#region <<---------- Input ---------->>
 		
 		private void InputRun(InputActionEventData data) {
-			if (this._controllingCharacter.Count <= 0) return;
+			var character = this.GetControllingCharacter();
+			if (character == null) return;
 			var inputRun = data.GetButton();
-			foreach (var character in this._controllingCharacter.Where(character => character != null)) {
-				character.InputRun = inputRun;
-			}
+			character.InputRun = inputRun;
 		}
 		
 		private void InputInteract(InputActionEventData data) {
-			var character = this.GetMainControllingCharacter();
+			var character = this.GetControllingCharacter();
 			if (character == null) return;
 			var interactionComponent = character.GetComponent<CPlayerInteractionBase>();
 			if (interactionComponent == null) return;
@@ -120,29 +120,36 @@ namespace CDK {
 		
 		
 		
+		
 		#region <<---------- Character Control ---------->>
 
 		public void AddControllingCharacter(CCharacterBase character) {
-			if (this._controllingCharacter.Contains(character)) {
+			if (this._characters.Contains(character)) {
 				Debug.LogError($"Will not add {character.name} to player {this.PlayerNumber} control because it is already controlling it!");
 				return;
 			}
 
-			CSceneManager.PositionTransformToSceneEntryPoint(character.transform);
+			CSceneManager.SetTransformToSceneEntryPoint(character.transform);
 			
-			this._controllingCharacter.Add(character);
+			this._characters.Add(character);
 			
 			this.CheckIfNeedToCreateCamera();
 		}
 
-		public CCharacterBase GetMainControllingCharacter() {
-			return this._controllingCharacter.FirstOrDefault(c => c != null);
+		public CCharacterBase GetControllingCharacter() {
+			return this._characters.FirstOrDefault(c => c != null);
 		}
 
-		private bool HasAnyCharacterToControl() {
-			return this._controllingCharacter.Count > 0 && this._controllingCharacter.FirstOrDefault(c => c != null) != null;
+		public List<GameObject> GetAllRelatedGameObjects() {
+			var list = this._characters.Select(characterBase => characterBase.gameObject).ToList();
+			if(this.PlayerCamera != null) list.Add(this.PlayerCamera.gameObject);
+			return list;
 		}
-		
+
+		public bool IsControllingCharacter(CCharacterBase characterBase) {
+			return this._characters.Contains(characterBase);
+		}
+
 		#endregion <<---------- Character Control ---------->>
 
 
@@ -152,7 +159,7 @@ namespace CDK {
 
 		private void CheckIfNeedToCreateCamera() {
 			if (this.PlayerCamera != null) return;
-			var mainChar = this.GetMainControllingCharacter();
+			var mainChar = this.GetControllingCharacter();
 			if (mainChar == null) return;
 
 			var createdGo = new GameObject($"[Camera] {mainChar.name}");

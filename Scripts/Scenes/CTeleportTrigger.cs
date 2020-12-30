@@ -44,8 +44,20 @@ namespace CDK {
 
 		#region <<---------- Teleport ---------->>
 		
-		private void Teleport(Transform objToTeleport) {
-			CSceneManager.Teleport(this.targetScene, this._targetEntryPoint, new List<GameObject>{ objToTeleport.gameObject }).CAwait();
+		private void Teleport(Transform objTriggeringTeleport) {
+			var triggerCharacter = objTriggeringTeleport.GetComponent<CCharacterBase>();
+			if (triggerCharacter == null) {
+				Debug.LogWarning($"Transform {objTriggeringTeleport} triggered TeleportTrigger {this.name} but it has no Character attached to it!", objTriggeringTeleport);
+				return;
+			}
+
+			var relatedGameObjects = CGamePlayerManager.get.GetAllGameObjectsRelatedToCharacter(triggerCharacter);
+			if (relatedGameObjects.Count <= 0) {
+				Debug.LogWarning($"Transform {objTriggeringTeleport} triggered TeleportTrigger {this.name} but can find any GamePlayer that controls this Character!", objTriggeringTeleport);
+				return;
+			}
+			
+			CSceneManager.Teleport(this.targetScene, this._targetEntryPoint, relatedGameObjects).CAwait();
 		}
 		
 		#endregion <<---------- Teleport ---------->>

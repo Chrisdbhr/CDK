@@ -9,14 +9,14 @@ using UnityEngine.ResourceManagement.AsyncOperations;
 using Object = UnityEngine.Object;
 
 namespace CDK {
-	public class CPlayerManager : IDisposable {
+	public class CGamePlayerManager : IDisposable {
 
 		#region <<---------- Properties ---------->>
 		
-		public static CPlayerManager get {
-			get { return _instance ?? (_instance = new CPlayerManager()); }
+		public static CGamePlayerManager get {
+			get { return _instance ?? (_instance = new CGamePlayerManager()); }
 		}
-		private static CPlayerManager _instance;
+		private static CGamePlayerManager _instance;
 
 
 		private readonly List<CGamePlayer> _gamePlayers = new List<CGamePlayer>();
@@ -87,6 +87,21 @@ namespace CDK {
 		}
 
 		#endregion <<---------- General ---------->>
+
+
+
+		
+		#region <<---------- Characters Managment ---------->>
+
+		public List<GameObject> GetAllGameObjectsRelatedToCharacter(CCharacterBase characterBase) {
+			foreach (var player in this._gamePlayers) {
+				if (!player.IsControllingCharacter(characterBase)) continue;
+				return player.GetAllRelatedGameObjects();
+			}
+			return new List<GameObject>();
+		}
+		
+		#endregion <<---------- Characters Managment ---------->>
 		
 		
 		

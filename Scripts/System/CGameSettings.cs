@@ -21,27 +21,37 @@ namespace CDK {
 				return _instance;
 			}
 		}
+
 		private static CGameSettings _instance;
 
-		public bool CursorStartsHidden { get { return this._cursorStartsHidden; } }
+		public bool CursorStartsHidden {
+			get { return this._cursorStartsHidden; }
+		}
+
 		[SerializeField] private bool _cursorStartsHidden;
-		
-		public LayerMask LineOfSightBlockingLayers { get { return this._lineOfSightBlockingLayers; } }
+
+		public LayerMask LineOfSightBlockingLayers {
+			get { return this._lineOfSightBlockingLayers; }
+		}
+
 		[SerializeField] private LayerMask _lineOfSightBlockingLayers = 1;
 
 		// public CCameraAreaProfileData DefaultCameraProfile { get { return this._defaultCameraProfile; } }
 		// [SerializeField] private CCameraAreaProfileData _defaultCameraProfile;
 
-		public long DiscordClientId { get { return this._discordClientId; } }
-		[HideInInspector] private long _discordClientId;
-		
+		public string DiscordClientId {
+			get { return this._discordClientId; }
+		}
+
+		[HideInInspector] [SerializeField] private string _discordClientId;
+
 		#endregion <<---------- Properties ---------->>
-		
-		
-		
-		
+
+
+
+
 		#if UNITY_EDITOR
-		
+
 		[MenuItem("Tools/Open GameSettings")]
 		private static void OpenGameSettingsData() {
 			var gameSettings = get;
@@ -62,6 +72,14 @@ namespace CDK {
 		
 		#endif
 		
+		public void EditorSetDiscordClientId(string clientId) {
+			if (!Application.isEditor) {
+				Debug.LogError($"Cant set Discord Client Id outside Unity editor.");
+				return;
+			}
+			this._discordClientId = clientId;
+		}
+		
 	}
 
 	#if UNITY_EDITOR
@@ -70,8 +88,10 @@ namespace CDK {
 		public override void OnInspectorGUI() {
 			if (!(this.target is CGameSettings myScript)) return;
 			base.OnInspectorGUI();
+			this.serializedObject.Update();
 
-			EditorGUILayout.PasswordField("Discord Client Id", myScript.DiscordClientId.ToString());
+			myScript.EditorSetDiscordClientId(EditorGUILayout.PasswordField("Discord Client Id", myScript.DiscordClientId.ToString()));
+			EditorUtility.SetDirty(this.target);
 		}
 
 	}

@@ -67,7 +67,7 @@ namespace CDK {
 					this.Anim.SetBool(this.ANIM_CHAR_IS_SLIDING, value == CMovState.Sliding);
 					this.Anim.SetBool(this.ANIM_CHAR_IS_WALKING, value == CMovState.Walking);
 					this.Anim.SetBool(this.ANIM_CHAR_IS_RUNNING, value == CMovState.Running);
-					this.Anim.SetBool(this.ANIM_CHAR_IS_SPRINTING, value == CMovState.Sprint);
+					//this.Anim.SetBool(this.ANIM_CHAR_IS_SPRINTING, value == CMovState.Sprint);
 				}
 			}
 		}
@@ -126,19 +126,6 @@ namespace CDK {
 		[NonSerialized] protected ReactiveProperty<bool> IsStrafingRx;
 		#endregion <<---------- Strafe ---------->>
 
-		#region <<---------- Crouch ---------->>
-
-		public bool IsCrouched {
-			get {
-				return this._isCrouched.Value;
-			}
-		}
-
-		[SerializeField] private ReactiveProperty<bool> _isCrouched;
-		public Action<bool> OnCrouchedStateChanged;
-
-		#endregion <<---------- Crouch ---------->>
-
 		#region <<---------- Aim ---------->>
 		public bool IsAiming {
 			get { return this._isAimingRx.Value; }
@@ -162,10 +149,7 @@ namespace CDK {
 		protected readonly int ANIM_CHAR_IS_SLIDING = Animator.StringToHash("isSliding");
 		protected readonly int ANIM_CHAR_IS_WALKING = Animator.StringToHash("isWalking");
 		protected readonly int ANIM_CHAR_IS_RUNNING = Animator.StringToHash("isRunning");
-		protected readonly int ANIM_CHAR_IS_SPRINTING = Animator.StringToHash("isSprinting");
 		protected readonly int ANIM_CHAR_IS_FALLING = Animator.StringToHash("isFalling");
-		protected readonly int ANIM_CHAR_IS_AIMING = Animator.StringToHash("isAiming");
-		protected readonly int ANIM_CHAR_IS_CROUCHING = Animator.StringToHash("isCrouching");
 		
 		// Stun
 		protected readonly int ANIM_CHAR_IS_STUNNED_LIGHT = Animator.StringToHash("stunL");
@@ -242,18 +226,12 @@ namespace CDK {
 			this._isAimingRx = new ReactiveProperty<bool>();
 			this.IsStrafingRx = new ReactiveProperty<bool>();
 			this.CanRunRx = new ReactiveProperty<bool>(true);
-			this._isCrouched = new ReactiveProperty<bool>();
 
 			// strafe
 			this.IsStrafingRx.Subscribe(isStrafing => {
 				if(this.Anim) this.Anim.SetBool(this.ANIM_CHAR_IS_STRAFING, isStrafing);
 			}).AddTo(this._compositeDisposable);
 
-			// aiming
-			this._isAimingRx.Subscribe(isAiming => { 
-				if(this.Anim) this.Anim.SetBool(this.ANIM_CHAR_IS_AIMING, isAiming);
-			}).AddTo(this._compositeDisposable);
-			
 			// can slide
 			this._canSlideRx.Subscribe(canSlide => {
 				// stopped sliding
@@ -294,11 +272,6 @@ namespace CDK {
 				}
 			}).AddTo(this._compositeDisposable);
 
-			// crouch
-			this._isCrouched.Subscribe(isCrouched => {
-				this.OnCrouchedStateChanged?.Invoke(isCrouched);
-				this.Anim.SetBool(this.ANIM_CHAR_IS_CROUCHING, isCrouched);
-			}).AddTo(this._compositeDisposable);
 		}
 
 		protected virtual void UnsubscribeToEvents() {
@@ -486,47 +459,47 @@ namespace CDK {
 		#region <<---------- Crouch ---------->>
 
 		public void ToggleCrouch() {
-			var oldCrouchState = this.IsCrouched;
+//			var oldCrouchState = this.IsCrouched;
 			
-			if (this.IsCrouched) {
-				// get up
-				var transformUp = this._myTransform.up;
-				var origin = this._myTransform.position + (transformUp * this.charController.height);
-				var collidersWithSelf = Physics.SphereCastAll(
-					origin,
-					this.charController.radius,
-					transformUp.normalized,
-					this.charController.height,
-					1
-				).Select(x => x.collider);
-
-				var allSelfColliders = this.transform.root.GetComponentsInChildren<Collider>();
-
-				var colliders = collidersWithSelf.Except(allSelfColliders).ToArray();
-
-				if (colliders.Length > 0) {
-					try {
-						var sb = new StringBuilder();
-						sb.AppendLine($"{this.name} cant get up, head collided with {colliders.Length} objects:");
-						foreach (var col in colliders) {
-							sb.AppendLine($"{col.name}");
-						}
-						Debug.Log(sb.ToString());
-					} catch (Exception e) {
-						Console.WriteLine(e);
-					}
-					return;
-				}
-			}
+			// if (this.IsCrouched) {
+			// 	// get up
+			// 	var transformUp = this._myTransform.up;
+			// 	var origin = this._myTransform.position + (transformUp * this.charController.height);
+			// 	var collidersWithSelf = Physics.SphereCastAll(
+			// 		origin,
+			// 		this.charController.radius,
+			// 		transformUp.normalized,
+			// 		this.charController.height,
+			// 		1
+			// 	).Select(x => x.collider);
+			//
+			// 	var allSelfColliders = this.transform.root.GetComponentsInChildren<Collider>();
+			//
+			// 	var colliders = collidersWithSelf.Except(allSelfColliders).ToArray();
+			//
+			// 	if (colliders.Length > 0) {
+			// 		try {
+			// 			var sb = new StringBuilder();
+			// 			sb.AppendLine($"{this.name} cant get up, head collided with {colliders.Length} objects:");
+			// 			foreach (var col in colliders) {
+			// 				sb.AppendLine($"{col.name}");
+			// 			}
+			// 			Debug.Log(sb.ToString());
+			// 		} catch (Exception e) {
+			// 			Console.WriteLine(e);
+			// 		}
+			// 		return;
+			// 	}
+			// }
 			
-			// get down
-			this.charController.height = this._charInitialHeight * (oldCrouchState ? 1f : 0.5f);  
-
-			var center = this.charController.center;
-			center.y = this.charController.height * 0.5f;
-			this.charController.center = center;
-				
-			this._isCrouched.Value = !oldCrouchState;
+			// // get down
+			// this.charController.height = this._charInitialHeight * (oldCrouchState ? 1f : 0.5f);  
+			//
+			// var center = this.charController.center;
+			// center.y = this.charController.height * 0.5f;
+			// this.charController.center = center;
+			// 	
+			// this._isCrouched.Value = !oldCrouchState;
 		}
 		
 		#endregion <<---------- Crouch ---------->>

@@ -22,11 +22,11 @@ namespace CDK {
 		}
 
 		private void OnEnable() {
-			this._characterBase.OnCrouchedStateChanged += this.CrouchedStateChanged;
+			// this._characterBase.OnCrouchedStateChanged += this.CrouchedStateChanged;
 		}
 
 		private void OnDisable() {
-			this._characterBase.OnCrouchedStateChanged -= this.CrouchedStateChanged;
+			// this._characterBase.OnCrouchedStateChanged -= this.CrouchedStateChanged;
 		}
 
 		private void CrouchedStateChanged(bool crouched) {
