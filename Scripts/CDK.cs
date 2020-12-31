@@ -7,7 +7,9 @@ using UnityEditor;
 #endif
 
 namespace CDK {
+	#if UNITY_EDITOR
 	[InitializeOnLoad]
+	#endif
 	public static class CDK {
 
 		#if UNITY_EDITOR

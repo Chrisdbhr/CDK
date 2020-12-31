@@ -345,6 +345,7 @@ namespace CDK {
 
 			if (this.AdditiveMovement != Vector3.zero) {
 				targetMotion += this.AdditiveMovement;
+				Debug.Log($"Applying additive movement of {this.AdditiveMovement}, targetMotion now is {targetMotion}");
 				this.AdditiveMovement = Vector3.zero;
 			}
 			

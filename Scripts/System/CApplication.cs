@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.AddressableAssets;
 
 namespace CDK {
 	public static class CApplication {
@@ -9,6 +10,8 @@ namespace CDK {
 		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
 		private static void InitializeBeforeSceneLoad() {
 			Application.backgroundLoadingPriority = ThreadPriority.Low;
+			Debug.Log("CApplication calling Addressables.InitializeAsync()");
+			Addressables.InitializeAsync();
 		}
 	}
 }
