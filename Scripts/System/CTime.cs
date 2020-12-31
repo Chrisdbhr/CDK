@@ -25,7 +25,7 @@ namespace CDK {
 		/// Set time scale logging this action on console.
 		/// </summary>
 		public static void SetTimeScale(float targetTimeScale) {
-			Debug.Log($"Settings time scale to {targetTimeScale}");
+			Debug.Log($"Setting time scale to {targetTimeScale}");
 			Time.timeScale = targetTimeScale;
 		}
 	}

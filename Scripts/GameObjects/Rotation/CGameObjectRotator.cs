@@ -10,7 +10,7 @@ namespace CDK {
 		#endregion <<---------- Properties and Fields ---------->>
 		
 		protected override void Execute(float deltaTime) {
-			this.transform.Rotate(this._rotateDirectionAndSpeed * (deltaTime * Time.timeScale));
+			this.transform.Rotate(this._rotateDirectionAndSpeed * (CTime.DeltaTimeScaled));
 		}
 	}
 }
