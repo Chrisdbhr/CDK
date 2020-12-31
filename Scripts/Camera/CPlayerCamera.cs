@@ -50,7 +50,7 @@ namespace CDK {
 			// unity camera
 			this._unityCamera = thisGo.AddComponent<Camera>();
 			this._unityCamera.backgroundColor = Color.black;
-			this._unityCamera.fov = 50;
+			this._unityCamera.fieldOfView = 50;
 			this._unityCamera.nearClipPlane = 0.01f;
 			this._unityCamera.farClipPlane = 1500;
 			this._unityCamera.depth = -1;
@@ -237,7 +237,7 @@ namespace CDK {
 			// subscribe to CAMERA PROFILE changed
 			this.ActiveProfileRx.Subscribe(newProfile => {
 				if(this._unityCamera == null) return;
-				DOVirtual.Float(this._unityCamera.fieldOfView, newProfile.fov, 1f, value => { this._unityCamera.fieldOfView = value; });
+				DOVirtual.Float(this._unityCamera.fieldOfView, newProfile.fieldOfView, 1f, value => { this._unityCamera.fieldOfView = value; });
 				DOVirtual.Float(this._unityCamera.farClipPlane, newProfile.FarClippingPlane, 1f, value => { this._unityCamera.farClipPlane = value; });
 			}).AddTo(this._compositeDisposable);
 
