@@ -39,12 +39,6 @@ namespace CDK {
 		// public CCameraAreaProfileData DefaultCameraProfile { get { return this._defaultCameraProfile; } }
 		// [SerializeField] private CCameraAreaProfileData _defaultCameraProfile;
 
-		public string DiscordClientId {
-			get { return this._discordClientId; }
-		}
-
-		[HideInInspector] [SerializeField] private string _discordClientId;
-
 		#endregion <<---------- Properties ---------->>
 
 
@@ -72,28 +66,5 @@ namespace CDK {
 		
 		#endif
 		
-		public void EditorSetDiscordClientId(string clientId) {
-			if (!Application.isEditor) {
-				Debug.LogError($"Cant set Discord Client Id outside Unity editor.");
-				return;
-			}
-			this._discordClientId = clientId;
-		}
-		
 	}
-
-	#if UNITY_EDITOR
-	[CustomEditor(typeof(CGameSettings))]
-	public class CGameSettingsEditor : Editor {
-		public override void OnInspectorGUI() {
-			if (!(this.target is CGameSettings myScript)) return;
-			base.OnInspectorGUI();
-			this.serializedObject.Update();
-
-			myScript.EditorSetDiscordClientId(EditorGUILayout.PasswordField("Discord Client Id", myScript.DiscordClientId.ToString()));
-			EditorUtility.SetDirty(this.target);
-		}
-
-	}
-	#endif
 }

@@ -9,18 +9,20 @@ namespace CDK.Integration {
 		private static Discord.Discord discord;
 		private static CompositeDisposable _compositeDisposable;
 		private static long _epochStartTime;
-
+		
+		public enum States {
+			onMenu, wakeup, dreaming, playing
+		}
+		
+		
+		
+		
 		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
 		public static void Init() {
 			_compositeDisposable?.Dispose();
 			discord?.Dispose();
 
-			long clientId = 0;
-			try {
-				clientId = Convert.ToInt64(CGameSettings.get.DiscordClientId);
-			} catch (Exception e) {
-				Debug.LogError(e);
-			}
+			long clientId = GetDiscordClientId();
 			if (clientId == 0) return;
 			
 			discord = new Discord.Discord(clientId, (UInt64)Discord.CreateFlags.NoRequireDiscord);
@@ -45,10 +47,17 @@ namespace CDK.Integration {
 		}
 
 
-		public enum States {
-			onMenu, wakeup, dreaming, playing
-		}
+		
 
+		public static long GetDiscordClientId() {
+			long clientId = 0;
+			try {
+				clientId = Convert.ToInt64(((TextAsset)Resources.Load("DiscordClientId")).text);
+			} catch (Exception e) {
+				Console.WriteLine(e);
+			}
+			return clientId;
+		}
 
 		public static void SetRichPresence(States newState) {
 			if (discord == null) return;
