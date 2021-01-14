@@ -10,7 +10,8 @@
         "UniTask.Addressables",
         "IngameDebugConsole",
         "UniTask",
-        "FMODUnity"
+        "FMODUnity",
+        "Cinemachine"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
