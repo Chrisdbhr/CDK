@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Cinemachine;
 using DG.Tweening;
 using FMODUnity;
 using UniRx;
@@ -20,45 +21,20 @@ namespace CDK {
 				return;
 			}
 			this._ownerPlayer = ownerPlayer;
-			
-			// cache
-			var thisGo = this.gameObject;
-			
-			// sphere collider
-			var sphere = thisGo.AddComponent<SphereCollider>();
-			sphere.isTrigger = true;
-			
-			// canvas for crossfade
-			var crossFadeCanvasGo = new GameObject("Crossfade Canvas");
-			crossFadeCanvasGo.transform.parent = this.transform;
-			var crossFadeCanvas = crossFadeCanvasGo.AddComponent<Canvas>();
-			crossFadeCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
-			crossFadeCanvas.sortingOrder = -100;
-		
-			// raw image for crossfade
-			var rawImgGo = new GameObject("Crossfade Raw Image");
-			rawImgGo.transform.parent = crossFadeCanvasGo.transform;
-			this._screenCrossfadeRawImage = rawImgGo.AddComponent<RawImage>();
-			this._screenCrossfadeRawImage.raycastTarget = false;
-			this._screenCrossfadeRawImage.color = new Color(255, 255, 255, 0);
-			// fill entire screen
-			var rawImgRectTransform = rawImgGo.GetComponent<RectTransform>();
-			rawImgRectTransform.anchorMin = Vector2.zero;
-			rawImgRectTransform.anchorMax = Vector2.one;
-			rawImgRectTransform.sizeDelta = Vector2.zero;
 
-			// unity camera
-			this._unityCamera = thisGo.AddComponent<Camera>();
-			this._unityCamera.backgroundColor = Color.black;
-			this._unityCamera.fieldOfView = 50;
-			this._unityCamera.nearClipPlane = 0.01f;
-			this._unityCamera.farClipPlane = 1500;
-			this._unityCamera.depth = -1;
+			// character object
+			var ownerCharacter = this._ownerPlayer.GetControllingCharacter();
+			
+			// cinemachine
+
+			var lookTarget = ownerCharacter.GetComponentInChildren<CCameraLookTarget>();
+			
+			this._cinemachineCamera.Follow = lookTarget != null ? lookTarget.transform : ownerCharacter.transform;
+			this._cinemachineCamera.LookAt = lookTarget != null ? lookTarget.transform : ownerCharacter.transform;
 			
 			// fmod listener
-			var fmodStudioListener = this.gameObject.AddComponent<StudioListener>();
-			fmodStudioListener.ListenerNumber = this._ownerPlayer.PlayerNumber;
-			fmodStudioListener.attenuationObject = this._ownerPlayer.GetControllingCharacter().gameObject;
+			this._studioListener.ListenerNumber = this._ownerPlayer.PlayerNumber;
+			this._studioListener.attenuationObject = ownerCharacter.gameObject;
 		}
 		
 		#endregion <<---------- Initializers ---------->>
@@ -76,14 +52,9 @@ namespace CDK {
 		
 		#region <<---------- Properties and Fields ---------->>
 		
-		// Main refs
-		[NonSerialized] private CGamePlayer _ownerPlayer;
-		[NonSerialized] private UnityEngine.Camera _unityCamera;
-		
 		// Position
 		[SerializeField] private Vector3 _offset = Vector3.up * 1.6f;
 		[NonSerialized] private Vector3 newPosition;
-		
 
 		// Rotation
 		[NonSerialized] private Quaternion newRotation;
@@ -95,11 +66,16 @@ namespace CDK {
 		[SerializeField] private float yMinLimit = -20f;
 		[SerializeField] private float yMaxLimit = 80f;
 
+		
 		// Wall collision
 		[SerializeField] private LayerMask wallCollisionLayers = 1;
 		[NonSerialized] private RaycastHit _raycastHit;
 		
-		// Camera distance from target
+		// Camera 
+		[SerializeField] private UnityEngine.Camera _unityCamera;
+		[SerializeField] private CinemachineVirtualCamera _cinemachineCamera;
+		
+
 		[SerializeField] private Renderer[] _renderToHideWhenCameraIsClose;
 		[NonSerialized] private float _currentDistanceFromTarget = 10.0f;
 		[NonSerialized] private float _distanceToConsiderCloseForCharacter = 0.5f;
@@ -107,7 +83,7 @@ namespace CDK {
 		[NonSerialized] private float _clampMaxDistanceSpeed = 3f;
 
 		// Screen print
-		[NonSerialized] private RawImage _screenCrossfadeRawImage;
+		[SerializeField] private RawImage _screenCrossfadeRawImage;
 		[NonSerialized] private bool _getRenderImgOnNextFrame;
 		[NonSerialized] private Texture2D _screenShootTexture2d;
 		
@@ -116,7 +92,11 @@ namespace CDK {
 		[SerializeField] private CCameraAreaProfileData defaultProfile;
 		private readonly HashSet<CCameraAreaProfileData> _activeCameraProfilesList = new HashSet<CCameraAreaProfileData>();
 
+		// Audio
+		[SerializeField] private StudioListener _studioListener;
+		
 		// Cache
+		[NonSerialized] private CGamePlayer _ownerPlayer;
 		[NonSerialized] private Transform _transform;
 		[NonSerialized] private CompositeDisposable _compositeDisposable;
 		[NonSerialized] private Tweener _tween;
@@ -131,7 +111,7 @@ namespace CDK {
 		private void Awake() {
 			this._transform = this.transform;
 
-			this.defaultProfile = ScriptableObject.CreateInstance<CCameraAreaProfileData>();
+			if(this.defaultProfile == null) this.defaultProfile = ScriptableObject.CreateInstance<CCameraAreaProfileData>();
 			
 			// active camera profile
 			this.ActiveProfileRx = new ReactiveProperty<CCameraAreaProfileData>();
@@ -163,7 +143,7 @@ namespace CDK {
 			Destroy(this._screenShootTexture2d);
 			this._screenShootTexture2d = null;
 			
-			this.defaultProfile.CDestroy();
+			if(this.defaultProfile == default) this.defaultProfile.CDestroy();
 		}
 		
 		private void LateUpdate() {
@@ -226,9 +206,20 @@ namespace CDK {
 		
 		#endregion <<---------- MonoBehaviour ---------->>
 
+
 		
+
+		#region <<---------- General ---------->>
+
+		public Transform GetCameraTransform() {
+			return this._unityCamera.transform;
+		}
 		
+		#endregion <<---------- General ---------->>
 		
+
+		
+
 		#region <<---------- Events ---------->>
 
 		private void SubscribeToEvents() {
@@ -264,22 +255,7 @@ namespace CDK {
 		}
 		
 		#endregion <<---------- Events ---------->>
-
 		
-		
-
-		#region <<---------- General ---------->>
-		
-		public void Rotate(Vector2 inputRotation) {
-			#if !UNITY_ANDROID
-			this.RotationY += inputRotation.x * this.xSpeed * CTime.DeltaTimeScaled; // * this.currentDistanceFromTarget; // make it rotate faster when very far from target.
-			this.RotationX -= inputRotation.y * this.ySpeed * CTime.DeltaTimeScaled;
-			#endif
-			this.transform.Rotate(inputRotation.y * this._rotationSpeed, inputRotation.x * this._rotationSpeed, 0f);
-		}
-		
-		#endregion <<---------- General ---------->>
-
 		
 		
 		

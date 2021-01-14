@@ -4,6 +4,7 @@ using System.Linq;
 using Rewired;
 using UniRx;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
 using Object = UnityEngine.Object;
 
 namespace CDK {
@@ -30,7 +31,7 @@ namespace CDK {
 		
 		public int PlayerNumber { get; } = 0;
 		private Rewired.Player _rePlayer;
-		public CPlayerCamera PlayerCamera { get; private set; }
+		private Transform _cameraTransform { get; set; }
 
 		private readonly List<CCharacterBase> _characters = new List<CCharacterBase>();
 
@@ -59,12 +60,11 @@ namespace CDK {
 				// input relative to cam direction
 				var camF = Vector3.forward;
 				var camR = Vector3.right;
-				if (this.PlayerCamera != null) {
-					var camTransform = this.PlayerCamera.transform;
-					camF = camTransform.forward;
+				if (this._cameraTransform != null) {
+					camF = this._cameraTransform.forward;
 					camF.y = 0;
 					camF = camF.normalized;
-					camR = camTransform.right;
+					camR = this._cameraTransform.right;
 					camR.y = 0;
 					camR = camR.normalized;
 				}
@@ -73,14 +73,6 @@ namespace CDK {
 					character.InputMovementRaw = this._inputMovement.normalized;
 					character.InputMovementDirRelativeToCam = (camF * this._inputMovement.y + camR * this._inputMovement.x).normalized;
 				}
-			}).AddTo(this._compositeDisposable);
-			
-			// look
-			Observable.EveryLateUpdate().Subscribe(context => {
-				var inputLook = this._rePlayer.GetAxis2D(CInputKeys.LOOK_X, CInputKeys.LOOK_Y);
-				if (inputLook == Vector2.zero) return;
-				if (this.PlayerCamera == null) return;
-				this.PlayerCamera.Rotate(inputLook);
 			}).AddTo(this._compositeDisposable);
 			
 			this._rePlayer.AddInputEventDelegate(this.InputInteract, UpdateLoopType.Update, InputActionEventType.ButtonJustPressed, CInputKeys.INTERACT);
@@ -142,7 +134,7 @@ namespace CDK {
 
 		public List<GameObject> GetAllRelatedGameObjects() {
 			var list = this._characters.Select(characterBase => characterBase.gameObject).ToList();
-			if(this.PlayerCamera != null) list.Add(this.PlayerCamera.gameObject);
+			if(this._cameraTransform != null) list.Add(this._cameraTransform.root.gameObject);
 			return list;
 		}
 
@@ -158,14 +150,22 @@ namespace CDK {
 		#region <<---------- Player Camera ---------->>
 
 		private void CheckIfNeedToCreateCamera() {
-			if (this.PlayerCamera != null) return;
+			if (this._cameraTransform != null) return;
 			var mainChar = this.GetControllingCharacter();
 			if (mainChar == null) return;
 
-			var createdGo = new GameObject($"[Camera] {mainChar.name}");
-			Debug.Log($"Created {mainChar.name} Camera", createdGo);
-			this.PlayerCamera = createdGo.AddComponent<CPlayerCamera>();
-			this.PlayerCamera.Initialze(this);
+			Addressables.LoadAssetAsync<GameObject>("PlayerCamera").Completed += handle => {
+				
+				var createdGo = Object.Instantiate(handle.Result);
+				createdGo.name = $"[Camera] {mainChar.name}";
+				
+				Debug.Log($"Created {mainChar.name} Camera", createdGo);
+
+				var cPlayerCameraManager = createdGo.GetComponent<CPlayerCamera>();
+				cPlayerCameraManager.Initialze(this);
+				this._cameraTransform = cPlayerCameraManager.GetCameraTransform();
+			};
+			
 		}
 		
 		#endregion <<---------- Player Camera ---------->>
