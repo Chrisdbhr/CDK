@@ -27,7 +27,7 @@ namespace CDK {
 			
 			// cinemachine
 
-			var lookTarget = ownerCharacter.GetComponentInChildren<CCameraLookTarget>();
+			var lookTarget = ownerCharacter.GetComponentInChildren<CCameraLookAndFollowTarget>();
 			
 			this._cinemachineCamera.Follow = lookTarget != null ? lookTarget.transform : ownerCharacter.transform;
 			this._cinemachineCamera.LookAt = lookTarget != null ? lookTarget.transform : ownerCharacter.transform;
