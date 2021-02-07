@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 
@@ -12,6 +13,10 @@ namespace CDK {
 			Application.backgroundLoadingPriority = ThreadPriority.Low;
 			Debug.Log("CApplication calling Addressables.InitializeAsync()");
 			Addressables.InitializeAsync();
+
+			Application.quitting += IsQuitting;
 		}
+
+		public static event Action IsQuitting;
 	}
 }

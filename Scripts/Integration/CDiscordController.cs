@@ -37,13 +37,21 @@ namespace CDK.Integration {
 			_compositeDisposable = new CompositeDisposable();
 			
 			_compositeDisposable.Add(
-			Observable.Timer(TimeSpan.FromSeconds(5)).RepeatSafe().Subscribe(_ => {
+			Observable.Timer(TimeSpan.FromSeconds(10)).RepeatSafe().Subscribe(_ => {
 				if (discord == null) return;
 				discord.RunCallbacks();
 			})
 			);
 			
 			SetRichPresence(States.playing);
+
+			CApplication.IsQuitting += () => {
+				var activityManager = discord?.GetActivityManager();
+				activityManager?.ClearActivity(result => {
+					Debug.Log($"Clearing Discord activity callback result: {result.ToString()}");
+				});
+				discord?.Dispose();
+			};
 		}
 
 
