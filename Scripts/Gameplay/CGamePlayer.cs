@@ -31,7 +31,8 @@ namespace CDK {
 		
 		public int PlayerNumber { get; } = 0;
 		private Rewired.Player _rePlayer;
-		private Transform _cameraTransform { get; set; }
+		private Transform _cameraTransform;
+		private CPlayerCamera _cPlayerCamera;
 
 		private readonly List<CCharacterBase> _characters = new List<CCharacterBase>();
 
@@ -77,12 +78,14 @@ namespace CDK {
 			
 			this._rePlayer.AddInputEventDelegate(this.InputInteract, UpdateLoopType.Update, InputActionEventType.ButtonJustPressed, CInputKeys.INTERACT);
 			this._rePlayer.AddInputEventDelegate(this.InputRun, UpdateLoopType.Update, CInputKeys.RUN);
+			this._rePlayer.AddInputEventDelegate(this.InputResetCameraRotation, UpdateLoopType.Update, CInputKeys.RESET_CAM_ROTATION);
 
 		}
 
 		private void UnsignFromInputEvents() {
 			this._rePlayer?.RemoveInputEventDelegate(this.InputInteract);
 			this._rePlayer?.RemoveInputEventDelegate(this.InputRun);
+			this._rePlayer?.RemoveInputEventDelegate(this.InputResetCameraRotation);
 		}
 
 		#endregion <<---------- Events ---------->>
@@ -91,6 +94,12 @@ namespace CDK {
 		
 
 		#region <<---------- Input ---------->>
+
+		private void InputResetCameraRotation(InputActionEventData data) {
+			if (!data.GetButtonDown()) return;
+			if (this._cPlayerCamera == null) return;
+			this._cPlayerCamera.ResetRotation();
+		}
 		
 		private void InputRun(InputActionEventData data) {
 			var character = this.GetControllingCharacter();
@@ -161,9 +170,9 @@ namespace CDK {
 				
 				Debug.Log($"Created {mainChar.name} Camera", createdGo);
 
-				var cPlayerCameraManager = createdGo.GetComponent<CPlayerCamera>();
-				cPlayerCameraManager.Initialze(this);
-				this._cameraTransform = cPlayerCameraManager.GetCameraTransform();
+				this._cPlayerCamera = createdGo.GetComponent<CPlayerCamera>();
+				this._cPlayerCamera.Initialize(this);
+				this._cameraTransform = this._cPlayerCamera.GetCameraTransform();
 			};
 			
 		}

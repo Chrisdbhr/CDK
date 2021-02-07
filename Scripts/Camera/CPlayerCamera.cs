@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Cinemachine;
 using DG.Tweening;
+using DG.Tweening.Core;
 using FMODUnity;
 using UniRx;
 using UnityEngine;
@@ -13,7 +14,7 @@ namespace CDK {
 
 		#region <<---------- Initializers ---------->>
 
-		public void Initialze(CGamePlayer ownerPlayer) {
+		public void Initialize(CGamePlayer ownerPlayer) {
 			
 			// owner player
 			if (ownerPlayer == null) {
@@ -65,7 +66,7 @@ namespace CDK {
 		[SerializeField] private float ySpeed = 2.4f;
 		[SerializeField] private float yMinLimit = -20f;
 		[SerializeField] private float yMaxLimit = 80f;
-
+		[NonSerialized] private Tween _recenterRotationTween;
 		
 		// Wall collision
 		[SerializeField] private LayerMask wallCollisionLayers = 1;
@@ -74,6 +75,7 @@ namespace CDK {
 		// Camera 
 		[SerializeField] private UnityEngine.Camera _unityCamera;
 		[SerializeField] private CinemachineVirtualCamera _cinemachineCamera;
+		[NonSerialized] private CinemachinePOV _pov;
 		
 
 		[SerializeField] private Renderer[] _renderToHideWhenCameraIsClose;
@@ -110,6 +112,8 @@ namespace CDK {
 
 		private void Awake() {
 			this._transform = this.transform;
+
+			this._pov = this._cinemachineCamera.GetCinemachineComponent<CinemachinePOV>();
 
 			if(this.defaultProfile == null) this.defaultProfile = ScriptableObject.CreateInstance<CCameraAreaProfileData>();
 			
@@ -231,14 +235,6 @@ namespace CDK {
 				DOVirtual.Float(this._unityCamera.fieldOfView, newProfile.fieldOfView, 1f, value => { this._unityCamera.fieldOfView = value; });
 				DOVirtual.Float(this._unityCamera.farClipPlane, newProfile.FarClippingPlane, 1f, value => { this._unityCamera.farClipPlane = value; });
 			}).AddTo(this._compositeDisposable);
-
-			// player warped callback 
-			Debug.LogWarning("TODO implement PlayerWarped callback");
-			// this._ownerPlayer.OnPlayerWarped += (oldPos, newPos) => {
-			// 	this.ResetPositionAndRotationToPlayerRotation(oldPos, newPos);
-			//
-			// 	//this._freeLookCamera.OnTargetObjectWarped(this.FollowAndLookTarget, newPos - oldPos);
-			// };
 			
 			// is close to the character?
 			this._isCloseToTheCharacterRx.Subscribe(isClose => {
@@ -255,7 +251,38 @@ namespace CDK {
 		}
 		
 		#endregion <<---------- Events ---------->>
+
+
+
+		#region <<---------- Input ---------->>
+
+		public void ResetRotation(float duration = 0.3f) {
+			if (this._recenterRotationTween != null ) return;
+			this._recenterRotationTween?.Kill();
+
+			var finalTimes = new Vector2(this._pov.m_HorizontalRecentering.m_RecenteringTime, this._pov.m_VerticalRecentering.m_RecenteringTime);
+			
+			this._recenterRotationTween = DOTween.To(
+				()=>new Vector2(this._pov.m_HorizontalRecentering.m_RecenteringTime * 0.01f,this._pov.m_VerticalRecentering.m_RecenteringTime * 0.01f),
+				x=> {
+					this._pov.m_HorizontalRecentering.m_RecenteringTime = x.x;
+					this._pov.m_VerticalRecentering.m_RecenteringTime = x.y;
+					
+					this._pov.m_HorizontalRecentering.RecenterNow();
+					this._pov.m_VerticalRecentering.RecenterNow();
+				},
+				finalTimes,
+				duration
+			);
+			
+			this._recenterRotationTween.onComplete += () => {
+				this._recenterRotationTween?.Kill();
+				this._recenterRotationTween = null;
+			};
+			this._recenterRotationTween.Play();
+		}
 		
+		#endregion <<---------- Input ---------->>
 		
 		
 		

@@ -6,6 +6,7 @@ namespace CDK {
 		
 		public const string LOOK_X = "Look X";
 		public const string LOOK_Y = "Look Y";
+		public const string RESET_CAM_ROTATION = "ResetCameraRotation";
 		public const string AIM = "Aim";
 		public const string ATTACK = "Fire";
 
