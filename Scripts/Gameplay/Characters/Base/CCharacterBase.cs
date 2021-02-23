@@ -1,6 +1,4 @@
 using System;
-using System.Linq;
-using System.Text;
 using CDK.Characters.Enums;
 using CDK.Characters.Interfaces;
 using UniRx;
@@ -19,7 +17,7 @@ namespace CDK {
 		
 		[Header("Cache and References")]
 		[SerializeField] protected Animator Anim;
-		[SerializeField] protected CharacterController charController;
+		[SerializeField] protected CharacterController _charController;
 		
 		[NonSerialized] protected Transform _myTransform;
 		[NonSerialized] protected CompositeDisposable _compositeDisposable = new CompositeDisposable();
@@ -36,9 +34,27 @@ namespace CDK {
 
 		#region <<---------- Movement Properties ---------->>
 		public Vector3 Position { get; protected set; }
+		protected Vector3 _previousPosition { get; private set; }
 
 		[NonSerialized] protected Vector3 myVelocity;
-		[NonSerialized] protected Vector3 myVelocityXZ;
+
+		protected Vector3 myVelocityXZ {
+			get {
+				return this._myVelocityXZ;
+			}
+			set {
+				if (this._myVelocityXZ == value) return;
+				this._myVelocityXZ = value;
+
+				if (this.Anim) {
+					var magnitude = this._myVelocityXZ.magnitude.CImprecise();
+					var currentFloat = this.Anim.GetFloat(this.ANIM_CHAR_MOV_SPEED_XZ);
+					this.Anim.SetFloat(this.ANIM_CHAR_MOV_SPEED_XZ, currentFloat.CLerp(magnitude, ANIMATION_BLENDTREE_LERP * CTime.DeltaTimeScaled));
+				}
+			}
+		}
+		[NonSerialized] private Vector3 _myVelocityXZ;
+		
 
 		[NonSerialized] public Vector3 AdditiveMovement = Vector3.zero;
 		
@@ -76,7 +92,7 @@ namespace CDK {
 		public float MovementSpeed {
 			get { return this._movementSpeed; }
 		}
-		[SerializeField] private float _movementSpeed = 1.5f;
+		[SerializeField][Min(1f)] private float _movementSpeed = 1f;
 		
 		public float WalkMultiplier {
 			get { return this._walkMultiplier; }
@@ -99,7 +115,7 @@ namespace CDK {
 		public float SlideSpeedMultiplier {
 			get { return this._slideSpeedMultiplier; }
 		}
-		[NonSerialized] private float _slideSpeedMultiplier = 1.4f;
+		[SerializeField] private float _slideSpeedMultiplier = 10f;
 		public virtual float SlideControlAmmount => 0.5f;
 		/// <summary>
 		/// tempo para tropecar
@@ -170,7 +186,7 @@ namespace CDK {
 		#region <<---------- MonoBehaviour ---------->>
 		protected virtual void Awake() {
 			this._myTransform = this.transform;
-			this._charInitialHeight = this.charController.height;
+			this._charInitialHeight = this._charController.height;
 		}
 
 		protected virtual void OnEnable() {
@@ -179,9 +195,12 @@ namespace CDK {
 
 		protected virtual void Update() {
 			this.Position = this._myTransform.position;
-			this.myVelocity = this.charController.velocity;
-			this.myVelocityXZ = this.myVelocity;
-			this.myVelocityXZ.y = 0f;
+			
+			this.myVelocity = this.Position - this._previousPosition;
+			this.myVelocityXZ = new Vector3(this.myVelocity.x, 0f, this.myVelocity.z);
+
+			this._previousPosition = this.Position;
+			
 			this.CheckIfIsGrounded();
 			this.ProcessSlide();
 			this.ProcessMovement();
@@ -220,7 +239,7 @@ namespace CDK {
 
 			// create rx properties
 			this.CanMoveRx = new ReactiveProperty<bool>(true);
-			this._canSlideRx = new ReactiveProperty<bool>(false);
+			this._canSlideRx = new ReactiveProperty<bool>(true);
 			this._isTouchingTheGroundRx = new ReactiveProperty<bool>(true);
 			this._isPlayingBlockingAnimationRx = new ReactiveProperty<bool>(false);
 			this._isAimingRx = new ReactiveProperty<bool>();
@@ -287,13 +306,13 @@ namespace CDK {
 		#region <<---------- Movement ---------->>
 		
 		protected void ProcessMovement() {
-			if (!this.charController.enabled) return;
+			if (!this._charController.enabled) return;
 			
 			Vector3 targetMotion = this.InputMovementDirRelativeToCam;
 			float targetMovSpeed = 0f;
-
+	
 			// manual movement
-			if (this.CanMoveRx.Value) {
+			if (this.CanMoveRx.Value && this.CurrentMovState != CMovState.Sliding) {
 				
 				// input movement
 				if (targetMotion != Vector3.zero) {
@@ -350,14 +369,14 @@ namespace CDK {
 			}
 			
 			// move character
-			this.charController.Move((targetMotion * targetMovSpeed + Physics.gravity) 
+			this._charController.Move((targetMotion * targetMovSpeed + Physics.gravity) 
 				* CTime.DeltaTimeScaled);
 		}
 		
 		protected void CheckIfIsGrounded() {
 			bool isGrounded = Physics.SphereCast(
 				this.Position + new Vector3(0f, 0.5f),
-				this.charController.radius,
+				this._charController.radius,
 				Vector3.down,
 				out var hitInfo,
 				1f,
@@ -372,18 +391,22 @@ namespace CDK {
 			}
 			this._isTouchingTheGroundRx.Value = isGrounded;
 		}
-		
+
+		public float angleFromGround;
+		public float angleRelativeVelocity;
 		protected void ProcessSlide() {
+			angleFromGround = Vector3.Angle(this._myTransform.up, this._groundNormal);
+			angleRelativeVelocity = Vector3.Angle(this.myVelocityXZ, this._groundNormal);
 			if (
 				this._canSlideRx.Value 
-				&& this.CurrentMovState > CMovState.Walking
+				&& this.CurrentMovState >= CMovState.Running
 				&& this._isTouchingTheGroundRx.Value
-				&& this.InputMovementDirRelativeToCam != Vector3.zero 
-				&& Vector3.Angle(this.InputMovementDirRelativeToCam, this._groundNormal) <= CGameSettings.ANGLE_TO_BEGIN_SLIDING
+				&& angleFromGround >= 20f
+				&& angleRelativeVelocity <= 70f
 			) {
 				this.CurrentMovState = CMovState.Sliding;
 			}else if (this.CurrentMovState == CMovState.Sliding) {
-				this.CurrentMovState = CMovState.Idle;
+				this.CurrentMovState = CMovState.Walking;
 			}
 		}
 
@@ -400,19 +423,13 @@ namespace CDK {
 				this.RotateTowardsDirection(this._aimTargetDirection);
 			}
 			else {
-				this.RotateTowardsDirection(this.InputMovementDirRelativeToCam);
+				if (this.CurrentMovState == CMovState.Sliding) {
+					this.RotateTowardsDirection(this.myVelocityXZ);
+				}
+				else {
+					if(!this._isPlayingBlockingAnimationRx.Value) this.RotateTowardsDirection(this.InputMovementDirRelativeToCam);
+				}
 			}
-		}
-		
-		protected void RotateTowardsVelocity() {
-			if (!this.CanMoveRx.Value) return;
-			var lookRotationTarget = this.charController.velocity;
-			lookRotationTarget.y = 0f;
-			if (lookRotationTarget == Vector3.zero) return;
-			this._myTransform.rotation = Quaternion.RotateTowards(
-				this._myTransform.rotation,
-				Quaternion.LookRotation(lookRotationTarget),
-				this.rotateTowardsLookTargetSpeed * CTime.DeltaTimeScaled);
 		}
 		
 		protected void RotateTowardsDirection(Vector3 dir) {
@@ -424,13 +441,6 @@ namespace CDK {
 				this._myTransform.rotation,
 				this._targetLookRotation,
 				this._rotateTowardsSpeed * CTime.DeltaTimeScaled);
-			
-			/*
-			 // Rotate towards
-			this._myTransform.rotation = Quaternion.RotateTowards(
-				this._myTransform.rotation,
-				this._targetLookRotation,
-				this._rotateTowardsInputSpeed * Time.deltaTime);*/
 		}
 		
 		#endregion <<---------- Rotation ---------->>
