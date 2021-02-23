@@ -12,7 +12,6 @@ namespace CDK {
 
 		// Menu
 		public const string MENU_PAUSE = "MenuPause";
-		public const string MENU_INVENTORY = "MenuInventory";
 		public const string INTERACT = "Interact";
 
 	}
