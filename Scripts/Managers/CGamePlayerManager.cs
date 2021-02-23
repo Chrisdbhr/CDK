@@ -87,6 +87,24 @@ namespace CDK {
 			};
 		}
 
+		public bool IsRootTransformFromAPlayerCharacter(Transform aTransform) {
+			var gameObjectToCheck = aTransform.root.gameObject;
+			if (!gameObjectToCheck.activeInHierarchy) return false;
+			return this.IsGameObjectAPlayerCharacter(gameObjectToCheck);
+		}
+		
+		public bool IsGameObjectAPlayerCharacter(GameObject gameObjectToCheck) {
+			foreach (var player in this._gamePlayers) {
+				var playerCharacter = player.GetControllingCharacter();
+				if (playerCharacter == null) {
+					Debug.LogWarning($"Player {player.PlayerNumber} method '{nameof(CGamePlayer.GetControllingCharacter)}' returned null!");
+					continue;
+				}
+				if (playerCharacter.gameObject == gameObjectToCheck) return true;
+			}
+			return false;
+		}
+		
 		#endregion <<---------- General ---------->>
 
 
