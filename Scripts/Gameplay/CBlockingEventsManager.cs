@@ -5,40 +5,36 @@ using UnityEngine;
 namespace CDK {
 	public class CBlockingEventsManager {
 		
-		#region <<---------- Singleton ---------->>
-
+		#region <<---------- Properties ---------->>
+		
+		private static CBlockingEventsManager Instance {
+			get { return _instance ?? new CBlockingEventsManager(); }
+		}
 		private static CBlockingEventsManager _instance;
 		
-		#endregion <<---------- Singleton ---------->>
-
 		
-		
-
-		#region <<---------- Properties ---------->>
-
-		public static bool IsBlockingEventHappening { get { return (_instance ?? new CBlockingEventsManager())._isBlockingEventHappening; } }
+		public static bool IsBlockingEventHappening {
+			get { return Instance._isBlockingEventHappening; }
+		}
 		private bool _isBlockingEventHappening;
+
 		
 		public static bool IsPlayingCutscene {
-			get { return (_instance ?? new CBlockingEventsManager()).IsPlayingCutsceneRx.Value; }
-			set {
-				if (_applicationIsQuitting) return;
-				(_instance ?? new CBlockingEventsManager()).IsPlayingCutsceneRx.Value = value;
-			}
+			get { return Instance._isPlayingCutsceneRx.Value; }
+			set { Instance._isPlayingCutsceneRx.Value = value; }
 		}
+		private BoolReactiveProperty _isPlayingCutsceneRx = new BoolReactiveProperty();
+
 
 		public static bool IsOnMenu {
-			get { return (_instance ?? new CBlockingEventsManager()).IsOnMenuRx.Value; }
-			set {
-				if (_applicationIsQuitting) return;
-				(_instance ?? new CBlockingEventsManager()).IsOnMenuRx.Value = value;
-			}
+			get { return Instance._isOnMenuRx.Value; }
+			set { Instance._isOnMenuRx.Value = value; }
 		}
-		
-		private ReactiveProperty<bool> IsOnMenuRx;
-		private ReactiveProperty<bool> IsPlayingCutsceneRx;
+		private BoolReactiveProperty _isOnMenuRx = new BoolReactiveProperty();
 
-		private static bool _applicationIsQuitting;
+		
+		private bool _applicationIsQuitting;
+
 		
 		#endregion <<---------- Properties ---------->>
 
@@ -47,15 +43,38 @@ namespace CDK {
 		
 		public static event Action<bool> PlayingCutsceneEvent {
 			add {
-				var instance = (_instance ?? new CBlockingEventsManager());
-				instance._playingCutsceneEvent -= value;
-				instance._playingCutsceneEvent += value;
+				Instance._playingCutsceneEvent -= value;
+				Instance._playingCutsceneEvent += value;
 			}
 			remove {
-				(_instance ?? new CBlockingEventsManager())._playingCutsceneEvent -= value;
+				Instance._playingCutsceneEvent -= value;
 			}
 		}
 		private event Action<bool> _playingCutsceneEvent;
+
+		
+		public static event Action<bool> OnMenuEvent {
+			add {
+				Instance._isOnMenuEvent -= value;
+				Instance._isOnMenuEvent += value;
+			}
+			remove {
+				Instance._isOnMenuEvent -= value;
+			}
+		}
+		private event Action<bool> _isOnMenuEvent;
+		
+		
+		public static event Action<bool> BlockingEventHappeningEvent {
+			add {
+				Instance._isBlockingEventHappeningEvent -= value;
+				Instance._isBlockingEventHappeningEvent += value;
+			}
+			remove {
+				Instance._isBlockingEventHappeningEvent -= value;
+			}
+		}
+		private event Action<bool> _isBlockingEventHappeningEvent;
 		
 		#endregion <<---------- Events ---------->>
 
@@ -69,37 +88,37 @@ namespace CDK {
 			_instance = this;
 
 			// app is quitting
-			_applicationIsQuitting = false;
-			Application.quitting += () => {
-				_applicationIsQuitting = true;
-				Debug.Log("Application is quitting...");
+			this._applicationIsQuitting = false;
+			CApplication.IsQuitting += () => {
+				this._applicationIsQuitting = true;
+				_instance = null;
 			};
 			
-			// rx
-			this.IsOnMenuRx?.Dispose();
-			this.IsOnMenuRx = new ReactiveProperty<bool>();
-			this.IsPlayingCutsceneRx?.Dispose();
-			this.IsPlayingCutsceneRx = new ReactiveProperty<bool>();
-			
-			// cursor menu rx visibility
-			this.IsOnMenuRx.Subscribe(onMenu => {
-				Cursor.visible = onMenu;
-				Cursor.lockState = onMenu ? Cursor.lockState = CursorLockMode.None : CursorLockMode.Locked;
+			// on menu
+			this._isOnMenuRx?.Dispose();
+			this._isOnMenuRx = new BoolReactiveProperty();
+			this._isOnMenuRx.Subscribe(onMenu => {
+				Debug.Log($"IsOnMenuEvent: {onMenu}");
+				this._isOnMenuEvent?.Invoke(onMenu);
 			});
-			Cursor.visible = !CGameSettings.get.CursorStartsHidden;
-
+			
 			// playing cutscene
-			this.IsPlayingCutsceneRx.Subscribe(isPlayingCutscene => {
+			this._isPlayingCutsceneRx?.Dispose();
+			this._isPlayingCutsceneRx = new BoolReactiveProperty();
+			this._isPlayingCutsceneRx.Subscribe(isPlayingCutscene => {
 				Debug.Log($"IsPlayingCutscene: {isPlayingCutscene}");
 				this._playingCutsceneEvent?.Invoke(isPlayingCutscene);
 			});
 
 			// blocking Event Happening
 			Observable.CombineLatest(
-				this.IsOnMenuRx, this.IsPlayingCutsceneRx, 
-				(isOnMenu, isPlayingCutscene) => isOnMenu || isPlayingCutscene).Subscribe(blockingEventHappening => {
-				this._isBlockingEventHappening = blockingEventHappening;
-			});
+						  this._isOnMenuRx, this._isPlayingCutsceneRx,
+						  (isOnMenu, isPlayingCutscene) => isOnMenu || isPlayingCutscene)
+					  .Subscribe(blockingEventHappening => {
+						  Debug.Log($"IsBlockingEventHappening: {blockingEventHappening}");
+						  this._isBlockingEventHappening = blockingEventHappening;
+						  this._isBlockingEventHappeningEvent?.Invoke(blockingEventHappening);
+					  });
 		}
 
 		#endregion <<---------- Initializers ---------->>
