@@ -1,11 +1,15 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using CDK.UI;
 using Rewired;
 using UniRx;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using Object = UnityEngine.Object;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace CDK {
 	public class CGamePlayer : IDisposable {
@@ -19,6 +23,9 @@ namespace CDK {
 			
 			this.PlayerNumber = playerNumber;
 			this.SignToInputEvents();
+
+			CBlockingEventsManager.OnMenuEvent += this.ToggleOnMenuInputMapping; 
+			
 			Debug.Log($"Instantiating a new game player number {playerNumber}");
 		}
 		
@@ -29,15 +36,18 @@ namespace CDK {
 		
 		#region <<---------- Properties and Fields ---------->>
 		
+		private const string MENU_PAUSE_ASSETKEY = "menu-pause";
+		private const string MENU_INVENTORY_ASSETKEY = "menu-ingame";
+
 		public int PlayerNumber { get; } = 0;
 		private Rewired.Player _rePlayer;
+		private CPauseMenuView _openPauseMenu;
 		private Transform _cameraTransform;
 		private CPlayerCamera _cPlayerCamera;
 
 		private readonly List<CCharacterBase> _characters = new List<CCharacterBase>();
 
-		[NonSerialized] private CompositeDisposable _compositeDisposable;
-		[NonSerialized] private Vector2 _inputMovement;
+		[NonSerialized] private readonly CompositeDisposable _compositeDisposable;
 		
 		
 		#endregion <<---------- Properties and Fields ---------->>
@@ -51,12 +61,11 @@ namespace CDK {
 
 			this._rePlayer = ReInput.players.GetPlayer(this.PlayerNumber);
 
-			this._rePlayer.AddInputEventDelegate(data => { this._inputMovement.x = data.GetAxis(); }, UpdateLoopType.Update, InputActionEventType.AxisActiveOrJustInactive, CInputKeys.MOV_X);
-			this._rePlayer.AddInputEventDelegate(data => { this._inputMovement.y = data.GetAxis(); }, UpdateLoopType.Update, InputActionEventType.AxisActiveOrJustInactive, CInputKeys.MOV_Y);
-			
 			// movement
 			Observable.EveryUpdate().Subscribe(_ => {
 				if (this._characters.Count <= 0) return;
+
+				var inputMovement = this._rePlayer.GetAxis2D(CInputKeys.MOV_X, CInputKeys.MOV_Y);
 				
 				// input relative to cam direction
 				var camF = Vector3.forward;
@@ -71,14 +80,15 @@ namespace CDK {
 				}
 				
 				foreach (var character in this._characters.Where(character => character != null)) {
-					character.InputMovementRaw = this._inputMovement.normalized;
-					character.InputMovementDirRelativeToCam = (camF * this._inputMovement.y + camR * this._inputMovement.x).normalized;
+					character.InputMovementRaw = inputMovement.normalized;
+					character.InputMovementDirRelativeToCam = (camF * inputMovement.y + camR * inputMovement.x).normalized;
 				}
 			}).AddTo(this._compositeDisposable);
 			
 			this._rePlayer.AddInputEventDelegate(this.InputInteract, UpdateLoopType.Update, InputActionEventType.ButtonJustPressed, CInputKeys.INTERACT);
 			this._rePlayer.AddInputEventDelegate(this.InputRun, UpdateLoopType.Update, CInputKeys.RUN);
 			this._rePlayer.AddInputEventDelegate(this.InputResetCameraRotation, UpdateLoopType.Update, CInputKeys.RESET_CAM_ROTATION);
+			this._rePlayer.AddInputEventDelegate(this.InputPause, UpdateLoopType.Update, InputActionEventType.ButtonJustPressed, CInputKeys.MENU_PAUSE);
 
 		}
 
@@ -86,38 +96,10 @@ namespace CDK {
 			this._rePlayer?.RemoveInputEventDelegate(this.InputInteract);
 			this._rePlayer?.RemoveInputEventDelegate(this.InputRun);
 			this._rePlayer?.RemoveInputEventDelegate(this.InputResetCameraRotation);
+			this._rePlayer?.RemoveInputEventDelegate(this.InputPause);
 		}
 
 		#endregion <<---------- Events ---------->>
-
-
-		
-
-		#region <<---------- Input ---------->>
-
-		private void InputResetCameraRotation(InputActionEventData data) {
-			if (!data.GetButtonDown()) return;
-			if (this._cPlayerCamera == null) return;
-			this._cPlayerCamera.ResetRotation();
-		}
-		
-		private void InputRun(InputActionEventData data) {
-			var character = this.GetControllingCharacter();
-			if (character == null) return;
-			var inputRun = data.GetButton();
-			character.InputRun = inputRun;
-		}
-		
-		private void InputInteract(InputActionEventData data) {
-			var character = this.GetControllingCharacter();
-			if (character == null) return;
-			var interactionComponent = character.GetComponent<CPlayerInteractionBase>();
-			if (interactionComponent == null) return;
-			interactionComponent.TryToInteract();
-		}
-		
-		
-		#endregion <<---------- Input ---------->>
 		
 		
 		
@@ -135,6 +117,11 @@ namespace CDK {
 			this._characters.Add(character);
 			
 			this.CheckIfNeedToCreateCamera();
+			
+			
+			#if UNITY_EDITOR
+			Selection.activeGameObject = character.gameObject;
+			#endif
 		}
 
 		public CCharacterBase GetControllingCharacter() {
@@ -181,6 +168,93 @@ namespace CDK {
 
 		
 
+		
+		#region <<---------- Input ---------->>
+
+		private void InputPause(InputActionEventData data) {
+			if (!data.GetButtonDown()) return;
+			
+			if (this._openPauseMenu == null) {
+				this.OpenMenu();
+			}
+			else {
+				this.CloseMenu();
+			}
+		}
+
+		private void InputResetCameraRotation(InputActionEventData data) {
+			if (!data.GetButtonDown()) return;
+			if (this._cPlayerCamera == null) return;
+			this._cPlayerCamera.ResetRotation();
+		}
+		
+		private void InputRun(InputActionEventData data) {
+			var character = this.GetControllingCharacter();
+			if (character == null) return;
+			var inputRun = data.GetButton();
+			character.InputRun = inputRun;
+		}
+		
+		private void InputInteract(InputActionEventData data) {
+			var character = this.GetControllingCharacter();
+			if (character == null) return;
+			var interactionComponent = character.GetComponent<CPlayerInteractionBase>();
+			if (interactionComponent == null) return;
+			interactionComponent.TryToInteract();
+		}
+		
+		#endregion <<---------- Input ---------->>
+
+
+
+		#region <<---------- Controlls Mappings ---------->>
+
+		private void ToggleOnMenuInputMapping(bool onMenu) {
+			this._rePlayer.controllers.maps.SetMapsEnabled(!onMenu, "Default");
+			this._rePlayer.controllers.maps.SetMapsEnabled(onMenu, "Menu");
+			
+			Debug.Log($"Player {this.PlayerNumber} controllers maps onMenu changed to {onMenu}");
+		}
+		
+		#endregion <<---------- Controlls Mappings ---------->>
+		
+		
+
+
+		#region <<---------- Pause Menu ---------->>
+		
+		private void OpenMenu() {
+			if (CBlockingEventsManager.IsOnMenu) {
+				Debug.LogWarning("Tried to open a menu when already on some Menu!");
+				return;
+			}
+
+			var menuAssetKey = CBlockingEventsManager.IsPlayingCutscene ? MENU_PAUSE_ASSETKEY : MENU_INVENTORY_ASSETKEY;
+			
+			CBlockingEventsManager.IsOnMenu = true;
+			try {
+				Addressables.LoadAssetAsync<GameObject>(menuAssetKey).Completed += handle => {
+					this._openPauseMenu = Object.Instantiate(handle.Result).GetComponent<CPauseMenuView>();
+					this._openPauseMenu.name = $"[{menuAssetKey.ToUpper()}] {this._openPauseMenu.name}";
+					
+					Debug.Log($"Created menu: {this._openPauseMenu.name}", this._openPauseMenu);
+
+					this._openPauseMenu.OpenMenu();
+				};
+				
+			} catch (Exception e) {
+				CBlockingEventsManager.IsOnMenu = false;
+				Debug.LogError(e);
+			}
+		}
+		private void CloseMenu() {
+			this._openPauseMenu.CloseMenu();
+		}
+		
+		#endregion <<---------- Pause Menu ---------->>
+		
+
+		
 
 		#region <<---------- Disposable ---------->>
 		
@@ -188,71 +262,10 @@ namespace CDK {
 			this._compositeDisposable?.Dispose();
 			
 			this.UnsignFromInputEvents();
+			CBlockingEventsManager.OnMenuEvent -= this.ToggleOnMenuInputMapping; 
 		}
 		
 		#endregion <<---------- Disposable ---------->>
-
-		
-		
-/*
-private void TryToInteract() {
-	var originPos = Vector3.zero;
-
-	var colliders = Physics.OverlapSphere(
-		originPos,
-		this._interactionSphereCheckRadius,
-		1,
-		QueryTriggerInteraction.Collide
-	);
-	
-	if (colliders == null || colliders.Length <= 0) return;
-	
-	// get list of interactables
-	var interactableColliders = new List<Collider>();
-	foreach (var col in colliders) {
-		var interactable = col.GetComponent<CIInteractable>();
-		if (interactable == null) continue;
-		interactableColliders.Add(col);
-	}
-	
-	if (interactableColliders.Count <= 0) return;
-	
-	// originPos.x = this._myTransform.position.x;
-	// originPos.z = this._myTransform.position.z;
-	//
-	// get closest interactable collider index
-	int closestColliderIndex = 0;
-	if (interactableColliders.Count == 1) closestColliderIndex = 0;
-	else {
-		float closestDistance = this._interactionSphereCheckRadius * 2f;
-		for (int i = 0; i < interactableColliders.Count; i++) {
-			float distance = (originPos - interactableColliders[i].transform.position).sqrMagnitude;
-			if (distance >= closestDistance) continue;
-			closestDistance = distance;
-			closestColliderIndex = i;
-		}
-	}
-
-	var direction = interactableColliders[closestColliderIndex].transform.position - originPos;
-	bool hasSomethingBlockingLineOfSight = Physics.Raycast(
-		originPos,
-		direction,
-		direction.magnitude,
-		CGameSettings.get.LineOfSightBlockingLayers,
-		QueryTriggerInteraction.Collide
-	);
-
-	if (hasSomethingBlockingLineOfSight) return;
-		
-	var choosenInteractable = interactableColliders[closestColliderIndex].GetComponent<CIInteractable>();
-	choosenInteractable.OnInteract(this._controllingCharacter.transform);
-	
-}
-
-private Vector3 GetCenterSphereCheckPosition() {
-	return this._myTransform.position + this._myTransform.forward * (this._interactionSphereCheckRadius * INTERACT_SPHERE_CHECK_MULTIPLIER) + (Vector3.up * this._yCheckOffset);
-}
-*/
 
 	}
 }
