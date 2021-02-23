@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 
 namespace CDK {
-	public class CUIInteractable : MonoBehaviour {
+	public class CHasInteractableTrigger : MonoBehaviour {
 
 		#region <<---------- Properties and Fields ---------->>
 		
@@ -17,10 +17,6 @@ namespace CDK {
 
 		#region <<---------- MonoBehaviour ---------->>
 		
-		private void Awake() {
-			this.HasInteractableEvent?.Invoke(false);
-		}
-
 		private void OnEnable() {
 			this._playerInteractor.OnInteractableChanged += this.InteractableChanged;
 		}
