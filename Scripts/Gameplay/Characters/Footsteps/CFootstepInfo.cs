@@ -4,15 +4,21 @@ using UnityEngine;
 namespace CDK {
 	[System.Serializable]
 	public class CFootstepInfo {
-		public Material[] Materials;
-		[EventRef]
-		public string Audio;
-
-		[SerializeField] private ParticleSystem[] _particleSystems;
 		
-		// TODO get random particle system
+		[EventRef] 
+		public string Audio;
+		
+		public Material[] Materials;
+		
+		public TerrainLayer[] TerrainLayers;
+
+		[SerializeField] 
+		private ParticleSystem[] _particleSystems;
+		
+		
 		public ParticleSystem GetRandomParticleSystem() {
 			return this._particleSystems.RandomElement();
 		}
+		
 	}
 }

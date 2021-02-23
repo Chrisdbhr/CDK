@@ -6,12 +6,14 @@ namespace CDK {
 	public class CFootstepDatabase : ScriptableObject {
 		
 		public CFootstepInfo[] FootstepInfos;
+		
 
-		
-		
-		
-		public CFootstepInfo GetFootstepInfo(Material targetMaterial) {
+		public CFootstepInfo GetFootstepInfoByMaterial(Material targetMaterial) {
 			return (from footstepInfo in this.FootstepInfos where footstepInfo != null from mat in footstepInfo.Materials where mat == targetMaterial select footstepInfo).FirstOrDefault();
+		}
+
+		public CFootstepInfo GetFootstepInfoByTerrainLayer(TerrainLayer targetTerrainLayer) {
+			return (from footstepInfo in this.FootstepInfos where footstepInfo != null from terLayer in footstepInfo.TerrainLayers where terLayer == targetTerrainLayer select footstepInfo).FirstOrDefault();
 		}
 		
 	}

@@ -19,7 +19,6 @@ namespace CDK {
 		#region <<---------- Properties and Fields ---------->>
 
 		[SerializeField] private CFootstepDatabase _database;
-		[SerializeField] private StudioEventEmitter _audioEmitter;
 		[SerializeField] private Transform _footL;
 		[SerializeField] private Transform _footR;
 		[SerializeField] private LayerMask _footCollisionLayers = 1;
@@ -27,7 +26,6 @@ namespace CDK {
 
 		[NonSerialized] private float _rayOffset = 0.25f;
 		[NonSerialized] private Transform _currentFeet;
-		[NonSerialized] private RaycastHit _raycastHit;
 		[NonSerialized] private float _feetSizeForSphereCast = 0.1f;
 		[NonSerialized] private Vector3 _lastValidHitPoint;
 
@@ -77,38 +75,62 @@ namespace CDK {
 				rayOrigin.position + (transformUp * this._rayOffset),
 				this._feetSizeForSphereCast,
 				(transformUp * -1).normalized, // down
-				out this._raycastHit,
+				out var raycastHit,
 				2f * this._rayOffset,
 				this._footCollisionLayers,
 				QueryTriggerInteraction.Ignore
 			);
 			if (!feetHitSomething) return;
 
-			this._lastValidHitPoint = this._raycastHit.point;
+			this._lastValidHitPoint = raycastHit.point;
 
 			// check for smashable object
-			var smashableObj = this._raycastHit.collider.GetComponent<CICanBeSmashedWhenStepping>();
+			var smashableObj = raycastHit.collider.GetComponent<CICanBeSmashedWhenStepping>();
 			if (smashableObj != null) {
 				smashableObj.Smash();
 				return;
 			}
 
+			var footstepInfo = this.GetFootstepInfoFromMeshRenderer(raycastHit);
+			if (footstepInfo == null) {
+				// Try to get footstep info from a terrain
+				footstepInfo = this.GetFootstepInfoFromTerrain(raycastHit);
+				if (footstepInfo == null) return;
+			}
+
+			// new footstep particle effect.
+			var particlePrefab = footstepInfo.GetRandomParticleSystem();
+			if (particlePrefab != null) {
+				var createdPartSystem = Instantiate(particlePrefab);
+				if (createdPartSystem != null) {
+					createdPartSystem.transform.position = raycastHit.point;
+					createdPartSystem.transform.rotation = Quaternion.FromToRotation(Vector3.up, raycastHit.normal);
+					Destroy(createdPartSystem.gameObject, particlePrefab.main.duration);
+				}
+			}
+
+			// play random audio
+			if (footstepInfo.Audio.CIsNullOrEmpty()) return;
+			FMODUnity.RuntimeManager.PlayOneShot(footstepInfo.Audio, raycastHit.point);
+		}
+
+		private CFootstepInfo GetFootstepInfoFromMeshRenderer(RaycastHit raycastHit) {
 			// check for mesh
-			var meshFilter = this._raycastHit.collider.GetComponent<MeshFilter>();
-			if (meshFilter == null) return;
+			var meshFilter = raycastHit.collider.GetComponent<MeshFilter>();
+			if (meshFilter == null) return null;
 			var sharedMesh = meshFilter.sharedMesh;
-			if (sharedMesh == null) return;
+			if (sharedMesh == null) return null;
 			var rend = meshFilter.GetComponent<Renderer>();
-			if (!rend) return;
+			if (!rend) return null;
 
 			var materialId = -1;
 
-			if (!sharedMesh.isReadable || !(this._raycastHit.collider is MeshCollider)) {
+			if (!sharedMesh.isReadable || !(raycastHit.collider is MeshCollider)) {
 				materialId = 0;
 			}
 			else {
-				var triangleIndex = this._raycastHit.triangleIndex;
-				if (triangleIndex <= -1) return;
+				var triangleIndex = raycastHit.triangleIndex;
+				if (triangleIndex <= -1) return null;
 				var triangles = sharedMesh.triangles;
 				int lookupIndex1 = triangles[triangleIndex * 3];
 				int lookupIndex2 = triangles[triangleIndex * 3 + 1];
@@ -128,30 +150,23 @@ namespace CDK {
 					if (materialId != -1) break;
 				}
 
-				if (materialId == -1) return;
+				if (materialId == -1) return null;
 			}
 
 			var material = rend.sharedMaterials[materialId];
-			if (!material) return;
+			if (!material) return null;
 
-			var footstepInfo = this._database.GetFootstepInfo(material);
-			if (footstepInfo == null) return;
+			return this._database.GetFootstepInfoByMaterial(material);
+		}
 
-			// new footstep particle effect.
-			var particlePrefab = footstepInfo.GetRandomParticleSystem();
-			if (particlePrefab != null) {
-				var createdPartSystem = Instantiate(particlePrefab);
-				if (createdPartSystem != null) {
-					createdPartSystem.transform.position = this._raycastHit.point;
-					createdPartSystem.transform.rotation = Quaternion.FromToRotation(Vector3.up, this._raycastHit.normal);
-					Destroy(createdPartSystem.gameObject, particlePrefab.main.duration);
-				}
-			}
+		private CFootstepInfo GetFootstepInfoFromTerrain(RaycastHit raycastHit) {
+			var terrainTextureDetector = raycastHit.collider.GetComponent<CTerrainTextureDetector>();
+			if (terrainTextureDetector == null) return null;
 
-			// play random audio
-			if (!footstepInfo.Audio.CIsNullOrEmpty()) {
-				this._audioEmitter.Event = footstepInfo.Audio;
-			}
+			var dominantLayer = terrainTextureDetector.GetFirstTextureAt(raycastHit.point);
+			if (dominantLayer == null) return null;
+
+			return this._database.GetFootstepInfoByTerrainLayer(dominantLayer);
 		}
 		
 		#endregion <<---------- General ---------->>
