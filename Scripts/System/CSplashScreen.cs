@@ -69,7 +69,6 @@ namespace CDK {
         private void Update() {
             this._pressedSkip 
                     = Input.GetKeyDown(CInputKeys.INTERACT) 
-                    || Input.GetKeyDown(CInputKeys.MENU_INVENTORY)
                     || Input.GetKeyDown(CInputKeys.MENU_PAUSE)
                     ;
         }
