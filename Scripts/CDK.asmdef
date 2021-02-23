@@ -11,7 +11,8 @@
         "IngameDebugConsole.Runtime",
         "UniTask",
         "FMODUnity",
-        "Cinemachine"
+        "Cinemachine",
+        "DynamicBone"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

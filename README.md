@@ -27,7 +27,7 @@ CDK (Chris Development Kit) is a useful set of tools to speedup development of c
 ### Contribution guidelines ###
 
 * Fell free to open a pull request for fixes or new versions.
-* Try to follow some code conventions like using "**this.**" on variables even though its not mandatory.
+* Please follow some code conventions like using "**this.**" on variables even though its not mandatory.
 
 ### Who do I talk to? ###
 
