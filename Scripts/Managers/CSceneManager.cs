@@ -51,8 +51,8 @@ namespace CDK {
 		#endregion <<---------- Initializers ---------->>
 
 
-		public static void LoadSceneSingle(string sceneName) {
-			SceneManager.LoadSceneAsync(sceneName);
+		public static AsyncOperation LoadSceneSingle(string sceneName) {
+			return SceneManager.LoadSceneAsync(sceneName);
 		}
 
 		public static async Task Teleport(string sceneToLoad, int entryPointNumber, IReadOnlyList<GameObject> gameObjectsToTeleport) {
@@ -75,7 +75,7 @@ namespace CDK {
 			
 			sceneToLoadAsyncOp.allowSceneActivation = false;
 			
-			await CFadeCanvas.FadeToBlack(0.5f);
+			await CFadeCanvas.FadeToBlack(0.3f);
 
 			Debug.Log($"TODO implement loading screen");
 
