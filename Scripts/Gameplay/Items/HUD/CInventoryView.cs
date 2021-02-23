@@ -29,7 +29,7 @@ namespace CDK {
 		}
 
 		private void Update() {
-			if (Input.GetButtonDown(CInputKeys.MENU_INVENTORY)) {
+			if (Input.GetButtonDown(CInputKeys.MENU_PAUSE)) {
 				this.Unpause();
 			}
 		}
