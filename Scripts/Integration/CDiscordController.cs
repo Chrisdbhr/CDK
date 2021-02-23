@@ -39,7 +39,11 @@ namespace CDK.Integration {
 			_compositeDisposable.Add(
 			Observable.Timer(TimeSpan.FromSeconds(10)).RepeatSafe().Subscribe(_ => {
 				if (discord == null) return;
-				discord.RunCallbacks();
+				try {
+					discord.RunCallbacks();
+				} catch (Exception e) {
+					Debug.Log($"Exception on {nameof(CDiscordController)}: {e}");
+				}
 			})
 			);
 			
