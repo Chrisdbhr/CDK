@@ -11,7 +11,6 @@ namespace CDK {
 		#region <<---------- Properties ---------->>
 
 		public const float MAX_NAVMESH_FINDPOSITION_DISTANCE = 1000f;
-		public const float ANGLE_TO_BEGIN_SLIDING = 80;
 
 		public static CGameSettings get {
 			get {
