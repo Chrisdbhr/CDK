@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace CDK {
@@ -22,11 +23,28 @@ namespace CDK {
 		}
 
 		/// <summary>
-		/// Set time scale logging this action on console.
+		/// Set time scale optionally logging on console.
 		/// </summary>
-		public static void SetTimeScale(float targetTimeScale) {
-			Debug.Log($"Setting time scale to {targetTimeScale}");
+		public static void SetTimeScale(float targetTimeScale, bool supressLog = false) {
+			if(!supressLog) Debug.Log($"Setting time scale to {targetTimeScale}");
+
+			_onTimeScaleChanged?.Invoke(targetTimeScale);
+			
 			Time.timeScale = targetTimeScale;
 		}
+
+		/// <summary>
+		/// Notify time scaled changed (oldTimeScale, newTimeScale)
+		/// </summary>
+		public static event Action<float> OnTimeScaleChanged {
+			add {
+				_onTimeScaleChanged -= value;
+				_onTimeScaleChanged += value;
+			}
+			remove {
+				_onTimeScaleChanged -= value;
+			}
+		}
+		private static Action<float> _onTimeScaleChanged;
 	}
 }
