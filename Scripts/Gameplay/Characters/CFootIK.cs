@@ -3,7 +3,9 @@ using UnityEngine;
 
 namespace CDK {
 	public class CFootIK : MonoBehaviour {
+		
 		#region <<---------- Properties and Fields ---------->>
+		
 		[SerializeField] private Animator animator;
 		[SerializeField] private CharacterController _charController;
 
@@ -14,7 +16,14 @@ namespace CDK {
 		[SerializeField, Range(0f, 1f)] private float rightFootIkWeight = 1f;
 		[SerializeField, Range(0f, 1f)] private float leftFootIkWeight = 1f;
 
+		[NonSerialized] private Transform _transform;
+		
 		#endregion <<---------- Properties and Fields ---------->>
+
+		
+		private void Awake() {
+			this._transform = this.transform;
+		}
 
 		private void OnAnimatorIK(int layerIndex) {
 			this.animator.SetIKPositionWeight(AvatarIKGoal.LeftFoot, this.leftFootIkWeight);
@@ -38,6 +47,7 @@ namespace CDK {
 			) > 0) {
 				if (feetPos.y - this._footSize < hits[0].point.y) {
 					this.animator.SetIKPosition(ikGoal, hits[0].point + (hits[0].normal.normalized * this._footSize));
+					this.animator.SetIKRotation(ikGoal,  Quaternion.LookRotation(this._transform.forward, hits[0].normal));
 				}
 			}
 		}
