@@ -1,6 +1,7 @@
 using System;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace CDK {
 	public class CTeleportTrigger : MonoBehaviour, CIInteractable {
@@ -10,6 +11,9 @@ namespace CDK {
 		[SerializeField] private bool onlyWorkOneTimePerSceneLoad = true;
 		
 		[SerializeField] private CPlayerCamera.CameraTransitionType cameraTransitionType;
+
+		[SerializeField] private UnityEvent _onTeleport;
+		
 
 
 
@@ -34,6 +38,8 @@ namespace CDK {
 				Debug.LogWarning($"Transform {objTriggeringTeleport} triggered TeleportTrigger {this.name} but can find any GamePlayer that controls this Character!", objTriggeringTeleport);
 				return;
 			}
+
+			this._onTeleport?.Invoke();
 			
 			CSceneManager.Teleport(this.targetScene, this._targetEntryPoint, relatedGameObjects).CAwait();
 		}
