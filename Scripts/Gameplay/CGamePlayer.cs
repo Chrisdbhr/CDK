@@ -41,7 +41,7 @@ namespace CDK {
 
 		public int PlayerNumber { get; } = 0;
 		private Rewired.Player _rePlayer;
-		private CPauseMenuView _openPauseMenu;
+		private CUIBase _openPauseMenu;
 		private Transform _cameraTransform;
 		private CPlayerCamera _cPlayerCamera;
 
@@ -234,7 +234,7 @@ namespace CDK {
 			CBlockingEventsManager.IsOnMenu = true;
 			try {
 				Addressables.LoadAssetAsync<GameObject>(menuAssetKey).Completed += handle => {
-					this._openPauseMenu = Object.Instantiate(handle.Result).GetComponent<CPauseMenuView>();
+					this._openPauseMenu = Object.Instantiate(handle.Result).GetComponent<CUIBase>();
 					this._openPauseMenu.name = $"[{menuAssetKey.ToUpper()}] {this._openPauseMenu.name}";
 					
 					Debug.Log($"Created menu: {this._openPauseMenu.name}", this._openPauseMenu);
