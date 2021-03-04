@@ -110,6 +110,8 @@ namespace CDK {
 				SetTransformToSceneEntryPoint(rootGo.transform, entryPointNumber);
 			}
 
+			LightProbes.TetrahedralizeAsync();
+			
 			Debug.Log($"TODO remove loading screen");
 			
 			_newSceneLoaded?.Invoke();
