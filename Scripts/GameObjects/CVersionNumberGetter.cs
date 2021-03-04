@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using UnityEngine;
 
 #if UNITY_EDITOR
@@ -12,19 +13,22 @@ namespace CDK {
 
 		[SerializeField] private CUnityEventString versionStringEvent;
 
-		#if UNITY_EDITOR
-		private void OnValidate() {
-			this.GetVersion();
-		}
-		#endif
-		
-		private void Start() {
-			this.GetVersion();
+		private void Awake() {
+			var path = "GameBundleVersion";
+			var textAsset = Resources.Load<TextAsset>(path);
+			try {
+				this.versionStringEvent?.Invoke(textAsset.text ?? "");
+			} catch (Exception e) {
+				Debug.LogError($"Exception getting Version file, path was '{path}'\n{e}");
+			}
 		}
 
-		private void GetVersion() {
-			this.versionStringEvent?.Invoke(((TextAsset)Resources.Load("GameVersion")).text);
+		#if UNITY_EDITOR
+		private void OnValidate() {
+			
+			this.versionStringEvent?.Invoke(PlayerSettings.bundleVersion);
 		}
+		#endif
 		
 	}
 }
