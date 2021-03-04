@@ -12,11 +12,11 @@ namespace CDK {
 	#endif
 	public static class CDK {
 
-		#if UNITY_EDITOR
 		static CDK() {
+			#if UNITY_EDITOR
 			CGameSettings.EditorCreateGameSettingsResourceIfNeeded();
+			#endif
 		} 
-		#endif
 		
 		public static readonly Version VERSION = new Version(0,1,1);
 		private const string VERSION_UPDATE_URL = "https://raw.githubusercontent.com/Chrisdbhr/CDK/master/Resources/CDKVersion.txt";
