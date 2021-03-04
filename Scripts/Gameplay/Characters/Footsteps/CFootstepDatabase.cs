@@ -9,7 +9,15 @@ namespace CDK {
 		
 
 		public CFootstepInfo GetFootstepInfoByMaterial(Material targetMaterial) {
-			return (from footstepInfo in this.FootstepInfos where footstepInfo != null from mat in footstepInfo.Materials where mat == targetMaterial select footstepInfo).FirstOrDefault();
+			foreach (var footstepInfo in this.FootstepInfos) {
+				if (footstepInfo == null) continue;
+				foreach (var mat in footstepInfo.Materials) {
+					if (mat.renderQueue != targetMaterial.renderQueue) continue;
+					if (mat.name != targetMaterial.name) continue;
+					return footstepInfo;
+				}
+			}
+			return null;
 		}
 
 		public CFootstepInfo GetFootstepInfoByTerrainLayer(TerrainLayer targetTerrainLayer) {
