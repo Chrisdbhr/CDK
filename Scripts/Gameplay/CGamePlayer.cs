@@ -22,9 +22,19 @@ namespace CDK {
 			this._compositeDisposable = new CompositeDisposable();
 			
 			this.PlayerNumber = playerNumber;
+			
+			this._rePlayer = ReInput.players.GetPlayer(this.PlayerNumber);
+			this._rePlayer.controllers.maps.SetMapsEnabled(true, "Default");
+			this._rePlayer.controllers.maps.SetMapsEnabled(false, "UI");
+			
 			this.SignToInputEvents();
 
-			CBlockingEventsManager.OnMenuEvent += this.ToggleOnMenuInputMapping; 
+			CBlockingEventsManager.OnMenuEvent += this.SetInputLayout;
+		
+
+			Application.focusChanged += focused => {
+				if(!focused) this.OpenMenu();
+			};
 			
 			Debug.Log($"Instantiating a new game player number {playerNumber}");
 		}
@@ -58,9 +68,7 @@ namespace CDK {
 		#region <<---------- Events ---------->>
 		
 		private void SignToInputEvents() {
-
-			this._rePlayer = ReInput.players.GetPlayer(this.PlayerNumber);
-
+			
 			// movement
 			Observable.EveryUpdate().Subscribe(_ => {
 				if (this._characters.Count <= 0) return;
@@ -209,9 +217,11 @@ namespace CDK {
 
 		#region <<---------- Controlls Mappings ---------->>
 
-		private void ToggleOnMenuInputMapping(bool onMenu) {
+		private void SetInputLayout(bool onMenu) {
+			//var layoutName = onMenu ? "UI" : "Default";
+			
 			this._rePlayer.controllers.maps.SetMapsEnabled(!onMenu, "Default");
-			this._rePlayer.controllers.maps.SetMapsEnabled(onMenu, "Menu");
+			ReInput.players.GetSystemPlayer().controllers.maps.SetMapsEnabled(onMenu, "Default");
 			
 			Debug.Log($"Player {this.PlayerNumber} controllers maps onMenu changed to {onMenu}");
 		}
@@ -239,7 +249,7 @@ namespace CDK {
 					
 					Debug.Log($"Created menu: {this._openPauseMenu.name}", this._openPauseMenu);
 
-					this._openPauseMenu.OpenMenu();
+					this._openPauseMenu.OpenMenu().CAwait();
 				};
 				
 			} catch (Exception e) {
@@ -248,7 +258,7 @@ namespace CDK {
 			}
 		}
 		private void CloseMenu() {
-			this._openPauseMenu.CloseMenu();
+			this._openPauseMenu.CloseMenu().CAwait();
 		}
 		
 		#endregion <<---------- Pause Menu ---------->>
@@ -262,7 +272,7 @@ namespace CDK {
 			this._compositeDisposable?.Dispose();
 			
 			this.UnsignFromInputEvents();
-			CBlockingEventsManager.OnMenuEvent -= this.ToggleOnMenuInputMapping; 
+			CBlockingEventsManager.OnMenuEvent -= this.SetInputLayout; 
 		}
 		
 		#endregion <<---------- Disposable ---------->>

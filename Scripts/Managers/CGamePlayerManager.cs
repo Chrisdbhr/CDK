@@ -37,10 +37,12 @@ namespace CDK {
 		private static void InitializeBeforeSceneLoad() {
 			get?.Dispose();
 
-			_rewiredLoaded = Addressables.LoadAssetAsync<GameObject>("RewiredInputManager");
-			_rewiredLoaded.Completed += handle => {
-				Object.Instantiate(handle.Result);
-			};
+			if (!Rewired.ReInput.isReady && GameObject.FindObjectOfType<Rewired.InputManager_Base>() == null) {
+				_rewiredLoaded = Addressables.LoadAssetAsync<GameObject>("Rewired Input Manager");
+				_rewiredLoaded.Completed += handle => {
+					Object.Instantiate(handle.Result);
+				};
+			}
 
 			DebugLogConsole.AddCommandInstance("createplayer", "Creates a player with a controlling character or none.", nameof(CreatePlayer), get);
 		}
@@ -54,7 +56,7 @@ namespace CDK {
 
 		public async Task CreatePlayer(string controllingCharName = null) {
 
-			await _rewiredLoaded.Task;
+			if(!_rewiredLoaded.IsDone) await _rewiredLoaded.Task;
 			
 			var pNumber = this._gamePlayers.Count;
 			var player = new CGamePlayer(pNumber);
