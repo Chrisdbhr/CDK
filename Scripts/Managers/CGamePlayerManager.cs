@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using IngameDebugConsole;
+using CDK.Assets;
 using UniRx;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
@@ -14,14 +14,14 @@ namespace CDK {
 		#region <<---------- Properties ---------->>
 		
 		public static CGamePlayerManager get {
-			get { return _instance ?? (_instance = new CGamePlayerManager()); }
+			get { return _instance ??= new CGamePlayerManager(); }
 		}
 		private static CGamePlayerManager _instance;
 
 
 		private readonly List<CGamePlayer> _gamePlayers = new List<CGamePlayer>();
 
-		private static AsyncOperationHandle<GameObject> _rewiredLoaded;
+		private static Task _rewiredLoadTask;
 		
 		#endregion <<---------- Properties ---------->>
 
@@ -38,13 +38,8 @@ namespace CDK {
 			get?.Dispose();
 
 			if (!Rewired.ReInput.isReady && GameObject.FindObjectOfType<Rewired.InputManager_Base>() == null) {
-				_rewiredLoaded = Addressables.LoadAssetAsync<GameObject>("Rewired Input Manager");
-				_rewiredLoaded.Completed += handle => {
-					Object.Instantiate(handle.Result);
-				};
+				_rewiredLoadTask = CAssets.LoadAndInstantiateGameObjectAsync("Rewired Input Manager");
 			}
-
-			DebugLogConsole.AddCommandInstance("createplayer", "Creates a player with a controlling character or none.", nameof(CreatePlayer), get);
 		}
 
 		#endregion <<---------- Initializers ---------->>
@@ -54,39 +49,36 @@ namespace CDK {
 
 		#region <<---------- General ---------->>
 
-		public async Task CreatePlayer(string controllingCharName = null) {
-
-			if(!_rewiredLoaded.IsDone) await _rewiredLoaded.Task;
+		public async Task CreatePlayer(AssetReference charToCreate = null) {
+			if(_rewiredLoadTask != null) await _rewiredLoadTask;
 			
 			var pNumber = this._gamePlayers.Count;
 			var player = new CGamePlayer(pNumber);
 			this._gamePlayers.Add(player);
 
-			if (controllingCharName.CIsNullOrEmpty()) {
+			if (charToCreate == null || !charToCreate.RuntimeKeyIsValid()) {
 				Debug.LogWarning($"Created player {pNumber} with no controlling character.");
 				return;
 			}
 
-			Addressables.LoadAssetAsync<GameObject>(controllingCharName).Completed += handle => {
-				if (handle.Result == null) {
-					Debug.LogWarning($"Created player {pNumber} but cant find character '{controllingCharName}' to control.");
-					return;
-				}
+			var createdGo = await CAssets.LoadAndInstantiateGameObjectAsync(charToCreate.RuntimeKey.ToString());
+			if (createdGo == null) {
+				Debug.LogWarning($"Created player {pNumber} but cant find character '{charToCreate}' to control.");
+				return;
+			}
 
-				var createdGo = Object.Instantiate(handle.Result);
-				createdGo.name = $"[Character] {controllingCharName}";
-				createdGo.transform.Translate(0f,0.0001f,0f); // prevent spawning at 0 position so engine does not think it is maybe inside the ground next frame.
-				var character = createdGo.GetComponent<CCharacterBase>();
+			createdGo.name = $"[Character] {charToCreate}";
+			createdGo.transform.Translate(0f,0.0001f,0f); // prevent spawning at 0 position so engine does not think it is maybe inside the ground next frame.
+			var character = createdGo.GetComponent<CCharacterBase>();
 
-				if (character == null) {
-					Debug.LogError($"{controllingCharName} gameobject doesnt have a {nameof(CCharacterBase)} component on it! could not create player!");
-					return;
-				}
+			if (character == null) {
+				Debug.LogError($"{charToCreate} gameobject doesnt have a {nameof(CCharacterBase)} component on it! could not create player!");
+				return;
+			}
 				
-				player.AddControllingCharacter(character);
+			await player.AddControllingCharacter(character);
 				
-				Debug.Log($"Created player {pNumber} controlling character '{controllingCharName}'.");
-			};
+			Debug.Log($"Created player {pNumber} controlling character '{charToCreate}'.");
 		}
 
 		public bool IsRootTransformFromAPlayerCharacter(Transform aTransform) {

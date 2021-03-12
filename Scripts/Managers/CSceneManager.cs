@@ -2,29 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using IngameDebugConsole;
 using UniRx;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using Object = UnityEngine.Object;
 
 namespace CDK {
 	public static class CSceneManager {
-
-		#region <<---------- Events ---------->>
-		
-		public static event Action NewSceneLoaded {
-			add {
-				_newSceneLoaded -= value;
-				_newSceneLoaded += value;
-			}
-			remove {
-				_newSceneLoaded -= value;
-			}
-		}
-		private static event Action _newSceneLoaded;
-
-		#endregion <<---------- Events ---------->>
 
 		private static CSceneEntryPoint[] _sceneEntryPoints;
 		
@@ -36,7 +19,7 @@ namespace CDK {
 		/// </summary>
 		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
 		private static void InitializeBeforeSceneLoad() {
-			DebugLogConsole.AddCommandStatic( "load", "Load scene Single.", nameof(CSceneManager.LoadSceneSingle), typeof(CSceneManager));
+			//DebugLogConsole.AddCommandStatic( "load", "Load scene Single.", nameof(CSceneManager.LoadSceneSingle), typeof(CSceneManager));
 		}
 		
 		/// <summary>
@@ -113,8 +96,6 @@ namespace CDK {
 			LightProbes.TetrahedralizeAsync();
 			
 			Debug.Log($"TODO remove loading screen");
-			
-			_newSceneLoaded?.Invoke();
 			
 			CBlockingEventsManager.IsPlayingCutscene = false;
 			CTime.SetTimeScale(1f);
