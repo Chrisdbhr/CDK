@@ -22,7 +22,6 @@ CDK (Chris Development Kit) is a useful set of tools to speedup development of c
 * [LINQ For Game Object](https://github.com/neuecc/LINQ-to-GameObject-for-Unity)
 * [DOTween](https://assetstore.unity.com/packages/tools/animation/dotween-hotween-v2-27676)
 * [FMOD](https://www.fmod.com) (for audio processing)
-* [InGame Debug Console](https://assetstore.unity.com/packages/tools/gui/in-game-debug-console-68068)
 
 ### Contribution guidelines ###
 
