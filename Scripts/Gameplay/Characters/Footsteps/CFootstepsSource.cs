@@ -1,5 +1,4 @@
 ﻿using System;
-using FMODUnity;
 using UnityEngine;
 
 namespace CDK {
@@ -18,14 +17,14 @@ namespace CDK {
 		
 		#region <<---------- Properties and Fields ---------->>
 
+		[SerializeField] private bool _debugFootstep;
 		[SerializeField] private CFootstepDatabase _database;
 		[SerializeField] private Transform _footL;
 		[SerializeField] private Transform _footR;
 		[SerializeField] private LayerMask _footCollisionLayers = 1;
-		[SerializeField] private Transform _defaultRayOriginTransform;
 
+		[NonSerialized] private Transform _defaultRayOriginTransform;
 		[NonSerialized] private float _rayOffset = 0.25f;
-		[NonSerialized] private Transform _currentFeet;
 		[NonSerialized] private float _feetSizeForSphereCast = 0.1f;
 		[NonSerialized] private Vector3 _lastValidHitPoint;
 
@@ -83,11 +82,13 @@ namespace CDK {
 			if (!feetHitSomething) return;
 
 			this._lastValidHitPoint = raycastHit.point;
+			
+			if(this._debugFootstep) Debug.Log($"Footstep {feet} on {raycastHit.collider.name}");
 
 			// check for smashable object
 			var smashableObj = raycastHit.collider.GetComponent<CICanBeSmashedWhenStepping>();
 			if (smashableObj != null) {
-				smashableObj.Smash();
+				smashableObj.Smash(this.transform.root);
 				return;
 			}
 

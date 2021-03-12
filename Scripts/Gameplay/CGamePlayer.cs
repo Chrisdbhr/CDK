@@ -1,12 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
+using CDK.Assets;
 using CDK.UI;
 using Rewired;
 using UniRx;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
-using Object = UnityEngine.Object;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -24,15 +25,14 @@ namespace CDK {
 			this.PlayerNumber = playerNumber;
 			
 			this._rePlayer = ReInput.players.GetPlayer(this.PlayerNumber);
-			this._rePlayer.controllers.maps.SetMapsEnabled(true, "Default");
-			this._rePlayer.controllers.maps.SetMapsEnabled(false, "UI");
 			
 			this.SignToInputEvents();
 
+			this.SetInputLayout(false);
 			CBlockingEventsManager.OnMenuEvent += this.SetInputLayout;
 		
 
-			Application.focusChanged += focused => {
+			Application.focusChanged += async focused => {
 				if(!focused) this.OpenMenu();
 			};
 			
@@ -46,11 +46,8 @@ namespace CDK {
 		
 		#region <<---------- Properties and Fields ---------->>
 		
-		private const string MENU_PAUSE_ASSETKEY = "menu-pause";
-		private const string MENU_INVENTORY_ASSETKEY = "menu-ingame";
-
 		public int PlayerNumber { get; } = 0;
-		private Rewired.Player _rePlayer;
+		private readonly Rewired.Player _rePlayer;
 		private CUIBase _openPauseMenu;
 		private Transform _cameraTransform;
 		private CPlayerCamera _cPlayerCamera;
@@ -114,7 +111,7 @@ namespace CDK {
 		
 		#region <<---------- Character Control ---------->>
 
-		public void AddControllingCharacter(CCharacterBase character) {
+		public async Task AddControllingCharacter(CCharacterBase character) {
 			if (this._characters.Contains(character)) {
 				Debug.LogError($"Will not add {character.name} to player {this.PlayerNumber} control because it is already controlling it!");
 				return;
@@ -124,7 +121,7 @@ namespace CDK {
 			
 			this._characters.Add(character);
 			
-			this.CheckIfNeedToCreateCamera();
+			await this.CheckIfNeedToCreateCamera();
 			
 			
 			#if UNITY_EDITOR
@@ -153,23 +150,19 @@ namespace CDK {
 
 		#region <<---------- Player Camera ---------->>
 
-		private void CheckIfNeedToCreateCamera() {
+		private async Task CheckIfNeedToCreateCamera() {
 			if (this._cameraTransform != null) return;
 			var mainChar = this.GetControllingCharacter();
 			if (mainChar == null) return;
-
-			Addressables.LoadAssetAsync<GameObject>("PlayerCamera").Completed += handle => {
-				
-				var createdGo = Object.Instantiate(handle.Result);
-				createdGo.name = $"[Camera] {mainChar.name}";
-				
-				Debug.Log($"Created {mainChar.name} Camera", createdGo);
-
-				this._cPlayerCamera = createdGo.GetComponent<CPlayerCamera>();
-				this._cPlayerCamera.Initialize(this);
-				this._cameraTransform = this._cPlayerCamera.GetCameraTransform();
-			};
 			
+			var createdGo = await CAssets.LoadAndInstantiateGameObjectAsync("PlayerCamera");
+			createdGo.name = $"[Camera] {mainChar.name}";
+			
+			Debug.Log($"Created {mainChar.name} Camera", createdGo);
+
+			this._cPlayerCamera = createdGo.GetComponent<CPlayerCamera>();
+			this._cPlayerCamera.Initialize(this);
+			this._cameraTransform = this._cPlayerCamera.GetCameraTransform();
 		}
 		
 		#endregion <<---------- Player Camera ---------->>
@@ -183,7 +176,7 @@ namespace CDK {
 			if (!data.GetButtonDown()) return;
 			
 			if (this._openPauseMenu == null) {
-				this.OpenMenu();
+				this.OpenMenu().CAwait();
 			}
 			else {
 				this.CloseMenu();
@@ -218,10 +211,8 @@ namespace CDK {
 		#region <<---------- Controlls Mappings ---------->>
 
 		private void SetInputLayout(bool onMenu) {
-			//var layoutName = onMenu ? "UI" : "Default";
-			
 			this._rePlayer.controllers.maps.SetMapsEnabled(!onMenu, "Default");
-			ReInput.players.GetSystemPlayer().controllers.maps.SetMapsEnabled(onMenu, "Default");
+			ReInput.players.GetSystemPlayer().controllers.maps.SetMapsEnabled(onMenu, "UI");
 			
 			Debug.Log($"Player {this.PlayerNumber} controllers maps onMenu changed to {onMenu}");
 		}
@@ -233,28 +224,15 @@ namespace CDK {
 
 		#region <<---------- Pause Menu ---------->>
 		
-		private void OpenMenu() {
-			if (CBlockingEventsManager.IsOnMenu) {
-				Debug.LogWarning("Tried to open a menu when already on some Menu!");
-				return;
-			}
-
-			var menuAssetKey = CBlockingEventsManager.IsPlayingCutscene ? MENU_PAUSE_ASSETKEY : MENU_INVENTORY_ASSETKEY;
-			
+		private async Task OpenMenu() {
+			if (CBlockingEventsManager.IsOnMenu) return;
 			CBlockingEventsManager.IsOnMenu = true;
 			try {
-				Addressables.LoadAssetAsync<GameObject>(menuAssetKey).Completed += handle => {
-					this._openPauseMenu = Object.Instantiate(handle.Result).GetComponent<CUIBase>();
-					this._openPauseMenu.name = $"[{menuAssetKey.ToUpper()}] {this._openPauseMenu.name}";
-					
-					Debug.Log($"Created menu: {this._openPauseMenu.name}", this._openPauseMenu);
-
-					this._openPauseMenu.OpenMenu().CAwait();
-				};
-				
+				var menu = await CAssets.LoadAndInstantiateUI(CGameSettings.AssetRef_PauseMenu);
+				this._openPauseMenu = await menu.OpenMenu(null);
 			} catch (Exception e) {
 				CBlockingEventsManager.IsOnMenu = false;
-				Debug.LogError(e);
+				Debug.LogError("Exception trying to OpenMenu on GamePlayer: " + e);
 			}
 		}
 		private void CloseMenu() {

@@ -105,7 +105,11 @@ namespace CDK {
 		private float _runSpeedMultiplier = 2f;
 		
 		public ReactiveProperty<bool> CanMoveRx { get; protected set; }
-		public ReactiveProperty<bool> CanRunRx { get; protected set; }
+
+		public bool CanRun {
+			get { return !this.BlockRunFromEnvironment; }
+		}
+		[NonSerialized] public bool BlockRunFromEnvironment;
 		#endregion <<---------- Run and Walk ---------->>
 		
 		#region <<---------- Sliding ---------->>
@@ -244,8 +248,7 @@ namespace CDK {
 			this._isPlayingBlockingAnimationRx = new ReactiveProperty<bool>(false);
 			this._isAimingRx = new ReactiveProperty<bool>();
 			this.IsStrafingRx = new ReactiveProperty<bool>();
-			this.CanRunRx = new ReactiveProperty<bool>(true);
-
+			
 			// strafe
 			this.IsStrafingRx.Subscribe(isStrafing => {
 				if(this.Anim) this.Anim.SetBool(this.ANIM_CHAR_IS_STRAFING, isStrafing);
@@ -284,13 +287,6 @@ namespace CDK {
 				if(this.Anim) this.Anim.SetBool(this.ANIM_CHAR_IS_FALLING, !isTouchingTheGround);
 			}).AddTo(this._compositeDisposable);
 			
-			// can run
-			this.CanRunRx.Subscribe(canRun => {
-				if (canRun == false && this.CurrentMovState == CMovState.Running) {
-					this.CurrentMovState = CMovState.Walking;
-				}
-			}).AddTo(this._compositeDisposable);
-
 		}
 
 		protected virtual void UnsubscribeToEvents() {
@@ -316,7 +312,7 @@ namespace CDK {
 				
 				// input movement
 				if (targetMotion != Vector3.zero) {
-					if (this.InputRun && this.CanRunRx.Value && !this._isAimingRx.Value) {
+					if (this.InputRun && this.CanRun && !this._isAimingRx.Value) {
 						this.CurrentMovState = CMovState.Running;
 					}
 					else {
@@ -392,17 +388,20 @@ namespace CDK {
 			this._isTouchingTheGroundRx.Value = isGrounded;
 		}
 
-		public float angleFromGround;
-		public float angleRelativeVelocity;
+		//public float angleFromGround;
+		//public float angleRelativeVelocity;
+		[SerializeField] private float _slideAngleFromGround = 20f;
+		[SerializeField] private float _angleRelativeVelocity = 70f;
+		
 		protected void ProcessSlide() {
-			angleFromGround = Vector3.Angle(this._myTransform.up, this._groundNormal);
-			angleRelativeVelocity = Vector3.Angle(this.myVelocityXZ, this._groundNormal);
+			var angleFromGround = Vector3.Angle(this._myTransform.up, this._groundNormal);
+			var angleRelativeVelocity = Vector3.Angle(this.myVelocityXZ, this._groundNormal);
 			if (
 				this._canSlideRx.Value 
 				&& this.CurrentMovState >= CMovState.Running
 				&& this._isTouchingTheGroundRx.Value
-				&& angleFromGround >= 20f
-				&& angleRelativeVelocity <= 70f
+				&& angleFromGround >= this._slideAngleFromGround
+				&& angleRelativeVelocity <= this._angleRelativeVelocity
 			) {
 				this.CurrentMovState = CMovState.Sliding;
 			}else if (this.CurrentMovState == CMovState.Sliding) {

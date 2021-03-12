@@ -92,26 +92,12 @@ namespace CDK {
 			this._compositeDisposable = null;
 		}
 
-		private void Update() {
-			if (CBlockingEventsManager.IsBlockingEventHappening) return;
-
-			// input menu
-			if (Input.GetButtonDown(CInputKeys.MENU_PAUSE) && this._inventoryViewPrefab != null) {
-				this.PauseGame();
-			}
-		}
-		
 		#endregion <<---------- MonoBehaviour ---------->>
 
 
 		
 		
 		#region <<---------- Managment ---------->>
-
-		public void PauseGame() {
-			this.CreateView();
-
-		}
 
 		private void CreateView() {
 			this._inventoryViewSpawned = Instantiate(this._inventoryViewPrefab, this.transform);
