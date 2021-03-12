@@ -24,12 +24,14 @@ namespace CDK.Integration {
 
 			long clientId = GetDiscordClientId();
 			if (clientId == 0) return;
-			
-			discord = new Discord.Discord(clientId, (UInt64)Discord.CreateFlags.NoRequireDiscord);
-			if (discord == null) {
-				Debug.LogError($"Error creating Discord Controller and instance now is null.");
+
+			try {
+				discord = new Discord.Discord(clientId, (UInt64)Discord.CreateFlags.NoRequireDiscord);
+			} catch (Exception e) {
+				Debug.LogError($"Error creating Discord Controller and instance now is null."+e);
 				return;
 			}
+			
 			Debug.Log("Created Discord Controller");
 
 			_epochStartTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
