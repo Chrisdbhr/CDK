@@ -1,5 +1,6 @@
 {
     "name": "CDK",
+    "rootNamespace": "",
     "references": [
         "UniRx",
         "Unity.TextMeshPro",
@@ -12,7 +13,8 @@
         "UniTask",
         "FMODUnity",
         "Cinemachine",
-        "DynamicBone"
+        "DynamicBone",
+        "Unity.Localization"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
