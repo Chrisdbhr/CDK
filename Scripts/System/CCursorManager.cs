@@ -8,7 +8,7 @@ namespace CDK {
 		/// </summary>
 		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
 		private static void Initialize() {
-			SetCursorState(!CGameSettings.get.CursorStartsHidden);
+			SetCursorState(!CGameSettings.CursorStartsHidden);
 			CBlockingEventsManager.OnMenuEvent += SetCursorState;
 		}
 

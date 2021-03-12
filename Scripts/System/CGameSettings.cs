@@ -1,6 +1,5 @@
-using System;
 using UnityEngine;
-
+using UnityEngine.AddressableAssets;
 #if UNITY_EDITOR
 using UnityEditor;		
 #endif
@@ -8,46 +7,64 @@ using UnityEditor;
 namespace CDK {
 	public class CGameSettings : ScriptableObject {
 
-		#region <<---------- Properties ---------->>
-
-		public const float MAX_NAVMESH_FINDPOSITION_DISTANCE = 1000f;
-
-		public static CGameSettings get {
+		#region <<---------- Singleton ---------->>
+		
+		private static CGameSettings Instance {
 			get {
 				if (_instance == null) {
 					_instance = Resources.Load<CGameSettings>("GameSettings");
+					Debug.Log($"Loaded GameSettings resource.");
 				}
 				return _instance;
 			}
 		}
-
 		private static CGameSettings _instance;
+		
+		#endregion <<---------- Singleton ---------->>
 
-		public bool CursorStartsHidden {
-			get { return this._cursorStartsHidden; }
-		}
 
+		
+		
+		#region <<---------- Consts ---------->>
+		
+		public const float MAX_NAVMESH_FINDPOSITION_DISTANCE = 1000f;
+
+		#endregion <<---------- Consts ---------->>
+		
+		
+		
+		
+		#region <<---------- Properties ---------->>
+
+		public static AssetReference AssetRef_UiLoading => Instance._assetRefUiLoading;
+		[Header("Asset References")]
+		[SerializeField] private AssetReference _assetRefUiLoading;
+
+		public static AssetReference AssetRef_ConfirmationPopup => Instance._assetRefConfirmationPopup;
+		[SerializeField] private AssetReference _assetRefConfirmationPopup;
+
+		public static AssetReference AssetRef_PauseMenu => Instance._assetRefPauseMenu;
+		[SerializeField] private AssetReference _assetRefPauseMenu;
+
+
+		public static bool CursorStartsHidden => Instance._cursorStartsHidden;
 		[SerializeField] private bool _cursorStartsHidden;
 
-		public LayerMask LineOfSightBlockingLayers {
-			get { return this._lineOfSightBlockingLayers; }
-		}
-
+		public static LayerMask LineOfSightBlockingLayers => Instance._lineOfSightBlockingLayers;
 		[SerializeField] private LayerMask _lineOfSightBlockingLayers = 1;
-
-		// public CCameraAreaProfileData DefaultCameraProfile { get { return this._defaultCameraProfile; } }
-		// [SerializeField] private CCameraAreaProfileData _defaultCameraProfile;
 
 		#endregion <<---------- Properties ---------->>
 
 
+		
 
-
+		#region <<---------- Editor ---------->>
+		
 		#if UNITY_EDITOR
 
-		[MenuItem("Tools/Open GameSettings")]
-		private static void OpenGameSettingsData() {
-			var gameSettings = get;
+		[MenuItem("Game/Open GameSettings")]
+		public static void OpenGameSettingsData() {
+			var gameSettings = Instance;
 			if (gameSettings == null) {
 				gameSettings = EditorCreateGameSettingsResourceIfNeeded();
 			}
@@ -59,11 +76,16 @@ namespace CDK {
 			var gameSettingsScriptObj = Resources.Load<CGameSettings>("GameSettings");
 			if (gameSettingsScriptObj != null) return gameSettingsScriptObj;
 			gameSettingsScriptObj = ScriptableObject.CreateInstance<CGameSettings>();
-			AssetDatabase.CreateAsset(gameSettingsScriptObj, "Assets/Resources/GameSettings.asset");
+			var path = "Assets/Resources/GameSettings.asset";
+			AssetDatabase.CreateAsset(gameSettingsScriptObj, path);
+			Debug.Log($"Created GameSettings scriptable object at path: '{path}'");
 			return gameSettingsScriptObj;
 		}
 		
 		#endif
-		
+
+		#endregion <<---------- Editor ---------->>
+	
 	}
+	
 }
