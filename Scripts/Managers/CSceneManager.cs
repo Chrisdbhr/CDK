@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -45,7 +44,6 @@ namespace CDK {
 				return;
 			}
 			
-			CTime.SetTimeScale(0f);
 			CBlockingEventsManager.IsPlayingCutscene = true;
 
 			Debug.Log($"Loading scene {sceneToLoad}");
@@ -58,7 +56,7 @@ namespace CDK {
 			
 			sceneToLoadAsyncOp.allowSceneActivation = false;
 			
-			await CFadeCanvas.FadeToBlack(0.3f);
+			await CFadeCanvas.FadeToBlack(0.3f, false);
 
 			Debug.Log($"TODO implement loading screen");
 
@@ -98,8 +96,7 @@ namespace CDK {
 			Debug.Log($"TODO remove loading screen");
 			
 			CBlockingEventsManager.IsPlayingCutscene = false;
-			CTime.SetTimeScale(1f);
-			await CFadeCanvas.FadeToTransparent(1f);
+			await CFadeCanvas.FadeToTransparent(1f, false);
 		}
 
 		public static void SetTransformToSceneEntryPoint(Transform transformToMove, int entryPointNumber = 0) {

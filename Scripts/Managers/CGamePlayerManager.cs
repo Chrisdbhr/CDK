@@ -1,12 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using CDK.Assets;
-using UniRx;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
-using UnityEngine.ResourceManagement.AsyncOperations;
-using Object = UnityEngine.Object;
 
 namespace CDK {
 	public class CGamePlayerManager : IDisposable {
