@@ -20,7 +20,7 @@ namespace CDK {
 			Application.backgroundLoadingPriority = ThreadPriority.High;
 
 			await AddressablesInitialize();
-			DetectLanguage().CAwait();
+			await DetectLanguage();
 
 			Application.quitting -= IsQuitting;
 			Application.quitting += IsQuitting;

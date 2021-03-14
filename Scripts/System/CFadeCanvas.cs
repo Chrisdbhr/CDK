@@ -17,7 +17,7 @@ namespace CDK {
 
 		#region <<---------- General ---------->>
 		
-		public static async Task FadeToBlack(float fadeTime) {
+		public static async Task FadeToBlack(float fadeTime, bool ignoreTimeScale = true) {
 			if (_fadeCanvasGroup == null) {
 				await CreateFadeCanvas();
 			}
@@ -26,13 +26,14 @@ namespace CDK {
 
 			while (_fadeCanvasGroup.alpha < 1f) {
 				await Observable.NextFrame();
-				
-				_fadeCanvasGroup.alpha += Time.unscaledDeltaTime / fadeTime;
+
+				float delta = ignoreTimeScale ? Time.unscaledDeltaTime : CTime.DeltaTimeScaled;
+				_fadeCanvasGroup.alpha += delta / fadeTime;
 			}
 			
 		}
 
-		public static async Task FadeToTransparent(float fadeTime) {
+		public static async Task FadeToTransparent(float fadeTime, bool ignoreTimeScale = true) {
 			if (_fadeCanvasGroup == null) {
 				await CreateFadeCanvas();
 			}
@@ -42,7 +43,8 @@ namespace CDK {
 			while (_fadeCanvasGroup.alpha > 0f) {
 				await Observable.NextFrame();
 				
-				_fadeCanvasGroup.alpha -= Time.unscaledDeltaTime / fadeTime;
+				float delta = ignoreTimeScale ? Time.unscaledDeltaTime : CTime.DeltaTimeScaled;
+				_fadeCanvasGroup.alpha -= delta / fadeTime;
 			}
 		}
 		
