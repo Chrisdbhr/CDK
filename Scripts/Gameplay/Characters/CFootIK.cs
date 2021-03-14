@@ -2,6 +2,7 @@
 using UnityEngine;
 
 namespace CDK {
+	[Obsolete]
 	public class CFootIK : MonoBehaviour {
 		
 		#region <<---------- Properties and Fields ---------->>
@@ -12,10 +13,20 @@ namespace CDK {
 		[SerializeField] private Transform leftFoot;
 		[SerializeField] private Transform rightFoot;
 		[SerializeField] private float _footSize = 0.1f;
+		[SerializeField] private LayerMask _footCollisionLayers = 1;
 
-		[SerializeField, Range(0f, 1f)] private float rightFootIkWeight = 1f;
-		[SerializeField, Range(0f, 1f)] private float leftFootIkWeight = 1f;
+		private float rightFootIkWeight {
+			get { return this._rightFootIkWeight; }
+			set { this._rightFootIkWeight = value.CClamp01(); }
+		}
+		[SerializeField, Range(0f, 1f)] private float _rightFootIkWeight = 1f;
+		private float leftFootIkWeight {
+			get { return this._leftFootIkWeight.CClamp01(); }
+			set { this._leftFootIkWeight = value.CClamp01(); }
+		}
+		[SerializeField, Range(0f, 1f)] private float _leftFootIkWeight = 1f;
 
+		[NonSerialized] private RaycastHit _hitInfo;
 		[NonSerialized] private Transform _transform;
 		
 		#endregion <<---------- Properties and Fields ---------->>
@@ -35,19 +46,25 @@ namespace CDK {
 		private void ProcessIk(Vector3 feetPos, AvatarIKGoal ikGoal) {
 			float checkDistance = this._charController.stepOffset;
 
-			var hits = new RaycastHit[1];
-
-			if (Physics.RaycastNonAlloc(
+			if (Physics.SphereCast(
 				feetPos - (Vector3.down * this._footSize) + (Vector3.up * (checkDistance * 0.5f)),
+				this._footSize,
 				Vector3.down * checkDistance,
-				hits,
+				out this._hitInfo,
 				checkDistance,
-				1,
+				this._footCollisionLayers,
 				QueryTriggerInteraction.Ignore
-			) > 0) {
-				if (feetPos.y - this._footSize < hits[0].point.y) {
-					this.animator.SetIKPosition(ikGoal, hits[0].point + (hits[0].normal.normalized * this._footSize));
-					this.animator.SetIKRotation(ikGoal,  Quaternion.LookRotation(this._transform.forward, hits[0].normal));
+			)) {
+				if (feetPos.y - this._footSize < this._hitInfo.point.y) {
+
+					if (ikGoal == AvatarIKGoal.LeftFoot) this.leftFootIkWeight += CTime.DeltaTimeScaled;
+					else this.leftFootIkWeight -= CTime.DeltaTimeScaled;
+					
+					if (ikGoal == AvatarIKGoal.RightFoot) this.rightFootIkWeight += CTime.DeltaTimeScaled;
+					else this.rightFootIkWeight -= CTime.DeltaTimeScaled;
+					
+					this.animator.SetIKPosition(ikGoal, this._hitInfo.point + (this._hitInfo.normal.normalized * this._footSize));
+					this.animator.SetIKRotation(ikGoal,  Quaternion.LookRotation(this._transform.forward, this._hitInfo.normal));
 				}
 			}
 		}

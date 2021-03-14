@@ -92,7 +92,7 @@ namespace CDK {
 		public float MovementSpeed {
 			get { return this._movementSpeed; }
 		}
-		[SerializeField][Min(1f)] private float _movementSpeed = 1f;
+		[SerializeField][Min(0f)] private float _movementSpeed = 1f;
 		
 		public float WalkMultiplier {
 			get { return this._walkMultiplier; }
@@ -329,11 +329,11 @@ namespace CDK {
 				// target movement speed
 				switch (this.CurrentMovState) {
 					case CMovState.Walking: {
-						targetMovSpeed = this.MovementSpeed * this.WalkMultiplier;
+						targetMovSpeed = this.MovementSpeed > 0f ? this.MovementSpeed * this.WalkMultiplier : this.WalkMultiplier;
 						break;
 					}
 					case CMovState.Running: {
-						targetMovSpeed = this.MovementSpeed * this.RunSpeedMultiplier;
+						targetMovSpeed = this.MovementSpeed > 0f ? this.MovementSpeed * this.RunSpeedMultiplier : this.RunSpeedMultiplier;
 						break;
 					}
 					default: {

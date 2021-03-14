@@ -2,12 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using CDK.Assets;
 using CDK.UI;
 using Rewired;
 using UniRx;
 using UnityEngine;
-using UnityEngine.AddressableAssets;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -33,7 +31,7 @@ namespace CDK {
 		
 
 			Application.focusChanged += async focused => {
-				if(!focused) this.OpenMenu();
+				if(!focused) await this.OpenMenu();
 			};
 			
 			Debug.Log($"Instantiating a new game player number {playerNumber}");
@@ -48,7 +46,6 @@ namespace CDK {
 		
 		public int PlayerNumber { get; } = 0;
 		private readonly Rewired.Player _rePlayer;
-		private CUIBase _openPauseMenu;
 		private Transform _cameraTransform;
 		private CPlayerCamera _cPlayerCamera;
 
@@ -175,11 +172,11 @@ namespace CDK {
 		private void InputPause(InputActionEventData data) {
 			if (!data.GetButtonDown()) return;
 			
-			if (this._openPauseMenu == null) {
+			if (!CBlockingEventsManager.IsOnMenu) {
 				this.OpenMenu().CAwait();
 			}
 			else {
-				this.CloseMenu();
+				CUINavigation.get.CloseCurrentMenu().CAwait();
 			}
 		}
 
@@ -212,6 +209,7 @@ namespace CDK {
 
 		private void SetInputLayout(bool onMenu) {
 			this._rePlayer.controllers.maps.SetMapsEnabled(!onMenu, "Default");
+			this._rePlayer.controllers.maps.SetMapsEnabled(onMenu, "UI");
 			ReInput.players.GetSystemPlayer().controllers.maps.SetMapsEnabled(onMenu, "UI");
 			
 			Debug.Log($"Player {this.PlayerNumber} controllers maps onMenu changed to {onMenu}");
@@ -228,15 +226,11 @@ namespace CDK {
 			if (CBlockingEventsManager.IsOnMenu) return;
 			CBlockingEventsManager.IsOnMenu = true;
 			try {
-				var menu = await CAssets.LoadAndInstantiateUI(CGameSettings.AssetRef_PauseMenu);
-				this._openPauseMenu = await menu.OpenMenu(null);
+				await CUINavigation.get.OpenMenu(CGameSettings.AssetRef_PauseMenu, null);
 			} catch (Exception e) {
 				CBlockingEventsManager.IsOnMenu = false;
 				Debug.LogError("Exception trying to OpenMenu on GamePlayer: " + e);
 			}
-		}
-		private void CloseMenu() {
-			this._openPauseMenu.CloseMenu().CAwait();
 		}
 		
 		#endregion <<---------- Pause Menu ---------->>
