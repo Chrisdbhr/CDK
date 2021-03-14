@@ -1,7 +1,5 @@
 using System;
 using UnityEngine;
-using System.Collections.Generic;
-using System.Linq;
 using Unity.Linq;
 using Random = UnityEngine.Random;
 
@@ -12,22 +10,64 @@ using UnityEditor;
 namespace CDK {
 	public class CChildrenPositionAndRotationRandomizer : MonoBehaviour {
 		
-		[SerializeField] private Vector3 _range = Vector3.one * 10;
-		[SerializeField] private Vector3 _angle = Vector3.one * 30;
+		#region <<---------- Properties and Fields ---------->>
+
+		[SerializeField] private Vector3 _scaleRange = Vector3.one * 0.10f;
+		[SerializeField] private Vector3 _angleRange = Vector3.one * 30;
+		[SerializeField] private Vector3 _positionRange = Vector3.one * 10;
 		[SerializeField] private float _minimumSpaceBetweenObjs = 1f;
 		[NonSerialized] private GameObject[] _childObjs;
+
+		#endregion <<---------- Properties and Fields ---------->>
+
 		
 		
 		
-		
+		#region <<---------- MonoBehaviour ---------->>
+
+		#if UNITY_EDITOR
 		private void OnDrawGizmosSelected() {
 			Gizmos.color = Color.cyan;
-			Gizmos.DrawWireCube(this.transform.position, this._range*2f);
+			Gizmos.DrawWireCube(this.transform.position, this._positionRange*2f);
 		}
+		#endif
+		
+		#endregion <<---------- MonoBehaviour ---------->>
 
-		public void RandomizeObjs() {
+		#if UNITY_EDITOR
+		public void RandomizePositionsEditor() {
+			this.DoForEachGameObject(target => {
+				var pos = this.GetValidPosition(200);
+				Undo.RecordObject(target, $"undo-{target.name}");
+				target.position = pos;
+			});
+		}
+		public void RandomizeRotationsEditor() {
+			this.DoForEachGameObject(target => {
+				var angle = new Vector3(
+					Random.Range(-this._angleRange.x, this._angleRange.x),
+					Random.Range(-this._angleRange.y, this._angleRange.y),
+					Random.Range(-this._angleRange.z, this._angleRange.z)
+				);
+				Undo.RecordObject(target, $"undo-{target.name}");
+				target.rotation = Quaternion.Euler(angle);
+			});
+		}
+		public void RandomizeScalesEditor() {
+			this.DoForEachGameObject(target => {
+				var scale = target.localScale;
+				scale.x += scale.x * this._scaleRange.x;
+				scale.y += scale.y * this._scaleRange.y;
+				scale.z += scale.z * this._scaleRange.z;
+				Undo.RecordObject(target, $"undo-{target.name}");
+				target.localScale = scale;
+			});
+		}
+		#endif
+
+		private void DoForEachGameObject(Action<Transform> actionOnTransform) {
 			#if UNITY_EDITOR
-			string progressBarTitle = "Randomizing positions";
+			string progressBarTitle = "Randomizing Rotations";
 			string progressBarInfo = "";
 			EditorUtility.DisplayProgressBar(progressBarTitle, progressBarInfo, 0f); 
 			#endif
@@ -43,15 +83,8 @@ namespace CDK {
 				}
 				#endif
 				count++;
-
-				var pos = this.GetValidPosition(200);
-				var angle = new Vector3(
-					Random.Range(-this._angle.x, this._angle.x),
-					Random.Range(-this._angle.y, this._angle.y),
-					Random.Range(-this._angle.z, this._angle.z)
-				);
-				child.transform.position = pos;
-				child.transform.rotation = Quaternion.Euler(angle);
+				
+				actionOnTransform?.Invoke(child.transform);
 			}
 			#if UNITY_EDITOR
 			EditorUtility.ClearProgressBar();
@@ -60,9 +93,9 @@ namespace CDK {
 
 		private Vector3 GetValidPosition(int safeOverflowCount) {
 			var pos = new Vector3(
-				Random.Range(-this._range.x, this._range.x),
-				Random.Range(-this._range.y, this._range.y),
-				Random.Range(-this._range.z, this._range.z)
+				Random.Range(-this._positionRange.x, this._positionRange.x),
+				Random.Range(-this._positionRange.y, this._positionRange.y),
+				Random.Range(-this._positionRange.z, this._positionRange.z)
 			);
 			pos += this.transform.position;
 			
@@ -84,24 +117,31 @@ namespace CDK {
 
 	}
 
+	#region <<---------- Editor ---------->>
+	
 	#if UNITY_EDITOR
 	[CustomEditor(typeof(CChildrenPositionAndRotationRandomizer))]
-	public class RandomPositionAndRotationInstantiatorEditor : Editor
-	{
-		public override void OnInspectorGUI()
-		{
-			DrawDefaultInspector();
-        
-			var myScript = (CChildrenPositionAndRotationRandomizer)target;
-			if(GUILayout.Button(nameof(CTransformExtensions.DeleteAllChildren)))
-			{
+	public class RandomPositionAndRotationInstantiatorEditor : Editor {
+		public override void OnInspectorGUI() {
+			this.DrawDefaultInspector();
+
+			if (!(target is CChildrenPositionAndRotationRandomizer myScript)) return;
+			if(GUILayout.Button(nameof(CTransformExtensions.DeleteAllChildren))) {
 				myScript.transform.DeleteAllChildren();
 			}
-			if(GUILayout.Button(nameof(myScript.RandomizeObjs)))
-			{
-				myScript.RandomizeObjs();
+			if(GUILayout.Button(nameof(CChildrenPositionAndRotationRandomizer.RandomizePositionsEditor))) {
+				myScript.RandomizePositionsEditor();
+			}
+			if(GUILayout.Button(nameof(CChildrenPositionAndRotationRandomizer.RandomizeRotationsEditor))) {
+				myScript.RandomizeRotationsEditor();
+			}
+			if(GUILayout.Button(nameof(CChildrenPositionAndRotationRandomizer.RandomizeScalesEditor))) {
+				myScript.RandomizeScalesEditor();
 			}
 		}
 	}
 	#endif
+	
+	#endregion <<---------- Editor ---------->>
+
 }
