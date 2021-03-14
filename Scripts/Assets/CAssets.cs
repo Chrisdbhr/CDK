@@ -7,24 +7,28 @@ using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using Object = UnityEngine.Object;
 
-namespace CDK.Assets {
+namespace CDK {
 	public class CAssets {
 
 		#region <<---------- Properties ---------->>
 
-		private static CAssets Instance {
+		public static CAssets get {
 			get {
 				if (_instance != null) return _instance;
 				Debug.Log($"Creating new instance of {nameof(CAssets)}");
+				CApplication.IsQuitting += () => {
+					_instance = null;
+				};
 				return _instance = new CAssets();
 			}
 		}
 		private static CAssets _instance;
 		
-		private static Canvas _loadingCanvas;
-		private static CRetainable _loadingRetainable;
-		private static TimeSpan TimeToShowLoadingIndicator = TimeSpan.FromSeconds(1);
-		private static IDisposable _loadingTimer; 
+		private Task _loadLoadingCanvasTask;
+		private Canvas _loadingCanvas;
+		private CRetainable _loadingRetainable;
+		private TimeSpan TimeToShowLoadingIndicator = TimeSpan.FromSeconds(1);
+		private IDisposable _loadingTimer; 
 		
 		#endregion <<---------- Properties ---------->>
 
@@ -33,9 +37,9 @@ namespace CDK.Assets {
 		
 		#region <<---------- Initializers ---------->>
 		
-		private async Task CheckForInitialization() {
-			await Instance.CheckForLoadingCanvas();
-			_loadingRetainable = new CRetainable();
+		private CAssets() {
+			this._loadingRetainable = new CRetainable();
+			(this._loadLoadingCanvasTask = this.CheckForLoadingCanvas()).CAwait();
 		}
 
 		#endregion <<---------- Initializers ---------->>
@@ -67,10 +71,10 @@ namespace CDK.Assets {
 		}
 		
 		public static async Task<GameObject> LoadAndInstantiateGameObjectAsync(string key) {
-			await Instance.CheckForInitialization();
+			await get._loadLoadingCanvasTask;
 			Debug.Log($"Loading asset '{key}'");
 
-			Instance.LoadingRetain();
+			get.LoadingRetain();
 			
 			var asyncOp = new AsyncOperationHandle<GameObject>();
 			
@@ -84,7 +88,7 @@ namespace CDK.Assets {
 				Debug.LogError(e);
 			}
 			finally {
-				Instance.LoadingRelease();
+				get.LoadingRelease();
 			}
 
 			var go = Object.Instantiate(asyncOp.Result);
@@ -121,13 +125,14 @@ namespace CDK.Assets {
 
 
 		#region <<---------- Loading Canvas ---------->>
+		
 		private async Task CheckForLoadingCanvas() {
-			if (_loadingCanvas != null) return;
+			if (this._loadingCanvas != null) return;
 			var asyncOp = Addressables.LoadAssetAsync<GameObject>(CGameSettings.AssetRef_UiLoading);
 			await asyncOp.Task;
-			_loadingCanvas = Object.Instantiate(asyncOp.Result).GetComponent<Canvas>();
-			_loadingCanvas.enabled = false;
-			Object.DontDestroyOnLoad(_loadingCanvas.gameObject);
+			this._loadingCanvas = Object.Instantiate(asyncOp.Result).GetComponent<Canvas>();
+			this._loadingCanvas.enabled = false;
+			Object.DontDestroyOnLoad(this._loadingCanvas.gameObject);
 		}
 		
 		#endregion <<---------- Loading Canvas ---------->>
