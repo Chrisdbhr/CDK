@@ -37,8 +37,7 @@ namespace CDK.UI {
 		}
 		
 		public void OnCancel(BaseEventData eventData) {
-			var parentUi = this.transform.root.GetComponent<CUIBase>();
-			if (parentUi != null) parentUi.CloseMenu().CAwait();
+			CUINavigation.get.CloseCurrentMenu().CAwait();
 		}
 		
 		#endregion <<---------- IHandlers ---------->>

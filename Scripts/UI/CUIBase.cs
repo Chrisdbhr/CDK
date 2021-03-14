@@ -3,118 +3,88 @@ using System.Threading.Tasks;
 using FMODUnity;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
-using UnityEngine.EventSystems;
 
 namespace CDK.UI {
 	public abstract class CUIBase : MonoBehaviour {
 
-		#region <<---------- Singleton ---------->>
-		
-		public static CUIBase ActiveUI {
-			get {
-				return _activeUI;
-			}
-			set {
-				Debug.Log($"Setting Active UI from '{(_activeUI != null ? _activeUI.name : null)}' to '{(value != null ? value.name : null)}'");
-				_activeUI = value;
-			}
-		}
-		private static CUIBase _activeUI;
-
-		#endregion <<---------- Singleton ---------->>
-
-		
-		
-		
 		#region <<---------- Properties and Fields ---------->>
 
-		[SerializeField] private GameObject _firstSelected;
+		[Header("Setup")]
+		[SerializeField] private CUIInteractable _firstSelected;
+		public CUIInteractable FirstSelected => this._firstSelected;
+		[SerializeField] private Canvas _canvas;
+		[SerializeField] private bool _hideWhenBehind;
+		
+		[Header("Sounds")]
 		[SerializeField] [EventRef] protected string _soundOpenMenu;
 		[SerializeField] [EventRef] protected string _soundCloseMenu;
 		
 		[NonSerialized] private CUIBase _previousUI;
 		[NonSerialized] private CUIButton _previousButton;
-		[NonSerialized] private EventSystem _currentEventSystem;
+
+		public event Action OnOpen {
+			add {
+				this._onOpen -= value;
+				this._onOpen += value;
+			}
+			remove {
+				this._onOpen -= value;
+			}
+		}
+		[NonSerialized] private Action _onOpen;
+		
+		public event Action OnClose {
+			add {
+				this._onClose -= value;
+				this._onClose += value;
+			}
+			remove {
+				this._onClose -= value;
+			}
+		}
+		[NonSerialized] private Action _onClose;
 
 		#endregion <<---------- Properties and Fields ---------->>
 
 		
 		
 		
-		#region <<---------- MonoBehaviour ---------->>
-		protected virtual void Start() {
-			this._currentEventSystem = EventSystem.current;
-			if(this._currentEventSystem != null && this._firstSelected != null) this._currentEventSystem.SetSelectedGameObject(this._firstSelected);
-		}
-		
-		protected virtual void Update() {
-			this.CheckForSelection();
-		}
-		#endregion <<---------- MonoBehaviour ---------->>
-
-		
-		
-		private void CheckForSelection() {
-			if (ActiveUI != this) return;
-			this._currentEventSystem = EventSystem.current;
-			if (this._currentEventSystem == null) return;
-			if (this._currentEventSystem.currentSelectedGameObject != null) return;
-			if (this._firstSelected == null) return;
-			Debug.Log($"Setting selected object to {this._firstSelected.name} because there was any another selected on Event System {this._currentEventSystem.name}");
-			this._currentEventSystem.SetSelectedGameObject(this._firstSelected);
-		}
-		
-		
-		
-		
 		#region <<---------- Open / Close ---------->>
-		
-		/// <summary>
-		/// Opens a menu, registering the button that opened it and returning the opened menu if opened.
-		/// </summary>
-		public virtual async Task<CUIBase> OpenMenu(CUIButton previousButton) {
-			Debug.Log($"{this.name} received a OpenMenu request");
-			if (previousButton == null) {
-				CTime.SetTimeScale(0f);
-			}
-			else {
-				this._previousButton = previousButton;
-			}
+
+		public async Task Open(int sortOrder) {
+			this._onOpen?.Invoke();
+			this._canvas.sortingOrder = sortOrder;
 			RuntimeManager.PlayOneShot(this._soundOpenMenu);
-			
-			this._previousUI = ActiveUI;
-			ActiveUI = this;
-			
-			return this;
+			Debug.Log($"Opening menu {this.name}");
 		}
-
-		/// <summary>
-		/// Closes a menu selecting the button that opened it if possible.
-		/// </summary>
-		/// <returns></returns>
-		public virtual async Task CloseMenu() {			
-			Debug.Log($"{this.name} received a CloseMenu request");
-			if (this._previousButton != null) {
-				var es = EventSystem.current;
-				if (es) {
-					es.SetSelectedGameObject(this._previousButton.gameObject);
-				}
-			}
-			else {
-				// this is the last menu in navigation
-				CTime.SetTimeScale(1f);
-				CBlockingEventsManager.IsOnMenu = false;
-			}
-			
+		public async Task Close() {
+			this._onClose?.Invoke();
 			RuntimeManager.PlayOneShot(this._soundCloseMenu);
-			
-			ActiveUI = this._previousUI;
-
+			Debug.Log($"Closing menu {this.name}");
 			Addressables.ReleaseInstance(this.gameObject);
 			Destroy(this.gameObject);
 		}
 		
 		#endregion <<---------- Open / Close ---------->>
-	
+
+
+
+
+		#region <<---------- Visibility ---------->>
+		
+		public void HideIfSet() {
+			if (!this._hideWhenBehind) return;
+			this.gameObject.SetActive(false);
+			//this._canvas.enabled = false;
+		}
+
+		public void ShowIfHidden() {
+			if (!this._hideWhenBehind) return;
+			this.gameObject.SetActive(true);
+			//this._canvas.enabled = true;
+		}
+		
+		#endregion <<---------- Visibility ---------->>
+
 	}
 }

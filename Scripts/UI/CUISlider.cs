@@ -1,11 +1,12 @@
 using System;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace CDK.UI {
 	[RequireComponent(typeof(Slider))]
-	public class CUISlider : CUIInteractable {
+	public class CUISlider : CUIInteractable, IMoveHandler {
 
 		public Slider Slider;
 		[SerializeField] private TextMeshProUGUI _valueTmp;
@@ -24,6 +25,10 @@ namespace CDK.UI {
 			if (newValue == this.Slider.value) return;
 			if (this._valueTmp) this._valueTmp.text = newValue.ToString(this._toStringParams);
 			this.OnValueChanged?.Invoke(newValue);
+		}
+
+		public void OnMove(AxisEventData eventData) {
+			this.Slider.value += eventData.moveVector.x * Time.deltaTime;
 		}
 	}
 }
