@@ -222,7 +222,7 @@ namespace CDK {
 			switch (transitionType) {
 				case CameraTransitionType.fade:
 					print($"[CPlayerCamera] Start fade transition with duration {duration}.");
-					CFadeCanvas.FadeToBlack(duration).CAwait();
+					CFadeCanvas.FadeToBlack(duration, false).CAwait();
 					break;
 			case CameraTransitionType.crossfade:
 					print($"[CPlayerCamera] Start {CameraTransitionType.crossfade.ToString()} transition with duration {duration}.");
@@ -241,7 +241,7 @@ namespace CDK {
 			switch (transitionType) {
 				case CameraTransitionType.fade:
 					print($"[CPlayerCamera] Reverse fade transition with duration {duration}.");
-					CFadeCanvas.FadeToTransparent(duration).CAwait();
+					CFadeCanvas.FadeToTransparent(duration, false).CAwait();
 					break;
 				case CameraTransitionType.crossfade:
 					print($"[CPlayerCamera] Reverse {CameraTransitionType.crossfade.ToString()} transition with duration {duration}.");
