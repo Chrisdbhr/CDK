@@ -1,2 +1,4 @@
 ﻿Config/GameVersionInfo.cs.meta
 Config/GameVersionInfo.cs
+Scripts/Save/CSave.Custom.cs
+Scripts/Save/CSave.Custom.cs.meta
