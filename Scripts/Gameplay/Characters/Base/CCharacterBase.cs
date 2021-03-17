@@ -119,7 +119,7 @@ namespace CDK {
 		public float SlideSpeedMultiplier {
 			get { return this._slideSpeedMultiplier; }
 		}
-		[SerializeField] private float _slideSpeedMultiplier = 10f;
+		[SerializeField] private float _slideSpeedMultiplier = 3f;
 		public virtual float SlideControlAmmount => 0.5f;
 		/// <summary>
 		/// tempo para tropecar
@@ -135,7 +135,7 @@ namespace CDK {
 		#endregion <<---------- Aerial Movement ---------->>
 		
 		#region <<---------- Rotation ---------->>
-		[SerializeField] private float _rotateTowardsSpeed = 20f;
+		[SerializeField] private float _rotateTowardsSpeed = 10f;
 		
 		[NonSerialized] protected Quaternion _targetLookRotation;
 		[NonSerialized] protected float rotateTowardsLookTargetSpeed = 800f;
@@ -162,7 +162,7 @@ namespace CDK {
 		protected readonly int ANIM_CHAR_MOV_SPEED_XZ = Animator.StringToHash("speedXZ");
 
 		// actions
-		protected readonly int ANIM_CHAR_STUMBLE = Animator.StringToHash("stumble");
+		private readonly int ANIM_CHAR_STUMBLE = Animator.StringToHash("stumble");
 		
 		// condition states
 		protected readonly int ANIM_CHAR_IS_STRAFING = Animator.StringToHash("isStrafing");
@@ -177,10 +177,6 @@ namespace CDK {
 		protected readonly int ANIM_CHAR_IS_STUNNED_HEAVY = Animator.StringToHash("stunH");
 		#endregion <<---------- Animation Parameters ---------->>
 		
-		/// <summary>
-		/// Character cant move during this condition.
-		/// </summary>
-		[NonSerialized] protected ReactiveProperty<bool> _isPlayingBlockingAnimationRx;
 		#endregion <<---------- Animation ---------->>
 		#endregion <<---------- Properties ---------->>
 
@@ -245,7 +241,6 @@ namespace CDK {
 			this.CanMoveRx = new ReactiveProperty<bool>(true);
 			this._canSlideRx = new ReactiveProperty<bool>(true);
 			this._isTouchingTheGroundRx = new ReactiveProperty<bool>(true);
-			this._isPlayingBlockingAnimationRx = new ReactiveProperty<bool>(false);
 			this._isAimingRx = new ReactiveProperty<bool>();
 			this.IsStrafingRx = new ReactiveProperty<bool>();
 			
@@ -278,10 +273,8 @@ namespace CDK {
 			
 			
 			// movement blocking animations playing
-			this._isPlayingBlockingAnimationRx.Subscribe(isPlayingBlockingAnimation => {
-				this.CanMoveRx.Value = !isPlayingBlockingAnimation;
-			}).AddTo(this._compositeDisposable);
-			
+			CBlockingEventsManager.OnDoingBlockingAction += this.DoingBlockingAction;
+
 			// is touching the ground
 			this._isTouchingTheGroundRx.DistinctUntilChanged().Subscribe(isTouchingTheGround => {
 				if(this.Anim) this.Anim.SetBool(this.ANIM_CHAR_IS_FALLING, !isTouchingTheGround);
@@ -292,8 +285,14 @@ namespace CDK {
 		protected virtual void UnsubscribeToEvents() {
 			this._compositeDisposable?.Dispose();
 			this._compositeDisposable = null;
+			
+			CBlockingEventsManager.OnDoingBlockingAction -= this.DoingBlockingAction;
 		}
 		
+		protected void DoingBlockingAction(bool isDoing) {
+			this.CanMoveRx.Value = !isDoing;
+		}
+
 		#endregion <<---------- Events ---------->>
 
 
@@ -426,7 +425,7 @@ namespace CDK {
 					this.RotateTowardsDirection(this.myVelocityXZ);
 				}
 				else {
-					if(!this._isPlayingBlockingAnimationRx.Value) this.RotateTowardsDirection(this.InputMovementDirRelativeToCam);
+					if(!CBlockingEventsManager.IsDoingBlockingAction.IsRetained()) this.RotateTowardsDirection(this.InputMovementDirRelativeToCam);
 				}
 			}
 		}
@@ -515,6 +514,14 @@ namespace CDK {
 		#endregion <<---------- Crouch ---------->>
 
 
+		#region <<---------- Stumble ---------->>
+
+		public void Stumble() {
+			if(this.Anim) this.Anim.SetTrigger(this.ANIM_CHAR_STUMBLE);
+		}
+		
+		#endregion <<---------- Stumble ---------->>
+		
 
 
 		#region <<---------- ICStunnable ---------->>
@@ -539,10 +546,6 @@ namespace CDK {
 		
 
 		#region <<---------- Animations State Machine Behaviours ---------->>
-		
-		public void SetPlayingBlockingAnimation(bool state) {
-			this._isPlayingBlockingAnimationRx.Value = state;
-		}
 		
 		public void SetAnimationRootMotion(bool state) {
 			if(this.Anim) this.Anim.applyRootMotion = state;

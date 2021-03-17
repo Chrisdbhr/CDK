@@ -27,7 +27,7 @@ namespace CDK {
 			this.SignToInputEvents();
 
 			this.SetInputLayout(false);
-			CBlockingEventsManager.OnMenuEvent += this.SetInputLayout;
+			CBlockingEventsManager.OnMenu += this.SetInputLayout;
 		
 
 			Application.focusChanged += async focused => {
@@ -244,7 +244,7 @@ namespace CDK {
 			this._compositeDisposable?.Dispose();
 			
 			this.UnsignFromInputEvents();
-			CBlockingEventsManager.OnMenuEvent -= this.SetInputLayout; 
+			CBlockingEventsManager.OnMenu -= this.SetInputLayout; 
 		}
 		
 		#endregion <<---------- Disposable ---------->>

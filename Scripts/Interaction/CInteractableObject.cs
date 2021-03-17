@@ -14,7 +14,7 @@ namespace CDK {
 		
 
 		public void OnInteract(Transform interactingTransform) {
-			if (!this.enabled || !this.gameObject.activeInHierarchy || CBlockingEventsManager.IsBlockingEventHappening) return;
+			if (!this.enabled || !this.gameObject.activeInHierarchy || CBlockingEventsManager.IsAnyBlockingEventHappening) return;
 			this.InteractEvent?.Invoke();
 			if (this.onlyWorkOneTimePerSceneLoad) {
 				Destroy(this);
@@ -22,7 +22,7 @@ namespace CDK {
 		}
 		
 		public void OnLookTo(Transform lookingTransform) {
-			if (!this.enabled || !this.gameObject.activeInHierarchy || CBlockingEventsManager.IsBlockingEventHappening) return;
+			if (!this.enabled || !this.gameObject.activeInHierarchy || CBlockingEventsManager.IsAnyBlockingEventHappening) return;
 			if (lookingTransform == null) return;
 			Debug.Log($"{lookingTransform.name} looked to {this.name} in its interactable range.");	
 		}

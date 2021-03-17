@@ -20,7 +20,7 @@ namespace CDK {
 		#endif
 
 		public override void TryToInteract() {
-			if (CBlockingEventsManager.IsBlockingEventHappening) return;
+			if (CBlockingEventsManager.IsAnyBlockingEventHappening) return;
 
 			var originPos = this.GetCenterSphereCheckPosition();
 
