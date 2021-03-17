@@ -46,6 +46,9 @@ namespace CDK {
 		public static AssetReference AssetRef_PauseMenu => Instance._assetRefPauseMenu;
 		[SerializeField] private AssetReference _assetRefPauseMenu;
 
+		public static AssetReference AssetRef_ItemsMenu => Instance._assetRef_ItemsMenu;
+		[SerializeField] private AssetReference _assetRef_ItemsMenu;
+
 
 		public static bool CursorStartsHidden => Instance._cursorStartsHidden;
 		[SerializeField] private bool _cursorStartsHidden;

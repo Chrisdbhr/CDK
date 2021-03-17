@@ -92,7 +92,12 @@ namespace CDK {
 
 			this._pov = this._cinemachineCamera.GetCinemachineComponent<CinemachinePOV>();
 		}
-		
+
+		private void CameraSensitivityChanged(float newValue) {
+			this._pov.m_HorizontalAxis.m_MaxSpeed = newValue;
+			this._pov.m_VerticalAxis.m_MaxSpeed = newValue;
+		}
+
 		private void OnEnable() {
 			var angles = this._transform.eulerAngles;
 			this.RotationY = angles.y;
@@ -154,6 +159,7 @@ namespace CDK {
 		private void SubscribeToEvents() {
 			this._isCloseToTheCharacterRx = new ReactiveProperty<bool>(false);
 
+			CSave.get.CameraSensitivity_Changed += this.CameraSensitivityChanged;
 
 			Observable.Timer(TimeSpan.FromSeconds(0.5f)).TakeUntilDisable(this).Subscribe(_ => {
 				bool camIsCloseToTheCharacter = this._currentDistanceFromTarget <= this._distanceToConsiderCloseForCharacter;
@@ -173,6 +179,7 @@ namespace CDK {
 		}
 
 		private void UnsubscribeToEvents() {
+			CSave.get.CameraSensitivity_Changed -= this.CameraSensitivityChanged;
 		}
 		
 		#endregion <<---------- Events ---------->>

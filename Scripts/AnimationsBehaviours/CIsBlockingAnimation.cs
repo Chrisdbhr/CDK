@@ -5,9 +5,7 @@ namespace CDK {
 	{
 		// OnStateEnter is called when a transition starts and the state machine starts to evaluate this state
 		public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex) {
-			var baseChar = animator.GetComponent<CCharacterBase>();
-			if (baseChar == null) return;
-			baseChar.SetPlayingBlockingAnimation(true);
+			CBlockingEventsManager.IsDoingBlockingAction.Retain();
 		}
 
 		// OnStateUpdate is called on each Update frame between OnStateEnter and OnStateExit callbacks
@@ -18,9 +16,7 @@ namespace CDK {
 
 		// OnStateExit is called when a transition ends and the state machine finishes evaluating this state
 		public override void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex) {
-			var baseChar = animator.GetComponent<CCharacterBase>();
-			if (baseChar == null) return;
-			baseChar.SetPlayingBlockingAnimation(false);
+			CBlockingEventsManager.IsDoingBlockingAction.Release();
 		}
 
 		// OnStateMove is called right after Animator.OnAnimatorMove()

@@ -1,6 +1,7 @@
 using System;
 using UniRx;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
 using UnityEngine.Events;
 
 namespace CDK {
@@ -12,7 +13,7 @@ namespace CDK {
 		[SerializeField] private Animator _characterAnimator;
 		
 		// items
-		[SerializeField] private CInventoryView _inventoryViewPrefab;
+		[SerializeField] private AssetReference _inventoryViewRef;
 		[NonSerialized] private CInventoryView _inventoryViewSpawned;
 	
 		public int Size {
@@ -98,15 +99,6 @@ namespace CDK {
 		
 		
 		#region <<---------- Managment ---------->>
-
-		private void CreateView() {
-			this._inventoryViewSpawned = Instantiate(this._inventoryViewPrefab, this.transform);
-			this._inventoryViewSpawned.CreateInventoryViewItens(this);
-			CBlockingEventsManager.IsOnMenu = true;
-			this._inventoryViewSpawned.OnInventoryClose += () => {
-				CBlockingEventsManager.IsOnMenu = false;
-			};
-		}
 
 		private void UpdateView() {
 			if(this._inventoryViewSpawned != null) this._inventoryViewSpawned.UpdateInventoryView();

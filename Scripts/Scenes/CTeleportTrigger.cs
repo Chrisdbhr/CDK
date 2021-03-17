@@ -58,7 +58,7 @@ namespace CDK {
 				Debug.LogWarning($"Already interacted with {this.name}. Will not trigger OnInteract().");
 				return;
 			}
-			if (CBlockingEventsManager.IsBlockingEventHappening) return;
+			if (CBlockingEventsManager.IsAnyBlockingEventHappening) return;
 
 			this.interacted = true;
 			this.Teleport(interactingTransform);
