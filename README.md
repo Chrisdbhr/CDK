@@ -1,6 +1,9 @@
 # README #
 
-CDK (Chris Development Kit) is a useful set of tools to speedup development of core Unity games mechanics. This code is used shared between all my projects and it is in active update and improvement. Check more information about my projects on [my website](https://chrisjogos.com)!
+CDK (Chris Development Kit) is a useful set of tools to speedup development of core Unity games mechanics. 
+
+It's being used in my main current game project "[resultarias](https://gamejolt.com/games/resultarias/472865)", a surrealist game about dream exploration.
+Check more information about my other projects on [my website](https://chrisjogos.com)!
 
 ### What is this repository for? ###
 
@@ -15,12 +18,12 @@ CDK (Chris Development Kit) is a useful set of tools to speedup development of c
 * Be aware that before version 1.0.0 there will have code modifications that can break some Inspector references. Pay attention when upgrading version.
 
 ### Dependencies
-* SimpleJSON (bundled)
-* Unity Addressables system (install via package manager)
-* Cinemachine (install via package manager)
+* [UnityJSON](https://github.com/adragonite/UnityJSON)
 * [Debug Draw Extension](https://assetstore.unity.com/packages/tools/debug-drawing-extension-11396)
 * [LINQ For Game Object](https://github.com/neuecc/LINQ-to-GameObject-for-Unity)
 * [DOTween](https://assetstore.unity.com/packages/tools/animation/dotween-hotween-v2-27676)
+* Unity Addressables system (install via package manager)
+* Cinemachine (install via package manager)
 * [FMOD](https://www.fmod.com) (for audio processing)
 
 ### Contribution guidelines ###
