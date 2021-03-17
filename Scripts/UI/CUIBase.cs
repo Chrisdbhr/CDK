@@ -10,7 +10,7 @@ namespace CDK.UI {
 		#region <<---------- Properties and Fields ---------->>
 
 		[Header("Setup")]
-		[SerializeField] private CUIInteractable _firstSelected;
+		[SerializeField] protected CUIInteractable _firstSelected;
 		public CUIInteractable FirstSelected => this._firstSelected;
 		[SerializeField] private Canvas _canvas;
 		[SerializeField] private bool _hideWhenBehind;

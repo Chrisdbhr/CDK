@@ -84,14 +84,16 @@ namespace CDK.UI {
 			}
 			
 			Debug.Log($"Requested navigation to '{ui.name}'");
-			if (this._navigationHistory.Count <= 0) CTime.SetTimeScale(0f);
 
 			this.HideLastMenuIfSet();
 			
 			this._navigationHistory.Push((ui, originButton));
 
 			await ui.Open(this._navigationHistory.Count);
-			if(this._navigationHistory.Count > 0) this.CheckForActiveEventSystem(ui.FirstSelected);
+			if (this._navigationHistory.Count > 0) {
+				CBlockingEventsManager.IsOnMenu = true;
+				this.CheckForActiveEventSystem(ui.FirstSelected);
+			}
 			return ui;
 		}
 
@@ -114,7 +116,6 @@ namespace CDK.UI {
 			
 			if (this._navigationHistory.Count <= 0) {
 				// this is the last menu in navigation
-				CTime.SetTimeScale(1f);
 				CBlockingEventsManager.IsOnMenu = false;
 			}
 			else {
@@ -133,15 +134,16 @@ namespace CDK.UI {
 				await ui.Close();
 			}
 			this._navigationHistory.Clear();
-			CTime.SetTimeScale(1f);
 			CBlockingEventsManager.IsOnMenu = false;
 		}
 		
 		#endregion <<---------- Open / Close ---------->>
 
 
-		
-
+		/// <summary>
+		/// check for naoa
+		/// </summary>
+		/// <param name="interactableToSelect">define taokt gaopgmdosp</param>
 		private void CheckForActiveEventSystem(CUIInteractable interactableToSelect) {
 			if (this._navigationHistory.Count <= 0) return;
 			var nh = this._navigationHistory.Peek();
