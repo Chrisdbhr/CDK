@@ -62,7 +62,6 @@ namespace CDK.UI {
 			RuntimeManager.PlayOneShot(this._soundCloseMenu);
 			Debug.Log($"Closing menu {this.name}");
 			Addressables.ReleaseInstance(this.gameObject);
-			Destroy(this.gameObject);
 		}
 		
 		#endregion <<---------- Open / Close ---------->>

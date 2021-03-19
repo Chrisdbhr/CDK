@@ -120,7 +120,8 @@ namespace CDK {
 			
 			await this.CheckIfNeedToCreateCamera();
 			
-			
+			character.gameObject.SetActive(true);
+
 			#if UNITY_EDITOR
 			Selection.activeGameObject = character.gameObject;
 			#endif
@@ -202,6 +203,7 @@ namespace CDK {
 		}
 		
 		#endregion <<---------- Input ---------->>
+
 
 
 

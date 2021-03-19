@@ -62,7 +62,8 @@ namespace CDK {
 				Debug.LogWarning($"Created player {pNumber} but cant find character '{charToCreate}' to control.");
 				return;
 			}
-
+			
+			createdGo.SetActive(false);
 			createdGo.name = $"[Character] {charToCreate}";
 			createdGo.transform.Translate(0f,0.0001f,0f); // prevent spawning at 0 position so engine does not think it is maybe inside the ground next frame.
 			var character = createdGo.GetComponent<CCharacterBase>();

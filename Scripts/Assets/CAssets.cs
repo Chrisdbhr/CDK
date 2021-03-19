@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using CDK.UI;
+using Cysharp.Threading.Tasks;
 using UniRx;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
@@ -48,13 +50,13 @@ namespace CDK {
 		
 
 		#region <<---------- Loadings ---------->>
-
-		public static async Task<CUIBase> LoadAndInstantiateUI(AssetReference key) {
-			return await LoadAndInstantiateUI(key.RuntimeKey.ToString());
+		
+		public static async Task<CUIBase> LoadAndInstantiateUI(AssetReference key, Transform parent = null, bool instantiateInWorldSpace = false, bool trackHandle = true) {
+			return await LoadAndInstantiateUI(key.RuntimeKey.ToString(), parent, instantiateInWorldSpace, trackHandle);
 		}
 		
-		public static async Task<CUIBase> LoadAndInstantiateUI(string key) {
-			var uiGameObject = await LoadAndInstantiateGameObjectAsync(key);
+		public static async Task<CUIBase> LoadAndInstantiateUI(string key, Transform parent = null, bool instantiateInWorldSpace = false, bool trackHandle = true) {
+			var uiGameObject = await LoadAndInstantiateGameObjectAsync(key, parent, instantiateInWorldSpace, trackHandle);
 			if (uiGameObject == null) return null;
 			
 			var ui = uiGameObject.GetComponent<CUIBase>();
@@ -70,20 +72,19 @@ namespace CDK {
 			return ui;
 		}
 		
-		public static async Task<GameObject> LoadAndInstantiateGameObjectAsync(string key) {
+		
+		public static async Task<GameObject> LoadAndInstantiateGameObjectAsync(AssetReference key, Transform parent = null, bool instantiateInWorldSpace = false, bool trackHandle = true) {
+			return await LoadAndInstantiateGameObjectAsync(key.RuntimeKey.ToString(), parent, instantiateInWorldSpace, trackHandle);
+		}
+		
+		public static async Task<GameObject> LoadAndInstantiateGameObjectAsync(string key, Transform parent = null, bool instantiateInWorldSpace = false, bool trackHandle = true) {
 			await get._loadLoadingCanvasTask;
 			Debug.Log($"Loading asset '{key}'");
 
 			get.LoadingRetain();
 			
-			var asyncOp = new AsyncOperationHandle<GameObject>();
-			
 			try {
-				asyncOp = Addressables.LoadAssetAsync<GameObject>(key);
-				await asyncOp.Task;
-				if (asyncOp.Result == null) {
-					Debug.LogError($"Requested Load Asset key '{key}' but async operation returned null!");
-				}
+				return await Addressables.InstantiateAsync(key, parent, instantiateInWorldSpace, trackHandle);
 			} catch (Exception e) {
 				Debug.LogError(e);
 			}
@@ -91,9 +92,7 @@ namespace CDK {
 				get.LoadingRelease();
 			}
 
-			var go = Object.Instantiate(asyncOp.Result);
-			go.name = asyncOp.Result.name;
-			return go;
+			return null;
 		}
 
 		#endregion <<---------- Loadings ---------->>
@@ -128,9 +127,7 @@ namespace CDK {
 		
 		private async Task CheckForLoadingCanvas() {
 			if (this._loadingCanvas != null) return;
-			var asyncOp = Addressables.LoadAssetAsync<GameObject>(CGameSettings.AssetRef_UiLoading);
-			await asyncOp.Task;
-			this._loadingCanvas = Object.Instantiate(asyncOp.Result).GetComponent<Canvas>();
+			this._loadingCanvas = (await Addressables.InstantiateAsync(CGameSettings.AssetRef_UiLoading)).GetComponent<Canvas>();
 			this._loadingCanvas.enabled = false;
 			Object.DontDestroyOnLoad(this._loadingCanvas.gameObject);
 		}
