@@ -7,12 +7,7 @@ using STOP_MODE = FMOD.Studio.STOP_MODE;
 
 namespace CDK.UI {
 	public class CUIInteractable : MonoBehaviour, ISelectHandler, ISubmitHandler, ICancelHandler {
-		
-		
-		[Header("Default Sounds")]
-		[SerializeField] [EventRef] protected string _soundSelect;
-		[SerializeField] [EventRef] protected string _soundSubmit;
-		[SerializeField] [EventRef] protected string _soundCancel;
+
 		[NonSerialized] private EventInstance _soundEventInstance;
 
 		
@@ -29,14 +24,15 @@ namespace CDK.UI {
 		#region <<---------- IHandlers ---------->>
 		
 		public void OnSelect(BaseEventData eventData) {
-			this.PlaySound(this._soundSelect);
+			this.PlaySound(CGameSettings.SoundSelect);
 		}
 
-		public void OnSubmit(BaseEventData eventData) {
-			this.PlaySound(this._soundSubmit);
+		public virtual void OnSubmit(BaseEventData eventData) {
+			this.PlaySound(CGameSettings.SoundSubmit);
 		}
 		
 		public void OnCancel(BaseEventData eventData) {
+			this.PlaySound(CGameSettings.SoundCancel);
 			CUINavigation.get.CloseCurrentMenu().CAwait();
 		}
 		

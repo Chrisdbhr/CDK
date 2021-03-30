@@ -55,12 +55,10 @@ namespace CDK.UI {
 			this._onOpen?.Invoke();
 			this._canvas.sortingOrder = sortOrder;
 			RuntimeManager.PlayOneShot(this._soundOpenMenu);
-			Debug.Log($"Opening menu {this.name}");
 		}
 		public async Task Close() {
 			this._onClose?.Invoke();
 			RuntimeManager.PlayOneShot(this._soundCloseMenu);
-			Debug.Log($"Closing menu {this.name}");
 			Addressables.ReleaseInstance(this.gameObject);
 		}
 		

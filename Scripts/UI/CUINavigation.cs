@@ -35,7 +35,7 @@ namespace CDK.UI {
 			this._compositeDisposable?.Dispose();
 			this._compositeDisposable = new CompositeDisposable();
 			
-			this._navigationHistory = new Stack<(CUIBase current, CUIButton originButton)>();
+			this._navigationHistory = new Stack<(CUIBase current, CUIInteractable originButton)>();
 			
 			// check for select button
 			Observable.EveryUpdate().Subscribe(_ => {
@@ -51,10 +51,10 @@ namespace CDK.UI {
 		
 
 		#region <<---------- Properties ---------->>
-		public (CUIBase current, CUIButton originButton)[] NavigationHistory {
+		public (CUIBase current, CUIInteractable originButton)[] NavigationHistory {
 			get { return this._navigationHistory.ToArray(); }
 		}
-		private readonly Stack<(CUIBase current, CUIButton originButton)> _navigationHistory;
+		private readonly Stack<(CUIBase current, CUIInteractable originButton)> _navigationHistory;
 		private EventSystem _currentEventSystem;
 
 		private CompositeDisposable _compositeDisposable;
@@ -70,7 +70,7 @@ namespace CDK.UI {
 		/// Opens a menu, registering the button that opened it.
 		/// </summary>
 		/// <returns>returns the new opened menu.</returns>
-		public async Task<CUIBase> OpenMenu(AssetReference uiReference, CUIButton originButton) {
+		public async Task<CUIBase> OpenMenu(AssetReference uiReference, CUIInteractable originButton) {
 			bool alreadyOpened = this._navigationHistory.Any(x => x.originButton == originButton);
 			if (alreadyOpened) {
 				Debug.LogError($"Tried to open the same menu twice! Will not open menu '{uiReference.RuntimeKey}'");
@@ -153,8 +153,9 @@ namespace CDK.UI {
 			}
 			if (this._currentEventSystem.currentSelectedGameObject == null
 				|| this._currentEventSystem.currentSelectedGameObject.transform.root != nh.current.transform.root) {
-				this._currentEventSystem.SetSelectedGameObject(interactableToSelect != null ? interactableToSelect.gameObject : nh.current.FirstSelected.gameObject);
-				Debug.Log($"Setting selected object to '{nh.current.FirstSelected.name}' in menu '{nh.current.name}'");
+				var toSelect = interactableToSelect != null ? interactableToSelect.gameObject : nh.current.FirstSelected.gameObject;
+				this._currentEventSystem.SetSelectedGameObject(toSelect);
+				Debug.Log($"Setting selected object to '{toSelect.name}' in menu '{nh.current.name}'");
 			}
 		}
 
