@@ -14,7 +14,8 @@
         "FMODUnity",
         "Cinemachine",
         "DynamicBone",
-        "Unity.Localization"
+        "Unity.Localization",
+        "Ludiq.Chronos"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
