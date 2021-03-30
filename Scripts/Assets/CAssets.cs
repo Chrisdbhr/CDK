@@ -106,6 +106,7 @@ namespace CDK {
 			Debug.Log("Retaining to show loading indicator.");
 			_loadingRetainable.Retain();
 			_loadingTimer = Observable.Timer(TimeToShowLoadingIndicator).Subscribe(_ => {
+				if (_loadingCanvas == null) return;
 				_loadingCanvas.enabled = true;
 			});
 		}
@@ -126,6 +127,7 @@ namespace CDK {
 		#region <<---------- Loading Canvas ---------->>
 		
 		private async Task CheckForLoadingCanvas() {
+			if (CApplication.Quitting) return;
 			if (this._loadingCanvas != null) return;
 			this._loadingCanvas = (await Addressables.InstantiateAsync(CGameSettings.AssetRef_UiLoading)).GetComponent<Canvas>();
 			this._loadingCanvas.enabled = false;
