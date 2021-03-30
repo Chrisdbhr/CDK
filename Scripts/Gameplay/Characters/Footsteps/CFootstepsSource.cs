@@ -23,7 +23,6 @@ namespace CDK {
 		[SerializeField] private Transform _footR;
 		[SerializeField] private LayerMask _footCollisionLayers = 1;
 
-		[NonSerialized] private Transform _defaultRayOriginTransform;
 		[NonSerialized] private float _rayOffset = 0.25f;
 		[NonSerialized] private float _feetSizeForSphereCast = 0.1f;
 		[NonSerialized] private Vector3 _lastValidHitPoint;
@@ -34,13 +33,7 @@ namespace CDK {
 		
 		
 		#region <<---------- MonoBehaviour ---------->>
-		private void Awake() {
-			if (!this._defaultRayOriginTransform) {
-				Debug.Log($"[FootstepSource] {this.name} doest have an {nameof(this._defaultRayOriginTransform)} value. Setting as root transform.", this);
-				this._defaultRayOriginTransform = this.transform.root;
-			}
-		}
-
+		
 		#if UNITY_EDITOR
 		private void OnDrawGizmosSelected() {
 			Gizmos.color = Color.white;
@@ -67,9 +60,11 @@ namespace CDK {
 		/// Do a footstep
 		/// </summary>
 		public void Footstep(FootstepFeet feet) {
-			var rayOrigin = feet == FootstepFeet.left ? (this._footL ? this._footL : this._defaultRayOriginTransform) : (this._footR ? this._footR : this._defaultRayOriginTransform);
+			var originTransform = this.transform.root;
+			
+			var rayOrigin = feet == FootstepFeet.left ? (this._footL ? this._footL : originTransform) : (this._footR ? this._footR : originTransform);
 
-			var transformUp = this._defaultRayOriginTransform.up;
+			var transformUp = originTransform.up;
 			bool feetHitSomething = Physics.SphereCast(
 				rayOrigin.position + (transformUp * this._rayOffset),
 				this._feetSizeForSphereCast,
@@ -105,7 +100,11 @@ namespace CDK {
 				var createdPartSystem = Instantiate(particlePrefab);
 				if (createdPartSystem != null) {
 					createdPartSystem.transform.position = raycastHit.point;
-					createdPartSystem.transform.rotation = Quaternion.FromToRotation(Vector3.up, raycastHit.normal);
+					
+					var rot = Quaternion.FromToRotation(this.transform.up, raycastHit.normal);
+					var euler = rot.eulerAngles;
+					euler.y = this.transform.rotation.eulerAngles.y;
+					createdPartSystem.transform.rotation = Quaternion.Euler(euler);
 					Destroy(createdPartSystem.gameObject, particlePrefab.main.duration);
 				}
 			}

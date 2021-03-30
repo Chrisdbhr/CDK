@@ -9,18 +9,23 @@ using UnityEditor;
 #endif
 
 namespace CDK {
-	[SelectionBase][RequireComponent(typeof(CharacterController))]
+	[SelectionBase][RequireComponent(typeof(CharacterController), typeof(Chronos.Timeline))]
 	public abstract class CCharacterBase : MonoBehaviour, ICStunnable {
 
 		#region <<---------- Properties ---------->>
+
+		#region <<---------- Debug ---------->>
+
+		[SerializeField] protected bool _debug;
+		
+		#endregion <<---------- Debug ---------->>
+		
 		#region <<---------- Cache and References ---------->>
 		
 		[Header("Cache and References")]
 		[SerializeField] protected Animator Anim;
 		[SerializeField] protected CharacterController _charController;
 		
-		[NonSerialized] protected Transform _myTransform;
-		[NonSerialized] protected CompositeDisposable _compositeDisposable = new CompositeDisposable();
 		[NonSerialized] private float _charInitialHeight;
 		
 		#endregion <<---------- References ---------->>
@@ -31,6 +36,12 @@ namespace CDK {
 		public bool InputRun { get; set; }
 		public bool InputAim { get; set; }
 		#endregion <<---------- Input ---------->>
+
+		#region <<---------- Time ---------->>
+
+		[SerializeField] protected Chronos.Timeline _timeline;
+
+		#endregion <<---------- Time ---------->>
 
 		#region <<---------- Movement Properties ---------->>
 		public Vector3 Position { get; protected set; }
@@ -49,7 +60,7 @@ namespace CDK {
 				if (this.Anim) {
 					var magnitude = this._myVelocityXZ.magnitude.CImprecise();
 					var currentFloat = this.Anim.GetFloat(this.ANIM_CHAR_MOV_SPEED_XZ);
-					this.Anim.SetFloat(this.ANIM_CHAR_MOV_SPEED_XZ, currentFloat.CLerp(magnitude, ANIMATION_BLENDTREE_LERP * CTime.DeltaTimeScaled));
+					this.Anim.SetFloat(this.ANIM_CHAR_MOV_SPEED_XZ, currentFloat.CLerp(magnitude, ANIMATION_BLENDTREE_LERP * CTime.DeltaTimeScaled * this._timeline.timeScale));
 				}
 			}
 		}
@@ -67,6 +78,7 @@ namespace CDK {
 				var oldValue = this._currentMovState;
 				this._currentMovState = value;
 
+				// sliding
 				if (value == CMovState.Sliding) {
 					// is sliding now
 					this._slideBeginTime = Time.timeSinceLevelLoad;
@@ -138,7 +150,6 @@ namespace CDK {
 		[SerializeField] private float _rotateTowardsSpeed = 10f;
 		
 		[NonSerialized] protected Quaternion _targetLookRotation;
-		[NonSerialized] protected float rotateTowardsLookTargetSpeed = 800f;
 		#endregion <<---------- Rotation ---------->>
 		#endregion <<---------- Movement Properties ---------->>
 
@@ -185,8 +196,12 @@ namespace CDK {
 
 		#region <<---------- MonoBehaviour ---------->>
 		protected virtual void Awake() {
-			this._myTransform = this.transform;
 			this._charInitialHeight = this._charController.height;
+
+			if (this.Anim && !this.Anim.applyRootMotion) {
+				Debug.LogWarning($"{this.name} had an Animator with Root motion disabled, it will be enable because Characters use root motion.", this);
+				this.SetAnimationRootMotion(true);
+			}
 		}
 
 		protected virtual void OnEnable() {
@@ -194,7 +209,7 @@ namespace CDK {
 		}
 
 		protected virtual void Update() {
-			this.Position = this._myTransform.position;
+			this.Position = this.transform.position;
 			
 			this.myVelocity = this.Position - this._previousPosition;
 			this.myVelocityXZ = new Vector3(this.myVelocity.x, 0f, this.myVelocity.z);
@@ -234,9 +249,6 @@ namespace CDK {
 
 		#region <<---------- Events ---------->>
 		protected virtual void SubscribeToEvents() {
-			this._compositeDisposable?.Dispose();
-			this._compositeDisposable = new CompositeDisposable();
-
 			// create rx properties
 			this.CanMoveRx = new ReactiveProperty<bool>(true);
 			this._canSlideRx = new ReactiveProperty<bool>(true);
@@ -245,52 +257,48 @@ namespace CDK {
 			this.IsStrafingRx = new ReactiveProperty<bool>();
 			
 			// strafe
-			this.IsStrafingRx.Subscribe(isStrafing => {
+			this.IsStrafingRx.TakeUntilDisable(this).Subscribe(isStrafing => {
 				if(this.Anim) this.Anim.SetBool(this.ANIM_CHAR_IS_STRAFING, isStrafing);
-			}).AddTo(this._compositeDisposable);
+			});
 
 			// can slide
-			this._canSlideRx.Subscribe(canSlide => {
+			this._canSlideRx.TakeUntilDisable(this).Subscribe(canSlide => {
 				// stopped sliding
 				if (!canSlide && this.CurrentMovState == CMovState.Sliding) {
 					this.CurrentMovState = CMovState.Walking;
 				}
-			}).AddTo(this._compositeDisposable);
+			});
 			
-			// // can mov
-			// Observable.CombineLatest(
-			// 	this.CanMoveRx, 
-			// 	this._isPlayingBlockingAnimation,
-			// (canMove, isPlayingBlockingAnimation) 
-			// 		=> 
-			// 		(canMove && !isPlayingBlockingAnimation))
-			// 	.Subscribe(canMove => {
-			// 		if (!canMove) {
-			// 			this.InputMov = Vector2.zero;
-			// 		}
-			// 	})
-			// .AddTo(this._compositeDisposable);
+			// can mov
+			this.CanMoveRx.TakeUntilDisable(this).Subscribe(canMove => {
+				if (!canMove && this.CurrentMovState > CMovState.Idle) {
+					this.CurrentMovState = CMovState.Idle;
+				}
+			});
 			
-			
-			// movement blocking animations playing
-			CBlockingEventsManager.OnDoingBlockingAction += this.DoingBlockingAction;
-
 			// is touching the ground
-			this._isTouchingTheGroundRx.DistinctUntilChanged().Subscribe(isTouchingTheGround => {
+			this._isTouchingTheGroundRx.TakeUntilDisable(this).DistinctUntilChanged().Subscribe(isTouchingTheGround => {
 				if(this.Anim) this.Anim.SetBool(this.ANIM_CHAR_IS_FALLING, !isTouchingTheGround);
-			}).AddTo(this._compositeDisposable);
+			});
 			
+			
+			// events
+			CBlockingEventsManager.OnDoingBlockingAction += this.DoingBlockingAction;
+			CTime.OnTimeScaleChanged += this.TimeScaleChangedEvent;
+
 		}
 
 		protected virtual void UnsubscribeToEvents() {
-			this._compositeDisposable?.Dispose();
-			this._compositeDisposable = null;
-			
 			CBlockingEventsManager.OnDoingBlockingAction -= this.DoingBlockingAction;
+			CTime.OnTimeScaleChanged -= this.TimeScaleChangedEvent;
 		}
 		
 		protected void DoingBlockingAction(bool isDoing) {
 			this.CanMoveRx.Value = !isDoing;
+		}
+
+		protected void TimeScaleChangedEvent(float newTimeScale) {
+			if(this.Anim) this.Anim.applyRootMotion = newTimeScale != 0f;
 		}
 
 		#endregion <<---------- Events ---------->>
@@ -307,7 +315,10 @@ namespace CDK {
 			float targetMovSpeed = 0f;
 	
 			// manual movement
-			if (this.CanMoveRx.Value && this.CurrentMovState != CMovState.Sliding) {
+			if (this.CanMoveRx.Value 
+			    && this.CurrentMovState != CMovState.Sliding
+			    && !CBlockingEventsManager.IsDoingBlockingAction.IsRetained()
+			    ) {
 				
 				// input movement
 				if (targetMotion != Vector3.zero) {
@@ -364,8 +375,7 @@ namespace CDK {
 			}
 			
 			// move character
-			this._charController.Move((targetMotion * targetMovSpeed + Physics.gravity) 
-				* CTime.DeltaTimeScaled);
+			this._charController.Move((targetMotion * targetMovSpeed + Physics.gravity) * (CTime.DeltaTimeScaled * this._timeline.timeScale));
 		}
 		
 		protected void CheckIfIsGrounded() {
@@ -393,7 +403,7 @@ namespace CDK {
 		[SerializeField] private float _angleRelativeVelocity = 70f;
 		
 		protected void ProcessSlide() {
-			var angleFromGround = Vector3.Angle(this._myTransform.up, this._groundNormal);
+			var angleFromGround = Vector3.Angle(this.transform.up, this._groundNormal);
 			var angleRelativeVelocity = Vector3.Angle(this.myVelocityXZ, this._groundNormal);
 			if (
 				this._canSlideRx.Value 
@@ -433,12 +443,15 @@ namespace CDK {
 		protected void RotateTowardsDirection(Vector3 dir) {
 			if (dir == Vector3.zero) return;
 			this._targetLookRotation = Quaternion.LookRotation(dir);
+
+			var rotateSpeed = this._rotateTowardsSpeed;
+			if (this.CurrentMovState >= CMovState.Running) rotateSpeed *= 0.5f;
 			
 			// lerp rotation
-			this._myTransform.rotation = Quaternion.Lerp(
-				this._myTransform.rotation,
-				this._targetLookRotation,
-				this._rotateTowardsSpeed * CTime.DeltaTimeScaled);
+			this.transform.rotation = Quaternion.Lerp(
+													this.transform.rotation,
+													this._targetLookRotation,
+													rotateSpeed * CTime.DeltaTimeScaled * this._timeline.timeScale);
 		}
 		
 		#endregion <<---------- Rotation ---------->>
@@ -513,6 +526,8 @@ namespace CDK {
 		
 		#endregion <<---------- Crouch ---------->>
 
+		
+		
 
 		#region <<---------- Stumble ---------->>
 
@@ -522,6 +537,7 @@ namespace CDK {
 		
 		#endregion <<---------- Stumble ---------->>
 		
+		
 
 
 		#region <<---------- ICStunnable ---------->>
@@ -529,13 +545,13 @@ namespace CDK {
 		public void Stun(CEnumStunType stunType) {
 			switch (stunType) {
 				case CEnumStunType.medium:
-					this.Anim.SetTrigger(this.ANIM_CHAR_IS_STUNNED_MEDIUM);
+					if(this.Anim) this.Anim.SetTrigger(this.ANIM_CHAR_IS_STUNNED_MEDIUM);
 					break;
 				case CEnumStunType.heavy:
-					this.Anim.SetTrigger(this.ANIM_CHAR_IS_STUNNED_HEAVY);
+					if(this.Anim) this.Anim.SetTrigger(this.ANIM_CHAR_IS_STUNNED_HEAVY);
 					break;
 				default:
-					this.Anim.SetTrigger(this.ANIM_CHAR_IS_STUNNED_LIGHT);
+					if(this.Anim) this.Anim.SetTrigger(this.ANIM_CHAR_IS_STUNNED_LIGHT);
 					break;
 			}
 		}

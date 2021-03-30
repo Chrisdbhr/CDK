@@ -6,6 +6,7 @@ using CDK.UI;
 using Rewired;
 using UniRx;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -104,6 +105,46 @@ namespace CDK {
 		#endregion <<---------- Events ---------->>
 		
 		
+		#region <<---------- Character Creation and Exclusion ---------->>
+		
+		public async Task InstantiateAndAssignCharacter(AssetReference charToCreate) {
+			
+			if (charToCreate == null || !charToCreate.RuntimeKeyIsValid()) {
+				Debug.LogWarning($"Created player {this.PlayerNumber} with no controlling character.");
+				return;
+			}
+
+			var createdGo = await CAssets.LoadAndInstantiateGameObjectAsync(charToCreate.RuntimeKey.ToString());
+			if (createdGo == null) {
+				Debug.LogWarning($"Player {this.PlayerNumber} cant find character '{charToCreate}' to control.");
+				return;
+			}
+
+			var entryPoints = GameObject.FindObjectsOfType<CSceneEntryPoint>();
+			if (entryPoints.Length > 0) {
+				var entryPoint = entryPoints.OrderBy(x=>x.Number).FirstOrDefault();
+				if (entryPoint != null) {
+					createdGo.transform.position = entryPoint.transform.position;
+				}
+			}
+			createdGo.transform.Translate(0f,0.001f,0f); // prevent spawning at 0 position so engine does not think it is maybe inside the ground next frame.
+			createdGo.SetActive(false);
+			createdGo.name = $"[Character] {charToCreate}";
+			var character = createdGo.GetComponent<CCharacterBase>();
+
+			if (character == null) {
+				Debug.LogError($"{charToCreate} gameobject doesnt have a {nameof(CCharacterBase)} component on it! could not create player!");
+				return;
+			}
+				
+			await this.AddControllingCharacter(character);
+				
+			Debug.Log($"Created player {this.PlayerNumber} controlling character '{charToCreate}'.");
+		}
+
+		#endregion <<---------- Character Creation and Exclusion ---------->>
+
+		
 		
 		
 		#region <<---------- Character Control ---------->>
@@ -125,6 +166,18 @@ namespace CDK {
 			#if UNITY_EDITOR
 			Selection.activeGameObject = character.gameObject;
 			#endif
+		}
+
+		public async Task<bool> RemoveControllingCharacter() {
+			var controllingChar = this.GetControllingCharacter();
+			var success = this._characters.Remove(controllingChar);
+			if (success) {
+				Debug.Log($"Removed controlling character '{controllingChar.name}' from Player {this.PlayerNumber}");
+			}
+			else {
+				Debug.LogError($"Could not remove '{controllingChar.name}' from Player {this.PlayerNumber}");
+			}
+			return success;
 		}
 
 		public CCharacterBase GetControllingCharacter() {

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
@@ -43,41 +44,36 @@ namespace CDK {
 
 		
 
-		#region <<---------- General ---------->>
+		#region <<---------- Player ---------->>
 
-		public async Task CreatePlayer(AssetReference charToCreate = null) {
+		public async Task<CGamePlayer> CreatePlayer() {
 			if(_rewiredLoadTask != null) await _rewiredLoadTask;
 			
 			var pNumber = this._gamePlayers.Count;
 			var player = new CGamePlayer(pNumber);
 			this._gamePlayers.Add(player);
-
-			if (charToCreate == null || !charToCreate.RuntimeKeyIsValid()) {
-				Debug.LogWarning($"Created player {pNumber} with no controlling character.");
-				return;
-			}
-
-			var createdGo = await CAssets.LoadAndInstantiateGameObjectAsync(charToCreate.RuntimeKey.ToString());
-			if (createdGo == null) {
-				Debug.LogWarning($"Created player {pNumber} but cant find character '{charToCreate}' to control.");
-				return;
-			}
-			
-			createdGo.SetActive(false);
-			createdGo.name = $"[Character] {charToCreate}";
-			createdGo.transform.Translate(0f,0.0001f,0f); // prevent spawning at 0 position so engine does not think it is maybe inside the ground next frame.
-			var character = createdGo.GetComponent<CCharacterBase>();
-
-			if (character == null) {
-				Debug.LogError($"{charToCreate} gameobject doesnt have a {nameof(CCharacterBase)} component on it! could not create player!");
-				return;
-			}
-				
-			await player.AddControllingCharacter(character);
-				
-			Debug.Log($"Created player {pNumber} controlling character '{charToCreate}'.");
+			return player;
 		}
+		
+		public CGamePlayer GetPlayerByPlayerNumber(int playerNumber) {
+			return this._gamePlayers.FirstOrDefault(x => x.PlayerNumber == playerNumber);
+		}
+		
+		#endregion <<---------- Player ---------->>
 
+
+		
+		
+		#region <<---------- Characters Managment ---------->>
+		
+		public List<GameObject> GetAllGameObjectsRelatedToCharacter(CCharacterBase characterBase) {
+			foreach (var player in this._gamePlayers) {
+				if (!player.IsControllingCharacter(characterBase)) continue;
+				return player.GetAllRelatedGameObjects();
+			}
+			return new List<GameObject>();
+		}
+		
 		public bool IsRootTransformFromAPlayerCharacter(Transform aTransform) {
 			var gameObjectToCheck = aTransform.root.gameObject;
 			if (!gameObjectToCheck.activeInHierarchy) return false;
@@ -95,22 +91,7 @@ namespace CDK {
 			}
 			return false;
 		}
-		
-		#endregion <<---------- General ---------->>
 
-
-
-		
-		#region <<---------- Characters Managment ---------->>
-
-		public List<GameObject> GetAllGameObjectsRelatedToCharacter(CCharacterBase characterBase) {
-			foreach (var player in this._gamePlayers) {
-				if (!player.IsControllingCharacter(characterBase)) continue;
-				return player.GetAllRelatedGameObjects();
-			}
-			return new List<GameObject>();
-		}
-		
 		#endregion <<---------- Characters Managment ---------->>
 		
 		
