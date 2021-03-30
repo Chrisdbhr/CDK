@@ -13,12 +13,6 @@ namespace CDK {
 			if (coroutine == null) return;
 			monoBehaviour.StopCoroutine(coroutine);
 		}
-
-		public static Coroutine CRestartCoroutine(this MonoBehaviour monoBehaviour, IEnumerator coroutine) {
-			if (coroutine == null) return null;
-			monoBehaviour.StopCoroutine(coroutine);
-			return monoBehaviour.StartCoroutine(coroutine);
-		}
 		
 	}
 }

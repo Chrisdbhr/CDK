@@ -17,5 +17,18 @@ namespace CDK {
 			return biggerValue;
 		}
 
+		public static Vector3 GetCloserFrom(this Vector3[] positions, Vector3 from) {
+			if (positions.Length <= 0) return default;
+			if (positions.Length == 1) return positions[0];
+			var closerPos = positions[0];
+			float closerDist = Vector3.Distance(positions[0], from);
+			for (int i = 1; i < positions.Length; i++) {
+				var currentDistance = Vector3.Distance(positions[i], from);
+				if (currentDistance >= closerDist) continue;
+				closerPos = positions[i];
+				closerDist = currentDistance;
+			}
+			return closerPos;
+		}
 	}
 }
