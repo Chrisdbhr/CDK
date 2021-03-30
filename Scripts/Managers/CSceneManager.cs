@@ -8,9 +8,6 @@ using UnityEngine.SceneManagement;
 namespace CDK {
 	public static class CSceneManager {
 
-		private static CSceneEntryPoint[] _sceneEntryPoints;
-		
-
 		#region <<---------- Initializers ---------->>
 		
 		/// <summary>
@@ -19,15 +16,6 @@ namespace CDK {
 		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
 		private static void InitializeBeforeSceneLoad() {
 			//DebugLogConsole.AddCommandStatic( "load", "Load scene Single.", nameof(CSceneManager.LoadSceneSingle), typeof(CSceneManager));
-		}
-		
-		/// <summary>
-		/// DEPOIS da scene load.
-		/// </summary>
-		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
-		private static void InitializeAfterSceneLoad() {
-			UpdateSceneEntryPointsList();
-
 		}
 
 		#endregion <<---------- Initializers ---------->>
@@ -85,8 +73,6 @@ namespace CDK {
 				} while (unloadAsyncOp.progress < 1f);
 			}
 
-			UpdateSceneEntryPointsList();
-
 			foreach (var rootGo in gameObjectsToTeleport) {
 				SetTransformToSceneEntryPoint(rootGo.transform, entryPointNumber);
 			}
@@ -106,33 +92,31 @@ namespace CDK {
 			}
 
 			Transform targetTransform = null;
+			
+			var sceneEntryPoints = GameObject.FindObjectsOfType<CSceneEntryPoint>();
 
-			if (!_sceneEntryPoints.Any() || entryPointNumber >= _sceneEntryPoints.Length) {
+			if (!sceneEntryPoints.Any() || entryPointNumber >= sceneEntryPoints.Length) {
 				Debug.LogWarning($"Cant find any level entry point {entryPointNumber} OR it is invalid.");
 			}
 			else {
-				var selectedEntryPoint = _sceneEntryPoints.FirstOrDefault(ep => ep.Number == entryPointNumber);
+				var selectedEntryPoint = sceneEntryPoints.FirstOrDefault(ep => ep.Number == entryPointNumber);
 				if (selectedEntryPoint != null) {
 					targetTransform = selectedEntryPoint.transform;
 				}
 			}
 
+			var offset = new Vector3(0f, 0.001f, 0f);
 			if (targetTransform == null) {
-				transformToMove.position = Vector3.zero;
+				transformToMove.position = Vector3.zero + offset;
 				transformToMove.rotation = Quaternion.identity;
 			}
 			else {
-				transformToMove.position = targetTransform.position;
+				transformToMove.position = targetTransform.position + offset;
 				transformToMove.rotation = targetTransform.rotation;
 			}
 			
 			Debug.Log($"Moving {transformToMove.name} to {nameof(entryPointNumber)} at position {transformToMove.position}");
 		}
-
-		public static void UpdateSceneEntryPointsList() {
-			_sceneEntryPoints = GameObject.FindObjectsOfType<CSceneEntryPoint>();
-		}
-		
 
 		#region <<---------- Scene All Objects ---------->>
 		

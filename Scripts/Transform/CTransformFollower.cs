@@ -13,13 +13,21 @@ namespace CDK {
 		[Obsolete("OBSOLETE, use public property instead.")]
 		[SerializeField] private Transform _transformToFollow;
 		public Transform TransformToFollow {
-			get { return this._transformToFollow; }
-			set { this._transformToFollow = value; }
+			get => this._transformToFollow;
+			set {
+				if (this._transformToFollow == value) return;
+				this._transformToFollow = value;
+				this.CheckIfWillMove();
+			}
 		}
-		private Vector3 _followOffset = Vector3.zero;
+		[SerializeField] private Vector3 _followOffset = Vector3.zero;
 		[SerializeField] private FollowTypeEnum _followType;
 		[SerializeField] private float _followSpeed = 10f;
 		[NonSerialized] private Transform _myTransform;
+
+		[SerializeField] private bool _ignoreXAxis;
+		[SerializeField] private bool _ignoreYAxis;
+		[SerializeField] private bool _ignoreZAxis;
 
 		#endregion <<---------- Properties and Fields ---------->>
 
@@ -41,6 +49,10 @@ namespace CDK {
 		
 		private void Awake() {
 			this._myTransform = this.transform;
+		}
+
+		private void OnEnable() {
+			this.CheckIfWillMove();
 		}
 
 		private void Update() {
@@ -77,16 +89,29 @@ namespace CDK {
 		
 		
 		#region <<---------- General ---------->>
+
+		private void CheckIfWillMove() {
+			if (this._ignoreXAxis && this._ignoreYAxis && this._ignoreZAxis) {
+				Debug.LogError($"'{this.name}' is set to ignore all axis when following so it will remain stationary."); 
+			}
+		}
 		
 		private void FollowTarget(float deltaTime) {
 			if (this._transformToFollow == null) return;
 
+			if (this._ignoreXAxis && this._ignoreYAxis && this._ignoreZAxis) return;
+			
+			var targetPos = this._transformToFollow.position + this._followOffset;
+			if (this._ignoreXAxis) targetPos.x = this.transform.position.x;
+			if (this._ignoreYAxis) targetPos.y = this.transform.position.y;
+			if (this._ignoreZAxis) targetPos.z = this.transform.position.z;
+			
 			switch (this._followType) {
 				case FollowTypeEnum.instant:
-					this._myTransform.position = this._transformToFollow.position + this._followOffset;
+					this._myTransform.position = targetPos;
 					break;
 				case FollowTypeEnum.smooth:
-					this._myTransform.position = Vector3.Lerp(this._myTransform.position, this._transformToFollow.position + this._followOffset, this._followSpeed * deltaTime);
+					this._myTransform.position = Vector3.Lerp(this._myTransform.position, targetPos, this._followSpeed * deltaTime);
 					break;
 			}
 

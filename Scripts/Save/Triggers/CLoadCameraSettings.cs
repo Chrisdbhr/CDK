@@ -6,7 +6,6 @@ namespace CDK {
 	public class CLoadCameraSettings : MonoBehaviour {
 
 		[SerializeField] private CinemachineVirtualCamera _cinemachineCamera;
-		[SerializeField] private CUnityEventFloat _sensitivity; 
 		[NonSerialized] private CinemachinePOV _pov;
 
 		private void Awake() {
@@ -30,7 +29,6 @@ namespace CDK {
 				this._pov.m_HorizontalAxis.m_MaxSpeed = value;
 				this._pov.m_VerticalAxis.m_MaxSpeed = value;
 			}
-			this._sensitivity?.Invoke(value);
 		}
 		
 	}

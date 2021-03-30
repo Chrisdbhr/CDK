@@ -47,7 +47,7 @@ namespace CDK {
 		[SerializeField] private CUnityEventBool LockStateChangedEvent;
 		[SerializeField] private UnityEvent LockEvent;
 		[SerializeField] private UnityEvent UnlockEvent;
-		[SerializeField] private UnityEvent InteractedWhenLocked;
+		[SerializeField] private CUnityEventTransform InteractedWhenLocked;
 
 
 
@@ -79,7 +79,7 @@ namespace CDK {
 		public void OnInteract(Transform interactingTransform) {
 			if (!this.enabled || !this.gameObject.activeInHierarchy || CBlockingEventsManager.IsAnyBlockingEventHappening) return; 
 			if (this.Locked) {
-				this.TryToOpenWhenLocked();
+				this.TryToOpenWhenLocked(interactingTransform);
 				return;
 			}
 			this.SwitchState();
@@ -99,8 +99,8 @@ namespace CDK {
 			this.On = newState;
 		}
 
-		public void TryToOpenWhenLocked() {
-			this.InteractedWhenLocked?.Invoke();
+		public void TryToOpenWhenLocked(Transform interactingTransform) {
+			this.InteractedWhenLocked?.Invoke(interactingTransform);
 		}
 		
 		public void Lock() {

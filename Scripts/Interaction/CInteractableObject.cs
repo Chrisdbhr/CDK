@@ -1,12 +1,10 @@
-using System;
 using UnityEngine;
-using UnityEngine.Events;
 
 namespace CDK {
 	public class CInteractableObject : MonoBehaviour, CIInteractable {
 
 		[SerializeField] private bool onlyWorkOneTimePerSceneLoad;
-		[SerializeField] private UnityEvent InteractEvent;
+		[SerializeField] private CUnityEventTransform InteractEvent;
 
 		private void OnEnable() {
 			// show enable checkbox
@@ -15,7 +13,7 @@ namespace CDK {
 
 		public void OnInteract(Transform interactingTransform) {
 			if (!this.enabled || !this.gameObject.activeInHierarchy || CBlockingEventsManager.IsAnyBlockingEventHappening) return;
-			this.InteractEvent?.Invoke();
+			this.InteractEvent?.Invoke(interactingTransform);
 			if (this.onlyWorkOneTimePerSceneLoad) {
 				Destroy(this);
 			}
