@@ -16,6 +16,7 @@ Check more information about my other projects on [my website](https://chrisjogo
 * Pay attention for any new warning that will be logged on console.
 * There are still no Unit Test implemented since this repository is still in active change.
 * Be aware that before version 1.0.0 there will have code modifications that can break some Inspector references. Pay attention when upgrading version.
+* I currently using [URP](https://docs.unity3d.com/Packages/com.unity.render-pipelines.universal@latest) on my project so the materials in this repository are using URP shaders.
 
 ### Dependencies
 * [UnityJSON](https://github.com/adragonite/UnityJSON)
