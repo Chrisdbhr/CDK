@@ -10,7 +10,7 @@ namespace CDK {
 
 		#region <<---------- Singleton ---------->>
 		
-		private static CGameSettings Instance {
+		protected static CGameSettings Instance {
 			get {
 				if (_instance == null) {
 					_instance = Resources.Load<CGameSettings>("GameSettings");
@@ -37,42 +37,38 @@ namespace CDK {
 		
 		#region <<---------- Properties ---------->>
 		
-		public static AssetReference AssetRef_UtsukiDreaming => Instance._assetRef_UtsukiDreaming;
-		[Header("Utsuki")]
-		[SerializeField] private AssetReference _assetRef_UtsukiDreaming;
-
-		public static AssetReference AssetRef_UtsukiAwake => Instance._assetRef_UtsukiAwake;
-		[SerializeField] private AssetReference _assetRef_UtsukiAwake;
-
-		
-		
 		public static AssetReference AssetRef_UiLoading => Instance._assetRefUiLoading;
 		[Header("Asset References")]
-		[SerializeField] private AssetReference _assetRefUiLoading;
-
-		public static AssetReference AssetRef_ConfirmationPopup => Instance._assetRefConfirmationPopup;
-		[SerializeField] private AssetReference _assetRefConfirmationPopup;
+		[SerializeField] protected AssetReference _assetRefUiLoading;
 
 		public static AssetReference AssetRef_PauseMenu => Instance._assetRefPauseMenu;
-		[SerializeField] private AssetReference _assetRefPauseMenu;
-
-		public static AssetReference AssetRef_ItemsMenu => Instance._assetRef_ItemsMenu;
-		[SerializeField] private AssetReference _assetRef_ItemsMenu;
-
-
+		[SerializeField] protected AssetReference _assetRefPauseMenu;
+		
+		public static AssetReference AssetRef_ConfirmationPopup => Instance._assetRefConfirmationPopup;
+		[SerializeField] protected AssetReference _assetRefConfirmationPopup;
+		
 		public static bool CursorStartsHidden => Instance._cursorStartsHidden;
-		[SerializeField] private bool _cursorStartsHidden;
+		[SerializeField] protected bool _cursorStartsHidden;
 
 		public static LayerMask LineOfSightBlockingLayers => Instance._lineOfSightBlockingLayers;
-		[SerializeField] private LayerMask _lineOfSightBlockingLayers = 1;
+		[SerializeField] protected LayerMask _lineOfSightBlockingLayers = 1;
+
 
 		[Header("Default Sounds")]
 		[SerializeField] [EventRef] protected string _soundSelect;
 		public static string SoundSelect => Instance._soundSelect;
+		
 		[SerializeField] [EventRef] protected string _soundSubmit;
 		public static string SoundSubmit => Instance._soundSubmit;
+		
 		[SerializeField] [EventRef] protected string _soundCancel;
 		public static string SoundCancel => Instance._soundCancel;
+
+		[SerializeField] [EventRef] protected string _soundOpenMenu;
+		public static string SoundOpenMenu => Instance._soundOpenMenu;
+
+		[SerializeField] [EventRef] protected string _soundCloseMenu;
+		public static string SoundCloseMenu => Instance._soundCloseMenu;
 
 		
 		#endregion <<---------- Properties ---------->>
