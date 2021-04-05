@@ -1,6 +1,8 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Rewired;
 using UniRx;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
@@ -32,16 +34,7 @@ namespace CDK.UI {
 
 		public CUINavigation() {
 
-			this._compositeDisposable?.Dispose();
-			this._compositeDisposable = new CompositeDisposable();
-			
-			this._navigationHistory = new Stack<(CUIBase current, CUIInteractable originButton)>();
-			
-			// check for select button
-			Observable.EveryUpdate().Subscribe(_ => {
-				if (this._navigationHistory.Count <= 0) return;
-				this.CheckForActiveEventSystem(null);
-			}).AddTo(this._compositeDisposable);
+			this._navigationHistory = new Stack<CUIBase>();
 
 		}
 		
@@ -51,13 +44,12 @@ namespace CDK.UI {
 		
 
 		#region <<---------- Properties ---------->>
-		public (CUIBase current, CUIInteractable originButton)[] NavigationHistory {
+		public CUIBase[] NavigationHistory {
 			get { return this._navigationHistory.ToArray(); }
 		}
-		private readonly Stack<(CUIBase current, CUIInteractable originButton)> _navigationHistory;
-		private EventSystem _currentEventSystem;
-
-		private CompositeDisposable _compositeDisposable;
+		private readonly Stack<CUIBase> _navigationHistory;
+		
+		private CompositeDisposable _navigationDisposables;
 		
 		#endregion <<---------- Properties ---------->>
 		
@@ -70,12 +62,8 @@ namespace CDK.UI {
 		/// Opens a menu, registering the button that opened it.
 		/// </summary>
 		/// <returns>returns the new opened menu.</returns>
-		public async Task<CUIBase> OpenMenu(AssetReference uiReference, CUIInteractable originButton) {
-			bool alreadyOpened = this._navigationHistory.Any(x => x.originButton == originButton);
-			if (alreadyOpened) {
-				Debug.LogError($"Tried to open the same menu twice! Will not open menu '{uiReference.RuntimeKey}'");
-				return null;
-			}
+		public async Task<CUIBase> OpenMenu(AssetReference uiReference, CUIInteractable originButton, CUIBase originUI) {
+			if (CApplication.Quitting) return null;
 
 			var ui = await CAssets.LoadAndInstantiateUI(uiReference);
 			if (ui == null) {
@@ -83,17 +71,23 @@ namespace CDK.UI {
 				return null;
 			}
 			
+			bool alreadyOpened = this._navigationHistory.Any(x => x == ui);
+			if (alreadyOpened) {
+				Debug.LogError($"Tried to open the same menu twice! Will not open menu '{ui.name}'");
+				Addressables.ReleaseInstance(ui.gameObject);
+				return null;
+			}
+			
 			Debug.Log($"Requested navigation to '{ui.name}'");
 
 			this.HideLastMenuIfSet();
 			
-			this._navigationHistory.Push((ui, originButton));
-
-			await ui.Open(this._navigationHistory.Count);
-			if (this._navigationHistory.Count > 0) {
-				CBlockingEventsManager.IsOnMenu = true;
-				this.CheckForActiveEventSystem(ui.FirstSelected);
-			}
+			await ui.Open(this._navigationHistory.Count, originUI, originButton);
+			
+			this.CheckIfIsFirstMenu();
+			
+			this._navigationHistory.Push(ui);
+			
 			return ui;
 		}
 
@@ -108,28 +102,21 @@ namespace CDK.UI {
 
 			var ui = this._navigationHistory.Pop();
 
-			if (ui.current == null) {
+			if (ui == null) {
 				Debug.LogError("UI popped from Stack was null");
 			}
-
-			this.ShowLastMenuIfHidden();
 			
-			if (this._navigationHistory.Count <= 0) {
-				// this is the last menu in navigation
-				CBlockingEventsManager.IsOnMenu = false;
-			}
-			else {
-				this.CheckForActiveEventSystem(ui.originButton);
-			}
+			this.CheckIfIsLastMenu();
 
-			if (ui.current != null) {
-				Debug.Log($"Closing Menu '{ui.current.name}'");
-				await ui.current.Close();
+			if (ui != null) {
+				Debug.Log($"Closing Menu '{ui.name}'");
+				await ui.Close();
 			}
 		}
 
 		public async Task EndNavigation() {
-			foreach (var (ui, button) in this._navigationHistory) {
+			Debug.Log($"Requested EndNavigation of {this._navigationHistory.Count} Menus in history.");
+			foreach (var ui in this._navigationHistory) {
 				if(ui == null) continue;
 				await ui.Close();
 			}
@@ -140,29 +127,52 @@ namespace CDK.UI {
 		#endregion <<---------- Open / Close ---------->>
 
 
-		/// <summary>
-		/// check for naoa
-		/// </summary>
-		/// <param name="interactableToSelect">define taokt gaopgmdosp</param>
-		private void CheckForActiveEventSystem(CUIInteractable interactableToSelect) {
-			if (this._navigationHistory.Count <= 0) return;
-			var nh = this._navigationHistory.Peek();
-			if (this._currentEventSystem == null
-			   || this._currentEventSystem.transform.root != nh.current.transform.root) {
-				this._currentEventSystem = nh.current.GetComponentInChildren<EventSystem>();
-			}
-			if (this._currentEventSystem.currentSelectedGameObject == null
-				|| this._currentEventSystem.currentSelectedGameObject.transform.root != nh.current.transform.root) {
-				var toSelect = interactableToSelect != null ? interactableToSelect.gameObject : nh.current.FirstSelected.gameObject;
-				this._currentEventSystem.SetSelectedGameObject(toSelect);
-				Debug.Log($"Setting selected object to '{toSelect.name}' in menu '{nh.current.name}'");
-			}
+
+		#region <<---------- Input ---------->>
+
+		
+
+		#endregion <<---------- Input ---------->>
+
+		private void InputBack(InputActionEventData data) {
+			this.CloseCurrentMenu().CAwait();
 		}
 
+		#region <<---------- Navigation ---------->>
+		
+		private void CheckIfIsFirstMenu() {
+			if (this._navigationHistory.Count > 0) return;
+			
+			this._navigationDisposables?.Dispose();
+			this._navigationDisposables = new CompositeDisposable();
 
+			ReInput.players.GetSystemPlayer().AddInputEventDelegate(this.InputBack, UpdateLoopType.Update, InputActionEventType.ButtonJustPressed, CInputKeys.UI_CANCEL);
+
+			CBlockingEventsManager.IsOnMenu = true;
+			
+			Observable.EveryUpdate().Subscribe(_ => {
+				if (this._navigationHistory.Count <= 0) return;
+				var current = EventSystem.current;
+				if (current == null) return;
+				if (current.currentSelectedGameObject != null) return;
+				var activeUi = this._navigationHistory.Peek();
+				current.SetSelectedGameObject(activeUi.FirstSelectedObject);
+			}).AddTo(this._navigationDisposables);
+		}
+
+		private void CheckIfIsLastMenu() {
+			if (this._navigationHistory.Count > 0) return;
+			
+			ReInput.players.GetSystemPlayer().RemoveInputEventDelegate(this.InputBack);
+
+			CBlockingEventsManager.IsOnMenu = false;
+			
+			this._navigationDisposables?.Dispose();
+		}
+		
 		private void HideLastMenuIfSet() {
 			if (this._navigationHistory.Count <= 0) return;
-			var current = this._navigationHistory.Peek().current;
+			var current = this._navigationHistory.Peek();
 			if (current == null) {
 				Debug.LogError("There was a null item on navigation history, this should not happen!");
 			}
@@ -170,16 +180,9 @@ namespace CDK.UI {
 				current.HideIfSet(); 
 			}
 		}
-		private void ShowLastMenuIfHidden() {
-			if (this._navigationHistory.Count <= 0) return;
-			var current = this._navigationHistory.Peek().current;
-			if (current == null) {
-				Debug.LogError("There was a null item on navigation history, this should not happen!");
-			}
-			else {
-				current.ShowIfHidden(); 
-			}
-		}
 		
+		#endregion <<---------- Navigation ---------->>
+
+
 	}
 }

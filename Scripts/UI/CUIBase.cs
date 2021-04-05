@@ -3,24 +3,21 @@ using System.Threading.Tasks;
 using FMODUnity;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
+using UnityEngine.EventSystems;
 
 namespace CDK.UI {
 	public abstract class CUIBase : MonoBehaviour {
 
 		#region <<---------- Properties and Fields ---------->>
 
-		[Header("Setup")]
-		[SerializeField] protected CUIInteractable _firstSelected;
-		public CUIInteractable FirstSelected => this._firstSelected;
-		[SerializeField] private Canvas _canvas;
-		[SerializeField] private bool _hideWhenBehind;
+		public GameObject FirstSelectedObject => this._eventSystem.firstSelectedGameObject;
 		
-		[Header("Sounds")]
-		[SerializeField] [EventRef] protected string _soundOpenMenu;
-		[SerializeField] [EventRef] protected string _soundCloseMenu;
+		[Header("Setup")]
+		[SerializeField] protected EventSystem _eventSystem;
 		
 		[NonSerialized] private CUIBase _previousUI;
-		[NonSerialized] private CUIButton _previousButton;
+		[NonSerialized] private CUIInteractable _previousButton;
+		[NonSerialized] private Canvas _canvas;
 
 		public event Action OnOpen {
 			add {
@@ -33,7 +30,7 @@ namespace CDK.UI {
 		}
 		[NonSerialized] private Action _onOpen;
 		
-		public event Action OnClose {
+		public event Action<CUIBase> OnClose {
 			add {
 				this._onClose -= value;
 				this._onClose += value;
@@ -42,23 +39,49 @@ namespace CDK.UI {
 				this._onClose -= value;
 			}
 		}
-		[NonSerialized] private Action _onClose;
+		[NonSerialized] private Action<CUIBase> _onClose;
 
 		#endregion <<---------- Properties and Fields ---------->>
 
+
+		
+
+		#region <<---------- MonoBehaviour ---------->>
+
+		protected virtual void Awake() {
+			this._canvas = this.GetComponent<Canvas>();
+		}
+
+		protected virtual void OnEnable() {
+			this.UpdateEventSystem(this._eventSystem.firstSelectedGameObject);
+		}
+		
+		protected virtual void OnDisable() {
+			
+		}
+		
+		#endregion <<---------- MonoBehaviour ---------->>
+		
 		
 		
 		
 		#region <<---------- Open / Close ---------->>
 
-		public async Task Open(int sortOrder) {
+		public async Task Open(int sortOrder, CUIBase originUI, CUIInteractable originButton) {
+			this._previousUI = originUI;
+			this._previousButton = originButton;
+
 			this._onOpen?.Invoke();
+
 			this._canvas.sortingOrder = sortOrder;
-			RuntimeManager.PlayOneShot(this._soundOpenMenu);
+			RuntimeManager.PlayOneShot(CGameSettings.SoundOpenMenu);
 		}
 		public async Task Close() {
-			this._onClose?.Invoke();
-			RuntimeManager.PlayOneShot(this._soundCloseMenu);
+			this._onClose?.Invoke(this);
+
+			if (this._previousUI != null) this._previousUI.ShowIfHidden(this._previousButton);
+
+			RuntimeManager.PlayOneShot(CGameSettings.SoundCloseMenu);
 			Addressables.ReleaseInstance(this.gameObject);
 		}
 		
@@ -68,17 +91,19 @@ namespace CDK.UI {
 
 
 		#region <<---------- Visibility ---------->>
+
+		private void UpdateEventSystem(GameObject gameObjectToSelect) {
+			EventSystem.current = this._eventSystem;
+			this._eventSystem.SetSelectedGameObject(gameObjectToSelect ? gameObjectToSelect : this.FirstSelectedObject);
+		}
 		
 		public void HideIfSet() {
-			if (!this._hideWhenBehind) return;
 			this.gameObject.SetActive(false);
-			//this._canvas.enabled = false;
 		}
 
-		public void ShowIfHidden() {
-			if (!this._hideWhenBehind) return;
+		public void ShowIfHidden(CUIInteractable buttonToSelect) {
 			this.gameObject.SetActive(true);
-			//this._canvas.enabled = true;
+			this.UpdateEventSystem(this._eventSystem.firstSelectedGameObject); //buttonToSelect.gameObject);
 		}
 		
 		#endregion <<---------- Visibility ---------->>

@@ -6,7 +6,7 @@ using UnityEngine.EventSystems;
 using STOP_MODE = FMOD.Studio.STOP_MODE;
 
 namespace CDK.UI {
-	public class CUIInteractable : MonoBehaviour, ISelectHandler, ISubmitHandler, ICancelHandler {
+	public class CUIInteractable : MonoBehaviour, ISelectHandler, ISubmitHandler {
 
 		[NonSerialized] private EventInstance _soundEventInstance;
 
@@ -29,11 +29,6 @@ namespace CDK.UI {
 
 		public virtual void OnSubmit(BaseEventData eventData) {
 			this.PlaySound(CGameSettings.SoundSubmit);
-		}
-		
-		public void OnCancel(BaseEventData eventData) {
-			this.PlaySound(CGameSettings.SoundCancel);
-			CUINavigation.get.CloseCurrentMenu().CAwait();
 		}
 		
 		#endregion <<---------- IHandlers ---------->>
