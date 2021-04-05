@@ -27,7 +27,7 @@ namespace CDK {
 
 			var lookTarget = ownerCharacter.GetComponentInChildren<CCameraLookAndFollowTarget>();
 			
-			this._cinemachineCamera.Follow = lookTarget != null ? lookTarget.transform : ownerCharacter.transform;
+			this._cinemachineCamera.Follow = ownerCharacter.transform;
 			this._cinemachineCamera.LookAt = lookTarget != null ? lookTarget.transform : ownerCharacter.transform;
 			
 			// fmod listener
@@ -57,8 +57,7 @@ namespace CDK {
 		
 		// Camera 
 		[SerializeField] private UnityEngine.Camera _unityCamera;
-		[SerializeField] private CinemachineVirtualCamera _cinemachineCamera;
-		[NonSerialized] private CinemachinePOV _pov;
+		[SerializeField] private CinemachineFreeLook _cinemachineCamera;
 		
 
 		[SerializeField] private Renderer[] _renderToHideWhenCameraIsClose;
@@ -89,19 +88,21 @@ namespace CDK {
 
 		private void Awake() {
 			this._transform = this.transform;
-
-			this._pov = this._cinemachineCamera.GetCinemachineComponent<CinemachinePOV>();
-		}
-
-		private void CameraSensitivityChanged(float newValue) {
-			this._pov.m_HorizontalAxis.m_MaxSpeed = newValue;
-			this._pov.m_VerticalAxis.m_MaxSpeed = newValue;
+			
 		}
 
 		private void OnEnable() {
 			var angles = this._transform.eulerAngles;
 			this.RotationY = angles.y;
 			this.RotationX = angles.x;
+
+			// camera sensitivity settings
+			CSave.get.CameraSensitivityHorizontal.TakeUntilDisable(this).Subscribe(value => {
+				this._cinemachineCamera.m_XAxis.m_MaxSpeed = value;
+			});
+			CSave.get.CameraSensitivityVertical.TakeUntilDisable(this).Subscribe(value => {
+				this._cinemachineCamera.m_YAxis.m_MaxSpeed = value;
+			});
 
 			this.SubscribeToEvents();
 			
@@ -158,9 +159,7 @@ namespace CDK {
 
 		private void SubscribeToEvents() {
 			this._isCloseToTheCharacterRx = new ReactiveProperty<bool>(false);
-
-			CSave.get.CameraSensitivity_Changed += this.CameraSensitivityChanged;
-
+			
 			Observable.Timer(TimeSpan.FromSeconds(0.5f)).TakeUntilDisable(this).Subscribe(_ => {
 				bool camIsCloseToTheCharacter = this._currentDistanceFromTarget <= this._distanceToConsiderCloseForCharacter;
 				this._isCloseToTheCharacterRx.Value = camIsCloseToTheCharacter;
@@ -179,7 +178,7 @@ namespace CDK {
 		}
 
 		private void UnsubscribeToEvents() {
-			CSave.get.CameraSensitivity_Changed -= this.CameraSensitivityChanged;
+			
 		}
 		
 		#endregion <<---------- Events ---------->>
@@ -193,16 +192,16 @@ namespace CDK {
 			if (this._recenterRotationTween != null ) return;
 			this._recenterRotationTween?.Kill();
 
-			var finalTimes = new Vector2(this._pov.m_HorizontalRecentering.m_RecenteringTime, this._pov.m_VerticalRecentering.m_RecenteringTime);
+			var finalTimes = new Vector2(this._cinemachineCamera.m_RecenterToTargetHeading.m_RecenteringTime, this._cinemachineCamera.m_YAxisRecentering.m_RecenteringTime);
 			
 			this._recenterRotationTween = DOTween.To(
-				()=>new Vector2(this._pov.m_HorizontalRecentering.m_RecenteringTime * 0.01f,this._pov.m_VerticalRecentering.m_RecenteringTime * 0.01f),
+				()=>new Vector2(this._cinemachineCamera.m_RecenterToTargetHeading.m_RecenteringTime * 0.01f,this._cinemachineCamera.m_YAxisRecentering.m_RecenteringTime * 0.01f),
 				x=> {
-					this._pov.m_HorizontalRecentering.m_RecenteringTime = x.x;
-					this._pov.m_VerticalRecentering.m_RecenteringTime = x.y;
+					this._cinemachineCamera.m_RecenterToTargetHeading.m_RecenteringTime = x.x;
+					this._cinemachineCamera.m_YAxisRecentering.m_RecenteringTime = x.y;
 					
-					this._pov.m_HorizontalRecentering.RecenterNow();
-					this._pov.m_VerticalRecentering.RecenterNow();
+					this._cinemachineCamera.m_RecenterToTargetHeading.RecenterNow();
+					this._cinemachineCamera.m_YAxisRecentering.RecenterNow();
 				},
 				finalTimes,
 				duration
@@ -216,9 +215,9 @@ namespace CDK {
 		}
 		
 		#endregion <<---------- Input ---------->>
-		
-		
-		
+
+
+
 		
 		#region <<---------- Camera Transition ---------->>
 
