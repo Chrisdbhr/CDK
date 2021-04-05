@@ -30,10 +30,11 @@ namespace CDK {
 			this.SetInputLayout(false);
 			CBlockingEventsManager.OnMenu += this.SetInputLayout;
 		
-
+			#if !UNITY_EDITOR
 			Application.focusChanged += async focused => {
 				if(!focused) await this.OpenMenu();
 			};
+			#endif
 			
 			Debug.Log($"Instantiating a new game player number {playerNumber}");
 		}
@@ -70,22 +71,11 @@ namespace CDK {
 
 				var inputMovement = this._rePlayer.GetAxis2D(CInputKeys.MOV_X, CInputKeys.MOV_Y);
 				
-				// input relative to cam direction
-				var camF = Vector3.forward;
-				var camR = Vector3.right;
-				if (this._cameraTransform != null) {
-					camF = this._cameraTransform.forward;
-					camF.y = 0;
-					camF = camF.normalized;
-					camR = this._cameraTransform.right;
-					camR.y = 0;
-					camR = camR.normalized;
-				}
+				var character = this.GetControllingCharacter();
+				var (camF, camR) = this.GetCameraVectors(character);
 				
-				foreach (var character in this._characters.Where(character => character != null)) {
-					character.InputMovementRaw = inputMovement.normalized;
-					character.InputMovementDirRelativeToCam = (camF * inputMovement.y + camR * inputMovement.x).normalized;
-				}
+				character.InputMovementRaw = inputMovement.normalized;
+				character.InputMovementDirRelativeToCam = (camF * inputMovement.y + camR * inputMovement.x).normalized;
 			}).AddTo(this._compositeDisposable);
 			
 			this._rePlayer.AddInputEventDelegate(this.InputInteract, UpdateLoopType.Update, InputActionEventType.ButtonJustPressed, CInputKeys.INTERACT);
@@ -215,6 +205,33 @@ namespace CDK {
 			this._cPlayerCamera.Initialize(this);
 			this._cameraTransform = this._cPlayerCamera.GetCameraTransform();
 		}
+
+		private (Vector3 camF, Vector3 camR) GetCameraVectors(CCharacterBase relativeTo) {
+			var (camF, camR) = (Vector3.forward, Vector3.right);
+			if (this._cameraTransform == null) return (camF, camR);
+
+			if (relativeTo == null) {
+				camF = this._cameraTransform.forward;
+				camF.y = 0;
+				camF.Normalize();
+			
+				camR = this._cameraTransform.right;
+				camR.y = 0;
+				camR.Normalize();
+				
+				return (camF, camR);
+			}
+
+			camF = relativeTo.Position - this._cameraTransform.position;
+			camF.y = 0;
+			camF.Normalize();
+
+			camR = -Vector3.Cross(camF, Vector3.up);
+			camR.y = 0;
+			camR.Normalize();
+			
+			return (camF, camR);
+		}
 		
 		#endregion <<---------- Player Camera ---------->>
 
@@ -225,12 +242,11 @@ namespace CDK {
 
 		private void InputPause(InputActionEventData data) {
 			if (!data.GetButtonDown()) return;
+
+			if (Time.timeScale <= 0) return;
 			
 			if (!CBlockingEventsManager.IsOnMenu) {
 				this.OpenMenu().CAwait();
-			}
-			else {
-				CUINavigation.get.CloseCurrentMenu().CAwait();
 			}
 		}
 
@@ -264,8 +280,8 @@ namespace CDK {
 
 		private void SetInputLayout(bool onMenu) {
 			this._rePlayer.controllers.maps.SetMapsEnabled(!onMenu, "Default");
-			this._rePlayer.controllers.maps.SetMapsEnabled(onMenu, "UI");
-			ReInput.players.GetSystemPlayer().controllers.maps.SetMapsEnabled(onMenu, "UI");
+			this._rePlayer.controllers.maps.SetMapsEnabled(onMenu, "UI"); 
+			//ReInput.players.GetSystemPlayer().controllers.maps.SetMapsEnabled(onMenu, "UI");
 			
 			Debug.Log($"Player {this.PlayerNumber} controllers maps onMenu changed to {onMenu}");
 		}
@@ -281,7 +297,7 @@ namespace CDK {
 			if (CBlockingEventsManager.IsOnMenu) return;
 			CBlockingEventsManager.IsOnMenu = true;
 			try {
-				await CUINavigation.get.OpenMenu(CGameSettings.AssetRef_PauseMenu, null);
+				await CUINavigation.get.OpenMenu(CGameSettings.AssetRef_PauseMenu, null, null);
 			} catch (Exception e) {
 				CBlockingEventsManager.IsOnMenu = false;
 				Debug.LogError("Exception trying to OpenMenu on GamePlayer: " + e);
