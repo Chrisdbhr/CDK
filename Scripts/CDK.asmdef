@@ -15,7 +15,8 @@
         "Cinemachine",
         "DynamicBone",
         "Unity.Localization",
-        "Ludiq.Chronos"
+        "Ludiq.Chronos",
+        "EasyButtons"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

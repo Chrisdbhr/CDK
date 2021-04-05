@@ -1,4 +1,5 @@
 using System;
+using EasyButtons;
 using UniRx;
 using UnityEngine;
 using UnityEngine.Events;
@@ -17,7 +18,7 @@ namespace CDK {
 
 		private void OnEnable() { } // exposing to allow enable/disable component.
 
-
+		[Button]
 		public virtual void TriggerEvent() {
 			if (!this.enabled || this._triggered) return;
 

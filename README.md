@@ -19,6 +19,7 @@ Check more information about my other projects on [my website](https://chrisjogo
 * I currently using [URP](https://docs.unity3d.com/Packages/com.unity.render-pipelines.universal@latest) on my project so the materials in this repository are using URP shaders.
 
 ### Dependencies
+
 * [UnityJSON](https://github.com/adragonite/UnityJSON)
 * [Debug Draw Extension](https://assetstore.unity.com/packages/tools/debug-drawing-extension-11396)
 * [LINQ For Game Object](https://github.com/neuecc/LINQ-to-GameObject-for-Unity)
@@ -27,6 +28,7 @@ Check more information about my other projects on [my website](https://chrisjogo
 * Unity Addressables system (install via package manager)
 * Cinemachine (install via package manager)
 * [FMOD](https://www.fmod.com) (for audio processing)
+* [EasyButtons](https://openupm.com/packages/com.madsbangh.easybuttons/)
 
 ### Contribution guidelines ###
 
