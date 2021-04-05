@@ -12,9 +12,12 @@ namespace CDK {
 
 		public const string ITEM_SWAP = "ItemSwap";
 
-		// Menu
 		public const string MENU_PAUSE = "MenuPause";
 		public const string INTERACT = "Interact";
+
+		// UI
+		public const string UI_SUBMIT = "UISubmit";
+		public const string UI_CANCEL = "UICancel";
 
 	}
 }
