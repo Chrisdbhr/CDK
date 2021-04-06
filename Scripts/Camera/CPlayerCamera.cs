@@ -97,11 +97,13 @@ namespace CDK {
 			this.RotationX = angles.x;
 
 			// camera sensitivity settings
-			CSave.get.CameraSensitivityHorizontal.TakeUntilDisable(this).Subscribe(value => {
-				this._cinemachineCamera.m_XAxis.m_MaxSpeed = value;
+			this._cinemachineCamera.m_XAxis.m_MaxSpeed = CSave.get.CameraSensitivity.x;
+			CSave.getRx.TakeUntilDisable(this).Subscribe(value => {
+				this._cinemachineCamera.m_XAxis.m_MaxSpeed = value.CameraSensitivity.x;
 			});
-			CSave.get.CameraSensitivityVertical.TakeUntilDisable(this).Subscribe(value => {
-				this._cinemachineCamera.m_YAxis.m_MaxSpeed = value;
+			this._cinemachineCamera.m_YAxis.m_MaxSpeed = CSave.get.CameraSensitivity.y;
+			CSave.getRx.TakeUntilDisable(this).Subscribe(value => {
+				this._cinemachineCamera.m_YAxis.m_MaxSpeed = value.CameraSensitivity.y;
 			});
 
 			this.SubscribeToEvents();

@@ -11,41 +11,42 @@ namespace CDK {
 
 		#region <<---------- Singleton ---------->>
 
-		public static CSave get {
+		public static CSave get => getRx.Value;
+		public static ReadOnlyReactiveProperty<CSave> getRx {
 			get {
-				if (_instance != null) return _instance;
-				Debug.Log($"Creating new instance of {nameof(CSave)}");
-				CApplication.IsQuitting += () => {
-					_instance = null;
-				};
-				return _instance = new CSave();
+				if (_rx == null) {
+					// load game
+					_rx = new ReactiveProperty<CSave>();
+					_rx.Value = new CSave();
+				}
+				return _rx.ToReadOnlyReactiveProperty();
 			}
 		}
-		private static CSave _instance;
-		
+		public static bool IsGameLoaded => getRx.Value != null;
+		private static ReactiveProperty<CSave> _rx;
+
 		#endregion <<---------- Singleton ---------->>
 
 
+		
+		
 		#region <<---------- Properties ---------->>
 		
-		[JSONNode(NodeOptions.ReplaceDeserialized, key = KEY_CameraSensitivityHorizontal)]
-		public readonly ReactiveProperty<float> CameraSensitivityHorizontal = new ReactiveProperty<float>(5f);
-		public const string KEY_CameraSensitivityHorizontal = "cameraSensitivityHorizontal";
-		
-		[JSONNode(NodeOptions.ReplaceDeserialized, key = KEY_CameraSensitivityVertical)]
-		public readonly ReactiveProperty<float> CameraSensitivityVertical = new ReactiveProperty<float>(0.1f);
-		public const string KEY_CameraSensitivityVertical = "cameraSensitivityVertical";
+		[JSONNode(NodeOptions.ReplaceDeserialized, key = "cameraSensitivity")]
+		public Vector2 CameraSensitivity = new Vector2(5f, 0.1f);
 
 		#endregion <<---------- Properties ---------->>
 
+		
+		
 
 		#region <<---------- Saving ---------->>
 
 		public static async Task SaveGame() {
 			try {
 				Debug.Log($"Starting SaveGame process.");
-
-				var json = CJsonUtils.DefaultSerializer.Serialize(get);
+				
+				var json = UnityJSON.Serializer.Default.Serialize(getRx.Value);
 			
 				var folderPath = GetSaveFileDirectory();
 				if (!Directory.Exists(folderPath)) {
@@ -53,7 +54,7 @@ namespace CDK {
 				}
 				var filePath = GetSaveFilePath();
 			
-				Debug.Log($"Trying to SaveGame in file '{filePath}'");
+				Debug.Log($"Trying to SaveGame in file '{filePath}' with content: '{json}'");
 
 				using var streamWriter = File.CreateText(filePath);
 				await streamWriter.WriteAsync(json);
@@ -68,10 +69,11 @@ namespace CDK {
 		#endregion <<---------- Saving ---------->>
 
 
+
 		
 		#region <<---------- Loading ---------->>
 
-		public static async Task LoadGame() {
+		public static void LoadGame() {
 			try {
 				var filePath = GetSaveFilePath();
 				
@@ -86,16 +88,15 @@ namespace CDK {
 				
 				Debug.Log($"Save file content: {fileContent}");
 
-				var save = CJsonUtils.DefaultDeserializer.Deserialize<CSave>(fileContent);
+				var save = UnityJSON.Deserializer.Default.Deserialize<CSave>(fileContent);
 
 				if (save == null) {
 					Debug.LogError($"Could not deserialize Save at path '{filePath}'!");
 					return;
 				}
-
-				CSave._instance = save;
 				
 				Debug.Log($"Game Loaded.");
+				(_rx ??= new ReactiveProperty<CSave>()).Value = save;
 			}
 			catch (Exception e) {
 				Debug.LogError(e);
@@ -103,6 +104,7 @@ namespace CDK {
 		}
 
 		#endregion <<---------- Loading ---------->>
+		
 		
 		
 		

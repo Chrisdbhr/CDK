@@ -74,10 +74,9 @@ namespace CDK {
 			return new List<GameObject>();
 		}
 		
-		public bool IsRootTransformFromAPlayerCharacter(Transform aTransform) {
-			var gameObjectToCheck = aTransform.root.gameObject;
-			if (!gameObjectToCheck.activeInHierarchy) return false;
-			return this.IsGameObjectAPlayerCharacter(gameObjectToCheck);
+		public bool IsTransformFromAPlayerCharacter(Transform aTransform) {
+			if (!aTransform.gameObject.activeInHierarchy) return false;
+			return this.IsGameObjectAPlayerCharacter(aTransform.gameObject);
 		}
 		
 		public bool IsGameObjectAPlayerCharacter(GameObject gameObjectToCheck) {
