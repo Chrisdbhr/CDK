@@ -128,10 +128,8 @@ namespace CDK {
 
 		protected ReactiveProperty<bool> _canSlideRx;
 
-		public float SlideSpeedMultiplier {
-			get { return this._slideSpeedMultiplier; }
-		}
-		[SerializeField] private float _slideSpeedMultiplier = 3f;
+		public virtual float SlideSpeed => this._slideSpeed;
+		[SerializeField] private float _slideSpeed = 3f;
 		public virtual float SlideControlAmmount => 0.5f;
 		/// <summary>
 		/// tempo para tropecar
@@ -189,6 +187,7 @@ namespace CDK {
 		#endregion <<---------- Animation Parameters ---------->>
 		
 		#endregion <<---------- Animation ---------->>
+		
 		#endregion <<---------- Properties ---------->>
 
 		
@@ -365,7 +364,7 @@ namespace CDK {
 			if (this.CurrentMovState == CMovState.Sliding) {
 				targetMotion = this.InputMovementDirRelativeToCam * this.SlideControlAmmount
 						+ (new Vector3(this._groundNormal.x, 0f, this._groundNormal.z).normalized);
-				targetMovSpeed = this.MovementSpeed * (this.RunSpeedMultiplier * this.SlideSpeedMultiplier);
+				targetMovSpeed = this.SlideSpeed;
 			}
 
 			if (this.AdditiveMovement != Vector3.zero) {
