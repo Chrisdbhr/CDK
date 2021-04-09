@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -82,6 +83,11 @@ namespace CDK {
 			Debug.Log($"TODO remove loading screen");
 			
 			CBlockingEventsManager.IsPlayingCutscene = false;
+
+			CSave.get.CurrentMap = targetScene.name;
+			
+			await Observable.Timer(TimeSpan.FromSeconds(1));
+
 			await CFadeCanvas.FadeToTransparent(1f, false);
 		}
 

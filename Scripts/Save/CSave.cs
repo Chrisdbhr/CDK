@@ -33,8 +33,12 @@ namespace CDK {
 		#region <<---------- Properties ---------->>
 		
 		[JSONNode(NodeOptions.ReplaceDeserialized, key = "cameraSensitivity")]
-		public Vector2 CameraSensitivity = new Vector2(5f, 0.1f);
+		public Vector2 CameraSensitivity = new Vector2(7.5f, 0.15f);
 
+		[JSONNode(NodeOptions.ReplaceDeserialized, key = "language")]
+		public string Language;
+
+		
 		#endregion <<---------- Properties ---------->>
 
 		
@@ -73,7 +77,7 @@ namespace CDK {
 		
 		#region <<---------- Loading ---------->>
 
-		public static void LoadGame() {
+		public static bool LoadGame() {
 			try {
 				var filePath = GetSaveFilePath();
 				
@@ -81,7 +85,7 @@ namespace CDK {
 
 				if (!File.Exists(filePath)) {
 					Debug.LogWarning($"Save file at path '{filePath}' doesnt exist!");
-					return;
+					return false;
 				}
 
 				var fileContent = File.ReadAllText(filePath);
@@ -92,15 +96,17 @@ namespace CDK {
 
 				if (save == null) {
 					Debug.LogError($"Could not deserialize Save at path '{filePath}'!");
-					return;
+					return false;
 				}
 				
 				Debug.Log($"Game Loaded.");
 				(_rx ??= new ReactiveProperty<CSave>()).Value = save;
+				return true;
 			}
 			catch (Exception e) {
 				Debug.LogError(e);
 			}
+			return false;
 		}
 
 		#endregion <<---------- Loading ---------->>
