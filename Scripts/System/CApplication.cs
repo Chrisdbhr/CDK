@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using UniRx;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.Localization.Settings;
@@ -40,7 +41,7 @@ namespace CDK {
 			
 			Application.backgroundLoadingPriority = ThreadPriority.Low;
 		}
-		
+
 		private static async Task AddressablesInitialize() {
 			Debug.Log("CApplication initializing Addressables");
 			await Addressables.InitializeAsync().Task;

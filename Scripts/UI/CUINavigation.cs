@@ -127,6 +127,7 @@ namespace CDK.UI {
 		#endregion <<---------- Open / Close ---------->>
 
 
+		
 
 		#region <<---------- Input ---------->>
 
@@ -134,10 +135,9 @@ namespace CDK.UI {
 
 		#endregion <<---------- Input ---------->>
 
-		private void InputBack(InputActionEventData data) {
-			this.CloseCurrentMenu().CAwait();
-		}
 
+		
+		
 		#region <<---------- Navigation ---------->>
 		
 		private void CheckIfIsFirstMenu() {
@@ -145,9 +145,7 @@ namespace CDK.UI {
 			
 			this._navigationDisposables?.Dispose();
 			this._navigationDisposables = new CompositeDisposable();
-
-			ReInput.players.GetSystemPlayer().AddInputEventDelegate(this.InputBack, UpdateLoopType.Update, InputActionEventType.ButtonJustPressed, CInputKeys.UI_CANCEL);
-
+			
 			CBlockingEventsManager.IsOnMenu = true;
 			
 			Observable.EveryUpdate().Subscribe(_ => {
@@ -163,8 +161,6 @@ namespace CDK.UI {
 		private void CheckIfIsLastMenu() {
 			if (this._navigationHistory.Count > 0) return;
 			
-			ReInput.players.GetSystemPlayer().RemoveInputEventDelegate(this.InputBack);
-
 			CBlockingEventsManager.IsOnMenu = false;
 			
 			this._navigationDisposables?.Dispose();
@@ -182,7 +178,6 @@ namespace CDK.UI {
 		}
 		
 		#endregion <<---------- Navigation ---------->>
-
 
 	}
 }

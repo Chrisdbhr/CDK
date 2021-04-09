@@ -13,7 +13,8 @@ namespace CDK {
 		}
 
 
-		private static void SetCursorState(bool visible) {
+		public static void SetCursorState(bool visible) {
+			Debug.Log($"Setting cursor visibility to {visible}");
 			Cursor.visible = visible;
 			
 			if (visible) {
