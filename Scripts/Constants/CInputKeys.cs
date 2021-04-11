@@ -10,7 +10,8 @@ namespace CDK {
 		
 		public const string ATTACK = "Fire";
 
-		public const string ITEM_SWAP = "ItemSwap";
+		public const string ITEM_NEXT = "NextItem";
+		public const string ITEM_PREVIOUS = "PreviousItem";
 
 		public const string MENU_PAUSE = "MenuPause";
 		public const string INTERACT = "Interact";
