@@ -82,13 +82,13 @@ namespace CDK {
 			
 			Debug.Log($"TODO remove loading screen");
 			
-			CBlockingEventsManager.IsPlayingCutscene = false;
-
 			CSave.get.CurrentMap = targetScene.name;
-			
-			await Observable.Timer(TimeSpan.FromSeconds(1));
 
-			await CFadeCanvas.FadeToTransparent(1f, false);
+			await Observable.Timer(TimeSpan.FromSeconds(1));
+			
+			await CFadeCanvas.FadeToTransparent(0.5f, false);
+			
+			CBlockingEventsManager.IsPlayingCutscene = false;
 		}
 
 		public static void SetTransformToSceneEntryPoint(Transform transformToMove, int entryPointNumber = 0) {
@@ -124,6 +124,22 @@ namespace CDK {
 			Debug.Log($"Moving {transformToMove.name} to {nameof(entryPointNumber)} at position {transformToMove.position}");
 		}
 
+		#region <<---------- Extensions ---------->>
+
+		public static bool IsSceneValid(string sceneName) {
+			Debug.Log("TODO implement method to save scenes on build in a file and check using this file with list from BuildSettings.scenes");
+			return true;
+			
+			for (int i = 0; i < SceneManager.sceneCountInBuildSettings; i++) {
+				var scene = SceneManager.GetSceneByBuildIndex(i);
+				if (scene.name == sceneName) return true;
+			}
+			return false;
+		}
+
+		#endregion <<---------- Extensions ---------->>
+		
+		
 		#region <<---------- Scene All Objects ---------->>
 		
 		public static Scene[] GetAllLoadedScenes() {
