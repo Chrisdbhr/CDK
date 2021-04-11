@@ -1,8 +1,6 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Rewired;
 using UniRx;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
@@ -47,10 +45,10 @@ namespace CDK.UI {
 		public CUIBase[] NavigationHistory {
 			get { return this._navigationHistory.ToArray(); }
 		}
-		private readonly Stack<CUIBase> _navigationHistory;
-		
+		private int LastFrameAMenuClosed;
 		private CompositeDisposable _navigationDisposables;
-		
+		private readonly Stack<CUIBase> _navigationHistory;
+
 		#endregion <<---------- Properties ---------->>
 		
 		
@@ -100,6 +98,12 @@ namespace CDK.UI {
 				return;
 			}
 
+			if (this.LastFrameAMenuClosed == Time.frameCount) {
+				var lastInHistory = this._navigationHistory.Peek();
+				Debug.LogWarning($"Will not close menu '{lastInHistory.name}' because one already closed in this frame.", lastInHistory);
+				return;
+			}
+
 			var ui = this._navigationHistory.Pop();
 
 			if (ui == null) {
@@ -109,7 +113,8 @@ namespace CDK.UI {
 			this.CheckIfIsLastMenu();
 
 			if (ui != null) {
-				Debug.Log($"Closing Menu '{ui.name}'");
+				Debug.Log($"Closing Menu '{ui.name}'", ui);
+				this.LastFrameAMenuClosed = Time.frameCount;
 				await ui.Close();
 			}
 		}
@@ -128,15 +133,6 @@ namespace CDK.UI {
 
 
 		
-
-		#region <<---------- Input ---------->>
-
-		
-
-		#endregion <<---------- Input ---------->>
-
-
-		
 		
 		#region <<---------- Navigation ---------->>
 		
@@ -149,6 +145,7 @@ namespace CDK.UI {
 			CBlockingEventsManager.IsOnMenu = true;
 			
 			Observable.EveryUpdate().Subscribe(_ => {
+				if (CInputManager.ActiveInputType != CInputManager.InputType.JoystickController) return;
 				if (this._navigationHistory.Count <= 0) return;
 				var current = EventSystem.current;
 				if (current == null) return;

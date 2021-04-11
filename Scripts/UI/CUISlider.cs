@@ -1,4 +1,3 @@
-using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -26,6 +25,7 @@ namespace CDK.UI {
 
 		public void OnMove(AxisEventData eventData) {
 			this.Slider.value += eventData.moveVector.x * Time.deltaTime;
+			this.Selected();
 		}
 	}
 }
