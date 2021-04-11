@@ -27,21 +27,20 @@ namespace CDK {
 
 		#endregion <<---------- Singleton ---------->>
 
-
+		
 		
 		
 		#region <<---------- Properties ---------->>
-		
-		[JSONNode(NodeOptions.ReplaceDeserialized, key = "cameraSensitivity")]
+
+		[JSONNode(NodeOptions.ReplaceDeserialized | NodeOptions.IgnoreDeserializationTypeErrors, key = "cameraSensitivity")]
 		public Vector2 CameraSensitivity = new Vector2(7.5f, 0.15f);
 
-		[JSONNode(NodeOptions.ReplaceDeserialized, key = "language")]
+		[JSONNode(NodeOptions.ReplaceDeserialized | NodeOptions.IgnoreDeserializationTypeErrors, key = "language")]
 		public string Language;
 
-		
 		#endregion <<---------- Properties ---------->>
 
-		
+
 		
 
 		#region <<---------- Saving ---------->>

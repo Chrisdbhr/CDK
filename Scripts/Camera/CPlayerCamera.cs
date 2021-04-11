@@ -57,6 +57,7 @@ namespace CDK {
 		
 		// Camera 
 		[SerializeField] private UnityEngine.Camera _unityCamera;
+		[SerializeField] private CinemachineBrain _cinemachineBrain;
 		[SerializeField] private CinemachineFreeLook _cinemachineCamera;
 		
 
@@ -96,19 +97,15 @@ namespace CDK {
 			this.RotationY = angles.y;
 			this.RotationX = angles.x;
 
-			// camera sensitivity settings
-			this._cinemachineCamera.m_XAxis.m_MaxSpeed = CSave.get.CameraSensitivity.x;
-			CSave.getRx.TakeUntilDisable(this).Subscribe(value => {
-				this._cinemachineCamera.m_XAxis.m_MaxSpeed = value.CameraSensitivity.x;
-			});
-			this._cinemachineCamera.m_YAxis.m_MaxSpeed = CSave.get.CameraSensitivity.y;
-			CSave.getRx.TakeUntilDisable(this).Subscribe(value => {
-				this._cinemachineCamera.m_YAxis.m_MaxSpeed = value.CameraSensitivity.y;
-			});
-
 			this.SubscribeToEvents();
 			
 			this._screenShootTexture2d = new Texture2D(Screen.width, Screen.height, TextureFormat.RGB24, false, true);
+		}
+
+		private void ActiveCameraChanged(ICinemachineCamera newCamera, ICinemachineCamera oldCamera) {
+			if (ReferenceEquals(this._cinemachineCamera, newCamera)) {
+				this._cinemachineCamera.m_YAxis.Value = 0.5f;
+			}
 		}
 
 		private void OnDisable() {
@@ -161,7 +158,17 @@ namespace CDK {
 
 		private void SubscribeToEvents() {
 			this._isCloseToTheCharacterRx = new ReactiveProperty<bool>(false);
+
+			// camera sensitivity settings
+			CSave.getRx.ObserveEveryValueChanged(p=>p.Value.CameraSensitivity.x).TakeUntilDisable(this).Subscribe(value => {
+				this._cinemachineCamera.m_XAxis.m_MaxSpeed = value;
+			});
+			CSave.getRx.ObserveEveryValueChanged(p=>p.Value.CameraSensitivity.y).TakeUntilDisable(this).Subscribe(value => {
+				this._cinemachineCamera.m_YAxis.m_MaxSpeed = value;
+			});
 			
+			this._cinemachineBrain.m_CameraActivatedEvent.AddListener(this.ActiveCameraChanged);
+
 			Observable.Timer(TimeSpan.FromSeconds(0.5f)).TakeUntilDisable(this).Subscribe(_ => {
 				bool camIsCloseToTheCharacter = this._currentDistanceFromTarget <= this._distanceToConsiderCloseForCharacter;
 				this._isCloseToTheCharacterRx.Value = camIsCloseToTheCharacter;
@@ -180,9 +187,9 @@ namespace CDK {
 		}
 
 		private void UnsubscribeToEvents() {
-			
+			this._cinemachineBrain.m_CameraActivatedEvent.RemoveListener(this.ActiveCameraChanged);
 		}
-		
+
 		#endregion <<---------- Events ---------->>
 
 
