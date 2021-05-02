@@ -5,7 +5,7 @@ using UnityEngine;
 namespace CDK {
 	public class CPlayerInteractionThirdPerson : CPlayerInteractionBase {
 
-		[NonSerialized] private float _interactionSphereCheckRadius = 0.75f;
+		[NonSerialized] private float _interactionSphereCheckRadius = 0.5f;
 		[NonSerialized] private const float INTERACT_SPHERE_CHECK_MULTIPLIER = 0.75f;
 		[NonSerialized] private float _yCheckOffset = 0.5f;
 		
