@@ -15,7 +15,7 @@ namespace CDK {
 		}
 
 		protected override void Execute(float deltaTime) {
-			this.transform.localPosition = this._startPosition + this._sineDirectionAndMagnitude * (Mathf.Sin(Time.timeSinceLevelLoad * this._sineSpeed) * Time.timeScale);
+			this.transform.localPosition = this._startPosition + this._sineDirectionAndMagnitude * (Mathf.Sin(Time.time * this._sineSpeed) * Time.timeScale);
 		}
 	}
 }
