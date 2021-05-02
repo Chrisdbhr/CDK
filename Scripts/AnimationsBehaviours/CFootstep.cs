@@ -17,8 +17,8 @@ namespace CDK {
 		// OnStateUpdate is called on each Update frame between OnStateEnter and OnStateExit callbacks
 		public override void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex) {
 			base.OnStateUpdate(animator, stateInfo, layerIndex);
-			if (!(Time.timeSinceLevelLoad >= this._nextFootstepTime)) return;
-			this._nextFootstepTime = Time.timeSinceLevelLoad + this.FootstepInterval;
+			if (!(Time.time >= this._nextFootstepTime)) return;
+			this._nextFootstepTime = Time.time + this.FootstepInterval;
 			this._lastFeet = this._lastFeet == CFootstepsSource.FootstepFeet.left ? CFootstepsSource.FootstepFeet.right : CFootstepsSource.FootstepFeet.left;
 			var footstepsSource = animator.GetComponent<CFootstepsSource>();
 			if (footstepsSource == null) return;
