@@ -6,9 +6,18 @@ using UnityEngine;
 namespace CDK {
 	public class CSceneAreaCharacterReceiver : MonoBehaviour {
 
-		[SerializeField] private CCharacterBase _characterBase;
-		
+		[NonSerialized] private CCharacterBase _characterBase;
 		[NonSerialized] private List<CSceneAreaData> _activeAreas = new List<CSceneAreaData>();
+
+		
+		
+		
+		private void Awake() {
+			this._characterBase = this.GetComponent<CCharacterBase>();
+		}
+
+		
+		
 		
 		public void AddArea(CSceneAreaData data) {
 			if (data == null) {
