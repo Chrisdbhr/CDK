@@ -72,6 +72,7 @@ namespace CDK {
 				var inputMovement = this._rePlayer.GetAxis2D(CInputKeys.MOV_X, CInputKeys.MOV_Y);
 				
 				var character = this.GetControllingCharacter();
+				if (character == null) return;
 				var (camF, camR) = this.GetCameraVectors(character);
 				
 				character.InputMovementRaw = inputMovement.normalized;
@@ -160,18 +161,10 @@ namespace CDK {
 			#endif
 		}
 
-		public async Task<bool> RemoveControllingCharacter() {
-			var controllingChar = this.GetControllingCharacter();
-			var success = this._characters.Remove(controllingChar);
-			if (success) {
-				Debug.Log($"Removed controlling character '{controllingChar.name}' from Player {this.PlayerNumber}");
-			}
-			else {
-				Debug.LogError($"Could not remove '{controllingChar.name}' from Player {this.PlayerNumber}");
-			}
-			return success;
+		public async Task RemoveAllControllingCharacters() {
+			this._characters.Clear();
 		}
-
+		
 		public CCharacterBase GetControllingCharacter() {
 			return this._characters.FirstOrDefault(c => c != null);
 		}
