@@ -48,7 +48,7 @@ namespace CDK {
 		
 		
 
-		#region <<---------- Loadings ---------->>
+		#region <<---------- Loaders ---------->>
 
 		public static async Task<T> LoadObjectAsync<T>(string key) {
 			Debug.Log($"Loading asset '{key}'");
@@ -112,7 +112,7 @@ namespace CDK {
 			return null;
 		}
 
-		#endregion <<---------- Loadings ---------->>
+		#endregion <<---------- Loaders ---------->>
 
 
 		
