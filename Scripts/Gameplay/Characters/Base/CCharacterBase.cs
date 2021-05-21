@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using CDK.Characters.Enums;
 using CDK.Characters.Interfaces;
 using FMODUnity;
@@ -61,7 +60,8 @@ namespace CDK {
 				this._myVelocityXZ = value;
 
 				if (this.Anim) {
-					var magnitude = this._myVelocityXZ.magnitude.CImprecise();
+					var magnitude = this._myVelocityXZ.magnitude;
+					magnitude = magnitude.CImprecise();
 					var currentFloat = this.Anim.GetFloat(this.ANIM_CHAR_MOV_SPEED_XZ);
 					this.Anim.SetFloat(this.ANIM_CHAR_MOV_SPEED_XZ, currentFloat.CLerp(
 						magnitude, 
@@ -149,8 +149,7 @@ namespace CDK {
 		[NonSerialized] protected BoolReactiveProperty _isTouchingTheGroundRx;
 		[NonSerialized] protected Vector3 _groundNormal;
 		[NonSerialized] protected FloatReactiveProperty _timeFalling;
-		[NonSerialized] protected FloatReactiveProperty _fallYAccumulatedDelta;
-		[NonSerialized] protected Vector3ReactiveProperty _lastValidPosition;
+		[NonSerialized] protected Vector3ReactiveProperty _lastGroundedPosition;
 		#endregion <<---------- Aerial Movement ---------->>
 		
 		#region <<---------- Rotation ---------->>
@@ -229,19 +228,24 @@ namespace CDK {
 		}
 		
 		protected virtual void Update() {
+			
+		}
+
+		protected void FixedUpdate() {
 			this.Position = this.transform.position;
+
+			this.CheckIfIsGrounded();
 			
 			this.myVelocity = this.Position - this._previousPosition;
 			this.myVelocityXZ = new Vector3(this.myVelocity.x, 0f, this.myVelocity.z);
-
-			this._previousPosition = this.Position;
-
+			
 			this.ProcessAerialMovement();
-			this.CheckIfIsGrounded();
 			this.ProcessSlide();
 			this.ProcessMovement();
 			this.ProcessRotation();
 			this.ProcessAim();
+
+			this._previousPosition = this.Position;
 		}
 
 		protected virtual void LateUpdate() {
@@ -274,8 +278,7 @@ namespace CDK {
 			this.CanMoveRx = new ReactiveProperty<bool>(true);
 			this._canSlideRx = new ReactiveProperty<bool>(true);
 			this._isTouchingTheGroundRx = new BoolReactiveProperty(true);
-			this._fallYAccumulatedDelta = new FloatReactiveProperty();
-			this._lastValidPosition = new Vector3ReactiveProperty(this.transform.position);
+			this._lastGroundedPosition = new Vector3ReactiveProperty(this.transform.position);
 			this._timeFalling = new FloatReactiveProperty();
 			this._isAimingRx = new ReactiveProperty<bool>();
 			this.IsStrafingRx = new ReactiveProperty<bool>();
@@ -339,6 +342,9 @@ namespace CDK {
 
 		protected void OnActiveSceneChanged(Scene oldScene, Scene newScene) { 
 			this.StopTalking();
+			
+			Debug.Log($"Scene changed, setting {nameof(this._timeFalling)} to 0f.");
+			this._timeFalling.Value = 0f;
 		}
 
 		#endregion <<---------- Events ---------->>
@@ -350,7 +356,16 @@ namespace CDK {
 		
 		protected void ProcessMovement() {
 			if (!this._charController.enabled) return;
+
+			var targetMotion = this.ProcessHorizontalMovement();
+			targetMotion.y = this.ProcessVerticalMovement();
+			targetMotion *= CTime.DeltaTimeScaled * this.TimelineTimescale;
+			if (targetMotion == Vector3.zero) return;
+			this._charController.Move(targetMotion);
 			
+		}
+
+		private Vector3 ProcessHorizontalMovement() {
 			Vector3 targetMotion = this.InputMovementDirRelativeToCam;
 			float targetMovSpeed = 0f;
 	
@@ -415,7 +430,10 @@ namespace CDK {
 			}
 			
 			// move character
-			this._charController.Move((targetMotion * targetMovSpeed + Physics.gravity) * (CTime.DeltaTimeScaled * this.TimelineTimescale));
+			return targetMotion * targetMovSpeed;
+		}
+		private float ProcessVerticalMovement() {
+			return this.myVelocity.y + Physics.gravity.y;
 		}
 		
 		protected void CheckIfIsGrounded() {
@@ -430,7 +448,7 @@ namespace CDK {
 			);
 			if (isGrounded) {
 				this._groundNormal = hitInfo.normal;
-				this._lastValidPosition.Value = this.Position;
+				this._lastGroundedPosition.Value = this.Position;
 			}
 			else {
 				this._groundNormal = Vector3.up;
@@ -472,6 +490,7 @@ namespace CDK {
 			}
 			else {
 				// is falling
+				if (CBlockingEventsManager.IsPlayingCutscene) return;
 				this._timeFalling.Value += CTime.DeltaTimeScaled;
 			}
 		}
