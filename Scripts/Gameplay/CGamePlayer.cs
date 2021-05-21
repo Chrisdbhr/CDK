@@ -122,7 +122,7 @@ namespace CDK {
 			}
 			createdGo.transform.Translate(0f,0.001f,0f); // prevent spawning at 0 position so engine does not think it is maybe inside the ground next frame.
 			createdGo.SetActive(false);
-			createdGo.name = $"[Character] {charToCreate}";
+			createdGo.name = $"[Character] {createdGo.name}";
 			var character = createdGo.GetComponent<CCharacterBase>();
 
 			if (character == null) {
@@ -155,10 +155,6 @@ namespace CDK {
 			await this.CheckIfNeedToCreateCamera();
 			
 			character.gameObject.SetActive(true);
-
-			#if UNITY_EDITOR
-			Selection.activeGameObject = character.gameObject;
-			#endif
 		}
 
 		public async Task RemoveAllControllingCharacters() {
