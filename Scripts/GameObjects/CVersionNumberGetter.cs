@@ -9,26 +9,45 @@ using UnityEditor;
 namespace CDK {
 	
 	[ExecuteInEditMode]
-	public class CVersionNumberGetter : MonoBehaviour{
+	public class CVersionNumberGetter : MonoBehaviour {
 
 		[SerializeField] private CUnityEventString versionStringEvent;
+		[NonSerialized] private string _filePathOnResourcesFolder = "GameBundleVersion";
 
 		private void Awake() {
-			var path = "GameBundleVersion";
-			var textAsset = Resources.Load<TextAsset>(path);
-			try {
-				this.versionStringEvent?.Invoke(textAsset.text ?? "");
-			} catch (Exception e) {
-				Debug.LogError($"Exception getting Version file, path was '{path}'\n{e}");
-			}
+			this.versionStringEvent?.Invoke(this.GetBundleVersion());
 		}
 
 		#if UNITY_EDITOR
 		private void OnValidate() {
 			
-			this.versionStringEvent?.Invoke(PlayerSettings.bundleVersion);
+			this.versionStringEvent?.Invoke(this.GetBundleVersion());
 		}
 		#endif
-		
+
+
+		private string GetBundleVersion() {
+			var version = string.Empty;
+			#if UNITY_EDITOR
+			version = PlayerSettings.bundleVersion;
+			#endif
+
+			try {
+				var textAsset = Resources.Load<TextAsset>(this._filePathOnResourcesFolder);
+				
+				#if UNITY_EDITOR
+				if (textAsset == null) {
+					File.WriteAllText(this._filePathOnResourcesFolder + ".txt", version);
+				}
+				#endif
+
+				if(textAsset != null) version = textAsset.text;
+			}
+			catch (Exception e) {
+				Debug.LogError(e);
+			}
+
+			return version;
+		}
 	}
 }
