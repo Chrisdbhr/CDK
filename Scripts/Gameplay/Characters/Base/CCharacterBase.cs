@@ -25,8 +25,7 @@ namespace CDK {
 		
 		[Header("Cache and References")]
 		[SerializeField] protected Animator Anim;
-		[SerializeField] protected CharacterController _charController;
-		
+		[NonSerialized] protected CharacterController _charController;
 		[NonSerialized] private float _charInitialHeight;
 		
 		#endregion <<---------- References ---------->>
@@ -49,8 +48,7 @@ namespace CDK {
 		public Vector3 Position { get; protected set; }
 		protected Vector3 _previousPosition { get; private set; }
 
-		[NonSerialized] protected Vector3 myVelocity;
-
+		[NonSerialized] protected Vector3 _myVelocity;
 		protected Vector3 myVelocityXZ {
 			get {
 				return this._myVelocityXZ;
@@ -58,20 +56,10 @@ namespace CDK {
 			set {
 				if (this._myVelocityXZ == value) return;
 				this._myVelocityXZ = value;
-
-				if (this.Anim) {
-					var magnitude = this._myVelocityXZ.magnitude;
-					magnitude = magnitude.CImprecise();
-					var currentFloat = this.Anim.GetFloat(this.ANIM_CHAR_MOV_SPEED_XZ);
-					this.Anim.SetFloat(this.ANIM_CHAR_MOV_SPEED_XZ, currentFloat.CLerp(
-						magnitude, 
-						ANIMATION_BLENDTREE_LERP * CTime.DeltaTimeScaled * this.TimelineTimescale
-						));
-				}
+				this.Anim.CSetFloatWithLerp(this.ANIM_CHAR_MOV_SPEED_XZ, this._myVelocityXZ.magnitude, ANIMATION_BLENDTREE_LERP * CTime.DeltaTimeScaled * this.TimelineTimescale);
 			}
 		}
 		[NonSerialized] private Vector3 _myVelocityXZ;
-		
 
 		[NonSerialized] public Vector3 AdditiveMovement = Vector3.zero;
 		
@@ -146,10 +134,12 @@ namespace CDK {
 		#endregion <<---------- Sliding ---------->>
 
 		#region <<---------- Aerial Movement ---------->>
-		[NonSerialized] protected BoolReactiveProperty _isTouchingTheGroundRx;
 		[NonSerialized] protected Vector3 _groundNormal;
-		[NonSerialized] protected FloatReactiveProperty _timeFalling;
-		[NonSerialized] protected Vector3ReactiveProperty _lastGroundedPosition;
+		[NonSerialized] private float _lastPositionYSpeedWasPositive;
+		[NonSerialized] protected BoolReactiveProperty _isTouchingTheGroundRx;
+		[NonSerialized] protected BoolReactiveProperty _isOnFreeFall;
+		[NonSerialized] protected FloatReactiveProperty _distanceOnFreeFall;
+		private const float HEIGHT_PERCENTAGE_TO_CONSIDER_FREE_FALL = 0.25f;
 		#endregion <<---------- Aerial Movement ---------->>
 		
 		#region <<---------- Rotation ---------->>
@@ -203,6 +193,12 @@ namespace CDK {
         [SerializeField] protected StudioEventEmitter _mounthVoiceEmitter;
 
 		#endregion <<---------- Sound ---------->>
+
+		#region <<---------- Observables ---------->>
+
+		[NonSerialized] private CompositeDisposable _disposables;
+
+		#endregion <<---------- Observables ---------->>
 		
 		#endregion <<---------- Properties ---------->>
 
@@ -211,6 +207,7 @@ namespace CDK {
 
 		#region <<---------- MonoBehaviour ---------->>
 		protected virtual void Awake() {
+			this._charController = this.GetComponent<CharacterController>();
 			this._charInitialHeight = this._charController.height;
 
 			if (this.Anim && !this.Anim.applyRootMotion) {
@@ -228,16 +225,12 @@ namespace CDK {
 		}
 		
 		protected virtual void Update() {
-			
-		}
-
-		protected void FixedUpdate() {
 			this.Position = this.transform.position;
 
 			this.CheckIfIsGrounded();
 			
-			this.myVelocity = this.Position - this._previousPosition;
-			this.myVelocityXZ = new Vector3(this.myVelocity.x, 0f, this.myVelocity.z);
+			this._myVelocity = this.Position - this._previousPosition;
+			this.myVelocityXZ = new Vector3(this._myVelocity.x, 0f, this._myVelocity.z);
 			
 			this.ProcessAerialMovement();
 			this.ProcessSlide();
@@ -265,6 +258,14 @@ namespace CDK {
 			Gizmos.color = Color.red;
 			Gizmos.DrawWireSphere(this._aimTargetPos, 0.05f);	
 			Handles.Label(this._aimTargetPos, $"{this.name} aimTargetPos");
+			
+			
+			// draw ground check sphere
+			var ray = new Ray(
+				this.Position + new Vector3(0f, 0.5f),
+				Vector3.down
+			);
+			Debug.DrawRay(ray.origin, ray.direction, Color.white);
 		}
 		#endif
 		#endregion <<---------- MonoBehaviour ---------->>
@@ -274,22 +275,32 @@ namespace CDK {
 
 		#region <<---------- Events ---------->>
 		protected virtual void SubscribeToEvents() {
-			// create rx properties
+			this._disposables?.Dispose();
+			this._disposables = new CompositeDisposable();
+			
+			#region <<---------- RX Creations ---------->>
+			
 			this.CanMoveRx = new ReactiveProperty<bool>(true);
 			this._canSlideRx = new ReactiveProperty<bool>(true);
+			
 			this._isTouchingTheGroundRx = new BoolReactiveProperty(true);
-			this._lastGroundedPosition = new Vector3ReactiveProperty(this.transform.position);
-			this._timeFalling = new FloatReactiveProperty();
+			this._isOnFreeFall = new BoolReactiveProperty(false);
+			this._distanceOnFreeFall = new FloatReactiveProperty();
+			
 			this._isAimingRx = new ReactiveProperty<bool>();
 			this.IsStrafingRx = new ReactiveProperty<bool>();
+
+			#endregion <<---------- RX Creations ---------->>
+
+			#region <<---------- Movement ---------->>
 			
 			// strafe
-			this.IsStrafingRx.TakeUntilDisable(this).Subscribe(isStrafing => {
+			this.IsStrafingRx.TakeUntilDisable(this).DistinctUntilChanged().Subscribe(isStrafing => {
 				if(this.Anim) this.Anim.SetBool(this.ANIM_CHAR_IS_STRAFING, isStrafing);
 			});
 
 			// can slide
-			this._canSlideRx.TakeUntilDisable(this).Subscribe(canSlide => {
+			this._canSlideRx.TakeUntilDisable(this).DistinctUntilChanged().Subscribe(canSlide => {
 				// stopped sliding
 				if (!canSlide && this.CurrentMovState == CMovState.Sliding) {
 					this.CurrentMovState = CMovState.Walking;
@@ -297,27 +308,40 @@ namespace CDK {
 			});
 			
 			// can mov
-			this.CanMoveRx.TakeUntilDisable(this).Subscribe(canMove => {
+			this.CanMoveRx.TakeUntilDisable(this).DistinctUntilChanged().Subscribe(canMove => {
 				if (!canMove && this.CurrentMovState > CMovState.Idle) {
 					this.CurrentMovState = CMovState.Idle;
 				}
 			});
 			
-			// is touching the ground
-			this._isTouchingTheGroundRx.TakeUntilDisable(this).DistinctUntilChanged().Subscribe(isTouchingTheGround => {
-				if(this.Anim) this.Anim.SetBool(this.ANIM_CHAR_IS_FALLING, !isTouchingTheGround);
-				if (isTouchingTheGround) {
-					
-				}
-				else {
-					this._timeFalling.Value = 0f;
-				}
-			});
+			#endregion <<---------- Movement ---------->>
 
-			// time falling
-			this._timeFalling.TakeUntilDisable(this).DistinctUntilChanged().Subscribe(timeFalling => {
-				if(this.Anim) this.Anim.SetFloat(this.ANIM_TIME_FALLING, timeFalling);
+			#region <<---------- Fall ---------->>
+
+			Observable.EveryUpdate().Subscribe(_ => {
+				if (this._myVelocity.y >= 0f) {
+					this._lastPositionYSpeedWasPositive = this.Position.y;
+					this._isOnFreeFall.Value = false;
+					return;
+				}
+				this._distanceOnFreeFall.Value = this._lastPositionYSpeedWasPositive - this.Position.y;
+				this._isOnFreeFall.Value = 
+						!this._isTouchingTheGroundRx.Value 
+						&& this._distanceOnFreeFall.Value > this._charController.height * HEIGHT_PERCENTAGE_TO_CONSIDER_FREE_FALL
+				;
+			}).AddTo(this._disposables);
+
+			this._isOnFreeFall.TakeUntilDisable(this).DistinctUntilChanged().Subscribe(isFallingNow => {
+				this.Anim.CSetBoolSafe(this.ANIM_CHAR_IS_FALLING, isFallingNow);
+				this._distanceOnFreeFall.Value = 0f;
 			});
+			
+			this._distanceOnFreeFall.TakeUntilDisable(this).DistinctUntilChanged().Subscribe(timeFalling => {
+				this.Anim.CSetFloatSafe(this.ANIM_TIME_FALLING, timeFalling);
+			});
+			
+			#endregion <<---------- Fall ---------->>
+
 
 			// events
 			CBlockingEventsManager.OnDoingBlockingAction += this.DoingBlockingAction;
@@ -327,6 +351,9 @@ namespace CDK {
 		}
 
 		protected virtual void UnsubscribeToEvents() {
+			this._disposables?.Dispose();
+			this._disposables = null;
+			
 			CBlockingEventsManager.OnDoingBlockingAction -= this.DoingBlockingAction;
 			CTime.OnTimeScaleChanged -= this.TimeScaleChangedEvent;
 			SceneManager.activeSceneChanged -= this.OnActiveSceneChanged;
@@ -343,8 +370,8 @@ namespace CDK {
 		protected void OnActiveSceneChanged(Scene oldScene, Scene newScene) { 
 			this.StopTalking();
 			
-			Debug.Log($"Scene changed, setting {nameof(this._timeFalling)} to 0f.");
-			this._timeFalling.Value = 0f;
+			Debug.Log($"Scene changed, setting {nameof(this._distanceOnFreeFall)} to 0f.");
+			this._distanceOnFreeFall.Value = 0f;
 		}
 
 		#endregion <<---------- Events ---------->>
@@ -406,6 +433,7 @@ namespace CDK {
 						break;
 					}
 				}
+				
 
 				if (this.IsAiming) {
 					targetMovSpeed *= 0.5f;
@@ -433,22 +461,26 @@ namespace CDK {
 			return targetMotion * targetMovSpeed;
 		}
 		private float ProcessVerticalMovement() {
-			return this.myVelocity.y + Physics.gravity.y;
+			return this._myVelocity.y + Physics.gravity.y;
 		}
 		
 		protected void CheckIfIsGrounded() {
-			bool isGrounded = Physics.SphereCast(
-				this.Position + new Vector3(0f, 0.5f),
-				this._charController.radius,
-				Vector3.down,
-				out var hitInfo,
-				1f,
-				1,
-				QueryTriggerInteraction.Ignore
-			);
+			bool isGrounded = (this._charController.collisionFlags & CollisionFlags.Below) != 0;
+			
 			if (isGrounded) {
+				var ray = new Ray(
+					this.Position + new Vector3(0f, 0.5f),
+					Vector3.down
+				);
+				Physics.SphereCast(
+					ray,
+					this._charController.radius,
+					out var hitInfo,
+					1f,
+					1,
+					QueryTriggerInteraction.Ignore
+				);
 				this._groundNormal = hitInfo.normal;
-				this._lastGroundedPosition.Value = this.Position;
 			}
 			else {
 				this._groundNormal = Vector3.up;
@@ -485,14 +517,7 @@ namespace CDK {
 		#region <<---------- Aerial and Falling ---------->>
 
 		protected virtual void ProcessAerialMovement() {
-			if (this._isTouchingTheGroundRx.Value) {
-				
-			}
-			else {
-				// is falling
-				if (CBlockingEventsManager.IsPlayingCutscene) return;
-				this._timeFalling.Value += CTime.DeltaTimeScaled;
-			}
+			
 		}
 
 		#endregion <<---------- Aerial and Falling ---------->>
