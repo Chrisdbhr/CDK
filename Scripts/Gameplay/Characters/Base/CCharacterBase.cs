@@ -120,16 +120,29 @@ namespace CDK {
 		
 		#region <<---------- Sliding ---------->>
 
-		protected ReactiveProperty<bool> _canSlideRx;
+		protected ReactiveProperty<bool> _enableSlideRx;
 
 		public virtual float SlideSpeed => this._slideSpeed;
 		[SerializeField] private float _slideSpeed = 3f;
+
+		private bool CanSlide {
+			get { return this._canSlide; }
+			set {
+				if (this._canSlide == value) return;
+				this._canSlide = value;
+				this._lastTimeToggleSlide = Time.realtimeSinceStartup;
+			}
+		}
+		[SerializeField] private bool _canSlide;
+		[SerializeField] private float _lastTimeToggleSlide;
+		
 		public virtual float SlideControlAmmount => 0.5f;
-		/// <summary>
-		/// tempo para tropecar
-		/// </summary>
+		
 		[NonSerialized] protected float _slideTimeToStumble = 1.0f;
 		[NonSerialized] protected float _slideBeginTime;
+
+		private const float DELAY_TO_TOGGLE_SLIDE = 0.4f;
+		private const float SLIDE_FROM_CHAR_SLOPE_LIMIT_MULTIPLIER = 0.6f;
 		
 		#endregion <<---------- Sliding ---------->>
 
@@ -230,8 +243,10 @@ namespace CDK {
 			this.CheckIfIsGrounded();
 			
 			this._myVelocity = this.Position - this._previousPosition;
-			this.myVelocityXZ = new Vector3(this._myVelocity.x, 0f, this._myVelocity.z);
-			
+			this._myVelocityXZ.x = this._myVelocity.x;
+			this._myVelocityXZ.y = 0f;
+			this._myVelocityXZ.z = this._myVelocity.z;
+
 			this.ProcessAerialMovement();
 			this.ProcessSlide();
 			this.ProcessMovement();
@@ -281,7 +296,7 @@ namespace CDK {
 			#region <<---------- RX Creations ---------->>
 			
 			this.CanMoveRx = new ReactiveProperty<bool>(true);
-			this._canSlideRx = new ReactiveProperty<bool>(true);
+			this._enableSlideRx = new ReactiveProperty<bool>(true);
 			
 			this._isTouchingTheGroundRx = new BoolReactiveProperty(true);
 			this._isOnFreeFall = new BoolReactiveProperty(false);
@@ -300,7 +315,7 @@ namespace CDK {
 			});
 
 			// can slide
-			this._canSlideRx.TakeUntilDisable(this).DistinctUntilChanged().Subscribe(canSlide => {
+			this._enableSlideRx.TakeUntilDisable(this).DistinctUntilChanged().Subscribe(canSlide => {
 				// stopped sliding
 				if (!canSlide && this.CurrentMovState == CMovState.Sliding) {
 					this.CurrentMovState = CMovState.Walking;
@@ -324,7 +339,7 @@ namespace CDK {
 					this._isOnFreeFall.Value = false;
 					return;
 				}
-				this._distanceOnFreeFall.Value = this._lastPositionYSpeedWasPositive - this.Position.y;
+				this._distanceOnFreeFall.Value = this._lastPositionYSpeedWasPositive.CAbs() - this.Position.y.CAbs();
 				this._isOnFreeFall.Value = 
 						!this._isTouchingTheGroundRx.Value 
 						&& this._distanceOnFreeFall.Value > this._charController.height * HEIGHT_PERCENTAGE_TO_CONSIDER_FREE_FALL
@@ -367,10 +382,9 @@ namespace CDK {
 			if(this.Anim) this.Anim.applyRootMotion = newTimeScale != 0f;
 		}
 
-		protected void OnActiveSceneChanged(Scene oldScene, Scene newScene) { 
+		protected void OnActiveSceneChanged(Scene oldScene, Scene newScene) {
+			if (this == null) return;
 			this.StopTalking();
-			
-			Debug.Log($"Scene changed, setting {nameof(this._distanceOnFreeFall)} to 0f.");
 			this._distanceOnFreeFall.Value = 0f;
 		}
 
@@ -447,7 +461,7 @@ namespace CDK {
 			// is sliding
 			if (this.CurrentMovState == CMovState.Sliding) {
 				targetMotion = this.InputMovementDirRelativeToCam * this.SlideControlAmmount
-						+ (new Vector3(this._groundNormal.x, 0f, this._groundNormal.z).normalized);
+						+ this.transform.forward + (this._groundNormal * 2f);
 				targetMovSpeed = this.SlideSpeed;
 			}
 
@@ -465,21 +479,19 @@ namespace CDK {
 		}
 		
 		protected void CheckIfIsGrounded() {
-			bool isGrounded = (this._charController.collisionFlags & CollisionFlags.Below) != 0;
+			float height = this._charController.height * HEIGHT_PERCENTAGE_TO_CONSIDER_FREE_FALL;
+			var ray = this.GetGroundCheckRay(height);
+			bool isGrounded = Physics.SphereCast(
+				ray.origin,
+				this._charController.radius,
+				ray.direction,
+				out var hitInfo,
+				height,
+				1,
+				QueryTriggerInteraction.Ignore
+			);
 			
 			if (isGrounded) {
-				var ray = new Ray(
-					this.Position + new Vector3(0f, 0.5f),
-					Vector3.down
-				);
-				Physics.SphereCast(
-					ray,
-					this._charController.radius,
-					out var hitInfo,
-					1f,
-					1,
-					QueryTriggerInteraction.Ignore
-				);
 				this._groundNormal = hitInfo.normal;
 			}
 			else {
@@ -488,21 +500,18 @@ namespace CDK {
 			this._isTouchingTheGroundRx.Value = isGrounded;
 		}
 
-		//public float angleFromGround;
-		//public float angleRelativeVelocity;
-		[SerializeField] private float _slideAngleFromGround = 20f;
-		[SerializeField] private float _angleRelativeVelocity = 70f;
-		
 		protected void ProcessSlide() {
-			var angleFromGround = Vector3.Angle(this.transform.up, this._groundNormal);
-			var angleRelativeVelocity = Vector3.Angle(this.myVelocityXZ, this._groundNormal);
-			if (
-				this._canSlideRx.Value 
-				&& this.CurrentMovState >= CMovState.Running
-				&& this._isTouchingTheGroundRx.Value
-				&& angleFromGround >= this._slideAngleFromGround
-				&& angleRelativeVelocity <= this._angleRelativeVelocity
-			) {
+			if (Time.realtimeSinceStartup < this._lastTimeToggleSlide + DELAY_TO_TOGGLE_SLIDE) return;
+
+			var angleFromGround = Vector3.SignedAngle(Vector3.up, this._groundNormal, this.transform.right);
+
+			this.CanSlide = this._enableSlideRx.Value
+					&& this._isTouchingTheGroundRx.Value
+					&& this.CurrentMovState >= CMovState.Running
+					&& angleFromGround >= this._charController.slopeLimit * SLIDE_FROM_CHAR_SLOPE_LIMIT_MULTIPLIER;
+
+			
+			if (this.CanSlide) {
 				this.CurrentMovState = CMovState.Sliding;
 			}else if (this.CurrentMovState == CMovState.Sliding) {
 				this.CurrentMovState = CMovState.Walking;
@@ -520,6 +529,11 @@ namespace CDK {
 			
 		}
 
+		protected (Vector3 origin, Vector3 direction) GetGroundCheckRay(float height) {
+			return (this.Position + new Vector3(0f, height * 0.5f), 
+					Vector3.down * height);
+		}
+		
 		#endregion <<---------- Aerial and Falling ---------->>
 
 		
@@ -529,12 +543,11 @@ namespace CDK {
 		
 		protected void ProcessRotation() {
 			if (this.IsStrafingRx.Value) {
-				this._aimTargetDirection.y = 0f;
 				this.RotateTowardsDirection(this._aimTargetDirection);
 			}
 			else {
 				if (this.CurrentMovState == CMovState.Sliding) {
-					this.RotateTowardsDirection(this.myVelocityXZ);
+					this.RotateTowardsDirection(this._groundNormal + this.myVelocityXZ);
 				}
 				else {
 					if(!CBlockingEventsManager.IsDoingBlockingAction.IsRetained()) this.RotateTowardsDirection(this.InputMovementDirRelativeToCam);
@@ -543,6 +556,7 @@ namespace CDK {
 		}
 		
 		protected void RotateTowardsDirection(Vector3 dir) {
+			dir.y = 0f;
 			if (dir == Vector3.zero) return;
 			this._targetLookRotation = Quaternion.LookRotation(dir);
 
