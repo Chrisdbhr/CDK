@@ -122,19 +122,18 @@ namespace CDK {
 
 		protected ReactiveProperty<bool> _enableSlideRx;
 
-		public virtual float SlideSpeed => this._slideSpeed;
-		[SerializeField] private float _slideSpeed = 3f;
+		[SerializeField] protected float _slideSpeed = 3f;
 
 		private bool CanSlide {
 			get { return this._canSlide; }
 			set {
 				if (this._canSlide == value) return;
 				this._canSlide = value;
-				this._lastTimeToggleSlide = Time.realtimeSinceStartup;
+				this._timeThatCanToggleSlide = Time.realtimeSinceStartup + DELAY_TO_TOGGLE_SLIDE;
 			}
 		}
 		[SerializeField] private bool _canSlide;
-		[SerializeField] private float _lastTimeToggleSlide;
+		[SerializeField] private float _timeThatCanToggleSlide;
 		
 		public virtual float SlideControlAmmount => 0.5f;
 		
@@ -462,7 +461,7 @@ namespace CDK {
 			if (this.CurrentMovState == CMovState.Sliding) {
 				targetMotion = this.InputMovementDirRelativeToCam * this.SlideControlAmmount
 						+ this.transform.forward + (this._groundNormal * 2f);
-				targetMovSpeed = this.SlideSpeed;
+				targetMovSpeed = this._slideSpeed;
 			}
 
 			if (this.AdditiveMovement != Vector3.zero) {
@@ -501,7 +500,7 @@ namespace CDK {
 		}
 
 		protected void ProcessSlide() {
-			if (Time.realtimeSinceStartup < this._lastTimeToggleSlide + DELAY_TO_TOGGLE_SLIDE) return;
+			if (Time.realtimeSinceStartup < this._timeThatCanToggleSlide + DELAY_TO_TOGGLE_SLIDE) return;
 
 			var angleFromGround = Vector3.SignedAngle(Vector3.up, this._groundNormal, this.transform.right);
 
@@ -510,6 +509,7 @@ namespace CDK {
 					&& this.CurrentMovState >= CMovState.Running
 					&& angleFromGround >= this._charController.slopeLimit * SLIDE_FROM_CHAR_SLOPE_LIMIT_MULTIPLIER;
 
+			if (Time.realtimeSinceStartup < this._timeThatCanToggleSlide) return;
 			
 			if (this.CanSlide) {
 				this.CurrentMovState = CMovState.Sliding;
