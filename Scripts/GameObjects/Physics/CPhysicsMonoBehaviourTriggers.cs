@@ -7,6 +7,8 @@ namespace CDK {
 
 		[SerializeField] protected CUnityEventTransform Enter;
 		[SerializeField] protected CUnityEventTransform Exit;
+		[Space]
+		[SerializeField] protected CUnityEventBool Entered;
 
 		
 		protected bool WillIgnoreCollision(Transform t) {
