@@ -2,6 +2,7 @@ using System;
 using UnityEngine;
 
 namespace CDK {
+	[DisallowMultipleComponent]
 	public abstract class CPlayerInteractionBase : MonoBehaviour {
 		
 		[NonSerialized] protected LayerMask _interactionLayerMask = 1;
