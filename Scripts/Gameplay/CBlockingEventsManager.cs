@@ -101,6 +101,10 @@ namespace CDK {
 		#region <<---------- Initializers ---------->>
 		
 		private CBlockingEventsManager() {
+			if (_instance != null) {
+				Debug.LogError($"{nameof(CBlockingEventsManager)} instance was not null!");
+				return;
+			}
 			Debug.Log("Creating BlockingEventsManager instance.");
 			_instance = this;
 
@@ -136,14 +140,15 @@ namespace CDK {
 			
 			// blocking Event Happening
 			Observable.CombineLatest(
-						  this._isOnMenuRx, this._isPlayingCutsceneRx, this._isDoingBlockingAction.IsRetainedRx,
-						  (isOnMenu, isPlayingCutscene, isDoingBlockingAction)
-								  => isOnMenu || isPlayingCutscene || isDoingBlockingAction)
-					  .Subscribe(blockingEventHappening => {
-						  Debug.Log($"IsBlockingEventHappening changed to: {blockingEventHappening}");
-						  this._isAnyBlockingEventHappening = blockingEventHappening;
-						  this._onAnyBlockingEventHappening?.Invoke(blockingEventHappening);
-					  });
+			this._isOnMenuRx, 
+			this._isPlayingCutsceneRx,
+			this._isDoingBlockingAction.IsRetainedRx,
+			(isOnMenu, isPlayingCutscene, isDoingBlockingAction) => isOnMenu || isPlayingCutscene || isDoingBlockingAction)
+			.Subscribe(blockingEventHappening => {
+				Debug.Log($"IsBlockingEventHappening changed to: {blockingEventHappening}");
+				this._isAnyBlockingEventHappening = blockingEventHappening;
+				this._onAnyBlockingEventHappening?.Invoke(blockingEventHappening);
+			});
 		}
 
 		#endregion <<---------- Initializers ---------->>
