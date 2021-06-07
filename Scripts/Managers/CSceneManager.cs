@@ -121,7 +121,7 @@ namespace CDK {
 				transformToMove.rotation = targetTransform.rotation;
 			}
 			
-			Debug.Log($"Moving {transformToMove.name} to {nameof(entryPointNumber)} at position {transformToMove.position}");
+			Debug.Log($"Moving {transformToMove.name} to {nameof(entryPointNumber)}:'{entryPointNumber}' at position {transformToMove.position}", targetTransform);
 		}
 
 		#region <<---------- Extensions ---------->>
