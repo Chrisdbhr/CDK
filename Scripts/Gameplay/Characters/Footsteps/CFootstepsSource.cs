@@ -160,8 +160,14 @@ namespace CDK {
 		}
 
 		private CFootstepInfo GetFootstepInfoFromTerrain(RaycastHit raycastHit) {
-			var terrainTextureDetector = raycastHit.collider.GetComponent<CTerrainTextureDetector>();
-			if (terrainTextureDetector == null) return null;
+			var terrain = raycastHit.collider.GetComponent<Terrain>();
+			if (terrain == null) return null;
+		
+			var terrainTextureDetector = terrain.GetComponent<CTerrainTextureDetector>();
+			if (terrainTextureDetector == null) {
+				Debug.LogWarning($"{this.name} step on a Terrain without a {nameof(CTerrainTextureDetector)} attached to it to detect footstep!");
+				return null;
+			}
 
 			var dominantLayer = terrainTextureDetector.GetFirstTextureAt(raycastHit.point);
 			if (dominantLayer == null) return null;

@@ -12,7 +12,8 @@ namespace CDK {
 			foreach (var footstepInfo in this.FootstepInfos) {
 				if (footstepInfo == null) continue;
 				foreach (var mat in footstepInfo.Materials) {
-					if (mat.renderQueue != targetMaterial.renderQueue) continue;
+					if (mat == null) continue;
+					if (mat.GetInstanceID() != targetMaterial.GetInstanceID()) continue;
 					if (mat.name != targetMaterial.name) continue;
 					return footstepInfo;
 				}

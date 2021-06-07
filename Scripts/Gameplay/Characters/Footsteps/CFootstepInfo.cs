@@ -4,6 +4,7 @@ using UnityEngine;
 namespace CDK {
 	[System.Serializable]
 	public class CFootstepInfo {
+		public string Name;
 		
 		[EventRef] 
 		public string Audio;
