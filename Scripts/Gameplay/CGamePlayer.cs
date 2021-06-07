@@ -120,7 +120,7 @@ namespace CDK {
 					createdGo.transform.position = entryPoint.transform.position;
 				}
 			}
-			createdGo.transform.Translate(0f,0.001f,0f); // prevent spawning at 0 position so engine does not think it is maybe inside the ground next frame.
+			createdGo.transform.position += new Vector3(0f,0.001f,0f); // prevent spawning at 0 position so engine does not think it is maybe inside the ground next frame.
 			createdGo.SetActive(false);
 			createdGo.name = $"[Character] {createdGo.name}";
 			var character = createdGo.GetComponent<CCharacterBase>();
@@ -132,7 +132,7 @@ namespace CDK {
 				
 			await this.AddControllingCharacter(character);
 				
-			Debug.Log($"Created player {this.PlayerNumber} controlling character '{charToCreate}'.");
+			Debug.Log($"Created player {this.PlayerNumber} controlling character '{createdGo.name}'.");
 		}
 
 		#endregion <<---------- Character Creation and Exclusion ---------->>
@@ -148,8 +148,6 @@ namespace CDK {
 				return;
 			}
 
-			CSceneManager.SetTransformToSceneEntryPoint(character.transform);
-			
 			this._characters.Add(character);
 			
 			await this.CheckIfNeedToCreateCamera();
