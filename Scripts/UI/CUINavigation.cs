@@ -115,7 +115,7 @@ namespace CDK.UI {
 			if (ui != null) {
 				Debug.Log($"Closing Menu '{ui.name}'", ui);
 				this.LastFrameAMenuClosed = Time.frameCount;
-				await ui.Close();
+				ui.Close();
 			}
 		}
 
@@ -123,7 +123,7 @@ namespace CDK.UI {
 			Debug.Log($"Requested EndNavigation of {this._navigationHistory.Count} Menus in history.");
 			foreach (var ui in this._navigationHistory) {
 				if(ui == null) continue;
-				await ui.Close();
+				ui.Close();
 			}
 			this._navigationHistory.Clear();
 			CBlockingEventsManager.IsOnMenu = false;

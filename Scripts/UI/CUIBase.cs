@@ -83,7 +83,7 @@ namespace CDK.UI {
 			this._canvas.sortingOrder = sortOrder;
 			RuntimeManager.PlayOneShot(CGameSettings.SoundOpenMenu);
 		}
-		public async Task Close() {
+		public void Close() {
 			Debug.Log($"Closing UI {this.gameObject.name}", this);
 			this._onClose?.Invoke(this);
 

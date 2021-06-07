@@ -9,6 +9,8 @@ namespace CDK.UI {
 	public class CUIInteractable : MonoBehaviour, ISelectHandler, ISubmitHandler, ICancelHandler,
 	                               IPointerEnterHandler, IPointerClickHandler {
 
+		[SerializeField] private bool _debug;
+		
 		[NonSerialized] private EventInstance _soundEventInstance;
 
 		
@@ -23,17 +25,17 @@ namespace CDK.UI {
 		}
 
 		public virtual void Selected() {
-			Debug.Log($"Selected: CUIInteractable '{this.gameObject.name}'", this);
+			if(this._debug) Debug.Log($"Selected: CUIInteractable '{this.gameObject.name}'", this);
 			this.PlaySound(CGameSettings.SoundSelect);
 		}
 
 		public virtual void Submited() {
-			Debug.Log($"SUBMIT: CUIInteractable '{this.gameObject.name}'", this);
+			if(this._debug) Debug.Log($"SUBMIT: CUIInteractable '{this.gameObject.name}'", this);
 			this.PlaySound(CGameSettings.SoundSubmit);
 		}
 
 		public virtual void Canceled() {
-			Debug.Log($"CANCEL: CUIInteractable '{this.gameObject.name}'", this);
+			if(this._debug) Debug.Log($"CANCEL: CUIInteractable '{this.gameObject.name}'", this);
 			this.PlaySound(CGameSettings.SoundCancel);
 		}
 		
