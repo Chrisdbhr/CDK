@@ -3,10 +3,13 @@ using System.IO;
 using System.Threading.Tasks;
 using UniRx;
 using UnityEngine;
-using UnityJSON;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+using Newtonsoft.Json.UnityConverters;
+using Newtonsoft.Json.UnityConverters.Math;
+using UnityEditor;
 
 namespace CDK {
-	[JSONObject(ObjectOptions.IgnoreUnknownKey | ObjectOptions.IgnoreProperties)]
 	public partial class CSave {
 
 		#region <<---------- Singleton ---------->>
@@ -32,10 +35,22 @@ namespace CDK {
 		
 		#region <<---------- Properties ---------->>
 
-		[JSONNode(NodeOptions.ReplaceDeserialized | NodeOptions.IgnoreDeserializationTypeErrors, key = "cameraSensitivity")]
+		[JsonIgnore]
+		private static readonly JsonSerializerSettings DefaultSettings = new JsonSerializerSettings {
+			NullValueHandling = NullValueHandling.Ignore,
+			MissingMemberHandling = MissingMemberHandling.Ignore,
+			Formatting = Formatting.Indented,
+			Converters = new JsonConverter[] {
+				new Vector3Converter(),
+				new StringEnumConverter()
+			},
+			ContractResolver = new UnityTypeContractResolver(),
+		};
+
+		[JsonProperty("cameraSensitivity")]
 		public Vector2 CameraSensitivity = new Vector2(7.5f, 0.15f);
 
-		[JSONNode(NodeOptions.ReplaceDeserialized | NodeOptions.IgnoreDeserializationTypeErrors, key = "language")]
+		[JsonProperty("language")]
 		public string Language;
 
 		#endregion <<---------- Properties ---------->>
@@ -49,7 +64,7 @@ namespace CDK {
 			try {
 				Debug.Log($"Starting SaveGame process.");
 				
-				var json = UnityJSON.Serializer.Default.Serialize(getRx.Value);
+				var json = JsonConvert.SerializeObject(getRx.Value, DefaultSettings);
 			
 				var folderPath = GetSaveFileDirectory();
 				if (!Directory.Exists(folderPath)) {
@@ -91,7 +106,7 @@ namespace CDK {
 				
 				Debug.Log($"Save file content: {fileContent}");
 
-				var save = UnityJSON.Deserializer.Default.Deserialize<CSave>(fileContent);
+				var save = JsonConvert.DeserializeObject<CSave>(fileContent, DefaultSettings);
 
 				if (save == null) {
 					Debug.LogError($"Could not deserialize Save at path '{filePath}'!");
@@ -123,6 +138,20 @@ namespace CDK {
 		}
 
 		#endregion <<---------- Path ---------->>
+
+
+		#region <<---------- Editor ---------->>
+	
+		#if UNITY_EDITOR
+
+		[MenuItem("Game/Open save folder")]
+		public static void OpenSaveFolder() {
+			EditorUtility.RevealInFinder(GetSaveFileDirectory());
+		}
+		
+		#endif
+		
+		#endregion <<---------- Editor ---------->>
 		
 	}
 }
