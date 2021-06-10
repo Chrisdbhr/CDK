@@ -1,12 +1,10 @@
 using System;
 using System.IO;
 using System.Threading.Tasks;
+using CDK.Json;
 using UniRx;
 using UnityEngine;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
-using Newtonsoft.Json.UnityConverters;
-using Newtonsoft.Json.UnityConverters.Math;
 using UnityEditor;
 
 namespace CDK {
@@ -34,19 +32,7 @@ namespace CDK {
 		
 		
 		#region <<---------- Properties ---------->>
-
-		[JsonIgnore]
-		private static readonly JsonSerializerSettings DefaultSettings = new JsonSerializerSettings {
-			NullValueHandling = NullValueHandling.Ignore,
-			MissingMemberHandling = MissingMemberHandling.Ignore,
-			Formatting = Formatting.Indented,
-			Converters = new JsonConverter[] {
-				new Vector3Converter(),
-				new StringEnumConverter()
-			},
-			ContractResolver = new UnityTypeContractResolver(),
-		};
-
+		
 		[JsonProperty("cameraSensitivity")]
 		public Vector2 CameraSensitivity = new Vector2(7.5f, 0.15f);
 
@@ -64,7 +50,7 @@ namespace CDK {
 			try {
 				Debug.Log($"Starting SaveGame process.");
 				
-				var json = JsonConvert.SerializeObject(getRx.Value, DefaultSettings);
+				var json = JsonConvert.SerializeObject(getRx.Value, CJsonExtensions.DefaultSettings);
 			
 				var folderPath = GetSaveFileDirectory();
 				if (!Directory.Exists(folderPath)) {
@@ -106,7 +92,7 @@ namespace CDK {
 				
 				Debug.Log($"Save file content: {fileContent}");
 
-				var save = JsonConvert.DeserializeObject<CSave>(fileContent, DefaultSettings);
+				var save = JsonConvert.DeserializeObject<CSave>(fileContent, CJsonExtensions.DefaultSettings);
 
 				if (save == null) {
 					Debug.LogError($"Could not deserialize Save at path '{filePath}'!");
