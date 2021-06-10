@@ -57,10 +57,8 @@ namespace CDK {
 			CDependencyContainer.Initialize();
 			
 			CDependencyContainer.Bind<CGameSettings>(() => {
-				Debug.Log($"Instancing GameSettings asset.");
 				return Resources.Load<CGameSettings>("GameSettings");
 			});
-			
 			
 		}
 

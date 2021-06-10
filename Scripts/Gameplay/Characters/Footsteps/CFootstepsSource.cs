@@ -18,11 +18,11 @@ namespace CDK {
 		#region <<---------- Properties and Fields ---------->>
 
 		[SerializeField] private bool _debugFootstep;
-		[SerializeField] private CFootstepDatabase _database;
 		[SerializeField] private Transform _footL;
 		[SerializeField] private Transform _footR;
 		[SerializeField] private LayerMask _footCollisionLayers = 1;
 
+		[NonSerialized] private CFootstepDatabase _database;
 		[NonSerialized] private float _rayOffset = 0.25f;
 		[NonSerialized] private float _feetSizeForSphereCast = 0.1f;
 		[NonSerialized] private Vector3 _lastValidHitPoint;
@@ -33,7 +33,10 @@ namespace CDK {
 		
 		
 		#region <<---------- MonoBehaviour ---------->>
-		
+		private void Awake() {
+			this._database = CDependencyContainer.Get<CFootstepDatabase>();
+		}
+
 		#if UNITY_EDITOR
 		private void OnDrawGizmosSelected() {
 			Gizmos.color = Color.white;

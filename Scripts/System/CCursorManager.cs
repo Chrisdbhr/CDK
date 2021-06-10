@@ -8,7 +8,7 @@ namespace CDK {
 		
 		
 		
-		private CCursorManager() {
+		public CCursorManager() {
 			this._gameSettings = CDependencyContainer.Get<CGameSettings>();
 			
 			SetCursorState(!this._gameSettings.CursorStartsHidden);
@@ -16,7 +16,7 @@ namespace CDK {
 			CInputManager.InputTypeChanged += OnInputTypeChanged;
 		}
 
-		private static void OnInputTypeChanged(CInputManager.InputType newType) {
+		private void OnInputTypeChanged(CInputManager.InputType newType) {
 			SetCursorState(CInputManager.ActiveInputType == CInputManager.InputType.MouseAndKeyboard && CBlockingEventsManager.IsOnMenu);
 		}
 

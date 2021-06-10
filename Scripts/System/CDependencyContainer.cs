@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace CDK {
 	// [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
@@ -46,6 +47,7 @@ namespace CDK {
 			if (Binds.TryGetValue(type, out var creationHandler)) {
 				var instance = creationHandler();
 				Instances.Add(type, instance);
+				if(Debug.isDebugBuild) Debug.Log($"Creating instance of '{type.Name}'.");
 				return instance;
 			}
 			throw new NotImplementedException($"Could not find a way to create '{nameof(T)}'");
