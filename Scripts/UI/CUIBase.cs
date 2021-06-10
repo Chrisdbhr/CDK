@@ -43,6 +43,8 @@ namespace CDK.UI {
 		}
 		[NonSerialized] private Action<CUIBase> _onClose;
 
+		[NonSerialized] protected CGameSettings _gameSettings;
+
 		#endregion <<---------- Properties and Fields ---------->>
 
 
@@ -52,6 +54,7 @@ namespace CDK.UI {
 
 		protected virtual void Awake() {
 			this._canvas = this.GetComponent<Canvas>();
+			this._gameSettings = CDependencyContainer.Get<CGameSettings>();
 		}
 
 		protected virtual void Start() {
@@ -81,7 +84,7 @@ namespace CDK.UI {
 			this._onOpen?.Invoke();
 
 			this._canvas.sortingOrder = sortOrder;
-			RuntimeManager.PlayOneShot(CGameSettings.SoundOpenMenu);
+			RuntimeManager.PlayOneShot(this._gameSettings.SoundOpenMenu);
 		}
 		public void Close() {
 			Debug.Log($"Closing UI {this.gameObject.name}", this);
@@ -92,7 +95,7 @@ namespace CDK.UI {
 			if (!Addressables.ReleaseInstance(this.gameObject)) {
 				Debug.LogError($"Error releasing instance of object '{this.gameObject.name}'", this);
 			}
-			RuntimeManager.PlayOneShot(CGameSettings.SoundCloseMenu);
+			RuntimeManager.PlayOneShot(this._gameSettings.SoundCloseMenu);
 
 		}
 		

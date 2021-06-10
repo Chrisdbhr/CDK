@@ -68,7 +68,7 @@ namespace CDK {
 				direction,
 				out var rayInfo,
 				direction.magnitude,
-				CGameSettings.LineOfSightBlockingLayers,
+				1,
 				QueryTriggerInteraction.Collide
 			);
 

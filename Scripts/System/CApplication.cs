@@ -10,9 +10,11 @@ using UnityEditor;
 #endif
 
 namespace CDK {
-	[DefaultExecutionOrder(-50000)]
+	[DefaultExecutionOrder(-100)]
 	public static class CApplication {
-			
+
+		#region <<---------- Initialization ---------->>
+		
 		/// <summary>
 		/// ANTES da scene load.
 		/// </summary>
@@ -26,6 +28,7 @@ namespace CDK {
 
 			Application.targetFrameRate = 60;
 
+			InitializeDependecyContainerAndBinds();
 			await AddressablesInitialize();
 			await DetectLanguage();
 
@@ -42,10 +45,43 @@ namespace CDK {
 			Application.backgroundLoadingPriority = ThreadPriority.Low;
 		}
 
+		#endregion <<---------- Initialization ---------->>
+
+
+
+
+		#region <<---------- Dependencies ---------->>
+
+		private static void InitializeDependecyContainerAndBinds() {
+			
+			CDependencyContainer.Initialize();
+			
+			CDependencyContainer.Bind<CGameSettings>(() => {
+				Debug.Log($"Instancing GameSettings asset.");
+				return Resources.Load<CGameSettings>("GameSettings");
+			});
+			
+			
+		}
+
+		#endregion <<---------- Dependencies ---------->>
+		
+		
+		
+
+		#region <<---------- Addressables ---------->>
+		
 		private static async Task AddressablesInitialize() {
 			Debug.Log("CApplication initializing Addressables");
 			await Addressables.InitializeAsync().Task;
 		}
+		
+		#endregion <<---------- Addressables ---------->>
+
+
+		
+		
+		#region <<---------- Language ---------->>
 		
 		private static async Task DetectLanguage() {
 			await LocalizationSettings.InitializationOperation.Task;
@@ -62,12 +98,16 @@ namespace CDK {
 			Debug.Log($"Could not auto select language for {systemCulture}");
 		}
 
+		#endregion <<---------- Language ---------->>
+
+
+		
+
+		#region <<---------- Application Quit ---------->>
 		
 		public static event Action IsQuitting;
 		public static event Action ApplicationInitialized;
-		
 		public static bool Quitting { get; private set; }
-
 
 		public static void Quit() {
 			Debug.Log("Requesting Application.Quit()");
@@ -81,6 +121,7 @@ namespace CDK {
 			
 		}
 		
-		
+		#endregion <<---------- Application Quit ---------->>
+
 	}
 }

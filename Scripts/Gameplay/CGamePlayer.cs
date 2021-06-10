@@ -18,9 +18,11 @@ namespace CDK {
 
 		public CGamePlayer(int playerNumber) {
 
+			this._gameSettings = CDependencyContainer.Get<CGameSettings>();
+			
 			this._compositeDisposable?.Dispose();
 			this._compositeDisposable = new CompositeDisposable();
-			
+
 			this.PlayerNumber = playerNumber;
 			
 			this._rePlayer = ReInput.players.GetPlayer(this.PlayerNumber);
@@ -54,6 +56,7 @@ namespace CDK {
 		private readonly List<CCharacterBase> _characters = new List<CCharacterBase>();
 
 		[NonSerialized] private readonly CompositeDisposable _compositeDisposable;
+		[NonSerialized] private CGameSettings _gameSettings;
 		
 		
 		#endregion <<---------- Properties and Fields ---------->>
@@ -286,7 +289,7 @@ namespace CDK {
 			if (CBlockingEventsManager.IsOnMenu) return;
 			CBlockingEventsManager.IsOnMenu = true;
 			try {
-				await CUINavigation.get.OpenMenu(CGameSettings.AssetRef_PauseMenu, null, null);
+				await CUINavigation.get.OpenMenu(this._gameSettings.AssetRef_PauseMenu, null, null);
 			} catch (Exception e) {
 				CBlockingEventsManager.IsOnMenu = false;
 				Debug.LogError("Exception trying to OpenMenu on GamePlayer: " + e);

@@ -1,14 +1,17 @@
 using UnityEngine;
 
 namespace CDK {
-	public static class CCursorManager {
+	public class CCursorManager {
+
+		private readonly CGameSettings _gameSettings;
 		
-		/// <summary>
-		/// ANTES da scene load.
-		/// </summary>
-		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-		private static void Initialize() {
-			SetCursorState(!CGameSettings.CursorStartsHidden);
+		
+		
+		
+		private CCursorManager() {
+			this._gameSettings = CDependencyContainer.Get<CGameSettings>();
+			
+			SetCursorState(!this._gameSettings.CursorStartsHidden);
 			CBlockingEventsManager.OnMenu += SetCursorState;
 			CInputManager.InputTypeChanged += OnInputTypeChanged;
 		}

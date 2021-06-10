@@ -29,7 +29,9 @@ namespace CDK {
 		private Canvas _loadingCanvas;
 		private CRetainable _loadingCanvasRetainable;
 		private TimeSpan TimeToShowLoadingIndicator = TimeSpan.FromSeconds(1);
-		private IDisposable _loadingCanvasTimer; 
+		private IDisposable _loadingCanvasTimer;
+
+		private readonly CGameSettings _gameSettings;
 		
 		#endregion <<---------- Properties ---------->>
 
@@ -39,6 +41,8 @@ namespace CDK {
 		#region <<---------- Initializers ---------->>
 		
 		private CAssets() {
+			this._gameSettings = CDependencyContainer.Get<CGameSettings>();
+			
 			this._loadingCanvasRetainable = new CRetainable();
 			(this._loadLoadingCanvasTask = this.CheckForLoadingCanvas()).CAwait();
 		}
@@ -146,7 +150,7 @@ namespace CDK {
 		private async Task CheckForLoadingCanvas() {
 			if (CApplication.Quitting) return;
 			if (this._loadingCanvas != null) return;
-			this._loadingCanvas = (await Addressables.InstantiateAsync(CGameSettings.AssetRef_UiLoading)).GetComponent<Canvas>();
+			this._loadingCanvas = (await Addressables.InstantiateAsync(this._gameSettings.AssetRef_UiLoading)).GetComponent<Canvas>();
 			if (CApplication.Quitting) {
 				this._loadingCanvas.CDestroy();
 				return;

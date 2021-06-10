@@ -12,10 +12,12 @@ namespace CDK.UI {
 		[SerializeField] private bool _debug;
 		
 		[NonSerialized] private EventInstance _soundEventInstance;
+		[NonSerialized] private CGameSettings _gameSettings;
 
-		
-		
-		
+		private void Awake() {
+			this._gameSettings = CDependencyContainer.Get<CGameSettings>();
+		}
+
 		private void PlaySound(string sound) {
 			if (!sound.CIsNullOrEmpty()) {
 				this._soundEventInstance.stop(STOP_MODE.IMMEDIATE);
@@ -26,17 +28,17 @@ namespace CDK.UI {
 
 		public virtual void Selected() {
 			if(this._debug) Debug.Log($"Selected: CUIInteractable '{this.gameObject.name}'", this);
-			this.PlaySound(CGameSettings.SoundSelect);
+			this.PlaySound(this._gameSettings.SoundSelect);
 		}
 
 		public virtual void Submited() {
 			if(this._debug) Debug.Log($"SUBMIT: CUIInteractable '{this.gameObject.name}'", this);
-			this.PlaySound(CGameSettings.SoundSubmit);
+			this.PlaySound(this._gameSettings.SoundSubmit);
 		}
 
 		public virtual void Canceled() {
 			if(this._debug) Debug.Log($"CANCEL: CUIInteractable '{this.gameObject.name}'", this);
-			this.PlaySound(CGameSettings.SoundCancel);
+			this.PlaySound(this._gameSettings.SoundCancel);
 		}
 		
 		#region <<---------- IHandlers ---------->>
