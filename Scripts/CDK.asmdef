@@ -10,7 +10,7 @@
         "Unity.ResourceManager",
         "UniTask.Addressables",
         "UniTask",
-        "UnityJSON",
+        "Newtonsoft.Json.UnityConverters",
         "FMODUnity",
         "Cinemachine",
         "DynamicBone",
