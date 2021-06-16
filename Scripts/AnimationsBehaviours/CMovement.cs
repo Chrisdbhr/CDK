@@ -24,7 +24,7 @@ namespace CDK {
 			var baseChar = animator.GetComponent<CCharacterBase>();
 			if (baseChar == null) return;
 			normalized = stateInfo.normalizedTime;
-			baseChar.AdditiveMovement = animator.transform.forward * (this._movementSpeed * this._movementIntensity.Evaluate(stateInfo.normalizedTime));
+			baseChar._movementMomentumXZ = animator.transform.forward * (this._movementSpeed * this._movementIntensity.Evaluate(stateInfo.normalizedTime));
 		}
 	}
 }
