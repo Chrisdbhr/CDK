@@ -62,8 +62,10 @@ namespace CDK {
 
 		[NonSerialized] private Vector3 _myVelocityXZ;
 
-		[NonSerialized] public Vector3 AdditiveMovement = Vector3.zero;
-
+		[NonSerialized] public Vector3 _movementMomentumXZ = Vector3.zero;
+		//[NonSerialized] private Vector3 _rootMotionDeltaPosition = Vector3.zero;
+		public Vector3 _rootMotionDeltaPosition = Vector3.zero;
+		
 
 		#region <<---------- Run and Walk ---------->>
 		public CMovState CurrentMovState {
@@ -154,6 +156,7 @@ namespace CDK {
 		#endregion <<---------- Sliding ---------->>
 
 		#region <<---------- Aerial Movement ---------->>
+		[SerializeField] [Range(0f,1f)] private float _aerialMomentumMaintainPercentage = 0.90f;
 		[NonSerialized] protected Vector3 _groundNormal;
 		[NonSerialized] private float _lastPositionYSpeedWasPositive;
 		[NonSerialized] protected BoolReactiveProperty _isTouchingTheGroundRx;
@@ -272,6 +275,17 @@ namespace CDK {
 			this.StopTalking();
 		}
 
+		private void OnAnimatorMove() {
+			if (CTime.TimeScale == 0f) {
+				this._rootMotionDeltaPosition = Vector3.zero;
+				return;
+			}
+
+			if (this.Anim == null) return;
+
+			this._rootMotionDeltaPosition = this.Anim.deltaPosition;
+		}
+
 		#if UNITY_EDITOR
 		protected virtual void OnDrawGizmosSelected() {
 			if (!this._debug) return;
@@ -350,6 +364,10 @@ namespace CDK {
 				this._distanceOnFreeFall.Value = this._lastPositionYSpeedWasPositive.CAbs() - this.Position.y.CAbs();
 			}).AddTo(this._disposables);
 
+			this._isTouchingTheGroundRx.TakeUntilDisable(this).DistinctUntilChanged().Subscribe(isTouchingTheGround => {
+				this._movementMomentumXZ = isTouchingTheGround ? Vector3.zero : this._myVelocityXZ;
+			});
+			
 			this._isOnFreeFall.TakeUntilDisable(this).DistinctUntilChanged().Subscribe(isFallingNow => {
 				this.Anim.CSetBoolSafe(this.ANIM_CHAR_IS_FALLING, isFallingNow);
 				this._distanceOnFreeFall.Value = 0f;
@@ -364,7 +382,6 @@ namespace CDK {
 
 			// events
 			CBlockingEventsManager.OnDoingBlockingAction += this.DoingBlockingAction;
-			CTime.OnTimeScaleChanged += this.TimeScaleChangedEvent;
 			SceneManager.activeSceneChanged += this.OnActiveSceneChanged;
 
 		}
@@ -374,16 +391,11 @@ namespace CDK {
 			this._disposables = null;
 
 			CBlockingEventsManager.OnDoingBlockingAction -= this.DoingBlockingAction;
-			CTime.OnTimeScaleChanged -= this.TimeScaleChangedEvent;
 			SceneManager.activeSceneChanged -= this.OnActiveSceneChanged;
 		}
 
 		protected void DoingBlockingAction(bool isDoing) {
 			this.CanMoveRx.Value = !isDoing;
-		}
-
-		protected void TimeScaleChangedEvent(float newTimeScale) {
-			if (this.Anim) this.Anim.applyRootMotion = newTimeScale != 0f;
 		}
 
 		protected void OnActiveSceneChanged(Scene oldScene, Scene newScene) {
@@ -402,24 +414,23 @@ namespace CDK {
 		protected void ProcessMovement() {
 			if (!this._charController.enabled) return;
 
-			var targetMotion = this.ProcessHorizontalMovement();
-			targetMotion.y = this.ProcessVerticalMovement();
-			targetMotion *= CTime.DeltaTimeScaled * this.TimelineTimescale;
+			var deltaTime = CTime.DeltaTimeScaled * this.TimelineTimescale;
+			
+			var targetMotion = this.ProcessHorizontalMovement(deltaTime);
+			targetMotion.y = this.ProcessVerticalMovement(deltaTime);
+			
 			if (targetMotion == Vector3.zero) return;
+			
 			this._charController.Move(targetMotion);
-
 		}
 
-		private Vector3 ProcessHorizontalMovement() {
+		private Vector3 ProcessHorizontalMovement(float deltaTime) {
 			Vector3 targetMotion = this.InputMovementDirRelativeToCam;
 			float targetMovSpeed = 0f;
 
+			
 			// manual movement
-			if (this.CanMoveRx.Value
-				&& this.CurrentMovState != CMovState.Sliding
-				&& !CBlockingEventsManager.IsDoingBlockingAction.IsRetained()
-			) {
-
+			if (this.CanMoveRx.Value && this.CurrentMovState != CMovState.Sliding && !CBlockingEventsManager.IsDoingBlockingAction.IsRetained()) {
 				// input movement
 				if (targetMotion != Vector3.zero) {
 					if (this.InputRun && this.CanRun && !this._isAimingRx.Value) {
@@ -469,18 +480,26 @@ namespace CDK {
 				targetMovSpeed = this._slideSpeed;
 			}
 
-			if (this.AdditiveMovement != Vector3.zero) {
-				targetMotion += this.AdditiveMovement;
-				Debug.Log($"Applying additive movement of {this.AdditiveMovement}, targetMotion now is {targetMotion}");
-				this.AdditiveMovement = Vector3.zero;
+			// momentum
+			if (!this._isTouchingTheGroundRx.Value && (this._movementMomentumXZ.x.CImprecise() != 0.0f || this._movementMomentumXZ.z.CImprecise() != 0.0f)) {
+				targetMotion += this._movementMomentumXZ;
+				Debug.Log($"Applying {this._movementMomentumXZ}, targetMotion now is {targetMotion}");
+				var momentumLoseValue = this._movementMomentumXZ - (this._movementMomentumXZ * (this._aerialMomentumMaintainPercentage));
+				this._movementMomentumXZ -= momentumLoseValue * deltaTime;
 			}
+			
+			// root motion
+			var rootMotionDeltaPos = this._rootMotionDeltaPosition;
+			rootMotionDeltaPos.y = 0f;
 
 			// move character
-			return targetMotion * targetMovSpeed;
+			return (targetMotion * (targetMovSpeed * deltaTime)) + rootMotionDeltaPos;
 		}
 
-		private float ProcessVerticalMovement() {
-			return this._myVelocity.y + Physics.gravity.y;
+		private float ProcessVerticalMovement(float deltaTime) {
+			var verticalDelta = this._myVelocity.y + this._rootMotionDeltaPosition.y + Physics.gravity.y;
+			verticalDelta *= deltaTime;
+			return verticalDelta;
 		}
 
 		protected void CheckIfIsGrounded() {
