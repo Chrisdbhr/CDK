@@ -34,7 +34,7 @@ namespace CDK {
 		
 		#region <<---------- MonoBehaviour ---------->>
 		private void Awake() {
-			this._database = CDependencyContainer.Get<CFootstepDatabase>();
+			this._database = CDependencyResolver.Get<CFootstepDatabase>();
 		}
 
 		#if UNITY_EDITOR

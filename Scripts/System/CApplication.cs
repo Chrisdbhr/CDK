@@ -1,6 +1,5 @@
 using System;
 using System.Threading.Tasks;
-using UniRx;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.Localization.Settings;
@@ -11,7 +10,7 @@ using UnityEditor;
 
 namespace CDK {
 	[DefaultExecutionOrder(-100)]
-	public static class CApplication {
+	public abstract class CApplication {
 
 		#region <<---------- Initialization ---------->>
 		
@@ -54,12 +53,18 @@ namespace CDK {
 
 		private static void InitializeDependecyContainerAndBinds() {
 			
-			CDependencyContainer.Initialize();
+			CDependencyResolver.Initialize();
 			
-			CDependencyContainer.Bind<CGameSettings>(() => {
-				return Resources.Load<CGameSettings>("GameSettings");
-			});
+			CDependencyResolver.Bind<CGameSettings>(() => Resources.Load<CGameSettings>("GameSettings"));
 			
+			CDependencyResolver.Bind<CFootstepDatabase>(() => Resources.Load<CFootstepDatabase>("FootstepsDatabase"));
+			
+			CDependencyResolver.Bind<CCursorManager>(() => new CCursorManager());
+			CDependencyResolver.Get<CCursorManager>(); // force create instance
+			
+			CDependencyResolver.Bind<CFader>(()=> new CFader());
+			
+			CDependencyResolver.Bind<CSceneManager>(()=> new CSceneManager());
 		}
 
 		#endregion <<---------- Dependencies ---------->>

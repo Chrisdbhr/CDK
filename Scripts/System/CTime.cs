@@ -23,18 +23,23 @@ namespace CDK {
 		}
 
 		/// <summary>
-		/// Set time scale optionally logging on console.
+		/// Set time scale and invoke a event if changed.
 		/// </summary>
-		public static void SetTimeScale(float targetTimeScale) {
-			_onTimeScaleChanged?.Invoke(targetTimeScale);
-			
-			Time.timeScale = targetTimeScale;
+		public static float TimeScale {
+			get { return Time.timeScale; }
+			set {
+				var oldTimeScale = Time.timeScale;
+				if (value == oldTimeScale) return;
+
+				Time.timeScale = value;
+				_onTimeScaleChanged?.Invoke(oldTimeScale, value);
+			}
 		}
 
 		/// <summary>
 		/// Notify time scaled changed (oldTimeScale, newTimeScale)
 		/// </summary>
-		public static event Action<float> OnTimeScaleChanged {
+		public static event Action<float, float> OnTimeScaleChanged {
 			add {
 				_onTimeScaleChanged -= value;
 				_onTimeScaleChanged += value;
@@ -43,6 +48,6 @@ namespace CDK {
 				_onTimeScaleChanged -= value;
 			}
 		}
-		private static Action<float> _onTimeScaleChanged;
+		private static Action<float, float> _onTimeScaleChanged;
 	}
 }

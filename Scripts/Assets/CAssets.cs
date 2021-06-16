@@ -41,7 +41,7 @@ namespace CDK {
 		#region <<---------- Initializers ---------->>
 		
 		private CAssets() {
-			this._gameSettings = CDependencyContainer.Get<CGameSettings>();
+			this._gameSettings = CDependencyResolver.Get<CGameSettings>();
 			
 			this._loadingCanvasRetainable = new CRetainable();
 			(this._loadLoadingCanvasTask = this.CheckForLoadingCanvas()).CAwait();

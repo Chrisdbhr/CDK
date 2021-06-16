@@ -18,7 +18,7 @@ namespace CDK {
 
 		public CGamePlayer(int playerNumber) {
 
-			this._gameSettings = CDependencyContainer.Get<CGameSettings>();
+			this._gameSettings = CDependencyResolver.Get<CGameSettings>();
 			
 			this._compositeDisposable?.Dispose();
 			this._compositeDisposable = new CompositeDisposable();
@@ -120,10 +120,10 @@ namespace CDK {
 			if (entryPoints.Length > 0) {
 				var entryPoint = entryPoints.OrderBy(x=>x.Number).FirstOrDefault();
 				if (entryPoint != null) {
+					Debug.Log($"Setting '{createdGo.name}' to entryPoint number'{entryPoint.Number}'", entryPoint.gameObject);
 					createdGo.transform.position = entryPoint.transform.position;
 				}
 			}
-			createdGo.transform.position += new Vector3(0f,0.001f,0f); // prevent spawning at 0 position so engine does not think it is maybe inside the ground next frame.
 			createdGo.SetActive(false);
 			createdGo.name = $"[Character] {createdGo.name}";
 			var character = createdGo.GetComponent<CCharacterBase>();
@@ -135,7 +135,7 @@ namespace CDK {
 				
 			await this.AddControllingCharacter(character);
 				
-			Debug.Log($"Created player {this.PlayerNumber} controlling character '{createdGo.name}'.");
+			Debug.Log($"Created player {this.PlayerNumber} controlling character '{createdGo.name}'.", createdGo);
 		}
 
 		#endregion <<---------- Character Creation and Exclusion ---------->>

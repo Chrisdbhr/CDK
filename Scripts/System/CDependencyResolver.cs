@@ -8,7 +8,7 @@ namespace CDK {
 	// 	
 	// }
 	
-	public static class CDependencyContainer {
+	public static class CDependencyResolver {
 
 		private static Dictionary<Type, object> Instances;
 		private static Dictionary<Type, Func<object>> Binds;
@@ -38,7 +38,7 @@ namespace CDK {
 			throw new NullReferenceException($"Could not find a instance for {typeof(T).FullName}");
 		}
 
-		public static void Bind<T>(Func<object> creationHandler) {
+		public static void Bind<T>(Func<object> creationHandler) { // enum comportamento singleton
 			Binds.Add(typeof(T), creationHandler);
 		}
 		
@@ -50,7 +50,7 @@ namespace CDK {
 				if(Debug.isDebugBuild) Debug.Log($"Creating instance of '{type.Name}'.");
 				return instance;
 			}
-			throw new NotImplementedException($"Could not find a way to create '{nameof(T)}'");
+			throw new NotImplementedException($"Could not find a way to create '{type.FullName}'");
 		}
 		
 	}

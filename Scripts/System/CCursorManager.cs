@@ -9,7 +9,7 @@ namespace CDK {
 		
 		
 		public CCursorManager() {
-			this._gameSettings = CDependencyContainer.Get<CGameSettings>();
+			this._gameSettings = CDependencyResolver.Get<CGameSettings>();
 			
 			SetCursorState(!this._gameSettings.CursorStartsHidden);
 			CBlockingEventsManager.OnMenu += SetCursorState;

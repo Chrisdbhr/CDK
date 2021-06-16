@@ -15,7 +15,7 @@ namespace CDK.UI {
 		[NonSerialized] private CGameSettings _gameSettings;
 
 		private void Awake() {
-			this._gameSettings = CDependencyContainer.Get<CGameSettings>();
+			this._gameSettings = CDependencyResolver.Get<CGameSettings>();
 		}
 
 		private void PlaySound(string sound) {

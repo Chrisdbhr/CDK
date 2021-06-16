@@ -44,6 +44,7 @@ namespace CDK.UI {
 		[NonSerialized] private Action<CUIBase> _onClose;
 
 		[NonSerialized] protected CGameSettings _gameSettings;
+		[NonSerialized] protected CFader _fader;
 
 		#endregion <<---------- Properties and Fields ---------->>
 
@@ -54,7 +55,8 @@ namespace CDK.UI {
 
 		protected virtual void Awake() {
 			this._canvas = this.GetComponent<Canvas>();
-			this._gameSettings = CDependencyContainer.Get<CGameSettings>();
+			this._gameSettings = CDependencyResolver.Get<CGameSettings>();
+			this._fader = CDependencyResolver.Get<CFader>();
 		}
 
 		protected virtual void Start() {

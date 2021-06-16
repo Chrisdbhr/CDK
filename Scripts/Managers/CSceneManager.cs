@@ -19,9 +19,23 @@ namespace CDK {
 			//DebugLogConsole.AddCommandStatic( "load", "Load scene Single.", nameof(CSceneManager.LoadSceneSingle), typeof(CSceneManager));
 		}
 
+		public CSceneManager() {
+			this._fader = CDependencyResolver.Get<CFader>();
+		}
+
 		#endregion <<---------- Initializers ---------->>
 
 
+		
+
+		#region <<---------- Properties and Fields ---------->>
+
+		private readonly CFader _fader;
+		
+		#endregion <<---------- Properties and Fields ---------->>
+
+
+		
 		public static AsyncOperation LoadSceneSingle(string sceneName) {
 			return SceneManager.LoadSceneAsync(sceneName);
 		}
