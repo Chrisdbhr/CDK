@@ -33,5 +33,8 @@ namespace CDK {
 
     [Serializable]
     public class CUnityEventCollision2D : UnityEvent<Collision2D> {}
+    
+    [Serializable]
+    public class CUnityEventCamera : UnityEvent<Camera> {}
 
 }
