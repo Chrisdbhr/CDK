@@ -44,6 +44,8 @@ namespace CDK {
 		
 		#endregion <<---------- Properties ---------->>
 
+		
+		
 
 		#region <<---------- Events ---------->>
 		
@@ -120,7 +122,7 @@ namespace CDK {
 			this._isOnMenuRx?.Dispose();
 			this._isOnMenuRx = new BoolReactiveProperty();
 			this._isOnMenuRx.Subscribe(onMenu => {
-				CTime.SetTimeScale(onMenu ? 0f : 1f);
+				CTime.TimeScale = (onMenu ? 0f : 1f);
 				Debug.Log($"IsOnMenuEvent: {onMenu}");
 				this._onMenu?.Invoke(onMenu);
 			});
