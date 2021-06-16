@@ -5,9 +5,10 @@ using System.Threading.Tasks;
 using UniRx;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Object = UnityEngine.Object;
 
 namespace CDK {
-	public static class CSceneManager {
+	public class CSceneManager {
 
 		#region <<---------- Initializers ---------->>
 		
@@ -36,11 +37,19 @@ namespace CDK {
 
 
 		
+
+		#region <<---------- Static SceneManager Wrappers ---------->>
+		
 		public static AsyncOperation LoadSceneSingle(string sceneName) {
 			return SceneManager.LoadSceneAsync(sceneName);
 		}
+		
+		#endregion <<---------- Static SceneManager Wrappers ---------->>
 
-		public static async Task Teleport(string sceneToLoad, int entryPointNumber, IReadOnlyList<GameObject> gameObjectsToTeleport) {
+		
+		
+
+		public async Task Teleport(string sceneToLoadName, int entryPointNumber, IReadOnlyList<GameObject> gameObjectsToTeleport) {
 
 			if (gameObjectsToTeleport == null || !gameObjectsToTeleport.Any()) {
 				Debug.LogError($"List of null objects tried to Teleport, canceling operation.");
@@ -49,59 +58,69 @@ namespace CDK {
 			
 			CBlockingEventsManager.IsPlayingCutscene = true;
 
-			Debug.Log($"Loading scene {sceneToLoad}");
+			Debug.Log($"Loading scene '{sceneToLoadName}'");
 			
 			var allLoadedScenes = GetAllLoadedScenes();
 			
-			
-			// Load scenes
-			var sceneToLoadAsyncOp = SceneManager.LoadSceneAsync(sceneToLoad, LoadSceneMode.Additive);
-			
-			sceneToLoadAsyncOp.allowSceneActivation = false;
-			
-			await CFadeCanvas.FadeToBlack(0.3f, false);
+			// fade out
+			float fadeOutTime = 0.3f;
+			this._fader.FadeToBlack(fadeOutTime, false);
+			await Observable.Timer(TimeSpan.FromSeconds(fadeOutTime));
 
 			Debug.Log($"TODO implement loading screen");
-
 			
-			// Activate loaded scenes
-			sceneToLoadAsyncOp.allowSceneActivation = true;
-
-			do {
-				await Observable.NextFrame();
-			} while (sceneToLoadAsyncOp.progress < 1f);
-			
-			var targetScene = SceneManager.GetSceneByName(sceneToLoad);
-			
-			SceneManager.SetActiveScene(targetScene);
-			
+			// move objects to temporary scene
+			var tempHolderScene = SceneManager.CreateScene("Temp Holder Scene"); 
 			foreach (var rootGo in gameObjectsToTeleport) {
-				SceneManager.MoveGameObjectToScene(rootGo.gameObject, targetScene);
+				SceneManager.MoveGameObjectToScene(rootGo, tempHolderScene);
 			}
-			
-			
-			// unload last scenes
-			foreach (var loadedScene in allLoadedScenes) {
-				var unloadAsyncOp = SceneManager.UnloadSceneAsync(loadedScene, UnloadSceneOptions.None);
+			SceneManager.SetActiveScene(tempHolderScene);
+
+			// unload scenes
+			foreach (var sceneToUnload in allLoadedScenes) {
+				var unloadAsyncOp = SceneManager.UnloadSceneAsync(sceneToUnload, UnloadSceneOptions.None);
 				do {
 					await Observable.NextFrame();
 				} while (unloadAsyncOp.progress < 1f);
 			}
 
+			// background load scene async
+			var loadAsyncOp = SceneManager.LoadSceneAsync(sceneToLoadName, LoadSceneMode.Additive);
+			loadAsyncOp.allowSceneActivation = false;
+
+			// Activate loaded scenes
+			loadAsyncOp.allowSceneActivation = true;
+			do {
+				await Observable.NextFrame();
+			} while (loadAsyncOp.progress < 1f);
+			
+			// teleport to target scene
+			var sceneToTeleport = SceneManager.GetSceneByName(sceneToLoadName);
+			SceneManager.SetActiveScene(sceneToTeleport);
+			
+			// move objects to loaded scene
+			foreach (var rootGo in gameObjectsToTeleport) {
+				SceneManager.MoveGameObjectToScene(rootGo, sceneToTeleport);
+			}
+
+			// move transform to scene entry points
 			foreach (var rootGo in gameObjectsToTeleport) {
 				SetTransformToSceneEntryPoint(rootGo.transform, entryPointNumber);
 			}
+
+			SceneManager.UnloadSceneAsync(tempHolderScene);
 
 			LightProbes.TetrahedralizeAsync();
 			
 			Debug.Log($"TODO remove loading screen");
 			
-			CSave.get.CurrentMap = targetScene.name;
+			CSave.get.CurrentMap = sceneToTeleport.name;
 
-			await Observable.Timer(TimeSpan.FromSeconds(1));
-			
-			await CFadeCanvas.FadeToTransparent(0.5f, false);
-			
+			// fade in
+			float fadeInTime = 0.5f;
+			this._fader.FadeToTransparent(fadeInTime, false);
+			await Observable.NextFrame();
+
 			CBlockingEventsManager.IsPlayingCutscene = false;
 		}
 
@@ -138,6 +157,9 @@ namespace CDK {
 			Debug.Log($"Moving {transformToMove.name} to {nameof(entryPointNumber)}:'{entryPointNumber}' at position {transformToMove.position}", targetTransform);
 		}
 
+		
+		
+		
 		#region <<---------- Extensions ---------->>
 
 		public static bool IsSceneValid(string sceneName) {
@@ -152,6 +174,8 @@ namespace CDK {
 		}
 
 		#endregion <<---------- Extensions ---------->>
+	
+		
 		
 		
 		#region <<---------- Scene All Objects ---------->>
