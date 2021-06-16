@@ -16,7 +16,8 @@
         "DynamicBone",
         "Unity.Localization",
         "Ludiq.Chronos",
-        "EasyButtons"
+        "EasyButtons",
+        "DebugExtension"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
