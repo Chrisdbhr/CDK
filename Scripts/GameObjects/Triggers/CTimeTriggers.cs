@@ -19,7 +19,7 @@ namespace CDK {
 		}
 
 
-		private void TimeScaleChanged(float newTimeScale) {
+		private void TimeScaleChanged(float oldTimeScale, float newTimeScale) {
 			bool timeStopped = newTimeScale <= 0f;
 
 			this._timeResumedEvent?.Invoke(!timeStopped);
