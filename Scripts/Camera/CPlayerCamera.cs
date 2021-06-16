@@ -4,6 +4,7 @@ using DG.Tweening;
 using FMODUnity;
 using UniRx;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 namespace CDK {
@@ -32,7 +33,6 @@ namespace CDK {
 			
 			// fmod listener
 			this._studioListener.ListenerNumber = this._ownerPlayer.PlayerNumber;
-			this._studioListener.attenuationObject = ownerCharacter.gameObject;
 		}
 		
 		#endregion <<---------- Initializers ---------->>
@@ -59,7 +59,7 @@ namespace CDK {
 		[SerializeField] private UnityEngine.Camera _unityCamera;
 		[SerializeField] private CinemachineBrain _cinemachineBrain;
 		[SerializeField] private CinemachineFreeLook _cinemachineCamera;
-		
+		[NonSerialized] private int _currentGameFrame;
 
 		[SerializeField] private Renderer[] _renderToHideWhenCameraIsClose;
 		[NonSerialized] private float _currentDistanceFromTarget = 10.0f;
@@ -79,7 +79,8 @@ namespace CDK {
 		[NonSerialized] private CGamePlayer _ownerPlayer;
 		[NonSerialized] private Transform _transform;
 		[NonSerialized] private Tweener _tween;
-		
+		[NonSerialized] private CFader _fader;
+	
 		#endregion <<---------- Properties and Fields ---------->>
 
 		
@@ -89,7 +90,8 @@ namespace CDK {
 
 		private void Awake() {
 			this._transform = this.transform;
-			
+			this._fader = CDependencyResolver.Get<CFader>();
+
 		}
 
 		private void OnEnable() {
@@ -100,12 +102,6 @@ namespace CDK {
 			this.SubscribeToEvents();
 			
 			this._screenShootTexture2d = new Texture2D(Screen.width, Screen.height, TextureFormat.RGB24, false, true);
-		}
-
-		private void ActiveCameraChanged(ICinemachineCamera newCamera, ICinemachineCamera oldCamera) {
-			if (ReferenceEquals(this._cinemachineCamera, newCamera)) {
-				this._cinemachineCamera.m_YAxis.Value = 0.5f;
-			}
 		}
 
 		private void OnDisable() {
@@ -148,7 +144,7 @@ namespace CDK {
 		public Transform GetCameraTransform() {
 			return this._unityCamera.transform;
 		}
-		
+
 		#endregion <<---------- General ---------->>
 		
 
@@ -184,15 +180,22 @@ namespace CDK {
 					objToDisable.enabled = !isClose;
 				}
 			});
+			
 		}
-
+		
 		private void UnsubscribeToEvents() {
 			this._cinemachineBrain.m_CameraActivatedEvent.RemoveListener(this.ActiveCameraChanged);
 		}
-
+		
+		private void ActiveCameraChanged(ICinemachineCamera newCamera, ICinemachineCamera oldCamera) {
+			if (ReferenceEquals(this._cinemachineCamera, newCamera)) {
+				this._cinemachineCamera.m_YAxis.Value = 0.5f;
+			}
+		}
+		
 		#endregion <<---------- Events ---------->>
 
-
+		
 		
 
 		#region <<---------- Input ---------->>
@@ -237,7 +240,7 @@ namespace CDK {
 			switch (transitionType) {
 				case CameraTransitionType.fade:
 					print($"[CPlayerCamera] Start fade transition with duration {duration}.");
-					CFadeCanvas.FadeToBlack(duration, false).CAwait();
+					this._fader.FadeToBlack(duration, false);
 					break;
 			case CameraTransitionType.crossfade:
 					print($"[CPlayerCamera] Start {CameraTransitionType.crossfade.ToString()} transition with duration {duration}.");
@@ -256,7 +259,7 @@ namespace CDK {
 			switch (transitionType) {
 				case CameraTransitionType.fade:
 					print($"[CPlayerCamera] Reverse fade transition with duration {duration}.");
-					CFadeCanvas.FadeToTransparent(duration, false).CAwait();
+					this._fader.FadeToTransparent(duration, false);
 					break;
 				case CameraTransitionType.crossfade:
 					print($"[CPlayerCamera] Reverse {CameraTransitionType.crossfade.ToString()} transition with duration {duration}.");
