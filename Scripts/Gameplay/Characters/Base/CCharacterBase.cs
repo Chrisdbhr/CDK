@@ -40,9 +40,14 @@ namespace CDK {
 
 		#region <<---------- Time ---------->>
 
-		protected float TimelineTimescale => (this._timeline ? this._timeline.timeScale : 1f);
+		protected float TimelineTimescale => (this._timeline != null ? this._timeline.timeScale : 1f);
+		
+		#if LUDIQ_CHRONOS
 		[SerializeField] private Chronos.Timeline _timeline;
-
+		#else
+		private object _timeline = null;
+		#endif
+		
 		#endregion <<---------- Time ---------->>
 
 		#region <<---------- Movement Properties ---------->>
