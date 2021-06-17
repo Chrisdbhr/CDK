@@ -103,17 +103,17 @@ namespace CDK {
 		
 		#region <<---------- Character Creation and Exclusion ---------->>
 		
-		public async Task InstantiateAndAssignCharacter(AssetReference charToCreate) {
+		public async Task<CCharacterBase> InstantiateAndAssignCharacter(AssetReference charToCreate) {
 			
 			if (charToCreate == null || !charToCreate.RuntimeKeyIsValid()) {
 				Debug.LogWarning($"Created player {this.PlayerNumber} with no controlling character.");
-				return;
+				return null;
 			}
 
 			var createdGo = await CAssets.LoadAndInstantiateGameObjectAsync(charToCreate.RuntimeKey.ToString());
 			if (createdGo == null) {
 				Debug.LogWarning($"Player {this.PlayerNumber} cant find character '{charToCreate}' to control.");
-				return;
+				return null;
 			}
 
 			var entryPoints = GameObject.FindObjectsOfType<CSceneEntryPoint>();
@@ -130,12 +130,14 @@ namespace CDK {
 
 			if (character == null) {
 				Debug.LogError($"{charToCreate} gameobject doesnt have a {nameof(CCharacterBase)} component on it! could not create player!");
-				return;
+				return null;
 			}
 				
 			await this.AddControllingCharacter(character);
 				
 			Debug.Log($"Created player {this.PlayerNumber} controlling character '{createdGo.name}'.", createdGo);
+
+			return character;
 		}
 
 		#endregion <<---------- Character Creation and Exclusion ---------->>
