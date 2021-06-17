@@ -79,9 +79,10 @@ namespace CDK {
 		}
 
 		private void UpdateOpacity() {
+			float currentAlpha = this._fadeCanvasGroup.alpha.CImprecise();
+			if (this.TargetAlpha == currentAlpha) return;
 			float delta = this.IgnoreTimeScale ? Time.unscaledDeltaTime : CTime.DeltaTimeScaled;
 			float step = delta / this.TargetFadeTime;
-			float currentAlpha = this._fadeCanvasGroup.alpha;
 			if (currentAlpha > this.TargetAlpha) step *= -1f;
 			this._fadeCanvasGroup.alpha = currentAlpha + step;
 		}
