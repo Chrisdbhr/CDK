@@ -27,6 +27,17 @@ namespace CDK {
 		[NonSerialized] private float _feetSizeForSphereCast = 0.1f;
 		[NonSerialized] private Vector3 _lastValidHitPoint;
 
+		public event Action<CFootstepInfo> OnFootstep {
+			add {
+				this._onFootstep += value;
+				this._onFootstep -= value;
+			}
+			remove {
+				this._onFootstep -= value;
+			}
+		}
+		private Action<CFootstepInfo> _onFootstep;
+
 		#endregion <<---------- Properties and Fields ---------->>
 
 		
@@ -96,6 +107,8 @@ namespace CDK {
 				footstepInfo = this.GetFootstepInfoFromTerrain(raycastHit);
 				if (footstepInfo == null) return;
 			}
+
+			this._onFootstep?.Invoke(footstepInfo);
 
 			// new footstep particle effect.
 			var particlePrefab = footstepInfo.GetRandomParticleSystem();
