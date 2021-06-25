@@ -6,27 +6,25 @@ namespace CDK {
 	public class CTransformShake : MonoBehaviour {
 
 		[NonSerialized] private Coroutine _shakeRoutine;
+		[NonSerialized] private Vector3 _startLocalPosition;
+		
 		[NonSerialized] private Transform _transform;
 		
 		
 		private void Awake() {
 			this._transform = this.transform;
-			if (this._transform.localPosition != Vector3.zero) {
-				Debug.LogWarning($"{this.name} has the script CTransformShake but it doesnt started at Vector3.zero position. Fixing it.");
-				this._transform.localPosition = Vector3.zero;
-			}
+			this._startLocalPosition = this._transform.localPosition;
 		}
 
 		
 		
 		
-		public void RequestShake(Vector3 direction, AnimationCurve animationCurve) {
-			this._transform.localPosition = Vector3.zero;
+		public void RequestShake(Vector3 direction, AnimationCurve animationCurve, float shakeMultiplier) {
 			this.CStopCoroutine(this._shakeRoutine);
-			this._shakeRoutine = this.CStartCoroutine(this.ShakeRoutine(direction, animationCurve));
+			this._shakeRoutine = this.CStartCoroutine(this.ShakeRoutine(direction, animationCurve, shakeMultiplier));
 		}
 
-		private IEnumerator ShakeRoutine(Vector3 direction, AnimationCurve animationCurve) {
+		private IEnumerator ShakeRoutine(Vector3 direction, AnimationCurve animationCurve, float shakeMultiplier) {
 			if (animationCurve.length <= 0) {
 				Debug.LogError($"Tried to Shake transform with a invalid Animation Curve (animationCurve.length invalid).");
 				yield break;
@@ -40,12 +38,12 @@ namespace CDK {
 			float elapsedTime = 0f;
 			while (elapsedTime <= animationCurve[animationCurve.length - 1].time) {
 				elapsedTime += CTime.DeltaTimeScaled;
-				this._transform.localPosition = direction * animationCurve.Evaluate(elapsedTime);
+				this._transform.localPosition = this._startLocalPosition + (direction * (animationCurve.Evaluate(elapsedTime) * shakeMultiplier));
 				yield return null;
 			}
 			yield return null;
 
-			this._transform.localPosition = Vector3.zero;
+			this._transform.localPosition = this._startLocalPosition;
 		}
 		
 	}
