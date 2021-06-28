@@ -26,5 +26,11 @@ namespace CDK {
 																									new Keyframe(0.2f,0f)
 																								});
 
+		public float ShakeMultiplier {
+			get { return this._shakeMultiplier; }
+		}
+		[SerializeField] private float _shakeMultiplier = 1f;
+		
+
 	}
 }
