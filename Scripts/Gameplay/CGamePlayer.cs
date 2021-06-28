@@ -76,7 +76,7 @@ namespace CDK {
 				
 				var character = this.GetControllingCharacter();
 				if (character == null) return;
-				var (camF, camR) = this.GetCameraVectors(character);
+				var (camF, camR) = this.GetCameraVectors();
 				
 				character.InputMovementRaw = inputMovement.normalized;
 				character.InputMovementDirRelativeToCam = (camF * inputMovement.y + camR * inputMovement.x).normalized;
@@ -200,27 +200,28 @@ namespace CDK {
 			this._cameraTransform = this._cPlayerCamera.GetCameraTransform();
 		}
 
-		private (Vector3 camF, Vector3 camR) GetCameraVectors(CCharacterBase relativeTo) {
-			var (camF, camR) = (Vector3.forward, Vector3.right);
-			if (this._cameraTransform == null) return (camF, camR);
-
-			if (relativeTo == null) {
-				camF = this._cameraTransform.forward;
-				camF.y = 0;
-				camF.Normalize();
+		private (Vector3 camF, Vector3 camR) GetCameraVectors() {
+			if (this._cameraTransform == null) return (Vector3.forward, Vector3.right);
 			
-				camR = this._cameraTransform.right;
-				camR.y = 0;
-				camR.Normalize();
+			var camF = this._cameraTransform.forward;
+			camF.y = 0;
+			camF.Normalize();
+			
+			var camR = this._cameraTransform.right;
+			camR.y = 0;
+			camR.Normalize();
 				
-				return (camF, camR);
-			}
+			return (camF, camR);
+		}
 
-			camF = relativeTo.Position - this._cameraTransform.position;
+		private (Vector3 camF, Vector3 camR) GetCameraVectorsRelativeToCharacter(CCharacterBase relativeTo) {
+			if (this._cameraTransform == null) return (Vector3.forward, Vector3.right);
+			
+			var camF = relativeTo.Position - this._cameraTransform.position;
 			camF.y = 0;
 			camF.Normalize();
 
-			camR = -Vector3.Cross(camF, Vector3.up);
+			var camR = -Vector3.Cross(camF, Vector3.up);
 			camR.y = 0;
 			camR.Normalize();
 			
