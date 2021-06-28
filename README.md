@@ -23,7 +23,6 @@ Check more information about my other projects on [my website](https://chrisjogo
 * [Newtonsoft.Json-for-Unity](https://github.com/jilleJr/Newtonsoft.Json-for-Unity)
 * [LINQ For Game Object](https://github.com/neuecc/LINQ-to-GameObject-for-Unity)
 * [EasyButtons](https://openupm.com/packages/com.madsbangh.easybuttons/)
-* [Debug Draw Extension](https://assetstore.unity.com/packages/tools/debug-drawing-extension-11396)
 * [DOTween](https://assetstore.unity.com/packages/tools/animation/dotween-hotween-v2-27676)
 * [Chronos - Time control](https://ludiq.io/chronos)
 * Unity Addressables system (install via package manager)
