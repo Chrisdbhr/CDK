@@ -1,7 +1,6 @@
 using System;
 using CDK.Damage;
 using CDK.Data;
-using CDK.Enums;
 using UniRx;
 using UnityEngine;
 
@@ -48,17 +47,34 @@ namespace CDK {
 		public float CurrentHealth {
 			get { return this._currentHealth; }
 			private set {
-				if (value == this._currentHealth || value == this._maxHealth && this._currentHealth == this._maxHealth) return;
+				var clampedValue = value.CClamp(0f, this._maxHealth);
+				if (clampedValue == this._currentHealth || clampedValue == this._maxHealth && this._currentHealth == this._maxHealth) return;
 
 				float oldHealth = this._currentHealth;
-				this._currentHealth = value > this._maxHealth ? this._maxHealth : value;
+				this._currentHealth = clampedValue;
+
+				if (oldHealth <= 0f) {
+					this.OnRevive?.Invoke();
+				}
+				if (this._currentHealth <= 0f) {
+					this.OnDie?.Invoke();
+					
+					Debug.Log($"{this.name} died.");
+				
+					foreach (var obj in this._unparentOnDie) {
+						obj.parent = null;
+					}
+					foreach (var obj in this._activateOnDie) {
+						obj.SetActive(true);
+					}
+					foreach (var obj in this._destroyOnDie) {
+						Destroy(obj.gameObject);
+					}
+				}
 
 				this.OnHealthChanged?.Invoke(this._currentHealth);
-
-				if (this._currentHealth <= 0f) {
-					this.IsDead = true;
-					return;
-				}
+				this.HealthChangedAsStringEvent?.Invoke(this._currentHealth.ToString("0"));
+				this.HealthChangedPercentageEvent?.Invoke(this._maxHealth != 0 ? this._currentHealth / this._maxHealth : 0);
 
 				if (this._currentHealth > oldHealth) {
 					this.OnRecoverHealth?.Invoke(this._currentHealth);
@@ -72,30 +88,8 @@ namespace CDK {
 		[SerializeField] private float _currentHealth;
 
 		public bool IsDead {
-			get { return this._isDead; }
-			private set {
-				if (this._isDead == value) return;
-				this._isDead = value;
-				
-				this.OnDie?.Invoke();
-				
-				Debug.Log($"{this.name} died.");
-				
-				if (this._currentHealth > 0f) {
-					this._currentHealth = 0f;
-				}
-				foreach (var obj in this._unparentOnDie) {
-					obj.parent = null;
-				}
-				foreach (var obj in this._activateOnDie) {
-					obj.SetActive(true);
-				}
-				foreach (var obj in this._destroyOnDie) {
-					Destroy(obj.gameObject);
-				}
-			}
+			get { return this._currentHealth <= 0f; }
 		}
-		[NonSerialized] private bool _isDead;
 		
 		#endregion <<---------- Health ---------->>
 
@@ -115,6 +109,9 @@ namespace CDK {
 		[SerializeField] private Transform[] _unparentOnDie;
 		[SerializeField] private GameObject[] _activateOnDie;
 		[SerializeField] private GameObject[] _destroyOnDie;
+
+		[SerializeField] private CUnityEventString HealthChangedAsStringEvent;
+		[SerializeField] private CUnityEventFloat HealthChangedPercentageEvent;
 		
 		public event Action<float> OnHealthChanged;
 		public event Action<float, CHitInfoData> OnDamageTaken;
@@ -145,7 +142,7 @@ namespace CDK {
 			if (this._transform != this._transform.root) {
 				Debug.LogWarning("Health component is not on a root transform! This object will not take damage!", this.gameObject);
 			}
-			this.Revive();
+			this.FullCure();
 		}
 
 		private void OnEnable() {
@@ -176,9 +173,8 @@ namespace CDK {
 
 
 
-		private void Revive() {
+		public void FullCure() {
 			this.CurrentHealth = this._maxHealth;
-			this.OnRevive?.Invoke();
 		}
 
 
@@ -208,14 +204,19 @@ namespace CDK {
 			this.CurrentHealth -= finalDamage;
 
 			// camera shake
-			if (this._transformShake != null) {
+			if (this._transformShake != null && hitInfo.AttackerTransform != null) {
 				this._transformShake.RequestShake(
-					(hitInfo.AttackerTransform.transform.position - this._transform.position).normalized * (finalDamage * 0.01f), 
-					hitScriptObj.DamageShakePattern
-					);
+					(hitInfo.AttackerTransform.position - this._transform.position).normalized * (finalDamage * 0.01f), 
+					hitScriptObj.DamageShakePattern,
+					hitScriptObj.ShakeMultiplier
+				);
 			}
 			
 			return true;
+		}
+
+		public void RecoverHealth(float recoverAmount) {
+			this.CurrentHealth += recoverAmount;
 		}
 
 	}
