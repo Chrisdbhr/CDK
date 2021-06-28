@@ -3,7 +3,7 @@ using CDK.Data;
 using UnityEngine;
 
 namespace CDK {
-	public class CDamageDealerMonoBehaviour : MonoBehaviour, ICDamageDealerItem {
+	public class CDamageDealerTrigger : MonoBehaviour, ICDamageDealerItem {
 
 
 		#region <<---------- Initializers ---------->>
@@ -14,7 +14,6 @@ namespace CDK {
 		}
 		
 		#endregion <<---------- Initializers ---------->>
-		
 		
 		
 
@@ -28,8 +27,14 @@ namespace CDK {
 		}
 		[SerializeField] private CHitInfoData _hitInfo;
 
-		[SerializeField] private bool _destroyOnCollide;
-		
+		[SerializeField] private bool _isTrigger;
+
+		private enum DestroyType {
+			dontDestroy,
+			onAnyCollisionOrTrigger,
+			onlyIfDidDamage
+		}
+		[SerializeField] private DestroyType _destroyType = DestroyType.onAnyCollisionOrTrigger;
 
 		#endregion <<---------- Properties and Fields ---------->>
 
@@ -38,32 +43,32 @@ namespace CDK {
 
 		#region <<---------- MonoBehaviour ---------->>
 		
-		private void Awake() {
-			
-		}
-
 		private void OnTriggerEnter(Collider other) {
+			if (!this._isTrigger) return;
 			var rootTransform = other.transform.root;
 			if (rootTransform == this._hitInfo.AttackerTransform) return;
-			this.DoDamage(rootTransform);
+			this.DoDamageOnContact(rootTransform);
 		}
 
 		private void OnCollisionEnter(Collision other) {
+			if (this._isTrigger) return;
 			var rootTransform = other.transform.root;
 			if (rootTransform == this._hitInfo.AttackerTransform) return;
-			this.DoDamage(rootTransform);
+			this.DoDamageOnContact(rootTransform);
 		}
 
 		private void OnTriggerEnter2D(Collider2D other) {
+			if (!this._isTrigger) return;
 			var rootTransform = other.transform.root;
 			if (rootTransform == this._hitInfo.AttackerTransform) return;
-			this.DoDamage(rootTransform);
+			this.DoDamageOnContact(rootTransform);
 		}
 
 		private void OnCollisionEnter2D(Collision2D other) {
+			if (this._isTrigger) return;
 			var rootTransform = other.transform.root;
 			if (rootTransform == this._hitInfo.AttackerTransform) return;
-			this.DoDamage(rootTransform);
+			this.DoDamageOnContact(rootTransform);
 		}
 		
 		#endregion <<---------- MonoBehaviour ---------->>
@@ -71,11 +76,16 @@ namespace CDK {
 		
 		
 		
-		private void DoDamage(Component go) {
+		private void DoDamageOnContact(Component go) {
 			var damageable = go.GetComponent<ICDamageable>();
-			if (damageable == null) return;
-			damageable.TakeDamage(this._hitInfo);
-			if (this._destroyOnCollide) {
+			if (damageable != null) {
+				damageable.TakeDamage(this._hitInfo);
+				if (this._destroyType == DestroyType.onlyIfDidDamage) {
+					this.gameObject.CDestroy();
+					return;
+				}
+			}
+			if (this._destroyType == DestroyType.onAnyCollisionOrTrigger) {
 				this.gameObject.CDestroy();
 			}
 		}

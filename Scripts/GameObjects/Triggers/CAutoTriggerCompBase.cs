@@ -5,19 +5,19 @@ namespace CDK {
 
 		[SerializeField] private CMonobehaviourExecutionTime executionTime;
 
-		private void Awake() {
+		protected virtual void Awake() {
 			if (!this.enabled) return;
 			if (this.executionTime != CMonobehaviourExecutionTime.Awake) return;
 			this.TriggerEvent();
 		}
 
-		private void Start() {
+		protected virtual  void Start() {
 			if (!this.enabled) return;
 			if (this.executionTime != CMonobehaviourExecutionTime.Start) return;
 			this.TriggerEvent();
 		}
 
-		private void OnEnable() {
+		protected virtual  void OnEnable() {
 			if (!this.enabled) return;
 			if (this.executionTime != CMonobehaviourExecutionTime.OnEnable) return;
 			this.TriggerEvent();
