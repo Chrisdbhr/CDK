@@ -4,7 +4,6 @@ using DG.Tweening;
 using FMODUnity;
 using UniRx;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 namespace CDK {
