@@ -96,7 +96,7 @@ namespace CDK {
 		
 		private void ProcessLookingInteractable() {
 			var originPos = this._rayOriginTransform.position;
-			var direction = this._rayOriginTransform.forward.normalized;
+			var direction = this._rayOriginTransform.forward;
 
 			var collided = Physics.SphereCast(
 				originPos,
