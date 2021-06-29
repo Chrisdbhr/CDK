@@ -16,9 +16,18 @@ namespace CDK {
 		
 		#if UNITY_EDITOR
 		private void OnDrawGizmos() {
-			Handles.color = Color.white;
-			var pos = this.transform.position;
-			//DebugExtension.DrawArrow(pos, this.transform.forward, Color.white);
+			var color = Color.cyan;
+			var tranf = this.transform;
+			var fwd = tranf.forward;
+			var pos = tranf.position;
+			
+			// gizmo
+			Gizmos.color = color;
+			Gizmos.DrawWireSphere(pos, 0.5f);
+			Gizmos.DrawLine(pos, pos + fwd);
+			
+			// text
+			Handles.color = color;
 			Handles.Label(pos, $"Entry point {this._number}");
 		}
 		#endif
