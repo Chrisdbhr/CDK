@@ -51,6 +51,13 @@ namespace CDK {
 		#endregion <<---------- Time ---------->>
 
 		#region <<---------- Movement Properties ---------->>
+		[Obsolete("Its not recomended to access transform directly.")]
+		public new Transform transform {
+			get {
+				return base.transform;
+			}
+		}
+		
 		public Vector3 Position { get; protected set; }
 		protected Vector3 _previousPosition { get; private set; }
 
@@ -252,7 +259,7 @@ namespace CDK {
 		protected virtual void Start() { }
 
 		protected virtual void Update() {
-			this.Position = this.transform.position;
+			this.Position = base.transform.position;
 
 			this.CheckIfIsGrounded();
 
@@ -262,7 +269,7 @@ namespace CDK {
 			this._myVelocityXZ.z = this._myVelocity.z;
 
 			this.ProcessAerialMovement();
-			this.ProcessSlide();
+			//this.ProcessSlide(); // disabled until bugs are fixed.
 			this.ProcessMovement();
 			this.ProcessRotation();
 			this.ProcessAim();
@@ -421,10 +428,17 @@ namespace CDK {
 
 			var deltaTime = CTime.DeltaTimeScaled * this.TimelineTimescale;
 			
+			// horizontal movement
 			var targetMotion = this.ProcessHorizontalMovement(deltaTime);
+			
+			// vertical movement
 			targetMotion.y = this.ProcessVerticalMovement(deltaTime);
 			
 			if (targetMotion == Vector3.zero) return;
+			
+			if(targetMotion.y > 0f) {
+				
+			}
 			
 			this._charController.Move(targetMotion);
 		}
@@ -501,9 +515,23 @@ namespace CDK {
 			return (targetMotion * (targetMovSpeed * deltaTime)) + rootMotionDeltaPos;
 		}
 
+
+		[Range(-15f,15f)]public float VAI_velocityY;
+		[Range(-15f,15f)]public float VAI_rootMotionY;
+		[Range(-10f,-9f)]public float VAI_verticalDeltaBefore;
+		[Range(-15f,15f)]public float VAI_verticalDeltaAFterTime;
 		private float ProcessVerticalMovement(float deltaTime) {
+			VAI_velocityY = this._myVelocity.y;
+			VAI_rootMotionY = this._rootMotionDeltaPosition.y;
+			
 			var verticalDelta = this._myVelocity.y + this._rootMotionDeltaPosition.y + Physics.gravity.y;
+
+			VAI_verticalDeltaBefore = verticalDelta;
+			
 			verticalDelta *= deltaTime;
+
+			VAI_verticalDeltaAFterTime = verticalDelta;
+			
 			return verticalDelta;
 		}
 
@@ -532,7 +560,7 @@ namespace CDK {
 		protected void ProcessSlide() {
 			if (Time.realtimeSinceStartup < this._timeThatCanToggleSlide + DELAY_TO_TOGGLE_SLIDE) return;
 
-			var angleFromGround = Vector3.SignedAngle(Vector3.up, this._groundNormal, this.transform.right);
+			var angleFromGround = Vector3.SignedAngle(Vector3.up, this._groundNormal, base.transform.right);
 
 			this.CanSlide = this._enableSlideRx.Value
 					&& this._isTouchingTheGroundRx.Value
@@ -718,7 +746,25 @@ namespace CDK {
 		}
 
 		#endregion <<---------- Voice ---------->>
+
+
+
+
+		#region <<---------- Transform ---------->>
+
+		public void TeleportToLocation(Vector3 targetPos, Quaternion targetRotation = default) {
+			base.transform.position = targetPos;
+			if (targetRotation != default) {
+				base.transform.rotation = targetRotation;
+			}
+			this._myVelocity = Vector3.zero;
+			this._myVelocityXZ = Vector3.zero;
+			this._previousPosition = targetPos;
+			this.Position = targetPos;
+			Physics.SyncTransforms();
+		}
 		
+		#endregion <<---------- Transform ---------->>
 		
 		
 
