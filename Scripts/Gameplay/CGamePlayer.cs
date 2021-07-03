@@ -116,25 +116,30 @@ namespace CDK {
 				return null;
 			}
 
-			var entryPoints = GameObject.FindObjectsOfType<CSceneEntryPoint>();
-			if (entryPoints.Length > 0) {
-				var entryPoint = entryPoints.OrderBy(x=>x.Number).FirstOrDefault();
-				if (entryPoint != null) {
-					Debug.Log($"Setting '{createdGo.name}' to entryPoint number'{entryPoint.Number}'", entryPoint.gameObject);
-					createdGo.transform.position = entryPoint.transform.position;
-				}
-			}
-			createdGo.SetActive(false);
-			createdGo.name = $"[Character] {createdGo.name}";
 			var character = createdGo.GetComponent<CCharacterBase>();
 
 			if (character == null) {
 				Debug.LogError($"{charToCreate} gameobject doesnt have a {nameof(CCharacterBase)} component on it! could not create player!");
 				return null;
 			}
-				
+			
+			var entryPoints = GameObject.FindObjectsOfType<CSceneEntryPoint>();
+			if (entryPoints.Length > 0) {
+				var entryPoint = entryPoints.OrderBy(x=>x.Number).FirstOrDefault();
+				if (entryPoint != null) {
+					Debug.Log($"Setting '{createdGo.name}' to entryPoint number'{entryPoint.Number}'", entryPoint.gameObject);
+					character.TeleportToLocation(entryPoint.transform.position, entryPoint.transform.rotation);
+				}
+			}
+			createdGo.SetActive(false);
+			createdGo.name = $"[Character] {createdGo.name}";
+			
 			await this.AddControllingCharacter(character);
-				
+			
+			createdGo.SetActive(true);
+		
+			await this.CheckIfNeedToCreateCamera();
+
 			Debug.Log($"Created player {this.PlayerNumber} controlling character '{createdGo.name}'.", createdGo);
 
 			return character;
@@ -154,10 +159,6 @@ namespace CDK {
 			}
 
 			this._characters.Add(character);
-			
-			await this.CheckIfNeedToCreateCamera();
-			
-			character.gameObject.SetActive(true);
 		}
 
 		public async Task RemoveAllControllingCharacters() {
