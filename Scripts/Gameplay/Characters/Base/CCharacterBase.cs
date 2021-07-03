@@ -61,17 +61,17 @@ namespace CDK {
 		public Vector3 Position { get; protected set; }
 		protected Vector3 _previousPosition { get; private set; }
 
-		[NonSerialized] protected Vector3 _myVelocity;
+		public Vector3 MyVelocity { get; private set; }
+		public float MyVelocityMagnitude { get; private set; }
 
-		protected Vector3 myVelocityXZ {
+		public Vector3 MyVelocityXZ {
 			get { return this._myVelocityXZ; }
-			set {
+			private set {
 				if (this._myVelocityXZ == value) return;
 				this._myVelocityXZ = value;
 				this.Anim.CSetFloatWithLerp(this.ANIM_CHAR_MOV_SPEED_XZ, this._myVelocityXZ.magnitude, ANIMATION_BLENDTREE_LERP * CTime.DeltaTimeScaled * this.TimelineTimescale);
 			}
 		}
-
 		[NonSerialized] private Vector3 _myVelocityXZ;
 
 		[NonSerialized] public Vector3 _movementMomentumXZ = Vector3.zero;
@@ -168,6 +168,7 @@ namespace CDK {
 		#endregion <<---------- Sliding ---------->>
 
 		#region <<---------- Aerial Movement ---------->>
+		[SerializeField] private float _gravityMultiplier = 1f;
 		[SerializeField] [Range(0f,1f)] private float _aerialMomentumMaintainPercentage = 0.90f;
 		[NonSerialized] protected Vector3 _groundNormal;
 		[NonSerialized] private float _lastPositionYSpeedWasPositive;
@@ -203,7 +204,8 @@ namespace CDK {
 
 		#region <<---------- Animation Parameters ---------->>
 		protected readonly int ANIM_CHAR_MOV_SPEED_XZ = Animator.StringToHash("speedXZ");
-		protected readonly int ANIM_TIME_FALLING = Animator.StringToHash("timeFalling");
+		protected readonly int ANIM_DISTANCE_ON_FREE_FALL = Animator.StringToHash("distanceOnFreeFall");
+		protected readonly int ANIM_FALL_LANDING_ANIM_INDEX = Animator.StringToHash("fallLandingAnim");
 
 		// actions
 		private readonly int ANIM_CHAR_STUMBLE = Animator.StringToHash("stumble");
@@ -263,10 +265,9 @@ namespace CDK {
 
 			this.CheckIfIsGrounded();
 
-			this._myVelocity = this.Position - this._previousPosition;
-			this._myVelocityXZ.x = this._myVelocity.x;
-			this._myVelocityXZ.y = 0f;
-			this._myVelocityXZ.z = this._myVelocity.z;
+			this.MyVelocity = this.Position - this._previousPosition;
+			this.MyVelocityMagnitude = this.MyVelocity.magnitude;
+			this.MyVelocityXZ = new Vector3(this.MyVelocity.x,0f, this.MyVelocity.z); // new to trigger event
 
 			this.ProcessAerialMovement();
 			//this.ProcessSlide(); // disabled until bugs are fixed.
@@ -364,7 +365,7 @@ namespace CDK {
 			#region <<---------- Fall ---------->>
 
 			Observable.EveryUpdate().Subscribe(_ => {
-				if (this._isTouchingTheGroundRx.Value || this._myVelocity.y >= 0f) {
+				if (this._isTouchingTheGroundRx.Value || this.MyVelocity.y >= 0f) {
 					// not falling
 					this._lastPositionYSpeedWasPositive = this.Position.y;
 					this._isOnFreeFall.Value = false;
@@ -377,6 +378,15 @@ namespace CDK {
 			}).AddTo(this._disposables);
 
 			this._isTouchingTheGroundRx.TakeUntilDisable(this).DistinctUntilChanged().Subscribe(isTouchingTheGround => {
+				if (isTouchingTheGround && this.Anim != null) {
+					int fallAnimIndex = 0;
+					if (this._distanceOnFreeFall.Value >= 6f) {
+						fallAnimIndex = 2;
+					}else if (this._distanceOnFreeFall.Value >= 2f) {
+						fallAnimIndex = 1;
+					}
+					this.Anim.SetInteger(ANIM_FALL_LANDING_ANIM_INDEX, fallAnimIndex);
+				}
 				this._movementMomentumXZ = isTouchingTheGround ? Vector3.zero : this._myVelocityXZ;
 			});
 			
@@ -386,7 +396,7 @@ namespace CDK {
 			});
 
 			this._distanceOnFreeFall.TakeUntilDisable(this).DistinctUntilChanged().Subscribe(timeFalling => {
-				this.Anim.CSetFloatSafe(this.ANIM_TIME_FALLING, timeFalling);
+				this.Anim.CSetFloatSafe(this.ANIM_DISTANCE_ON_FREE_FALL, timeFalling);
 			});
 
 			#endregion <<---------- Fall ---------->>
@@ -426,6 +436,8 @@ namespace CDK {
 		protected void ProcessMovement() {
 			if (!this._charController.enabled) return;
 
+			if (CTime.TimeScale == 0f) return;
+			
 			var deltaTime = CTime.DeltaTimeScaled * this.TimelineTimescale;
 			
 			// horizontal movement
@@ -435,10 +447,6 @@ namespace CDK {
 			targetMotion.y = this.ProcessVerticalMovement(deltaTime);
 			
 			if (targetMotion == Vector3.zero) return;
-			
-			if(targetMotion.y > 0f) {
-				
-			}
 			
 			this._charController.Move(targetMotion);
 		}
@@ -502,7 +510,7 @@ namespace CDK {
 			// momentum
 			if (!this._isTouchingTheGroundRx.Value && (this._movementMomentumXZ.x.CImprecise() != 0.0f || this._movementMomentumXZ.z.CImprecise() != 0.0f)) {
 				targetMotion += this._movementMomentumXZ;
-				Debug.Log($"Applying {this._movementMomentumXZ}, targetMotion now is {targetMotion}");
+				if(this._debug) Debug.Log($"Applying {this._movementMomentumXZ}, targetMotion now is {targetMotion}");
 				var momentumLoseValue = this._movementMomentumXZ - (this._movementMomentumXZ * (this._aerialMomentumMaintainPercentage));
 				this._movementMomentumXZ -= momentumLoseValue * deltaTime;
 			}
@@ -518,19 +526,12 @@ namespace CDK {
 
 		[Range(-15f,15f)]public float VAI_velocityY;
 		[Range(-15f,15f)]public float VAI_rootMotionY;
-		[Range(-10f,-9f)]public float VAI_verticalDeltaBefore;
-		[Range(-15f,15f)]public float VAI_verticalDeltaAFterTime;
 		private float ProcessVerticalMovement(float deltaTime) {
-			VAI_velocityY = this._myVelocity.y;
+			VAI_velocityY = this.MyVelocity.y;
 			VAI_rootMotionY = this._rootMotionDeltaPosition.y;
-			
-			var verticalDelta = this._myVelocity.y + this._rootMotionDeltaPosition.y + Physics.gravity.y;
 
-			VAI_verticalDeltaBefore = verticalDelta;
-			
-			verticalDelta *= deltaTime;
-
-			VAI_verticalDeltaAFterTime = verticalDelta;
+			var verticalDelta = this.MyVelocity.y + this._rootMotionDeltaPosition.y;
+			verticalDelta += (Physics.gravity.y * this._gravityMultiplier) * deltaTime;
 			
 			return verticalDelta;
 		}
@@ -605,7 +606,7 @@ namespace CDK {
 			}
 			else {
 				if (this.CurrentMovState == CMovState.Sliding) {
-					this.RotateTowardsDirection(this._groundNormal + this.myVelocityXZ);
+					this.RotateTowardsDirection(this._groundNormal + this.MyVelocityXZ);
 				}
 				else {
 					if(!CBlockingEventsManager.IsDoingBlockingAction.IsRetained()) this.RotateTowardsDirection(this.InputMovementDirRelativeToCam);
@@ -757,8 +758,8 @@ namespace CDK {
 			if (targetRotation != default) {
 				base.transform.rotation = targetRotation;
 			}
-			this._myVelocity = Vector3.zero;
-			this._myVelocityXZ = Vector3.zero;
+			this.MyVelocity = Vector3.zero;
+			this.MyVelocityXZ = Vector3.zero;
 			this._previousPosition = targetPos;
 			this.Position = targetPos;
 			Physics.SyncTransforms();
