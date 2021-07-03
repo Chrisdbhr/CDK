@@ -11,8 +11,12 @@ namespace CDK.Json {
 			MissingMemberHandling = MissingMemberHandling.Ignore,
 			Formatting = Formatting.Indented,
 			Converters = new JsonConverter[] {
+				new StringEnumConverter(),
+				new VersionConverter(),
+				new Vector2Converter(),
 				new Vector3Converter(),
-				new StringEnumConverter()
+				new Vector2IntConverter(),
+				new Vector3IntConverter()
 			},
 			ContractResolver = new UnityTypeContractResolver(),
 		};
