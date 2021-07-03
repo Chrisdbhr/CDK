@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using UniRx;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using Object = UnityEngine.Object;
 
 namespace CDK {
 	public class CSceneManager {
@@ -32,6 +31,8 @@ namespace CDK {
 		#region <<---------- Properties and Fields ---------->>
 
 		private readonly CFader _fader;
+		private const float MINIMUM_LOADING_TIME = 1f;
+		
 		
 		#endregion <<---------- Properties and Fields ---------->>
 
@@ -67,6 +68,8 @@ namespace CDK {
 			this._fader.FadeToBlack(fadeOutTime, false);
 			await Observable.Timer(TimeSpan.FromSeconds(fadeOutTime));
 
+			var minimumTimeToReturnFromLoading = Time.time + MINIMUM_LOADING_TIME;
+
 			Debug.Log($"TODO implement loading screen");
 			
 			// move objects to temporary scene
@@ -87,7 +90,7 @@ namespace CDK {
 			// background load scene async
 			var loadAsyncOp = SceneManager.LoadSceneAsync(sceneToLoadName, LoadSceneMode.Additive);
 			loadAsyncOp.allowSceneActivation = false;
-
+			
 			// Activate loaded scenes
 			loadAsyncOp.allowSceneActivation = true;
 			do {
@@ -109,17 +112,20 @@ namespace CDK {
 			}
 
 			SceneManager.UnloadSceneAsync(tempHolderScene);
-
+			 
 			LightProbes.TetrahedralizeAsync();
 			
+			Physics.SyncTransforms();
+
 			Debug.Log($"TODO remove loading screen");
-			
+
 			CSave.get.CurrentMap = sceneToTeleport.name;
+			
+			await this.WaitUntilMinimumTimeToReturnFromLoading(minimumTimeToReturnFromLoading);
 
 			// fade in
 			float fadeInTime = 0.5f;
 			this._fader.FadeToTransparent(fadeInTime, false);
-			await Observable.NextFrame();
 
 			CBlockingEventsManager.IsPlayingCutscene = false;
 		}
@@ -130,7 +136,7 @@ namespace CDK {
 				return;
 			}
 
-			Transform targetTransform = null;
+			Transform targetEntryPointTransform = null;
 			
 			var sceneEntryPoints = GameObject.FindObjectsOfType<CSceneEntryPoint>();
 
@@ -140,23 +146,36 @@ namespace CDK {
 			else {
 				var selectedEntryPoint = sceneEntryPoints.FirstOrDefault(ep => ep.Number == entryPointNumber);
 				if (selectedEntryPoint != null) {
-					targetTransform = selectedEntryPoint.transform;
+					targetEntryPointTransform = selectedEntryPoint.transform;
 				}
 			}
 
 			var offset = new Vector3(0f, 0.001f, 0f);
-			if (targetTransform == null) {
+			if (targetEntryPointTransform == null) {
 				transformToMove.position = Vector3.zero + offset;
 				transformToMove.rotation = Quaternion.identity;
 			}
 			else {
-				transformToMove.position = targetTransform.position + offset;
-				transformToMove.rotation = targetTransform.rotation;
+				var character = transformToMove.GetComponent<CCharacterBase>();
+				if (character != null) {
+					character.TeleportToLocation(targetEntryPointTransform.position, targetEntryPointTransform.rotation);					
+				}
+				else {
+					transformToMove.position = targetEntryPointTransform.position + offset;
+					transformToMove.rotation = targetEntryPointTransform.rotation;
+				}
 			}
 			
-			Debug.Log($"Moving {transformToMove.name} to {nameof(entryPointNumber)}:'{entryPointNumber}' at position {transformToMove.position}", targetTransform);
+			Debug.Log($"Moving {transformToMove.name} to {nameof(entryPointNumber)}:'{entryPointNumber}' at position {transformToMove.position}", targetEntryPointTransform);
 		}
 
+		private async Task WaitUntilMinimumTimeToReturnFromLoading(float timeToReturnFromLoading) {
+			var currentTime = Time.time;
+			if (currentTime >= timeToReturnFromLoading) return;
+			var secondsToWait = timeToReturnFromLoading - currentTime;
+			Debug.Log($"Will wait {secondsToWait} more seconds to scene load.");
+			await Observable.Timer(TimeSpan.FromSeconds(secondsToWait));
+		}
 		
 		
 		
