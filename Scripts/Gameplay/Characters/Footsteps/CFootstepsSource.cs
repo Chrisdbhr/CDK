@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace CDK {
 	public class CFootstepsSource : MonoBehaviour {
@@ -27,16 +29,19 @@ namespace CDK {
 		[NonSerialized] private float _feetSizeForSphereCast = 0.1f;
 		[NonSerialized] private Vector3 _lastValidHitPoint;
 
-		public event Action<CFootstepInfo> OnFootstep {
+		[NonSerialized] private Dictionary<ParticleSystem, ParticleSystem> _spawnedParticleInstances = new Dictionary<ParticleSystem, ParticleSystem>();
+		
+		
+		public event Action<CFootstepInfo, FootstepFeet> OnFootstep {
 			add {
-				this._onFootstep += value;
 				this._onFootstep -= value;
+				this._onFootstep += value;
 			}
 			remove {
 				this._onFootstep -= value;
 			}
 		}
-		private Action<CFootstepInfo> _onFootstep;
+		private Action<CFootstepInfo, FootstepFeet> _onFootstep;
 
 		#endregion <<---------- Properties and Fields ---------->>
 
@@ -46,6 +51,15 @@ namespace CDK {
 		#region <<---------- MonoBehaviour ---------->>
 		private void Awake() {
 			this._database = CDependencyResolver.Get<CFootstepDatabase>();
+		}
+
+		private void OnEnable() {
+			this.DestroyAllParticleInstances();
+			SceneManager.activeSceneChanged += this.OnActiveSceneChanged;
+		}
+		
+		private void OnDisable() {
+			this.DestroyAllParticleInstances();
 		}
 
 		#if UNITY_EDITOR
@@ -97,7 +111,7 @@ namespace CDK {
 			// check for smashable object
 			var smashableObj = raycastHit.collider.GetComponent<CICanBeSmashedWhenStepping>();
 			if (smashableObj != null) {
-				smashableObj.Smash(this.transform.root);
+				smashableObj.Smash(this.transform.root, feet);
 				return;
 			}
 
@@ -108,12 +122,12 @@ namespace CDK {
 				if (footstepInfo == null) return;
 			}
 
-			this._onFootstep?.Invoke(footstepInfo);
+			this._onFootstep?.Invoke(footstepInfo, feet);
 
 			// new footstep particle effect.
 			var particlePrefab = footstepInfo.GetRandomParticleSystem();
 			if (particlePrefab != null) {
-				var createdPartSystem = Instantiate(particlePrefab);
+				var createdPartSystem = this.GetOrCreateParticleInstance(particlePrefab);
 				if (createdPartSystem != null) {
 					createdPartSystem.transform.position = raycastHit.point;
 					
@@ -121,7 +135,8 @@ namespace CDK {
 					var euler = rot.eulerAngles;
 					euler.y = this.transform.rotation.eulerAngles.y;
 					createdPartSystem.transform.rotation = Quaternion.Euler(euler);
-					Destroy(createdPartSystem.gameObject, particlePrefab.main.duration);
+					createdPartSystem.Play(true);
+					//Destroy(createdPartSystem.gameObject, particlePrefab.main.duration);
 				}
 			}
 
@@ -192,6 +207,46 @@ namespace CDK {
 		}
 		
 		#endregion <<---------- General ---------->>
+
+
+		
+
+		#region <<---------- Pooling ---------->>
+
+		private ParticleSystem GetOrCreateParticleInstance(ParticleSystem key) {
+			if (key == null) return null;
+			if (this._spawnedParticleInstances.TryGetValue(key, out var particleSystem) && particleSystem != null) {
+				return particleSystem;
+			}
+			var spawnedParticle = Instantiate(key);
+			if (this._spawnedParticleInstances.ContainsKey(key)) {
+				this._spawnedParticleInstances[key] = spawnedParticle;
+			}
+			else {
+				this._spawnedParticleInstances.Add(key, spawnedParticle);
+			}
+			return spawnedParticle;
+		}
+		
+		private void DestroyAllParticleInstances() {
+			foreach (var spawnedParticleInstance in this._spawnedParticleInstances.Values) {
+				if (spawnedParticleInstance == null) continue;
+				Destroy(spawnedParticleInstance.gameObject);
+			}
+		}
+		
+		#endregion <<---------- Pooling ---------->>
+		
+		
+
+
+		#region <<---------- Callbacks ---------->>
+		
+		private void OnActiveSceneChanged(Scene oldScene, Scene newScene) {
+			this.DestroyAllParticleInstances();
+		}
+
+		#endregion <<---------- Callbacks ---------->>
 		
 	}
 }
