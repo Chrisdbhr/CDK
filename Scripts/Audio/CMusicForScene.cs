@@ -2,12 +2,15 @@ using System;
 using FMODUnity;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Debug = UnityEngine.Debug;
 using STOP_MODE = FMOD.Studio.STOP_MODE;
 
 namespace CDK.Audio {
 	public class CMusicForScene : MonoBehaviour {
 	
+		[SerializeField] private bool _is3d;
 		[SerializeField] [EventRef] private string _music;
+		
 		[NonSerialized] private Scene _sceneToCheck;
 		[NonSerialized] private FMOD.Studio.EventInstance _musicState;
 
@@ -23,6 +26,11 @@ namespace CDK.Audio {
 				return;
 			}
 			this._musicState = RuntimeManager.CreateInstance(this._music);
+
+			if (this._is3d) {
+				this._musicState.set3DAttributes(this.transform.position.To3DAttributes());
+			}
+			
 			if(this._musicState.isValid()) this._musicState.start();
 		}
 		
