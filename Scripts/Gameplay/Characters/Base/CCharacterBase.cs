@@ -530,7 +530,8 @@ namespace CDK {
 			VAI_velocityY = this.MyVelocity.y;
 			VAI_rootMotionY = this._rootMotionDeltaPosition.y;
 
-			var verticalDelta = this.MyVelocity.y + this._rootMotionDeltaPosition.y;
+			var verticalDelta = this._rootMotionDeltaPosition.y;
+			verticalDelta += this.MyVelocity.y > 0f ? 0f : this.MyVelocity.y; // consider only fall velocity
 			verticalDelta += (Physics.gravity.y * this._gravityMultiplier) * deltaTime;
 			
 			return verticalDelta;
