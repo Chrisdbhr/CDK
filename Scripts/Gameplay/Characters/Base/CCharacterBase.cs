@@ -41,12 +41,18 @@ namespace CDK {
 
 		#region <<---------- Time ---------->>
 
-		protected float TimelineTimescale => (this._timeline != null ? this._timeline.timeScale : 1f);
-		
+		protected float TimelineTimescale {
+			get {
+#if LUDIQ_CHRONOS
+				return (this._timeline != null ? this._timeline.timeScale : 1f);
+#else
+				return 1f;
+#endif
+			}
+		}
+
 		#if LUDIQ_CHRONOS
 		[SerializeField] private Chronos.Timeline _timeline;
-		#else
-		private object _timeline = null;
 		#endif
 		
 		#endregion <<---------- Time ---------->>
