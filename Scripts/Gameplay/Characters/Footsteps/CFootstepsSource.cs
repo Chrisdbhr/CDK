@@ -136,7 +136,6 @@ namespace CDK {
 					euler.y = this.transform.rotation.eulerAngles.y;
 					createdPartSystem.transform.rotation = Quaternion.Euler(euler);
 					createdPartSystem.Play(true);
-					//Destroy(createdPartSystem.gameObject, particlePrefab.main.duration);
 				}
 			}
 
