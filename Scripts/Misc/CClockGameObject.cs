@@ -76,9 +76,9 @@ namespace CDK {
 			float rotationHours = ((360.0f / 12.0f) * this.hour) + ((360.0f / (60.0f * 12.0f)) * this.minutes);
 
 			//-- draw pointers
-			this.pointerSeconds.localEulerAngles = new Vector3(0.0f, 0.0f, rotationSeconds);
-			this.pointerMinutes.localEulerAngles = new Vector3(0.0f, 0.0f, rotationMinutes);
-			this.pointerHours.localEulerAngles = new Vector3(0.0f, 0.0f, rotationHours);
+			if(this.pointerSeconds) this.pointerSeconds.localEulerAngles = new Vector3(0.0f, 0.0f, rotationSeconds);
+			if(this.pointerMinutes) this.pointerMinutes.localEulerAngles = new Vector3(0.0f, 0.0f, rotationMinutes);
+			if(this.pointerHours) this.pointerHours.localEulerAngles = new Vector3(0.0f, 0.0f, rotationHours);
 		}
 		
 		#endregion <<---------- General ---------->>
