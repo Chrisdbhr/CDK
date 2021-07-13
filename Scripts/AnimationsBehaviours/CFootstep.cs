@@ -8,6 +8,9 @@ namespace CDK {
 		[NonSerialized] private float _nextFootstepTime;
 		[NonSerialized] private CFootstepsSource.FootstepFeet _lastFeet;
     
+		
+		
+		
 		// OnStateEnter is called when a transition starts and the state machine starts to evaluate this state
 		public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex) {
 			base.OnStateEnter(animator, stateInfo, layerIndex);
