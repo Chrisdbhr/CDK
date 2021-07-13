@@ -7,6 +7,7 @@ using Rewired;
 using UniRx;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
+
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -19,6 +20,7 @@ namespace CDK {
 		public CGamePlayer(int playerNumber) {
 
 			this._gameSettings = CDependencyResolver.Get<CGameSettings>();
+			this._blockingEventsManager = CDependencyResolver.Get<CBlockingEventsManager>();
 			
 			this._compositeDisposable?.Dispose();
 			this._compositeDisposable = new CompositeDisposable();
@@ -30,13 +32,13 @@ namespace CDK {
 			this.SignToInputEvents();
 
 			this.SetInputLayout(false);
-			CBlockingEventsManager.OnMenu += this.SetInputLayout;
-		
-			#if !UNITY_EDITOR
-			Application.focusChanged += async focused => {
-				if(!focused) await this.OpenMenu();
-			};
-			#endif
+			this._blockingEventsManager.OnMenu += this.SetInputLayout;
+
+			if (!Application.isEditor) {
+				Application.focusChanged += async focused => {
+					if(!focused) await this.OpenMenu();
+				};
+			}
 			
 			Debug.Log($"Instantiating a new game player number {playerNumber}");
 		}
@@ -56,7 +58,8 @@ namespace CDK {
 		private readonly List<CCharacterBase> _characters = new List<CCharacterBase>();
 
 		[NonSerialized] private readonly CompositeDisposable _compositeDisposable;
-		[NonSerialized] private CGameSettings _gameSettings;
+		[NonSerialized] private readonly CGameSettings _gameSettings;
+		[NonSerialized] private readonly CBlockingEventsManager _blockingEventsManager;
 		
 		
 		#endregion <<---------- Properties and Fields ---------->>
@@ -241,7 +244,7 @@ namespace CDK {
 
 			if (Time.timeScale <= 0) return;
 			
-			if (!CBlockingEventsManager.IsOnMenu) {
+			if (!this._blockingEventsManager.IsOnMenu) {
 				this.OpenMenu().CAwait();
 			}
 		}
@@ -290,12 +293,12 @@ namespace CDK {
 		#region <<---------- Pause Menu ---------->>
 		
 		private async Task OpenMenu() {
-			if (CBlockingEventsManager.IsOnMenu) return;
-			CBlockingEventsManager.IsOnMenu = true;
+			if (this._blockingEventsManager.IsOnMenu) return;
+			this._blockingEventsManager.IsOnMenu = true;
 			try {
 				await CUINavigation.get.OpenMenu(this._gameSettings.AssetRef_PauseMenu, null, null);
 			} catch (Exception e) {
-				CBlockingEventsManager.IsOnMenu = false;
+				this._blockingEventsManager.IsOnMenu = false;
 				Debug.LogError("Exception trying to OpenMenu on GamePlayer: " + e);
 			}
 		}
@@ -311,7 +314,7 @@ namespace CDK {
 			this._compositeDisposable?.Dispose();
 			
 			this.UnsignFromInputEvents();
-			CBlockingEventsManager.OnMenu -= this.SetInputLayout; 
+			this._blockingEventsManager.OnMenu -= this.SetInputLayout; 
 		}
 		
 		#endregion <<---------- Disposable ---------->>

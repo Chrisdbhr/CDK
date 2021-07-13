@@ -56,7 +56,7 @@ namespace CDK {
 			CDependencyResolver.Initialize();
 			
 			CDependencyResolver.Bind<CGameSettings>(() => Resources.Load<CGameSettings>("GameSettings"));
-			
+			CDependencyResolver.Bind<CBlockingEventsManager>(() => new CBlockingEventsManager());
 			CDependencyResolver.Bind<CFootstepDatabase>(() => Resources.Load<CFootstepDatabase>("FootstepsDatabase"));
 			
 			CDependencyResolver.Bind<CCursorManager>(() => new CCursorManager());

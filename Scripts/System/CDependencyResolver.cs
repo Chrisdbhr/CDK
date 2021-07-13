@@ -38,8 +38,10 @@ namespace CDK {
 			throw new NullReferenceException($"Could not find a instance for {typeof(T).FullName}");
 		}
 
-		public static void Bind<T>(Func<object> creationHandler) { // enum comportamento singleton
-			Binds.Add(typeof(T), creationHandler);
+		public static void Bind<T>(Func<object> creationHandler) { // TODO enum comportamento singleton
+			var typeofT = typeof(T);
+			Debug.Log($"Binding creation handler for '{typeofT.Name}'");
+			Binds.Add(typeofT, creationHandler);
 		}
 		
 		private static object CreateInstance<T>() {

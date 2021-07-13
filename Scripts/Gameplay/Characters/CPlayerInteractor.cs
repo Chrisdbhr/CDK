@@ -19,7 +19,8 @@ namespace CDK {
 		[NonSerialized] private Transform _transform;
 
 		[NonSerialized] private bool _jumpNextFrame;
-		
+		[NonSerialized] private CBlockingEventsManager _blockingEventsManager;
+
 		#endregion <<---------- Properties and Fields ---------->>
 
 
@@ -36,6 +37,7 @@ namespace CDK {
 
 		#region <<---------- MonoBehaviour ---------->>
 		private void Awake() {
+			this._blockingEventsManager = CDependencyResolver.Get<CBlockingEventsManager>();
 			this._transform = this.transform;
 			
 			this._characterBase = this.GetComponent<CCharacterBase>();
@@ -59,7 +61,7 @@ namespace CDK {
 		
 		private void Update() {
 
-			if (CBlockingEventsManager.IsAnyBlockingEventHappening) {
+			if (this._blockingEventsManager.IsAnyBlockingEventHappening) {
 				this._jumpNextFrame = true;
 				return;
 			}
@@ -117,7 +119,7 @@ namespace CDK {
 		
 		private void TryToInteract() {
 			if (!this._currentInteractable.Value) return;
-			if (CBlockingEventsManager.IsAnyBlockingEventHappening) return;
+			if (this._blockingEventsManager.IsAnyBlockingEventHappening) return;
 			this._currentInteractable.Value.OnInteract(this._characterBase.transform);
 		}
 		

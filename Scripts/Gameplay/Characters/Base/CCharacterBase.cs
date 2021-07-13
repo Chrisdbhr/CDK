@@ -27,6 +27,7 @@ namespace CDK {
 		[SerializeField] protected Animator Anim;
 
 		[NonSerialized] protected CharacterController _charController;
+		[NonSerialized] protected CBlockingEventsManager _blockingEventsManager;
 		[NonSerialized] private float _charInitialHeight;
 
 		#endregion <<---------- References ---------->>
@@ -247,6 +248,7 @@ namespace CDK {
 		protected virtual void Awake() {
 			this._charController = this.GetComponent<CharacterController>();
 			this._charInitialHeight = this._charController.height;
+			this._blockingEventsManager = CDependencyResolver.Get<CBlockingEventsManager>();
 
 			if (this.Anim && !this.Anim.applyRootMotion) {
 				Debug.LogWarning($"{this.name} had an Animator with Root motion disabled, it will be enable because Characters use root motion.", this);
@@ -403,7 +405,7 @@ namespace CDK {
 
 
 			// events
-			CBlockingEventsManager.OnDoingBlockingAction += this.DoingBlockingAction;
+			this._blockingEventsManager.OnDoingBlockingAction += this.DoingBlockingAction;
 			SceneManager.activeSceneChanged += this.OnActiveSceneChanged;
 
 		}
@@ -412,7 +414,7 @@ namespace CDK {
 			this._disposables?.Dispose();
 			this._disposables = null;
 
-			CBlockingEventsManager.OnDoingBlockingAction -= this.DoingBlockingAction;
+			this._blockingEventsManager.OnDoingBlockingAction -= this.DoingBlockingAction;
 			SceneManager.activeSceneChanged -= this.OnActiveSceneChanged;
 		}
 
@@ -457,7 +459,7 @@ namespace CDK {
 
 			
 			// manual movement
-			if (this.CanMoveRx.Value && this.CurrentMovState != CMovState.Sliding && !CBlockingEventsManager.IsDoingBlockingAction.IsRetained()) {
+			if (this.CanMoveRx.Value && this.CurrentMovState != CMovState.Sliding && !this._blockingEventsManager.IsDoingBlockingAction.IsRetained()) {
 				// input movement
 				if (targetMotion != Vector3.zero) {
 					if (this.InputRun && this.CanRun && !this._isAimingRx.Value) {
@@ -610,7 +612,7 @@ namespace CDK {
 					this.RotateTowardsDirection(this._groundNormal + this.MyVelocityXZ);
 				}
 				else {
-					if(!CBlockingEventsManager.IsDoingBlockingAction.IsRetained()) this.RotateTowardsDirection(this.InputMovementDirRelativeToCam);
+					if(!this._blockingEventsManager.IsDoingBlockingAction.IsRetained()) this.RotateTowardsDirection(this.InputMovementDirRelativeToCam);
 				}
 			}
 		}

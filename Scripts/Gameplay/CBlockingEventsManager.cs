@@ -1,46 +1,40 @@
 using System;
+using System.Collections.Generic;
 using UniRx;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace CDK {
 	public class CBlockingEventsManager {
 		
 		#region <<---------- Properties ---------->>
-		
-		private static CBlockingEventsManager Instance {
-			get { return _instance ?? new CBlockingEventsManager(); }
-		}
-		private static CBlockingEventsManager _instance;
-		
-		
-		public static bool IsAnyBlockingEventHappening {
-			get { return Instance._isAnyBlockingEventHappening; }
+
+		public bool IsAnyBlockingEventHappening {
+			get { return this._isAnyBlockingEventHappening; }
 		}
 		private bool _isAnyBlockingEventHappening;
 
 		
-		public static bool IsPlayingCutscene {
-			get { return Instance._isPlayingCutsceneRx.Value; }
-			set { Instance._isPlayingCutsceneRx.Value = value; }
+		public bool IsPlayingCutscene {
+			get { return this._isPlayingCutsceneRx.Value; }
+			set { this._isPlayingCutsceneRx.Value = value; }
 		}
 		private BoolReactiveProperty _isPlayingCutsceneRx;
 
 
-		public static bool IsOnMenu {
-			get { return Instance._isOnMenuRx.Value; }
-			set { Instance._isOnMenuRx.Value = value; }
+		public bool IsOnMenu {
+			get { return this._isOnMenuRx.Value; }
+			set { this._isOnMenuRx.Value = value; }
 		}
 		private BoolReactiveProperty _isOnMenuRx;
 
-		public static CRetainable IsDoingBlockingAction {
-			get { return Instance._isDoingBlockingAction; }
-			set { Instance._isDoingBlockingAction = value; }
+		public CRetainable IsDoingBlockingAction {
+			get { return this._isDoingBlockingAction; }
+			set { this._isDoingBlockingAction = value; }
 		}
 		private CRetainable _isDoingBlockingAction;
 
-		
-		private bool _applicationIsQuitting;
-
+		private HashSet<UnityEngine.Object> RetainedObjects;
 		
 		#endregion <<---------- Properties ---------->>
 
@@ -49,48 +43,46 @@ namespace CDK {
 
 		#region <<---------- Events ---------->>
 		
-		public static event Action<bool> OnPlayCutscene {
+		public event Action<bool> OnPlayCutscene {
 			add {
-				Instance._onPlayCutscene -= value;
-				Instance._onPlayCutscene += value;
+				this._onPlayCutscene -= value;
+				this._onPlayCutscene += value;
 			}
 			remove {
-				Instance._onPlayCutscene -= value;
+				this._onPlayCutscene -= value;
 			}
 		}
 		private event Action<bool> _onPlayCutscene;
 		
-		public static event Action<bool> OnMenu {
+		public event Action<bool> OnMenu {
 			add {
-				Instance._onMenu -= value;
-				Instance._onMenu += value;
+				this._onMenu -= value;
+				this._onMenu += value;
 			}
 			remove {
-				Instance._onMenu -= value;
+				this._onMenu -= value;
 			}
 		}
 		private event Action<bool> _onMenu;
 		
-		public static event Action<bool> OnDoingBlockingAction {
+		public event Action<bool> OnDoingBlockingAction {
 			add {
-				Instance._onDoingBlockingAction -= value;
-				Instance._onDoingBlockingAction += value;
+				this._onDoingBlockingAction -= value;
+				this._onDoingBlockingAction += value;
 			}
 			remove {
-				Instance._onDoingBlockingAction -= value;
+				this._onDoingBlockingAction -= value;
 			}
 		}
 		private event Action<bool> _onDoingBlockingAction;
-
 		
-		
-		public static event Action<bool> OnAnyBlockingEventHappening {
+		public event Action<bool> OnAnyBlockingEventHappening {
 			add {
-				Instance._onAnyBlockingEventHappening -= value;
-				Instance._onAnyBlockingEventHappening += value;
+				this._onAnyBlockingEventHappening -= value;
+				this._onAnyBlockingEventHappening += value;
 			}
 			remove {
-				Instance._onAnyBlockingEventHappening -= value;
+				this._onAnyBlockingEventHappening -= value;
 			}
 		}
 		private event Action<bool> _onAnyBlockingEventHappening;
@@ -102,21 +94,9 @@ namespace CDK {
 
 		#region <<---------- Initializers ---------->>
 		
-		private CBlockingEventsManager() {
-			if (_instance != null) {
-				Debug.LogError($"{nameof(CBlockingEventsManager)} instance was not null!");
-				return;
-			}
-			Debug.Log("Creating BlockingEventsManager instance.");
-			_instance = this;
+		public CBlockingEventsManager() {
 
-			// app is quitting
-			this._applicationIsQuitting = false;
-			CApplication.IsQuitting += () => {
-				this._applicationIsQuitting = true;
-				_instance = null;
-			};
-			
+			this.RetainedObjects = new HashSet<Object>();
 			
 			// on menu
 			this._isOnMenuRx?.Dispose();
@@ -138,8 +118,6 @@ namespace CDK {
 			// is doing blocking action
 			this._isDoingBlockingAction = new CRetainable();
 			
-			
-			
 			// blocking Event Happening
 			Observable.CombineLatest(
 			this._isOnMenuRx, 
@@ -154,6 +132,31 @@ namespace CDK {
 		}
 
 		#endregion <<---------- Initializers ---------->>
+		
+		
+		
+		
+		#region <<---------- Game Object Retain ---------->>
+		
+		public void RetainFromUnityObject(UnityEngine.Object unityObject) {
+			if (this.RetainedObjects.Add(unityObject)) {
+				Debug.Log($"Retaining BlockingEvents from '{unityObject.name}'");
+				this.IsDoingBlockingAction.Retain();
+				return;
+			}
+			Debug.LogError($"GameObject '{unityObject.name}' tried to Retain BlockingEvents when already retaining!", unityObject);
+		}
+
+		public void ReleaseFromUnityObject(UnityEngine.Object unityObject) {
+			if (this.RetainedObjects.Remove(unityObject)) {
+				Debug.Log($"Releasing BlockingEvents from '{unityObject.name}'");
+				this.IsDoingBlockingAction.Release();
+				return;
+			}
+			Debug.LogWarning($"GameObject '{unityObject.name}' tried to Release BlockingEvents when not on list of retained objects. This can lead to unpredicable behaviour.", unityObject);
+		}
+		
+		#endregion <<---------- Game Object Retain ---------->>
 
 	}
 }

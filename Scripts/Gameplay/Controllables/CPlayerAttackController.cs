@@ -1,3 +1,4 @@
+using System;
 using CDK.Damage;
 using UnityEngine;
 
@@ -7,7 +8,8 @@ namespace CDK.Weapons {
 		[SerializeField] private CInventory _inventory;
 		[SerializeField] private CAim _aim;
 		[SerializeField] private Animator _characterAnimator;
-		
+		[NonSerialized] private CBlockingEventsManager _blockingEventsManager;
+
 		
 		protected readonly int ANIM_ATTACK = Animator.StringToHash("attack");
 
@@ -15,11 +17,15 @@ namespace CDK.Weapons {
 		
 		
 		#region <<---------- MonoBehaviour ---------->>
+		private void Awake() {
+			this._blockingEventsManager = CDependencyResolver.Get<CBlockingEventsManager>();
+		}
+
 		private void Update() {
 			if (Input.GetButtonDown(CInputKeys.ATTACK) && 
 				this._characterBase.IsAiming &&
 				this._inventory.EquippedWeapon != null &&
-				!CBlockingEventsManager.IsAnyBlockingEventHappening
+				!this._blockingEventsManager.IsAnyBlockingEventHappening
 				) {
 				if (this._inventory.EquippedWeapon is CWeaponData gun) {
 					if (!gun.HasAmmo()) {

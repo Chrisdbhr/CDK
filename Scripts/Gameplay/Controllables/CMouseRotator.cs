@@ -3,7 +3,9 @@ using UnityEngine;
 
 namespace CDK {
 	public class CMouseRotator : MonoBehaviour {
+		
 		#region <<---------- Properties and Fields ---------->>
+		
 		[SerializeField] private Vector2 _rotationSpeed = Vector2.one * 0.2f;
 		[SerializeField] private Vector2 _rotationYRange = new Vector2(60f, 60f);
 		[SerializeField] private Vector2 _rotationXRange = new Vector2(60f, 30f);
@@ -11,18 +13,20 @@ namespace CDK {
 		[NonSerialized] private Vector2 _inputLook;
 		[NonSerialized] private Transform _transform;
 		[NonSerialized] private Quaternion _initialRotation;
-		
+		[NonSerialized] private CBlockingEventsManager _blockingEventsManager;
+
 		#endregion <<---------- Properties and Fields ---------->>
 
 		#region <<---------- MonoBehaviour ---------->>
 		protected void Awake() {
 			this._transform = this.transform;
 			this._initialRotation = this._transform.rotation;
+			this._blockingEventsManager = CDependencyResolver.Get<CBlockingEventsManager>();
 		}
 
 		private void Update() {
 
-			if (CBlockingEventsManager.IsAnyBlockingEventHappening) return;
+			if (this._blockingEventsManager.IsAnyBlockingEventHappening) return;
 			
 			this._inputLook = new Vector2(Input.GetAxisRaw(CInputKeys.LOOK_X), Input.GetAxisRaw(CInputKeys.LOOK_Y));
 

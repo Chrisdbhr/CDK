@@ -21,6 +21,7 @@ namespace CDK {
 
 		public CSceneManager() {
 			this._fader = CDependencyResolver.Get<CFader>();
+			this._blockingEventsManager = CDependencyResolver.Get<CBlockingEventsManager>();
 		}
 
 		#endregion <<---------- Initializers ---------->>
@@ -30,10 +31,10 @@ namespace CDK {
 
 		#region <<---------- Properties and Fields ---------->>
 
-		private readonly CFader _fader;
 		private const float MINIMUM_LOADING_TIME = 1f;
-		
-		
+		[NonSerialized] private readonly CFader _fader;
+		[NonSerialized] private readonly CBlockingEventsManager _blockingEventsManager;
+
 		#endregion <<---------- Properties and Fields ---------->>
 
 
@@ -57,7 +58,7 @@ namespace CDK {
 				return;
 			}
 			
-			CBlockingEventsManager.IsPlayingCutscene = true;
+			this._blockingEventsManager.IsPlayingCutscene = true;
 
 			Debug.Log($"Loading scene '{sceneToLoadName}'");
 			
@@ -125,7 +126,7 @@ namespace CDK {
 			float fadeInTime = 0.5f;
 			this._fader.FadeToTransparent(fadeInTime, false);
 
-			CBlockingEventsManager.IsPlayingCutscene = false;
+			this._blockingEventsManager.IsPlayingCutscene = false;
 		}
 
 		public static void SetTransformToSceneEntryPoint(Transform transformToMove, int entryPointNumber = 0) {

@@ -6,6 +6,8 @@ namespace CDK {
 	public class CFootstepInfo {
 		
 		public string Name;
+		public float BloodAmount;
+		public float WetAmount;
 		[EventRef] public string Audio;
 		public Material[] Materials;
 		public TerrainLayer[] TerrainLayers;

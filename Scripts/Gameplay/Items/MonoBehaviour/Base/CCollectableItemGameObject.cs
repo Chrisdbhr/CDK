@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace CDK {
@@ -9,13 +10,19 @@ namespace CDK {
 		#region <<---------- Properties and Fields ---------->>
 
 		[SerializeField] private bool _collectOnCollision;
-		
+		[NonSerialized] private CBlockingEventsManager _blockingEventsManager;
+
 		#endregion <<---------- Properties and Fields ---------->>
 
 
 
 
 		#region <<---------- MonoBehaviour ---------->>
+		
+		private void Awake() {
+			this._blockingEventsManager = CDependencyResolver.Get<CBlockingEventsManager>();
+		}
+
 		private void OnCollisionEnter(Collision other) {
 			if (!this._collectOnCollision) return;
 			this.OnInteract(other.transform);
@@ -37,7 +44,7 @@ namespace CDK {
 		}
 
 		public void OnInteract(Transform interactingTransform) {
-			if (!this.enabled || !this.gameObject.activeInHierarchy || CBlockingEventsManager.IsAnyBlockingEventHappening) return;
+			if (!this.enabled || !this.gameObject.activeInHierarchy || this._blockingEventsManager.IsAnyBlockingEventHappening) return;
 			// try to get object
 			var inventory = interactingTransform.root.GetComponent<CInventory>();
 			if (inventory == null) {

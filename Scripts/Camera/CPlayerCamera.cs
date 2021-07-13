@@ -79,7 +79,8 @@ namespace CDK {
 		[NonSerialized] private Transform _transform;
 		[NonSerialized] private Tweener _tween;
 		[NonSerialized] private CFader _fader;
-	
+		[NonSerialized] private CBlockingEventsManager _blockingEventsManager;
+
 		#endregion <<---------- Properties and Fields ---------->>
 
 		
@@ -90,7 +91,7 @@ namespace CDK {
 		private void Awake() {
 			this._transform = this.transform;
 			this._fader = CDependencyResolver.Get<CFader>();
-
+			this._blockingEventsManager = CDependencyResolver.Get<CBlockingEventsManager>();
 		}
 
 		private void OnEnable() {
@@ -247,7 +248,7 @@ namespace CDK {
 					break;
 			}
 
-			CBlockingEventsManager.IsPlayingCutscene = true;
+			this._blockingEventsManager.IsPlayingCutscene = true;
 			this._tween.Play();
 		}
 
@@ -270,7 +271,7 @@ namespace CDK {
 					break;
 			}
 
-			CBlockingEventsManager.IsPlayingCutscene = false;
+			this._blockingEventsManager.IsPlayingCutscene = false;
 			this._tween.Play();
 		}
 

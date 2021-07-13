@@ -1,23 +1,26 @@
+using System;
 using UnityEngine;
 
 namespace CDK {
 	public class CCursorManager {
 
-		private readonly CGameSettings _gameSettings;
-		
+		[NonSerialized] private readonly CGameSettings _gameSettings;
+		[NonSerialized] private readonly CBlockingEventsManager _blockingEventsManager;
+
 		
 		
 		
 		public CCursorManager() {
 			this._gameSettings = CDependencyResolver.Get<CGameSettings>();
-			
+			this._blockingEventsManager = CDependencyResolver.Get<CBlockingEventsManager>();
+
 			SetCursorState(!this._gameSettings.CursorStartsHidden);
-			CBlockingEventsManager.OnMenu += SetCursorState;
+			this._blockingEventsManager.OnMenu += SetCursorState;
 			CInputManager.InputTypeChanged += OnInputTypeChanged;
 		}
 
 		private void OnInputTypeChanged(CInputManager.InputType newType) {
-			SetCursorState(CInputManager.ActiveInputType == CInputManager.InputType.MouseAndKeyboard && CBlockingEventsManager.IsOnMenu);
+			SetCursorState(CInputManager.ActiveInputType == CInputManager.InputType.MouseAndKeyboard && this._blockingEventsManager.IsOnMenu);
 		}
 
 		public static void SetCursorState(bool visible) {

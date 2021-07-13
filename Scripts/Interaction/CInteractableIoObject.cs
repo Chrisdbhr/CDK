@@ -1,8 +1,11 @@
+using System;
 using UnityEngine;
 using UnityEngine.Events;
 
 namespace CDK {
 	public class CInteractableIoObject : MonoBehaviour, CIInteractable {
+
+		#region <<---------- Properties and Fields ---------->>
 		
 		public bool On {
 			get { return this._on; }
@@ -38,7 +41,6 @@ namespace CDK {
 			}
 		}
 		[SerializeField] private bool _locked;
-		
 
 		[SerializeField] private CUnityEventBool NewStateEvent;
 		[SerializeField] private CUnityEvent StateOnEvent;
@@ -48,12 +50,19 @@ namespace CDK {
 		[SerializeField] private UnityEvent LockEvent;
 		[SerializeField] private UnityEvent UnlockEvent;
 		[SerializeField] private CUnityEventTransform InteractedWhenLocked;
+		[NonSerialized] private CBlockingEventsManager _blockingEventsManager;
+
+		#endregion <<---------- Properties and Fields ---------->>
 
 
-
+		
 
 		#region <<---------- MonoBehaviour ---------->>
 		
+		private void Awake() {
+			this._blockingEventsManager = CDependencyResolver.Get<CBlockingEventsManager>();
+		}
+
 		private void Start() {
 			if(this.triggerOnStart) this.NewStateEvent?.Invoke(this.On);
 		}
@@ -71,13 +80,14 @@ namespace CDK {
 
 
 
+		
 		#region <<---------- CInteractable ---------->>
 		public void OnLookTo(Transform lookingTransform) {
 			
 		}
 
 		public void OnInteract(Transform interactingTransform) {
-			if (!this.enabled || !this.gameObject.activeInHierarchy || CBlockingEventsManager.IsAnyBlockingEventHappening) return; 
+			if (!this.enabled || !this.gameObject.activeInHierarchy || this._blockingEventsManager.IsAnyBlockingEventHappening) return; 
 			if (this.Locked) {
 				this.TryToOpenWhenLocked(interactingTransform);
 				return;

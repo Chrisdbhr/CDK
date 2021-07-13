@@ -4,6 +4,7 @@ using UnityEngine;
 
 namespace CDK {
 	public class CPlayerInteractionFirstPerson : CPlayerInteractionBase {
+		
 		[SerializeField] private Transform _originTransform;
 		[NonSerialized] private float _maxInteractionDistance = 2.2f;
 		[NonSerialized] private RaycastHit _hitInfo;
@@ -23,7 +24,7 @@ namespace CDK {
 		#endif
 
 		public override void TryToInteract() {
-			if (CBlockingEventsManager.IsAnyBlockingEventHappening) return;
+			if (this._blockingEventsManager.IsAnyBlockingEventHappening) return;
 			var interactable = this.GetCollisionInteractable();
 			if (interactable == null) return;
 			interactable.OnInteract(this.transform.root);

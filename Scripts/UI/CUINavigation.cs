@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -31,9 +32,8 @@ namespace CDK.UI {
 		#region <<---------- Initializers ---------->>
 
 		public CUINavigation() {
-
 			this._navigationHistory = new Stack<CUIBase>();
-
+			this._blockingEventsManager = CDependencyResolver.Get<CBlockingEventsManager>();
 		}
 		
 		#endregion <<---------- Initializers ---------->>
@@ -47,7 +47,8 @@ namespace CDK.UI {
 		}
 		private int LastFrameAMenuClosed;
 		private CompositeDisposable _navigationDisposables;
-		private readonly Stack<CUIBase> _navigationHistory;
+		[NonSerialized] private readonly Stack<CUIBase> _navigationHistory;
+		[NonSerialized] private readonly CBlockingEventsManager _blockingEventsManager;
 
 		#endregion <<---------- Properties ---------->>
 		
@@ -126,7 +127,7 @@ namespace CDK.UI {
 				ui.Close();
 			}
 			this._navigationHistory.Clear();
-			CBlockingEventsManager.IsOnMenu = false;
+			this._blockingEventsManager.IsOnMenu = false;
 		}
 		
 		#endregion <<---------- Open / Close ---------->>
@@ -142,7 +143,7 @@ namespace CDK.UI {
 			this._navigationDisposables?.Dispose();
 			this._navigationDisposables = new CompositeDisposable();
 			
-			CBlockingEventsManager.IsOnMenu = true;
+			this._blockingEventsManager.IsOnMenu = true;
 			
 			Observable.EveryUpdate().Subscribe(_ => {
 				if (CInputManager.ActiveInputType != CInputManager.InputType.JoystickController) return;
@@ -158,7 +159,7 @@ namespace CDK.UI {
 		private void CheckIfIsLastMenu() {
 			if (this._navigationHistory.Count > 0) return;
 			
-			CBlockingEventsManager.IsOnMenu = false;
+			this._blockingEventsManager.IsOnMenu = false;
 			
 			this._navigationDisposables?.Dispose();
 		}

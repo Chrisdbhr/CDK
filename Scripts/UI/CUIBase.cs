@@ -45,6 +45,7 @@ namespace CDK.UI {
 
 		[NonSerialized] protected CGameSettings _gameSettings;
 		[NonSerialized] protected CFader _fader;
+		[NonSerialized] protected CBlockingEventsManager _blockingEventsManager;
 
 		#endregion <<---------- Properties and Fields ---------->>
 
@@ -54,8 +55,9 @@ namespace CDK.UI {
 		#region <<---------- MonoBehaviour ---------->>
 
 		protected virtual void Awake() {
-			this._canvas = this.GetComponent<Canvas>();
 			this._gameSettings = CDependencyResolver.Get<CGameSettings>();
+			this._blockingEventsManager = CDependencyResolver.Get<CBlockingEventsManager>();
+			this._canvas = this.GetComponent<Canvas>();
 			this._fader = CDependencyResolver.Get<CFader>();
 		}
 
