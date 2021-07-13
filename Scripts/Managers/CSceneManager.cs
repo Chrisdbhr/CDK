@@ -118,8 +118,6 @@ namespace CDK {
 			Physics.SyncTransforms();
 
 			Debug.Log($"TODO remove loading screen");
-
-			CSave.get.CurrentMap = sceneToTeleport.name;
 			
 			await this.WaitUntilMinimumTimeToReturnFromLoading(minimumTimeToReturnFromLoading);
 
