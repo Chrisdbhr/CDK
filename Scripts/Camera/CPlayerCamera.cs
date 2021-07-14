@@ -36,6 +36,8 @@ namespace CDK {
 		
 		#endregion <<---------- Initializers ---------->>
 		
+		
+		
 
 		#region <<---------- Enums ---------->>
 
@@ -45,6 +47,8 @@ namespace CDK {
 		}
 
 		#endregion <<---------- Enums ---------->>
+		
+		
 		
 		
 		#region <<---------- Properties and Fields ---------->>
@@ -57,7 +61,7 @@ namespace CDK {
 		// Camera 
 		[SerializeField] private UnityEngine.Camera _unityCamera;
 		[SerializeField] private CinemachineBrain _cinemachineBrain;
-		[SerializeField] private CinemachineFreeLook _cinemachineCamera;
+		[SerializeField] private CinemachineVirtualCameraBase _cinemachineCamera;
 		[NonSerialized] private int _currentGameFrame;
 
 		[SerializeField] private Renderer[] _renderToHideWhenCameraIsClose;
@@ -156,12 +160,23 @@ namespace CDK {
 			this._isCloseToTheCharacterRx = new ReactiveProperty<bool>(false);
 
 			// camera sensitivity settings
-			CSave.getRx.ObserveEveryValueChanged(p=>p.Value.CameraSensitivity.x).TakeUntilDisable(this).Subscribe(value => {
-				this._cinemachineCamera.m_XAxis.m_MaxSpeed = value;
-			});
-			CSave.getRx.ObserveEveryValueChanged(p=>p.Value.CameraSensitivity.y).TakeUntilDisable(this).Subscribe(value => {
-				this._cinemachineCamera.m_YAxis.m_MaxSpeed = value;
-			});
+			if (this._cinemachineCamera is CinemachineFreeLook freeLookCamera) {
+				CSave.getRx.ObserveEveryValueChanged(p=>p.Value.CameraSensitivity.x).TakeUntilDisable(this).Subscribe(value => {
+					freeLookCamera.m_XAxis.m_MaxSpeed = value;
+				});
+				CSave.getRx.ObserveEveryValueChanged(p=>p.Value.CameraSensitivity.y).TakeUntilDisable(this).Subscribe(value => {
+					freeLookCamera.m_YAxis.m_MaxSpeed = value;
+				});
+			}else if (this._cinemachineCamera is CinemachineVirtualCamera virtualCamera) {
+				var pov = virtualCamera.GetCinemachineComponent<CinemachinePOV>();
+				if (pov == null) return;
+				CSave.getRx.ObserveEveryValueChanged(p=>p.Value.CameraSensitivity.x).TakeUntilDisable(this).Subscribe(value => {
+					pov.m_HorizontalAxis.m_MaxSpeed = value;
+				});
+				CSave.getRx.ObserveEveryValueChanged(p=>p.Value.CameraSensitivity.y).TakeUntilDisable(this).Subscribe(value => {
+					pov.m_VerticalAxis.m_MaxSpeed = value;
+				});
+			}
 			
 			this._cinemachineBrain.m_CameraActivatedEvent.AddListener(this.ActiveCameraChanged);
 
@@ -189,7 +204,9 @@ namespace CDK {
 		
 		private void ActiveCameraChanged(ICinemachineCamera newCamera, ICinemachineCamera oldCamera) {
 			if (ReferenceEquals(this._cinemachineCamera, newCamera)) {
-				this._cinemachineCamera.m_YAxis.Value = 0.5f;
+				if (this._cinemachineCamera is CinemachineFreeLook freeLookCamera) {
+					freeLookCamera.m_YAxis.Value = 0.5f;
+				}
 			}
 		}
 		
@@ -204,26 +221,28 @@ namespace CDK {
 			if (this._recenterRotationTween != null ) return;
 			this._recenterRotationTween?.Kill();
 
-			var finalTimes = new Vector2(this._cinemachineCamera.m_RecenterToTargetHeading.m_RecenteringTime, this._cinemachineCamera.m_YAxisRecentering.m_RecenteringTime);
-			
-			this._recenterRotationTween = DOTween.To(
-				()=>new Vector2(this._cinemachineCamera.m_RecenterToTargetHeading.m_RecenteringTime * 0.01f,this._cinemachineCamera.m_YAxisRecentering.m_RecenteringTime * 0.01f),
-				x=> {
-					this._cinemachineCamera.m_RecenterToTargetHeading.m_RecenteringTime = x.x;
-					this._cinemachineCamera.m_YAxisRecentering.m_RecenteringTime = x.y;
-					
-					this._cinemachineCamera.m_RecenterToTargetHeading.RecenterNow();
-					this._cinemachineCamera.m_YAxisRecentering.RecenterNow();
-				},
-				finalTimes,
-				duration
-			);
-			
-			this._recenterRotationTween.onComplete += () => {
-				this._recenterRotationTween?.Kill();
-				this._recenterRotationTween = null;
-			};
-			this._recenterRotationTween.Play();
+			if (this._cinemachineCamera is CinemachineFreeLook freeLookCamera) {
+				var finalTimes = new Vector2(freeLookCamera.m_RecenterToTargetHeading.m_RecenteringTime, freeLookCamera.m_YAxisRecentering.m_RecenteringTime);
+				
+				this._recenterRotationTween = DOTween.To(
+					()=>new Vector2(freeLookCamera.m_RecenterToTargetHeading.m_RecenteringTime * 0.01f, freeLookCamera.m_YAxisRecentering.m_RecenteringTime * 0.01f),
+					x=> {
+						freeLookCamera.m_RecenterToTargetHeading.m_RecenteringTime = x.x;
+						freeLookCamera.m_YAxisRecentering.m_RecenteringTime = x.y;
+						
+						freeLookCamera.m_RecenterToTargetHeading.RecenterNow();
+						freeLookCamera.m_YAxisRecentering.RecenterNow();
+					},
+					finalTimes,
+					duration
+				);
+
+				this._recenterRotationTween.onComplete += () => {
+					this._recenterRotationTween?.Kill();
+					this._recenterRotationTween = null;
+				};
+				this._recenterRotationTween.Play();
+			}
 		}
 		
 		#endregion <<---------- Input ---------->>
