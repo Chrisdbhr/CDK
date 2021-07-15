@@ -1,7 +1,6 @@
 using System;
 using FMODUnity;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using Debug = UnityEngine.Debug;
 using STOP_MODE = FMOD.Studio.STOP_MODE;
 
@@ -11,7 +10,6 @@ namespace CDK.Audio {
 		[SerializeField] private bool _is3d;
 		[SerializeField] [EventRef] private string _music;
 		
-		[NonSerialized] private Scene _sceneToCheck;
 		[NonSerialized] private FMOD.Studio.EventInstance _musicState;
 
 
