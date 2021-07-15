@@ -441,7 +441,7 @@ namespace CDK {
 
 		#region <<---------- Movement ---------->>
 
-		protected void ProcessMovement() {
+		protected virtual void ProcessMovement() {
 			if (!this._charController.enabled) return;
 
 			if (CTime.TimeScale == 0f) return;
@@ -609,7 +609,7 @@ namespace CDK {
 		
 		#region <<---------- Rotation ---------->>
 		
-		protected void ProcessRotation() {
+		protected virtual void ProcessRotation() {
 			if (this.IsStrafingRx.Value) {
 				this.RotateTowardsDirection(this._aimTargetDirection);
 			}
