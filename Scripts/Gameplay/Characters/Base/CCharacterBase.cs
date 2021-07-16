@@ -134,8 +134,7 @@ namespace CDK {
 		public float RunSpeedMultiplier {
 			get { return this._runSpeedMultiplier; }
 		}
-
-		private float _runSpeedMultiplier = 2f;
+		[SerializeField] private float _runSpeedMultiplier = 2f;
 
 		public ReactiveProperty<bool> CanMoveRx { get; protected set; }
 
@@ -531,12 +530,7 @@ namespace CDK {
 			return (targetMotion * (targetMovSpeed * deltaTime)) + rootMotionDeltaPos;
 		}
 
-
-		[Range(-15f,15f)]public float VAI_velocityY;
-		[Range(-15f,15f)]public float VAI_rootMotionY;
 		private float ProcessVerticalMovement(float deltaTime) {
-			VAI_velocityY = this.MyVelocity.y;
-			VAI_rootMotionY = this._rootMotionDeltaPosition.y;
 
 			var verticalDelta = this._rootMotionDeltaPosition.y;
 			verticalDelta += this.MyVelocity.y > 0f ? 0f : this.MyVelocity.y; // consider only fall velocity
