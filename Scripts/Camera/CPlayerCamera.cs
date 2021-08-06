@@ -178,15 +178,14 @@ namespace CDK {
 				});
 			}
 			
+			// active camera changed
 			this._cinemachineBrain.m_CameraActivatedEvent.AddListener(this.ActiveCameraChanged);
 
-			Observable.Timer(TimeSpan.FromSeconds(0.5f)).TakeUntilDisable(this).Subscribe(_ => {
+			// is close to the character?
+			Observable.EveryUpdate().TakeUntilDisable(this).Subscribe(_ => {
 				bool camIsCloseToTheCharacter = this._currentDistanceFromTarget <= this._distanceToConsiderCloseForCharacter;
 				this._isCloseToTheCharacterRx.Value = camIsCloseToTheCharacter;
 			});
-
-			
-			// is close to the character?
 			this._isCloseToTheCharacterRx.TakeUntilDisable(this).Subscribe(isClose => {
 				if (this._renderToHideWhenCameraIsClose == null) return;
 				// disable renderers

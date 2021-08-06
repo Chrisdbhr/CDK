@@ -74,11 +74,18 @@ namespace CDK {
 			// movement
 			Observable.EveryUpdate().Subscribe(_ => {
 				if (this._characters.Count <= 0) return;
-
-				var inputMovement = this._rePlayer.GetAxis2D(CInputKeys.MOV_X, CInputKeys.MOV_Y);
 				
 				var character = this.GetControllingCharacter();
 				if (character == null) return;
+
+				if (this._blockingEventsManager.IsAnyBlockingEventHappening) {
+					character.InputMovementRaw = Vector2.zero;
+					character.InputMovementDirRelativeToCam = Vector3.zero;
+					return;
+				}
+				
+				var inputMovement = this._rePlayer.GetAxis2D(CInputKeys.MOV_X, CInputKeys.MOV_Y);
+				
 				var (camF, camR) = this.GetCameraVectors();
 				
 				character.InputMovementRaw = inputMovement.normalized;
@@ -132,6 +139,7 @@ namespace CDK {
 				if (entryPoint != null) {
 					Debug.Log($"Setting '{createdGo.name}' to entryPoint number'{entryPoint.Number}'", entryPoint.gameObject);
 					character.TeleportToLocation(entryPoint.transform.position, entryPoint.transform.rotation);
+					Physics.SyncTransforms();
 				}
 			}
 			createdGo.SetActive(false);
@@ -250,12 +258,14 @@ namespace CDK {
 		}
 
 		private void InputResetCameraRotation(InputActionEventData data) {
+			if (this._blockingEventsManager.IsAnyBlockingEventHappening) return;
 			if (!data.GetButtonDown()) return;
 			if (this._cPlayerCamera == null) return;
 			this._cPlayerCamera.ResetRotation();
 		}
 		
 		private void InputRun(InputActionEventData data) {
+			if (this._blockingEventsManager.IsAnyBlockingEventHappening) return;
 			var character = this.GetControllingCharacter();
 			if (character == null) return;
 			var inputRun = data.GetButton();
@@ -263,6 +273,7 @@ namespace CDK {
 		}
 		
 		private void InputInteract(InputActionEventData data) {
+			if (this._blockingEventsManager.IsAnyBlockingEventHappening) return;
 			var character = this.GetControllingCharacter();
 			if (character == null) return;
 			var interactionComponent = character.GetComponent<CPlayerInteractionBase>();

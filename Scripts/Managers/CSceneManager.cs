@@ -90,7 +90,6 @@ namespace CDK {
 
 			// background load scene async
 			var loadAsyncOp = SceneManager.LoadSceneAsync(sceneToLoadName, LoadSceneMode.Additive);
-			loadAsyncOp.allowSceneActivation = false;
 			
 			// Activate loaded scenes
 			loadAsyncOp.allowSceneActivation = true;
@@ -102,21 +101,22 @@ namespace CDK {
 			var sceneToTeleport = SceneManager.GetSceneByName(sceneToLoadName);
 			SceneManager.SetActiveScene(sceneToTeleport);
 			
+			await Observable.NextFrame();
 			// move objects to loaded scene
 			foreach (var rootGo in gameObjectsToTeleport) {
 				SceneManager.MoveGameObjectToScene(rootGo, sceneToTeleport);
 			}
+			await Observable.NextFrame();
 
 			// move transform to scene entry points
 			foreach (var rootGo in gameObjectsToTeleport) {
 				SetTransformToSceneEntryPoint(rootGo.transform, entryPointNumber);
 			}
+			Physics.SyncTransforms();
 
 			SceneManager.UnloadSceneAsync(tempHolderScene);
 			 
 			LightProbes.TetrahedralizeAsync();
-			
-			Physics.SyncTransforms();
 
 			Debug.Log($"TODO remove loading screen");
 			

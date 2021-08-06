@@ -604,6 +604,7 @@ namespace CDK {
 		#region <<---------- Rotation ---------->>
 		
 		protected virtual void ProcessRotation() {
+			if (this._blockingEventsManager.IsAnyBlockingEventHappening) return;
 			if (this.IsStrafingRx.Value) {
 				this.RotateTowardsDirection(this._aimTargetDirection);
 			}
@@ -612,7 +613,7 @@ namespace CDK {
 					this.RotateTowardsDirection(this._groundNormal + this.MyVelocityXZ);
 				}
 				else {
-					if(!this._blockingEventsManager.IsDoingBlockingAction.IsRetained()) this.RotateTowardsDirection(this.InputMovementDirRelativeToCam);
+					this.RotateTowardsDirection(this.InputMovementDirRelativeToCam);
 				}
 			}
 		}
@@ -765,7 +766,6 @@ namespace CDK {
 			this.MyVelocityXZ = Vector3.zero;
 			this._previousPosition = targetPos;
 			this.Position = targetPos;
-			Physics.SyncTransforms();
 		}
 		
 		#endregion <<---------- Transform ---------->>
