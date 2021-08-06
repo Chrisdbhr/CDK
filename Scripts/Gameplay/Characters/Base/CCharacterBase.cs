@@ -381,7 +381,7 @@ namespace CDK {
 				
 				// is falling
 				this._isOnFreeFall.Value = true;
-				this._distanceOnFreeFall.Value = this._lastPositionYSpeedWasPositive.CAbs() - this.Position.y.CAbs();
+				this._distanceOnFreeFall.Value = (this._lastPositionYSpeedWasPositive - this.Position.y).CAbs();
 			}).AddTo(this._disposables);
 
 			this._isTouchingTheGroundRx.TakeUntilDisable(this).DistinctUntilChanged().Subscribe(isTouchingTheGround => {
@@ -402,8 +402,8 @@ namespace CDK {
 				this._distanceOnFreeFall.Value = 0f;
 			});
 
-			this._distanceOnFreeFall.TakeUntilDisable(this).DistinctUntilChanged().Subscribe(timeFalling => {
-				this.Anim.CSetFloatSafe(this.ANIM_DISTANCE_ON_FREE_FALL, timeFalling);
+			this._distanceOnFreeFall.TakeUntilDisable(this).DistinctUntilChanged().Subscribe(distanceOnFreeFall => {
+				this.Anim.CSetFloatSafe(this.ANIM_DISTANCE_ON_FREE_FALL, distanceOnFreeFall);
 			});
 
 			#endregion <<---------- Fall ---------->>
