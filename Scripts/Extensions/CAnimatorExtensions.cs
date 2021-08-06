@@ -8,7 +8,7 @@ namespace CDK {
 			if (self == null) return;
 			target = target.CImprecise();
 			var currentFloat = self.GetFloat(id);
-			self.SetFloat(id, currentFloat.CLerp(target, time));
+			self.SetFloat(id, currentFloat.CLerp(target, time).CImprecise());
 		}
 
 		/// <summary>
