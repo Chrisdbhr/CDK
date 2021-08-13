@@ -16,7 +16,8 @@
         "Unity.Localization",
         "Ludiq.Chronos",
         "EasyButtons",
-        "DebugExtension"
+        "DebugExtension",
+        "Unity.Timeline"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
