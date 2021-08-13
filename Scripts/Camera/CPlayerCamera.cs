@@ -23,6 +23,9 @@ namespace CDK {
 			// character object
 			var ownerCharacter = this._ownerPlayer.GetControllingCharacter();
 			
+			// renderers to hide
+			this._renderToHideWhenCameraIsClose = ownerCharacter.GetComponentsInChildren<Renderer>(); 
+			
 			// cinemachine
 
 			var lookTarget = ownerCharacter.GetComponentInChildren<CCameraLookAndFollowTarget>();
@@ -183,11 +186,11 @@ namespace CDK {
 
 			// is close to the character?
 			Observable.EveryUpdate().TakeUntilDisable(this).Subscribe(_ => {
-				bool camIsCloseToTheCharacter = this._currentDistanceFromTarget <= this._distanceToConsiderCloseForCharacter;
-				this._isCloseToTheCharacterRx.Value = camIsCloseToTheCharacter;
+				this._currentDistanceFromTarget = Vector3.Distance(this._cinemachineCamera.LookAt.position, this._unityCamera.transform.position); 
+				this._isCloseToTheCharacterRx.Value = this._currentDistanceFromTarget <= this._distanceToConsiderCloseForCharacter;
 			});
 			this._isCloseToTheCharacterRx.TakeUntilDisable(this).Subscribe(isClose => {
-				if (this._renderToHideWhenCameraIsClose == null) return;
+				if (this._renderToHideWhenCameraIsClose.Length <= 0) return;
 				// disable renderers
 				foreach (var objToDisable in this._renderToHideWhenCameraIsClose) {
 					if (objToDisable == null) continue;
