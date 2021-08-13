@@ -33,7 +33,7 @@ namespace CDK.Audio {
 		}
 		
 		private void OnDisable() {
-			this._musicState.stop(STOP_MODE.ALLOWFADEOUT);
+			this.Stop();
 
 		}
 		
@@ -44,5 +44,15 @@ namespace CDK.Audio {
 		#endif
 		
 		#endregion <<---------- MonoBehaviour ---------->>
+
+
+
+		#region <<---------- Music ---------->>
+
+		public void Stop() {
+			this._musicState.stop(STOP_MODE.ALLOWFADEOUT);
+		}
+		
+		#endregion <<---------- Music ---------->>
 	}
 }

@@ -42,6 +42,20 @@ MonoBehaviour:
     m_StrikethroughThickness: 1.546875
     m_TabWidth: 17
   m_GlyphTable:
+  - m_Index: 2
+    m_Metrics:
+      m_Width: 0
+      m_Height: 0
+      m_HorizontalBearingX: 0
+      m_HorizontalBearingY: 0
+      m_HorizontalAdvance: 16.5
+    m_GlyphRect:
+      m_X: 0
+      m_Y: 0
+      m_Width: 0
+      m_Height: 0
+    m_Scale: 1
+    m_AtlasIndex: 0
   - m_Index: 3
     m_Metrics:
       m_Width: 1.90625
@@ -4692,6 +4706,10 @@ MonoBehaviour:
     m_AtlasIndex: 0
   m_CharacterTable:
   - m_ElementType: 1
+    m_Unicode: 32
+    m_GlyphIndex: 2
+    m_Scale: 1
+  - m_ElementType: 1
     m_Unicode: 33
     m_GlyphIndex: 3
     m_Scale: 1
@@ -7978,6 +7996,7 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    m_Ints: []
     m_Floats:
     - _Ambient: 0.5
     - _Bevel: 0.5
