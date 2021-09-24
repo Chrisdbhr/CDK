@@ -1,9 +1,10 @@
+#if Newtonsoft_Json_for_Unity
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.UnityConverters;
 using Newtonsoft.Json.UnityConverters.Math;
 
-namespace CDK.Json {
+namespace CDK {
 	public static class CJsonExtensions {
 	
 		public static readonly JsonSerializerSettings DefaultSettings = new JsonSerializerSettings {
@@ -23,3 +24,4 @@ namespace CDK.Json {
 		
 	}
 }
+#endif

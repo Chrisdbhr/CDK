@@ -1,8 +1,11 @@
 using System;
-using EasyButtons;
 using UniRx;
 using UnityEngine;
 using UnityEngine.Events;
+
+#if EasyButtons
+using EasyButtons;
+#endif
 
 namespace CDK {
 	public class CEventTrigger : MonoBehaviour {
@@ -18,7 +21,9 @@ namespace CDK {
 
 		private void OnEnable() { } // exposing to allow enable/disable component.
 
+		#if EasyButtons
 		[Button]
+		#endif
 		public virtual void TriggerEvent() {
 			if (!this.enabled || this._triggered) return;
 

@@ -2,13 +2,20 @@ using System;
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
+
+#if FMOD
 using FMODUnity;
+#endif
 
 namespace CDK.Audio {
+	#if FMOD
 	[RequireComponent(typeof(StudioEventEmitter))]
+	#endif
 	public class CRandomAudioPlayer : MonoBehaviour {
 
+		#if FMOD
 		[SerializeField] private StudioEventEmitter _audioEmitter;
+		#endif
 		[NonSerialized] private string[] _audios;
 		[NonSerialized] private readonly Queue<string> _lastPlayedAudios = new Queue<string>();
 		
@@ -27,8 +34,11 @@ namespace CDK.Audio {
 
 			this._lastPlayedAudios.Enqueue(audioEvent);
 
+			#if FMOD
 			this._audioEmitter.Event = audioEvent;
 			this._audioEmitter.Play();
+			#endif
+
 		}
 
 		private string GetRandomFromListNotRepeating() {
@@ -40,7 +50,7 @@ namespace CDK.Audio {
 				this._lastPlayedAudios.Dequeue();
 			}
 			
-			return this._audios.Except(this._lastPlayedAudios).RandomElement();
+			return this._audios.Except(this._lastPlayedAudios).CRandomElement();
 		}
 	}
 }

@@ -1,9 +1,12 @@
 using System;
-using FMOD.Studio;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+
+#if FMOD
+using FMOD.Studio;
 using STOP_MODE = FMOD.Studio.STOP_MODE;
+#endif
 
 namespace CDK.UI {
 	public class CUIInteractable : MonoBehaviour, ISelectHandler, ISubmitHandler, ICancelHandler,
@@ -11,7 +14,9 @@ namespace CDK.UI {
 
 		[SerializeField] private bool _debug;
 		
+		#if FMOD
 		[NonSerialized] private EventInstance _soundEventInstance;
+		#endif
 		[NonSerialized] private CGameSettings _gameSettings;
 
 		private void Awake() {
@@ -19,11 +24,15 @@ namespace CDK.UI {
 		}
 
 		private void PlaySound(string sound) {
+			#if FMOD
 			if (!sound.CIsNullOrEmpty()) {
 				this._soundEventInstance.stop(STOP_MODE.IMMEDIATE);
 				this._soundEventInstance = FMODUnity.RuntimeManager.CreateInstance(sound);
 				this._soundEventInstance.start();
 			}
+			#else
+			throw new NotImplementedException();
+			#endif
 		}
 
 		public virtual void Selected() {

@@ -1,11 +1,17 @@
 using System;
 using System.IO;
 using System.Threading.Tasks;
-using CDK.Json;
 using UniRx;
 using UnityEngine;
-using Newtonsoft.Json;
+
+#if UNITY_EDITOR
 using UnityEditor;
+#endif
+
+#if Newtonsoft_Json_for_Unity
+using Newtonsoft.Json;
+#endif
+
 
 namespace CDK {
 	public partial class CSave {
@@ -33,10 +39,14 @@ namespace CDK {
 		
 		#region <<---------- Properties ---------->>
 		
+		#if Newtonsoft_Json_for_Unity
 		[JsonProperty("cameraSensitivity")]
+		#endif
 		public Vector2 CameraSensitivity = new Vector2(7.5f, 0.15f);
 
+		#if Newtonsoft_Json_for_Unity
 		[JsonProperty("language")]
+		#endif
 		public string Language;
 
 		#endregion <<---------- Properties ---------->>
@@ -48,6 +58,7 @@ namespace CDK {
 
 		public static async Task SaveGame() {
 			try {
+				#if Newtonsoft_Json_for_Unity
 				Debug.Log($"Starting SaveGame process.");
 				
 				var json = JsonConvert.SerializeObject(getRx.Value, CJsonExtensions.DefaultSettings);
@@ -60,10 +71,15 @@ namespace CDK {
 			
 				Debug.Log($"Trying to SaveGame in file '{filePath}' with content: '{json}'");
 
-				using var streamWriter = File.CreateText(filePath);
-				await streamWriter.WriteAsync(json);
+				using (var streamWriter = File.CreateText(filePath)) {
+					await streamWriter.WriteAsync(json);
+				}
 			
 				Debug.Log($"Game saved.");
+
+				#else
+				throw new NotImplementedException();
+				#endif
 			}
 			catch (Exception e) {
 				Debug.LogError(e);
@@ -79,6 +95,7 @@ namespace CDK {
 
 		public static bool LoadGame() {
 			try {
+				#if Newtonsoft_Json_for_Unity
 				var filePath = GetSaveFilePath();
 				
 				Debug.Log($"Trying to LoadGame with file '{filePath}'");
@@ -100,12 +117,17 @@ namespace CDK {
 				}
 				
 				Debug.Log($"Game Loaded.");
-				(_rx ??= new ReactiveProperty<CSave>()).Value = save;
+				(_rx = _rx ?? new ReactiveProperty<CSave>()).Value = save;
 				return true;
+				
+				#else
+				throw new NotImplementedException();
+				#endif
 			}
 			catch (Exception e) {
 				Debug.LogError(e);
 			}
+			
 			return false;
 		}
 

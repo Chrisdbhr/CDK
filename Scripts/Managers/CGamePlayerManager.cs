@@ -10,7 +10,7 @@ namespace CDK {
 		#region <<---------- Properties ---------->>
 		
 		public static CGamePlayerManager get {
-			get { return _instance ??= new CGamePlayerManager(); }
+			get { return _instance = _instance ?? new CGamePlayerManager(); }
 		}
 		private static CGamePlayerManager _instance;
 
@@ -33,9 +33,11 @@ namespace CDK {
 		private static void InitializeBeforeSceneLoad() {
 			get?.Dispose();
 
+			#if Rewired
 			if (!Rewired.ReInput.isReady && GameObject.FindObjectOfType<Rewired.InputManager_Base>() == null) {
 				_rewiredLoadTask = CAssets.LoadAndInstantiateGameObjectAsync("Rewired Input Manager");
 			}
+			#endif
 		}
 
 		#endregion <<---------- Initializers ---------->>

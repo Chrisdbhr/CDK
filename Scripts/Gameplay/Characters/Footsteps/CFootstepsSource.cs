@@ -141,7 +141,10 @@ namespace CDK {
 
 			// play random audio
 			if (footstepInfo.Audio.CIsNullOrEmpty()) return;
+			
+			#if FMOD
 			FMODUnity.RuntimeManager.PlayOneShot(footstepInfo.Audio, raycastHit.point);
+			#endif
 		}
 
 		private CFootstepInfo GetFootstepInfoFromMeshRenderer(RaycastHit raycastHit) {

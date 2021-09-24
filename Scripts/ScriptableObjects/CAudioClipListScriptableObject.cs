@@ -1,6 +1,9 @@
 using System.Linq;
-using FMODUnity;
 using UnityEngine;
+
+#if FMOD
+using FMODUnity;
+#endif
 
 namespace CDK {
 	[CreateAssetMenu(fileName = "AudioClipArray", menuName = CConst.EDITOR_SCRIPTABLEOBJECT_CREATION_PREFIX + "AudioClipArray", order = 201)]
@@ -8,7 +11,9 @@ namespace CDK {
 
 		[System.Serializable]
 		class AudiosList {
+			#if FMOD
 			[EventRef]
+			#endif
 			public string audio;
 		}
 		

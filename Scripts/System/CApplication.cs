@@ -1,8 +1,14 @@
 using System;
 using System.Threading.Tasks;
 using UnityEngine;
+
+#if UnityAddressables
 using UnityEngine.AddressableAssets;
+#endif
+
+#if UnityLocalization
 using UnityEngine.Localization.Settings;
+#endif
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -28,8 +34,14 @@ namespace CDK {
 			Application.targetFrameRate = 60;
 
 			InitializeDependecyContainerAndBinds();
+			
+			#if UnityAddressables
 			await AddressablesInitialize();
-			await DetectLanguage();
+			#endif
+			
+			#if UnityLocalization
+			await LocalizationInitialize();
+			#endif
 
 			Quitting = false;
 			Application.quitting -= IsQuitting;
@@ -73,20 +85,26 @@ namespace CDK {
 		
 
 		#region <<---------- Addressables ---------->>
+
+		#if UnityAddressables
 		
 		private static async Task AddressablesInitialize() {
 			Debug.Log("CApplication initializing Addressables");
 			await Addressables.InitializeAsync().Task;
 		}
 		
+		#endif
+
 		#endregion <<---------- Addressables ---------->>
 
 
 		
 		
 		#region <<---------- Language ---------->>
-		
-		private static async Task DetectLanguage() {
+
+		#if UnityLocalization
+
+		private static async Task LocalizationInitialize() {
 			await LocalizationSettings.InitializationOperation.Task;
 			var systemCulture = System.Globalization.CultureInfo.CurrentCulture;
 			foreach (var locale in LocalizationSettings.AvailableLocales.Locales) {
@@ -100,6 +118,8 @@ namespace CDK {
 			}
 			Debug.Log($"Could not auto select language for {systemCulture}");
 		}
+
+		#endif
 
 		#endregion <<---------- Language ---------->>
 

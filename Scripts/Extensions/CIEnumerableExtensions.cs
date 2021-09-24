@@ -1,24 +1,30 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace CDK {
 	public static class CIEnumerableExtensions {
-		public static T RandomElement<T>(this IEnumerable<T> enumerable) {
+		public static T CRandomElement<T>(this IEnumerable<T> enumerable) {
 			var array = enumerable as T[] ?? enumerable.ToArray();
 			if (array.Length <= 0) return default;
 			int index = CRandom.system.Next(0, array.Length);
 			return array.ElementAt(index);
 		}
 		
-		public static bool ContainsIndex<T>(this IEnumerable<T> enumerable, int index) {
+		public static bool CContainsIndex<T>(this IEnumerable<T> enumerable, int index) {
 			return index >= 0 && enumerable != null && index < enumerable.Count();
 		}
 
-		public static T GetAtIndexSafe<T>(this IEnumerable<T> enumerable, int index) {
+		public static T CGetAtIndexSafe<T>(this IEnumerable<T> enumerable, int index) {
 			var array = enumerable as T[] ?? enumerable.ToArray();
-			return array.ContainsIndex(index) ? array.ElementAt(index) : default;
+			return array.CContainsIndex(index) ? array.ElementAt(index) : default;
+		}
+
+		public static bool CHasAnyAndNotNull<T>(this IEnumerable<T> enumerable) {
+			return enumerable != null && enumerable.Any();
 		}
 		
+		public static bool CIsNullOrEmpty<T>(this IEnumerable<T> enumerable) {
+			return !CHasAnyAndNotNull(enumerable);
+		}
 	}
 }

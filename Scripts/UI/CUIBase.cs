@@ -1,11 +1,17 @@
 using System;
 using System.Threading.Tasks;
-using FMODUnity;
 using UniRx;
 using UnityEngine;
-using UnityEngine.AddressableAssets;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+
+#if FMOD
+using FMODUnity;
+#endif
+
+#if UnityAddressables
+using UnityEngine.AddressableAssets;
+#endif
 
 namespace CDK.UI {
 	public abstract class CUIBase : MonoBehaviour {
@@ -88,7 +94,13 @@ namespace CDK.UI {
 			this._onOpen?.Invoke();
 
 			this._canvas.sortingOrder = sortOrder;
+			
+			#if FMOD
 			RuntimeManager.PlayOneShot(this._gameSettings.SoundOpenMenu);
+			#else
+			Debug.LogError("'Play Open menu sound' not implemented without FMOD");
+			#endif
+
 		}
 		public void Close() {
 			Debug.Log($"Closing UI {this.gameObject.name}", this);
@@ -96,11 +108,19 @@ namespace CDK.UI {
 
 			if (this._previousUI != null) this._previousUI.ShowIfHidden(this._previousButton);
 
+			#if UnityAddressables
 			if (!Addressables.ReleaseInstance(this.gameObject)) {
 				Debug.LogError($"Error releasing instance of object '{this.gameObject.name}'", this);
 			}
+			#else
+			this.gameObject.CDestroy();
+			#endif
+			
+			#if FMOD
 			RuntimeManager.PlayOneShot(this._gameSettings.SoundCloseMenu);
-
+			#else
+			Debug.LogError("'Play Close menu sound' not implemented without FMOD");
+			#endif
 		}
 		
 		#endregion <<---------- Open / Close ---------->>

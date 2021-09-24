@@ -1,12 +1,16 @@
 using System;
 using CDK.Characters.Enums;
 using CDK.Characters.Interfaces;
-using FMODUnity;
 using UniRx;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+
 #if UNITY_EDITOR
 using UnityEditor;
+#endif
+
+#if FMOD
+using FMODUnity;
 #endif
 
 namespace CDK {
@@ -233,8 +237,10 @@ namespace CDK {
 
 		#region <<---------- Sound ---------->>
 
+		#if FMOD
 		[Header("Sound")]
 		[SerializeField] protected StudioEventEmitter _mounthVoiceEmitter;
+		#endif
 
 		#endregion <<---------- Sound ---------->>
 
@@ -743,11 +749,16 @@ namespace CDK {
 		#region <<---------- Voice ---------->>
 
 		protected virtual void StopTalking() {
+			
+			#if FMOD
 			if (this._mounthVoiceEmitter == null) return;
 			if (this._mounthVoiceEmitter.IsPlaying()) {
 				this._mounthVoiceEmitter.AllowFadeout = false;
 				this._mounthVoiceEmitter.Stop();
 			}
+			#else
+			Debug.LogError("Character StopTalking() not implemented without FMOD");
+			#endif
 		}
 
 		#endregion <<---------- Voice ---------->>

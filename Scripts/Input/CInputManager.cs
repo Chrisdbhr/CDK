@@ -1,7 +1,10 @@
 using System;
-using Rewired;
 using UniRx;
 using UnityEngine;
+
+#if Rewired
+using Rewired;
+#endif
 
 namespace CDK {
 	public static class CInputManager {
@@ -45,13 +48,17 @@ namespace CDK {
 
 			SetControllerTypeBasedOnPlatform();
 			
+			#if Rewired
 			if (ReInput.isReady) Initialize();
 			else ReInput.InitializedEvent += Initialize;
+			#endif
 		}
 
+		#if Rewired
 		private static void Initialize() {
-			ReInput.InitializedEvent -= Initialize;
 			
+			ReInput.InitializedEvent -= Initialize;
+
 			// wait one frame
 			Observable.EveryUpdate().Subscribe(_ => {
 				if (ReInput.controllers.GetAnyButtonChanged(ControllerType.Mouse) || ReInput.controllers.GetAnyButton(ControllerType.Keyboard)) {
@@ -62,6 +69,7 @@ namespace CDK {
 				// TODO check mobile input
 			});
 		}
+		#endif
 
 		private static void SetControllerTypeBasedOnPlatform() {
 			#if UNITY_STANDALONE

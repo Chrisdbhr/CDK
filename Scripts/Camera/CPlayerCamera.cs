@@ -1,10 +1,19 @@
 using System;
-using Cinemachine;
-using DG.Tweening;
-using FMODUnity;
 using UniRx;
 using UnityEngine;
 using UnityEngine.UI;
+
+#if Cinemachine
+using Cinemachine;
+#endif
+
+#if DOTween
+using DG.Tweening;
+#endif
+
+#if FMOD 
+using FMODUnity;
+#endif
 
 namespace CDK {
 	public class CPlayerCamera : MonoBehaviour {
@@ -30,11 +39,17 @@ namespace CDK {
 
 			var lookTarget = ownerCharacter.GetComponentInChildren<CCameraLookAndFollowTarget>();
 			
+			#if Cinemachine
 			this._cinemachineCamera.Follow = ownerCharacter.transform;
 			this._cinemachineCamera.LookAt = lookTarget != null ? lookTarget.transform : ownerCharacter.transform;
-			
+			#else
+			Debug.LogError("'PlayerCamera' will not work without Cinemachine");
+			#endif
+
+			#if FMOD
 			// fmod listener
 			this._studioListener.ListenerNumber = this._ownerPlayer.PlayerNumber;
+			#endif
 		}
 		
 		#endregion <<---------- Initializers ---------->>
@@ -59,12 +74,16 @@ namespace CDK {
 		// Rotation
 		public float RotationX { get; private set; }
 		public float RotationY { get; private set; }
+		#if DOTween
 		[NonSerialized] private Tween _recenterRotationTween;
+		#endif
 		
 		// Camera 
 		[SerializeField] private UnityEngine.Camera _unityCamera;
+		#if Cinemachine
 		[SerializeField] private CinemachineBrain _cinemachineBrain;
 		[SerializeField] private CinemachineVirtualCameraBase _cinemachineCamera;
+		#endif
 		[NonSerialized] private int _currentGameFrame;
 
 		[SerializeField] private Renderer[] _renderToHideWhenCameraIsClose;
@@ -79,12 +98,18 @@ namespace CDK {
 		[NonSerialized] private Texture2D _screenShootTexture2d;
 		
 		// Audio
+		#if FMOD
 		[SerializeField] private StudioListener _studioListener;
+		#endif
 		
 		// Cache
 		[NonSerialized] private CGamePlayer _ownerPlayer;
 		[NonSerialized] private Transform _transform;
+		
+		#if DOTween
 		[NonSerialized] private Tweener _tween;
+		#endif
+		
 		[NonSerialized] private CFader _fader;
 		[NonSerialized] private CBlockingEventsManager _blockingEventsManager;
 
@@ -160,6 +185,7 @@ namespace CDK {
 		#region <<---------- Events ---------->>
 
 		private void SubscribeToEvents() {
+			#if Cinemachine
 			this._isCloseToTheCharacterRx = new ReactiveProperty<bool>(false);
 
 			// camera sensitivity settings
@@ -197,13 +223,16 @@ namespace CDK {
 					objToDisable.enabled = !isClose;
 				}
 			});
-			
+			#endif
 		}
 		
 		private void UnsubscribeToEvents() {
+			#if Cinemachine
 			this._cinemachineBrain.m_CameraActivatedEvent.RemoveListener(this.ActiveCameraChanged);
+			#endif
 		}
 		
+		#if Cinemachine
 		private void ActiveCameraChanged(ICinemachineCamera newCamera, ICinemachineCamera oldCamera) {
 			if (ReferenceEquals(this._cinemachineCamera, newCamera)) {
 				if (this._cinemachineCamera is CinemachineFreeLook freeLookCamera) {
@@ -211,7 +240,8 @@ namespace CDK {
 				}
 			}
 		}
-		
+		#endif
+
 		#endregion <<---------- Events ---------->>
 
 		
@@ -220,6 +250,7 @@ namespace CDK {
 		#region <<---------- Input ---------->>
 
 		public void ResetRotation(float duration = 0.3f) {
+			#if Cinemachine && DOTween
 			if (this._recenterRotationTween != null ) return;
 			this._recenterRotationTween?.Kill();
 
@@ -245,6 +276,9 @@ namespace CDK {
 				};
 				this._recenterRotationTween.Play();
 			}
+			#else
+			Debug.LogError("'Camera ResetRotation' Not implemented without Cinemachine and Dotween");
+			#endif
 		}
 		
 		#endregion <<---------- Input ---------->>
@@ -254,6 +288,8 @@ namespace CDK {
 		
 		#region <<---------- Camera Transition ---------->>
 
+		#if DOTween
+		
 		public void StartTransition(float duration, CameraTransitionType transitionType) {
 			this._tween?.Complete();
 			this._tween?.Kill();
@@ -283,18 +319,24 @@ namespace CDK {
 					this._fader.FadeToTransparent(duration, false);
 					break;
 				case CameraTransitionType.crossfade:
-					print($"[CPlayerCamera] Reverse {CameraTransitionType.crossfade.ToString()} transition with duration {duration}.");
+					#if DOTween
+					Debug.Log($"[CPlayerCamera] Reverse {CameraTransitionType.crossfade.ToString()} transition with duration {duration}.");
 					this._tween = DOVirtual.Float(this._screenCrossfadeRawImage.color.a, 0f, duration, value => {
 						var color = this._screenCrossfadeRawImage.color;
 						color = new Color(color.r, color.g, color.b, value);
 						this._screenCrossfadeRawImage.color = color;
-					});
+					});					
+					#else	
+					Debug.LogError("'Camera Crossfade transition doesnt work yet without DOTween'");
+					#endif
 					break;
 			}
 
 			this._blockingEventsManager.IsPlayingCutscene = false;
 			this._tween.Play();
 		}
+
+		#endif
 
 		#endregion <<---------- Camera Transition ---------->>
 		

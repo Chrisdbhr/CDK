@@ -25,7 +25,7 @@ namespace CDK {
 		}
 
 		public void ChangePose() {
-			var chosenAnim = this._animationsToGetPose.RandomElement();
+			var chosenAnim = this._animationsToGetPose.CRandomElement();
 			if (chosenAnim == null) return;
 			var time = Random.Range(0f, chosenAnim.length);
 			this._animationComponent.clip = chosenAnim;
