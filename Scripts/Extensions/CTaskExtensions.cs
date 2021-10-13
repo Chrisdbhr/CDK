@@ -7,8 +7,8 @@ namespace CDK {
 			await task.ConfigureAwait(continueOnCapturedContext);
 		}
 
-		public static bool CIsRunning(this Task t) {
-			return t is {IsCompleted: false};
+		public static bool CIsRunning(this Task task) {
+			return task != null && !task.IsCompleted;
 		}
 	}
 }

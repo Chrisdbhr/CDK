@@ -3,10 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using CDK.UI;
-using Rewired;
 using UniRx;
 using UnityEngine;
+
+#if Rewired
+using Rewired;
+#endif
+
+#if UnityAddressables
 using UnityEngine.AddressableAssets;
+#endif
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -27,8 +33,10 @@ namespace CDK {
 
 			this.PlayerNumber = playerNumber;
 			
+			#if Rewired	
 			this._rePlayer = ReInput.players.GetPlayer(this.PlayerNumber);
-			
+			#endif
+
 			this.SignToInputEvents();
 
 			this.SetInputLayout(false);
@@ -51,7 +59,11 @@ namespace CDK {
 		#region <<---------- Properties and Fields ---------->>
 		
 		public int PlayerNumber { get; } = 0;
+		
+		#if Rewired	
 		private readonly Rewired.Player _rePlayer;
+		#endif
+		
 		private Transform _cameraTransform;
 		private CPlayerCamera _cPlayerCamera;
 
@@ -84,26 +96,34 @@ namespace CDK {
 					return;
 				}
 				
+				#if Rewired
 				var inputMovement = this._rePlayer.GetAxis2D(CInputKeys.MOV_X, CInputKeys.MOV_Y);
 				
 				var (camF, camR) = this.GetCameraVectors();
 				
 				character.InputMovementRaw = inputMovement.normalized;
 				character.InputMovementDirRelativeToCam = (camF * inputMovement.y + camR * inputMovement.x).normalized;
+				#else
+				Debug.LogError("'GamePlayer movement handling not implemented without Rewired'");
+				#endif
 			}).AddTo(this._compositeDisposable);
 			
+			#if Rewired
 			this._rePlayer.AddInputEventDelegate(this.InputInteract, UpdateLoopType.Update, InputActionEventType.ButtonJustPressed, CInputKeys.INTERACT);
 			this._rePlayer.AddInputEventDelegate(this.InputRun, UpdateLoopType.Update, CInputKeys.RUN);
 			this._rePlayer.AddInputEventDelegate(this.InputResetCameraRotation, UpdateLoopType.Update, CInputKeys.RESET_CAM_ROTATION);
 			this._rePlayer.AddInputEventDelegate(this.InputPause, UpdateLoopType.Update, InputActionEventType.ButtonJustPressed, CInputKeys.MENU_PAUSE);
+			#endif
 
 		}
 
 		private void UnsignFromInputEvents() {
+			#if Rewired
 			this._rePlayer?.RemoveInputEventDelegate(this.InputInteract);
 			this._rePlayer?.RemoveInputEventDelegate(this.InputRun);
 			this._rePlayer?.RemoveInputEventDelegate(this.InputResetCameraRotation);
 			this._rePlayer?.RemoveInputEventDelegate(this.InputPause);
+			#endif
 		}
 
 		#endregion <<---------- Events ---------->>
@@ -113,6 +133,7 @@ namespace CDK {
 		
 		#region <<---------- Character Creation and Exclusion ---------->>
 		
+		#if UnityAddressables
 		public async Task<CCharacterBase> InstantiateAndAssignCharacter(AssetReference charToCreate) {
 			
 			if (charToCreate == null || !charToCreate.RuntimeKeyIsValid()) {
@@ -155,6 +176,7 @@ namespace CDK {
 
 			return character;
 		}
+		#endif
 
 		#endregion <<---------- Character Creation and Exclusion ---------->>
 
@@ -202,14 +224,19 @@ namespace CDK {
 			var mainChar = this.GetControllingCharacter();
 			if (mainChar == null) return;
 			
+			#if UnityAddressables
 			var createdGo = await CAssets.LoadAndInstantiateGameObjectAsync("PlayerCamera");
 			createdGo.name = $"[Camera] {mainChar.name}";
 			
 			Debug.Log($"Created {mainChar.name} Camera", createdGo);
 
 			this._cPlayerCamera = createdGo.GetComponent<CPlayerCamera>();
+			
 			this._cPlayerCamera.Initialize(this);
 			this._cameraTransform = this._cPlayerCamera.GetCameraTransform();
+			#else
+			Debug.LogError("Default player camera creation not implemented without UnityAddressables");
+			#endif
 		}
 
 		private (Vector3 camF, Vector3 camR) GetCameraVectors() {
@@ -247,6 +274,8 @@ namespace CDK {
 		
 		#region <<---------- Input ---------->>
 
+		#if Rewired
+		
 		private void InputPause(InputActionEventData data) {
 			if (!data.GetButtonDown()) return;
 
@@ -281,6 +310,8 @@ namespace CDK {
 			interactionComponent.TryToInteract();
 		}
 		
+		#endif
+		
 		#endregion <<---------- Input ---------->>
 
 
@@ -289,9 +320,11 @@ namespace CDK {
 		#region <<---------- Controlls Mappings ---------->>
 
 		private void SetInputLayout(bool onMenu) {
+			#if Rewired
 			this._rePlayer.controllers.maps.SetMapsEnabled(!onMenu, "Default");
 			this._rePlayer.controllers.maps.SetMapsEnabled(onMenu, "UI"); 
 			//ReInput.players.GetSystemPlayer().controllers.maps.SetMapsEnabled(onMenu, "UI");
+			#endif
 			
 			Debug.Log($"Player {this.PlayerNumber} controllers maps onMenu changed to {onMenu}");
 		}
@@ -307,7 +340,11 @@ namespace CDK {
 			if (this._blockingEventsManager.IsOnMenu) return;
 			this._blockingEventsManager.IsOnMenu = true;
 			try {
+				#if UnityAddressables
 				await CUINavigation.get.OpenMenu(this._gameSettings.AssetRef_PauseMenu, null, null);
+				#else
+				Debug.LogError("'GamePlayer OpenMenu' not implemented without UnityAddressables");
+				#endif
 			} catch (Exception e) {
 				this._blockingEventsManager.IsOnMenu = false;
 				Debug.LogError("Exception trying to OpenMenu on GamePlayer: " + e);

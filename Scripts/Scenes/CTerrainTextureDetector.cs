@@ -23,7 +23,7 @@ namespace CDK {
         public TerrainLayer GetFirstTextureAt(Vector3 worldPosition) {
             int index = this.GetDominantTextureIndexAt(worldPosition);
             if (index < 0) return null;
-            return this.ThisTerrainData.terrainLayers.GetAtIndexSafe(index);
+            return this.ThisTerrainData.terrainLayers.CGetAtIndexSafe(index);
         }
 
         /// <summary>

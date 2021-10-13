@@ -1,8 +1,11 @@
 using System;
 using UniRx;
 using UnityEngine;
-using UnityEngine.AddressableAssets;
 using UnityEngine.Events;
+
+#if UnityAddressables
+using UnityEngine.AddressableAssets;
+#endif
 
 namespace CDK {
 	public class CInventory : MonoBehaviour {
@@ -13,7 +16,9 @@ namespace CDK {
 		[SerializeField] private Animator _characterAnimator;
 		
 		// items
+		#if UnityAddressables
 		[SerializeField] private AssetReference _inventoryViewRef;
+		#endif
 		[NonSerialized] private CInventoryView _inventoryViewSpawned;
 	
 		public int Size {

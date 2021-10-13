@@ -4,8 +4,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using UniRx;
 using UnityEngine;
-using UnityEngine.AddressableAssets;
 using UnityEngine.EventSystems;
+
+#if UnityAddressables
+using UnityEngine.AddressableAssets;
+#endif
 
 namespace CDK.UI {
 	public class CUINavigation {
@@ -57,6 +60,7 @@ namespace CDK.UI {
 		
 		#region <<---------- Open / Close ---------->>
 
+		#if UnityAddressables
 		/// <summary>
 		/// Opens a menu, registering the button that opened it.
 		/// </summary>
@@ -89,6 +93,7 @@ namespace CDK.UI {
 			
 			return ui;
 		}
+		#endif
 
 		/// <summary>
 		/// Closes active menu selecting previous button.

@@ -1,8 +1,16 @@
-using FMODUnity;
 using UnityEngine;
+	
+#if UnityAddressables
 using UnityEngine.AddressableAssets;
+#endif
+
 #if UNITY_EDITOR
+using System.IO;
 using UnityEditor;		
+#endif
+
+#if FMOD
+using FMODUnity;
 #endif
 
 namespace CDK {
@@ -20,6 +28,8 @@ namespace CDK {
 		
 		
 		#region <<---------- Properties ---------->>
+
+		#if UnityAddressables
 		
 		public AssetReference AssetRef_UiLoading => this._assetRefUiLoading;
 		[Header("Asset References")]
@@ -31,6 +41,8 @@ namespace CDK {
 		public AssetReference AssetRef_ConfirmationPopup => this._assetRefConfirmationPopup;
 		[SerializeField] protected AssetReference _assetRefConfirmationPopup;
 		
+		#endif
+		
 		public bool CursorStartsHidden => this._cursorStartsHidden;
 		[SerializeField] protected bool _cursorStartsHidden;
 
@@ -39,19 +51,34 @@ namespace CDK {
 
 
 		[Header("Default Sounds")]
-		[SerializeField] [EventRef] protected string _soundSelect;
+		#if FMOD
+		[EventRef] 
+		#endif
+		[SerializeField] protected string _soundSelect;
 		public string SoundSelect => this._soundSelect;
 		
-		[SerializeField] [EventRef] protected string _soundSubmit;
+		#if FMOD
+		[EventRef] 
+		#endif
+		[SerializeField] protected string _soundSubmit;
 		public string SoundSubmit => this._soundSubmit;
 		
-		[SerializeField] [EventRef] protected string _soundCancel;
+		#if FMOD
+		[EventRef] 
+		#endif
+		[SerializeField] protected string _soundCancel;
 		public string SoundCancel => this._soundCancel;
 
-		[SerializeField] [EventRef] protected string _soundOpenMenu;
+		#if FMOD
+		[EventRef] 
+		#endif
+		[SerializeField]protected string _soundOpenMenu;
 		public string SoundOpenMenu => this._soundOpenMenu;
 
-		[SerializeField] [EventRef] protected string _soundCloseMenu;
+		#if FMOD
+		[EventRef] 
+		#endif
+		[SerializeField] protected string _soundCloseMenu;
 		public string SoundCloseMenu => this._soundCloseMenu;
 
 		
@@ -85,6 +112,7 @@ namespace CDK {
 			if (gameSettingsScriptObj != null) return gameSettingsScriptObj;
 			
 			gameSettingsScriptObj = ScriptableObject.CreateInstance<CGameSettings>();
+			Directory.CreateDirectory(GAME_SETTINGS_ASSET_PATH);
 			AssetDatabase.CreateAsset(gameSettingsScriptObj, GAME_SETTINGS_ASSET_PATH);
 			Debug.Log($"Created GameSettings scriptable object at path: '{GAME_SETTINGS_ASSET_PATH}'");
 			return gameSettingsScriptObj;
