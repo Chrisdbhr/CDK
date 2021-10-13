@@ -4,6 +4,7 @@ using System.Linq;
 using UnityEngine;
 
 namespace CDK {
+	[Obsolete]
 	public class CSceneAreaCharacterReceiver : MonoBehaviour {
 
 		[NonSerialized] private CCharacterBase _characterBase;

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 namespace CDK {
+	[Obsolete]
 	public class CSceneArea : MonoBehaviour {
 		[SerializeField] private CSceneAreaData _data;
 		[NonSerialized] private HashSet<CSceneAreaCharacterReceiver> _affectedReceivers = new HashSet<CSceneAreaCharacterReceiver>();
