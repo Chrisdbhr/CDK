@@ -72,7 +72,7 @@ namespace CDK {
 		#endif
 
 		private static void SetControllerTypeBasedOnPlatform() {
-			#if UNITY_STANDALONE
+			#if UNITY_STANDALONE || UNITY_WEBGL
 			ActiveInputType = InputType.MouseAndKeyboard;
 			#elif UNITY_ANDROID || UNITY_IOS || UNITY_IPHONE
 			ActiveInputType = InputType.Mobile;
