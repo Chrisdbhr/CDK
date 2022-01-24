@@ -147,7 +147,11 @@ namespace CDK {
 		
 		private void OnPostRender() {
 			if (this._getRenderImgOnNextFrame) {
+				#if UNITY_2021_2
+				this._screenShootTexture2d.Reinitialize(Screen.width, Screen.height);
+				#else
 				this._screenShootTexture2d.Resize(Screen.width, Screen.height);
+				#endif
 				this._screenShootTexture2d.ReadPixels(new Rect(0, 0, Screen.width, Screen.height), 0, 0);
 				this._screenShootTexture2d.Apply();
 				this._screenCrossfadeRawImage.texture = this._screenShootTexture2d;

@@ -39,7 +39,7 @@ namespace CDK {
 
 			this.SignToInputEvents();
 
-			this.SetInputLayout(false);
+			SetInputLayout(this._rePlayer, false);
 			this._blockingEventsManager.OnMenu += this.SetInputLayout;
 
 			if (!Application.isEditor) {
@@ -320,13 +320,24 @@ namespace CDK {
 		#region <<---------- Controlls Mappings ---------->>
 
 		private void SetInputLayout(bool onMenu) {
+			SetInputLayout(this._rePlayer, onMenu);
+		}
+
+		public static void SetInputLayout(Rewired.Player rePlayer, bool onMenu) {
+			if (rePlayer == null) {
+				Debug.LogError($"cannot set input for a null Rewired.Player");
+				return;
+			}
+
+			int joystickControllersCount = rePlayer.controllers.joystickCount;
+			int customControllersCount = rePlayer.controllers.customControllerCount;
 			#if Rewired
-			this._rePlayer.controllers.maps.SetMapsEnabled(!onMenu, "Default");
-			this._rePlayer.controllers.maps.SetMapsEnabled(onMenu, "UI"); 
+			rePlayer.controllers.maps.SetMapsEnabled(!onMenu, "Default");
+			rePlayer.controllers.maps.SetMapsEnabled(onMenu, "UI"); 
 			//ReInput.players.GetSystemPlayer().controllers.maps.SetMapsEnabled(onMenu, "UI");
 			#endif
 			
-			Debug.Log($"Player {this.PlayerNumber} controllers maps onMenu changed to {onMenu}");
+			Debug.Log($"Player ID '{rePlayer.id}' controllers maps onMenu changed to '{onMenu}'\nCustom Controllers: {customControllersCount}, JoystickControllers: {joystickControllersCount}");
 		}
 		
 		#endregion <<---------- Controlls Mappings ---------->>
