@@ -10,15 +10,18 @@ namespace CDK {
 	
 	public static class CDependencyResolver {
 
+		
 		private static Dictionary<Type, object> Instances;
 		private static Dictionary<Type, Func<object>> Binds;
+		private static bool _initialized;
 
 
 
-
-		public static void Initialize() {
+		private static void InitializeIfNeeded() {
+			if (_initialized) return;
 			Instances = new Dictionary<Type, object>();
 			Binds = new Dictionary<Type, Func<object>>();
+			_initialized = true;
 		}
 		
 		
@@ -39,6 +42,7 @@ namespace CDK {
 		}
 
 		public static void Bind<T>(Func<object> creationHandler) { // TODO enum comportamento singleton
+			InitializeIfNeeded();
 			var typeofT = typeof(T);
 			Debug.Log($"Binding creation handler for '{typeofT.Name}'");
 			Binds.Add(typeofT, creationHandler);
