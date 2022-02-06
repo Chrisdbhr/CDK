@@ -28,7 +28,7 @@ namespace CDK {
             var asyncOp = SceneManager.LoadSceneAsync(this._sceneToLoad, LoadSceneMode.Single);
             asyncOp.allowSceneActivation = false;
 
-            while (!FMODUnity.RuntimeManager.HasBanksLoaded) yield return null;
+            while (!FMODUnity.RuntimeManager.HaveMasterBanksLoaded) yield return null;
             while (!this._splashEnded) yield return null;
 
             asyncOp.allowSceneActivation = true;

@@ -8,7 +8,7 @@ namespace CDK {
 		[SerializeField] private CUnityEvent OnBanksLoaded;
 		
 		private void Update() {
-			if (!RuntimeManager.HasBanksLoaded) return;
+			if (!RuntimeManager.HaveMasterBanksLoaded) return;
 			this.enabled = false;
 			this.OnBanksLoaded?.Invoke();
 		}

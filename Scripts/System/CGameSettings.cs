@@ -51,36 +51,20 @@ namespace CDK {
 
 
 		[Header("Default Sounds")]
-		#if FMOD
-		[EventRef] 
-		#endif
-		[SerializeField] protected string _soundSelect;
-		public string SoundSelect => this._soundSelect;
+		[SerializeField] protected EventReference _soundSelect;
+		public EventReference SoundSelect => this._soundSelect;
 		
-		#if FMOD
-		[EventRef] 
-		#endif
-		[SerializeField] protected string _soundSubmit;
-		public string SoundSubmit => this._soundSubmit;
+		[SerializeField] protected EventReference _soundSubmit;
+		public EventReference SoundSubmit => this._soundSubmit;
 		
-		#if FMOD
-		[EventRef] 
-		#endif
-		[SerializeField] protected string _soundCancel;
-		public string SoundCancel => this._soundCancel;
+		[SerializeField] protected EventReference _soundCancel;
+		public EventReference SoundCancel => this._soundCancel;
 
-		#if FMOD
-		[EventRef] 
-		#endif
-		[SerializeField]protected string _soundOpenMenu;
-		public string SoundOpenMenu => this._soundOpenMenu;
+		[SerializeField] protected EventReference _soundOpenMenu;
+		public EventReference SoundOpenMenu => this._soundOpenMenu;
 
-		#if FMOD
-		[EventRef] 
-		#endif
-		[SerializeField] protected string _soundCloseMenu;
-		public string SoundCloseMenu => this._soundCloseMenu;
-
+		[SerializeField] protected EventReference _soundCloseMenu;
+		public EventReference SoundCloseMenu => this._soundCloseMenu;
 		
 		#endregion <<---------- Properties ---------->>
 

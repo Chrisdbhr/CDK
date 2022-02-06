@@ -1,4 +1,5 @@
 using System;
+using FMODUnity;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -23,9 +24,9 @@ namespace CDK.UI {
 			this._gameSettings = CDependencyResolver.Get<CGameSettings>();
 		}
 
-		private void PlaySound(string sound) {
+		private void PlaySound(EventReference sound) {
 			#if FMOD
-			if (!sound.CIsNullOrEmpty()) {
+			if (!sound.IsNull) {
 				this._soundEventInstance.stop(STOP_MODE.IMMEDIATE);
 				this._soundEventInstance = FMODUnity.RuntimeManager.CreateInstance(sound);
 				this._soundEventInstance.start();
