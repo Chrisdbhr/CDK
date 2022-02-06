@@ -1,3 +1,4 @@
+using System;
 using CDK.Damage;
 using CDK.Data;
 using UnityEngine;
@@ -10,7 +11,7 @@ namespace CDK {
 		
 		public void Initialize(CHitInfoData hitInfo, Transform attackerTransform) {
 			this._hitInfo = hitInfo;
-			this._hitInfo.AttackerTransform = attackerTransform;
+			this._hitInfo.AttackerRootTransform = attackerTransform;
 		}
 		
 		#endregion <<---------- Initializers ---------->>
@@ -43,32 +44,36 @@ namespace CDK {
 
 		#region <<---------- MonoBehaviour ---------->>
 		
+		private void Awake() {
+			if (this._hitInfo.AttackerRootTransform == null) {
+				var root = this.transform.root;
+				//Debug.Log($"'{this.name}' DamageDealer auto setting AttackerRootTransform as '{root.name}' because it was null on Awake()");
+				this._hitInfo.AttackerRootTransform = root;
+			}
+		}
+
 		private void OnTriggerEnter(Collider other) {
 			if (!this._isTrigger) return;
-			var rootTransform = other.transform.root;
-			if (rootTransform == this._hitInfo.AttackerTransform) return;
-			this.DoDamageOnContact(rootTransform);
+			if (other.transform.root == this._hitInfo.AttackerRootTransform) return;
+			this.DoDamageOnContact(other);
 		}
 
 		private void OnCollisionEnter(Collision other) {
 			if (this._isTrigger) return;
-			var rootTransform = other.transform.root;
-			if (rootTransform == this._hitInfo.AttackerTransform) return;
-			this.DoDamageOnContact(rootTransform);
+			if (other.transform.root == this._hitInfo.AttackerRootTransform) return;
+			this.DoDamageOnContact(other.collider);
 		}
 
 		private void OnTriggerEnter2D(Collider2D other) {
 			if (!this._isTrigger) return;
-			var rootTransform = other.transform.root;
-			if (rootTransform == this._hitInfo.AttackerTransform) return;
-			this.DoDamageOnContact(rootTransform);
+			if (other.transform.root == this._hitInfo.AttackerRootTransform) return;
+			this.DoDamageOnContact(other);
 		}
 
 		private void OnCollisionEnter2D(Collision2D other) {
 			if (this._isTrigger) return;
-			var rootTransform = other.transform.root;
-			if (rootTransform == this._hitInfo.AttackerTransform) return;
-			this.DoDamageOnContact(rootTransform);
+			if (other.transform.root == this._hitInfo.AttackerRootTransform) return;
+			this.DoDamageOnContact(other.collider);
 		}
 		
 		#endregion <<---------- MonoBehaviour ---------->>

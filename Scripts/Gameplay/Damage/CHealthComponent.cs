@@ -16,10 +16,11 @@ namespace CDK {
 
 		[SerializeField] private Animator _animator;
 		[Space]
-		[SerializeField] private CTransformShake _transformShake; // TODO shake only near cameras
+		[SerializeField] private CTransformShake _transformShake;
 
-		[NonSerialized] private Transform _transform;
-		[NonSerialized] private Transform _lastAttacker;
+		private Transform _transform;
+		public Transform LastAttacker => this._lastAttacker;
+		private Transform _lastAttacker;
 		
 		#endregion <<---------- References ---------->>
 
@@ -98,8 +99,8 @@ namespace CDK {
 
 		[SerializeField] private float _regenAmountPerTick = 0.20f;
 		[SerializeField] private float _regenDelayAfterHit = 3f;
-		[NonSerialized] private float _lastDamageTakenTime;
-		[NonSerialized] private float _lastDamageValue;
+		private float _lastDamageTakenTime;
+		private float _lastDamageValue;
 
 		#endregion <<---------- Partial Health Regeneration ---------->>
 		
@@ -129,19 +130,8 @@ namespace CDK {
 
 		#region <<---------- MonoBehaviour ---------->>
 		
-		#if UNITY_EDITOR
-		private void Reset() {
-			if (this.transform != this.transform.root) {
-				Debug.LogWarning("Health component is not on a root transform! This object will not take damage!");
-			}
-		}
-		#endif
-		
 		private void Awake() {
 			this._transform = this.transform;
-			if (this._transform != this._transform.root) {
-				Debug.LogWarning("Health component is not on a root transform! This object will not take damage!", this.gameObject);
-			}
 			this.FullCure();
 		}
 
@@ -183,10 +173,15 @@ namespace CDK {
 			var hitScriptObj = hitInfo.ScriptableObject;
 			if (hitScriptObj.Damage <= 0f) return false;
 
-			this._lastAttacker = hitInfo.AttackerTransform;
+			this._lastAttacker = hitInfo.AttackerRootTransform;
 
 			// Start total damage calculation.
 			float finalDamage = hitScriptObj.Damage;
+			
+			// external damage multiplier
+			if (hitInfo.DamageMultiplier != 0f) {
+				finalDamage *= hitInfo.DamageMultiplier;
+			}
 
 			//todo calculate armor damage reduction
 			//todo calculate damage bonus
@@ -194,7 +189,7 @@ namespace CDK {
 			//todo play damage animation if apply
 
 			if (hitScriptObj.LookAtAttacker) {
-				this._transform.LookAt(hitInfo.AttackerTransform.transform);
+				this._transform.LookAt(hitInfo.AttackerRootTransform.transform);
 				this._transform.eulerAngles = new Vector3(0f, this._transform.eulerAngles.y, 0f);
 			}
 
@@ -204,13 +199,15 @@ namespace CDK {
 			this.CurrentHealth -= finalDamage;
 
 			// camera shake
-			if (this._transformShake != null && hitInfo.AttackerTransform != null) {
+			if (this._transformShake != null && hitInfo.AttackerRootTransform != null) {
 				this._transformShake.RequestShake(
-					(hitInfo.AttackerTransform.position - this._transform.position).normalized * (finalDamage * 0.01f), 
+					(hitInfo.AttackerRootTransform.position - this._transform.position).normalized * (finalDamage * 0.01f), 
 					hitScriptObj.DamageShakePattern,
 					hitScriptObj.ShakeMultiplier
 				);
 			}
+
+			this._lastAttacker = hitInfo.AttackerRootTransform;
 			
 			return true;
 		}
