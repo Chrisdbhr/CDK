@@ -11,15 +11,8 @@ namespace CDK.Audio {
 	public class CMusicForScene : MonoBehaviour {
 	
 		[SerializeField] private bool _is3d;
-		
-#if FMOD
-		[EventRef] 
-#endif
-		[SerializeField] private string _music;
-		
-#if FMOD
+		[SerializeField] private EventReference _music;
 		[NonSerialized] private FMOD.Studio.EventInstance _musicState;
-#endif
 
 
 
@@ -28,7 +21,7 @@ namespace CDK.Audio {
 		#region <<---------- MonoBehaviour ---------->>
 
 		private void OnEnable() {
-			if (this._music.CIsNullOrEmpty()) {
+			if (this._music.IsNull) {
 				Debug.LogWarning($"{this.name} is not referencing a valid Music (EventRef)!");
 				return;
 			}
