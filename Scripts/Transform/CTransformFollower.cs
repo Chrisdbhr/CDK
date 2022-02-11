@@ -9,7 +9,7 @@ namespace CDK {
 
 		#region <<---------- Properties and Fields ---------->>
 		
-		[SerializeField] private CMonobehaviourExecutionLoop executionLoop;
+		[SerializeField] private CMonobehaviourExecutionLoop executionLoop = CMonobehaviourExecutionLoop.LateUpdate;
 		[Obsolete("OBSOLETE, use public property instead.")]
 		[SerializeField] private Transform _transformToFollow;
 		public Transform TransformToFollow {
