@@ -135,19 +135,7 @@ namespace CDK {
 				return;
 			}
 
-			Transform targetEntryPointTransform = null;
-			
-			var sceneEntryPoints = GameObject.FindObjectsOfType<CSceneEntryPoint>();
-
-			if (!sceneEntryPoints.Any() || entryPointNumber >= sceneEntryPoints.Length) {
-				Debug.LogWarning($"Cant find any level entry point {entryPointNumber} OR it is invalid.");
-			}
-			else {
-				var selectedEntryPoint = sceneEntryPoints.FirstOrDefault(ep => ep.Number == entryPointNumber);
-				if (selectedEntryPoint != null) {
-					targetEntryPointTransform = selectedEntryPoint.transform;
-				}
-			}
+			Transform targetEntryPointTransform = CSceneEntryPoint.GetSceneEntryPointTransform(entryPointNumber);
 
 			var offset = new Vector3(0f, 0.001f, 0f);
 			if (targetEntryPointTransform == null) {

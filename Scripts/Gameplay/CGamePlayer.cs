@@ -154,14 +154,11 @@ namespace CDK {
 				return null;
 			}
 			
-			var entryPoints = GameObject.FindObjectsOfType<CSceneEntryPoint>();
-			if (entryPoints.Length > 0) {
-				var entryPoint = entryPoints.OrderBy(x=>x.Number).FirstOrDefault();
-				if (entryPoint != null) {
-					Debug.Log($"Setting '{createdGo.name}' to entryPoint number'{entryPoint.Number}'", entryPoint.gameObject);
-					character.TeleportToLocation(entryPoint.transform.position, entryPoint.transform.rotation);
-					Physics.SyncTransforms();
-				}
+			var entryPoint = CSceneEntryPoint.GetSceneEntryPointTransform(0);
+			if (entryPoint != null) {
+				Debug.Log($"Setting '{createdGo.name}' to entryPoint number'{0}'", entryPoint.gameObject);
+				character.TeleportToLocation(entryPoint.transform.position, entryPoint.transform.rotation);
+				Physics.SyncTransforms();
 			}
 			createdGo.SetActive(false);
 			createdGo.name = $"[Character] {createdGo.name}";
