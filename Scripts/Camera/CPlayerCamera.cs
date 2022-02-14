@@ -1,6 +1,9 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using UniRx;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 #if Cinemachine
@@ -40,8 +43,10 @@ namespace CDK {
 			var lookTarget = ownerCharacter.GetComponentInChildren<CCameraLookAndFollowTarget>();
 			
 			#if Cinemachine
-			this._cinemachineCamera.Follow = ownerCharacter.transform;
-			this._cinemachineCamera.LookAt = lookTarget != null ? lookTarget.transform : ownerCharacter.transform;
+			foreach (var cam in this._cinemachineCameras) {
+				cam.Follow = ownerCharacter.transform;
+				cam.LookAt = lookTarget != null ? lookTarget.transform : ownerCharacter.transform;
+			}
 			#else
 			Debug.LogError("'PlayerCamera' will not work without Cinemachine");
 			#endif
@@ -63,6 +68,11 @@ namespace CDK {
 			fade,
 			crossfade
 		}
+		
+		public enum CameraType {
+			@default,
+			smallAreaCloseLimitedVision
+		}
 
 		#endregion <<---------- Enums ---------->>
 		
@@ -82,7 +92,7 @@ namespace CDK {
 		[SerializeField] private UnityEngine.Camera _unityCamera;
 		#if Cinemachine
 		[SerializeField] private CinemachineBrain _cinemachineBrain;
-		[SerializeField] private CinemachineVirtualCameraBase _cinemachineCamera;
+		[SerializeField] private CinemachineVirtualCameraBase[] _cinemachineCameras;
 		#endif
 		[NonSerialized] private int _currentGameFrame;
 
@@ -112,7 +122,10 @@ namespace CDK {
 		
 		[NonSerialized] private CFader _fader;
 		[NonSerialized] private CBlockingEventsManager _blockingEventsManager;
-
+		
+		// Camera Profiles
+		private List<CCameraProfileVolume> ActiveCameraProfiles;
+		
 		#endregion <<---------- Properties and Fields ---------->>
 
 		
@@ -124,13 +137,16 @@ namespace CDK {
 			this._transform = this.transform;
 			this._fader = CDependencyResolver.Get<CFader>();
 			this._blockingEventsManager = CDependencyResolver.Get<CBlockingEventsManager>();
+			this.ActiveCameraProfiles = new ();
+			this.SearchForGlobalVolume();
+			this.ApplyLastOrDefaultCameraProfile();
 		}
 
 		private void OnEnable() {
 			var angles = this._transform.eulerAngles;
 			this.RotationY = angles.y;
 			this.RotationX = angles.x;
-
+			
 			this.SubscribeToEvents();
 			
 			this._screenShootTexture2d = new Texture2D(Screen.width, Screen.height, TextureFormat.RGB24, false, true);
@@ -159,8 +175,7 @@ namespace CDK {
 				this._getRenderImgOnNextFrame = false;
 			}
 		}
-		
-		
+
 		#if UNITY_EDITOR
 		private void OnDrawGizmos() {
 			if (this._unityCamera) {
@@ -169,6 +184,18 @@ namespace CDK {
 			}
 		}
 		#endif
+		
+		private void OnTriggerEnter(Collider other) {
+			var cameraArea = other.GetComponent<CCameraProfileVolume>();
+			if (cameraArea == null) return;
+			this.EnteredCameraArea(cameraArea);
+		}
+
+		private void OnTriggerExit(Collider other) {
+			var cameraArea = other.GetComponent<CCameraProfileVolume>();
+			if (cameraArea == null) return;
+			this.ExitedCameraArea(cameraArea);
+		}
 		
 		#endregion <<---------- MonoBehaviour ---------->>
 		
@@ -192,31 +219,38 @@ namespace CDK {
 			#if Cinemachine
 			this._isCloseToTheCharacterRx = new ReactiveProperty<bool>(false);
 
-			// camera sensitivity settings
-			if (this._cinemachineCamera is CinemachineFreeLook freeLookCamera) {
-				CSave.getRx.ObserveEveryValueChanged(p=>p.Value.CameraSensitivity.x).TakeUntilDisable(this).Subscribe(value => {
-					freeLookCamera.m_XAxis.m_MaxSpeed = value;
-				});
-				CSave.getRx.ObserveEveryValueChanged(p=>p.Value.CameraSensitivity.y).TakeUntilDisable(this).Subscribe(value => {
-					freeLookCamera.m_YAxis.m_MaxSpeed = value;
-				});
-			}else if (this._cinemachineCamera is CinemachineVirtualCamera virtualCamera) {
-				var pov = virtualCamera.GetCinemachineComponent<CinemachinePOV>();
-				if (pov == null) return;
-				CSave.getRx.ObserveEveryValueChanged(p=>p.Value.CameraSensitivity.x).TakeUntilDisable(this).Subscribe(value => {
+			// camera sensitivity changed
+			CSave.getRx.ObserveEveryValueChanged(p=>p.Value.CameraSensitivity.x).TakeUntilDisable(this).Subscribe(value => {
+				// freelook camera
+				if (this._cinemachineBrain.ActiveVirtualCamera is CinemachineFreeLook freeLookCamera) freeLookCamera.m_XAxis.m_MaxSpeed = value;
+				
+				// virtual camera
+				if (this._cinemachineBrain.ActiveVirtualCamera is CinemachineVirtualCamera virtualCamera) {
+					var pov = virtualCamera.GetCinemachineComponent<CinemachinePOV>();
+					if (pov == null) return;
 					pov.m_HorizontalAxis.m_MaxSpeed = value;
-				});
-				CSave.getRx.ObserveEveryValueChanged(p=>p.Value.CameraSensitivity.y).TakeUntilDisable(this).Subscribe(value => {
+				}
+			});
+			CSave.getRx.ObserveEveryValueChanged(p=>p.Value.CameraSensitivity.y).TakeUntilDisable(this).Subscribe(value => {
+				// freelook camera
+				if (this._cinemachineBrain.ActiveVirtualCamera is CinemachineFreeLook freeLookCamera) freeLookCamera.m_YAxis.m_MaxSpeed = value;
+				
+				// virtual camera
+				if (this._cinemachineBrain.ActiveVirtualCamera is CinemachineVirtualCamera virtualCamera) {
+					var pov = virtualCamera.GetCinemachineComponent<CinemachinePOV>();
+					if (pov == null) return;
 					pov.m_VerticalAxis.m_MaxSpeed = value;
-				});
-			}
+				}
+			});
 			
 			// active camera changed
 			this._cinemachineBrain.m_CameraActivatedEvent.AddListener(this.ActiveCameraChanged);
 
 			// is close to the character?
 			Observable.EveryUpdate().TakeUntilDisable(this).Subscribe(_ => {
-				this._currentDistanceFromTarget = Vector3.Distance(this._cinemachineCamera.LookAt.position, this._unityCamera.transform.position); 
+				if (CApplication.Quitting) return;
+				if (this._cinemachineBrain == null || this._cinemachineBrain.ActiveVirtualCamera == null) return;
+				this._currentDistanceFromTarget = Vector3.Distance(this._cinemachineBrain.ActiveVirtualCamera.LookAt.position, this._unityCamera.transform.position); 
 				this._isCloseToTheCharacterRx.Value = this._currentDistanceFromTarget <= this._distanceToConsiderCloseForCharacter;
 			});
 			this._isCloseToTheCharacterRx.TakeUntilDisable(this).Subscribe(isClose => {
@@ -228,26 +262,42 @@ namespace CDK {
 				}
 			});
 			#endif
+
+			SceneManager.activeSceneChanged += ActiveSceneChanged;
 		}
 		
 		private void UnsubscribeToEvents() {
 			#if Cinemachine
 			this._cinemachineBrain.m_CameraActivatedEvent.RemoveListener(this.ActiveCameraChanged);
 			#endif
+			SceneManager.activeSceneChanged -= ActiveSceneChanged;
 		}
 		
 		#if Cinemachine
 		private void ActiveCameraChanged(ICinemachineCamera newCamera, ICinemachineCamera oldCamera) {
-			if (ReferenceEquals(this._cinemachineCamera, newCamera)) {
-				if (this._cinemachineCamera is CinemachineFreeLook freeLookCamera) {
-					freeLookCamera.m_YAxis.Value = 0.5f;
-				}
+			if (newCamera == null) return;
+			Debug.Log($"Player Cinemachine Active Camera Changed to '{newCamera.Name}'");
+			this.ApplyLastOrDefaultCameraProfile();
+			if (this._cinemachineBrain.ActiveVirtualCamera is CinemachineFreeLook freeLookCamera) {
+				freeLookCamera.m_YAxis.Value = 0.5f;
 			}
 		}
 		#endif
 
 		#endregion <<---------- Events ---------->>
+		
+		
+		
+		
+		#region <<---------- Callbacks ---------->>
 
+		private void ActiveSceneChanged(Scene oldScene, Scene newScene) {
+			this.SearchForGlobalVolume();
+			this.ApplyLastOrDefaultCameraProfile();
+		}
+		
+		#endregion <<---------- Callbacks ---------->>
+		
 		
 		
 
@@ -258,7 +308,7 @@ namespace CDK {
 			if (this._recenterRotationTween != null ) return;
 			this._recenterRotationTween?.Kill();
 
-			if (this._cinemachineCamera is CinemachineFreeLook freeLookCamera) {
+			if (this._cinemachineBrain.ActiveVirtualCamera is CinemachineFreeLook freeLookCamera) {
 				var finalTimes = new Vector2(freeLookCamera.m_RecenterToTargetHeading.m_RecenteringTime, freeLookCamera.m_YAxisRecentering.m_RecenteringTime);
 				
 				this._recenterRotationTween = DOTween.To(
@@ -343,6 +393,43 @@ namespace CDK {
 		#endif
 
 		#endregion <<---------- Camera Transition ---------->>
+
+
+
+
+		#region <<---------- Camera Area and Profiles ---------->>
+
+		private void SearchForGlobalVolume() {
+			var globalVolume = FindObjectsOfType<CCameraProfileVolume>().FirstOrDefault(s => s.IsGlobal);
+			if (globalVolume != null) {
+				this.ActiveCameraProfiles.Insert(0, globalVolume);
+			}
+		}
+		
+		public void EnteredCameraArea(CCameraProfileVolume cameraProfile) {
+			ActiveCameraProfiles.Add(cameraProfile);
+			this.ApplyLastOrDefaultCameraProfile();
+		}
+
+		public void ExitedCameraArea(CCameraProfileVolume cameraProfile) {
+			ActiveCameraProfiles.Remove(cameraProfile);
+			this.ApplyLastOrDefaultCameraProfile();
+		}
+
+		private void ApplyLastOrDefaultCameraProfile() {
+			this.ActiveCameraProfiles.RemoveAll(i => i == null);
+			var lastOrDefaultProfile = this.ActiveCameraProfiles.LastOrDefault();
+			EnableCameraFromType(lastOrDefaultProfile != null ? lastOrDefaultProfile.CameraType : CameraType.@default);
+		}
+
+		private void EnableCameraFromType(CameraType cameraType) {
+			int typeIndex = cameraType.CToInt();
+			for (int i = 0; i < this._cinemachineCameras.Length; i++) {
+				this._cinemachineCameras[i].gameObject.SetActive(i == typeIndex);
+			}
+		}
+		
+		#endregion <<---------- Camera Area and Profiles ---------->>
 		
 	}
 }
