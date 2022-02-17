@@ -8,7 +8,7 @@ namespace CDK {
 	/// <summary>
 	/// Makes something have health, can be hit and die.
 	/// </summary>
-	public class CHealthComponent : MonoBehaviour, ICDamageable {
+	public class CHealthComponent : MonoBehaviour {
 
 		#region <<---------- Properties and Fields ---------->>
 	
@@ -168,10 +168,13 @@ namespace CDK {
 		}
 
 
-		public bool TakeDamage(CHitInfoData hitInfo) {
-			if (this.IsDead) return false;
+		/// <summary>
+		/// Returns the amount of damage taken.
+		/// </summary>
+		public float TakeDamage(CHitInfoData hitInfo) {
+			if (this.IsDead) return 0f;
 			var hitScriptObj = hitInfo.ScriptableObject;
-			if (hitScriptObj.Damage <= 0f) return false;
+			if (hitScriptObj.Damage <= 0f) return 0f;
 
 			this._lastAttacker = hitInfo.AttackerRootTransform;
 
@@ -209,7 +212,7 @@ namespace CDK {
 
 			this._lastAttacker = hitInfo.AttackerRootTransform;
 			
-			return true;
+			return finalDamage;
 		}
 
 		public void RecoverHealth(float recoverAmount) {
