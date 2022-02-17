@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -9,8 +10,10 @@ namespace CDK.UI {
 	[RequireComponent(typeof(Button))]
 	public class CUIButton : CUIInteractable {
 		public Button Button;
-		
 
+		private void Reset() {
+			if(Button == null) Button = this.GetComponent<Button>();
+		}
 	}
 	
 }
