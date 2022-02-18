@@ -38,7 +38,7 @@ namespace CDK {
 			#endif
 
 			this.SignToInputEvents();
-
+			
 			SetInputLayout(this._rePlayer, false);
 			this._blockingEventsManager.OnMenu += this.SetInputLayout;
 
@@ -153,7 +153,7 @@ namespace CDK {
 				Debug.LogError($"{charToCreate} gameobject doesnt have a {nameof(CCharacterBase)} component on it! could not create player!");
 				return null;
 			}
-			
+
 			var entryPoint = CSceneEntryPoint.GetSceneEntryPointTransform(0);
 			if (entryPoint != null) {
 				Debug.Log($"Setting '{createdGo.name}' to entryPoint number'{0}'", entryPoint.gameObject);
@@ -164,9 +164,8 @@ namespace CDK {
 			createdGo.name = $"[Character] {createdGo.name}";
 			
 			await this.AddControllingCharacter(character);
-			
 			createdGo.SetActive(true);
-		
+			
 			await this.CheckIfNeedToCreateCamera();
 
 			Debug.Log($"Created player {this.PlayerNumber} controlling character '{createdGo.name}'.", createdGo);
@@ -368,7 +367,7 @@ namespace CDK {
 		
 		public void Dispose() {
 			this._compositeDisposable?.Dispose();
-			
+
 			this.UnsignFromInputEvents();
 			this._blockingEventsManager.OnMenu -= this.SetInputLayout; 
 		}
