@@ -28,7 +28,7 @@ namespace CDK {
 		#region <<---------- Cache and References ---------->>
 
 		[Header("Cache and References")]
-		[SerializeField] protected Animator Anim;
+		[SerializeField] protected Animator _animator;
 
 		[NonSerialized] protected CharacterController _charController;
 		[NonSerialized] protected CBlockingEventsManager _blockingEventsManager;
@@ -80,7 +80,7 @@ namespace CDK {
 			private set {
 				if (this._myVelocityXZ == value) return;
 				this._myVelocityXZ = value;
-				this.Anim.CSetFloatWithLerp(this.ANIM_CHAR_MOV_SPEED_XZ, this._myVelocityXZ.magnitude, ANIMATION_BLENDTREE_LERP * CTime.DeltaTimeScaled * this.TimelineTimescale);
+				this._animator.CSetFloatWithLerp(this.ANIM_CHAR_MOV_SPEED_XZ, this._myVelocityXZ.magnitude, ANIMATION_BLENDTREE_LERP * CTime.DeltaTimeScaled * this.TimelineTimescale);
 			}
 		}
 		[NonSerialized] private Vector3 _myVelocityXZ;
@@ -106,15 +106,15 @@ namespace CDK {
 				else if (oldValue == CMovState.Sliding) {
 					// was sliding
 					if (Time.time >= this._slideBeginTime + this._slideTimeToStumble) {
-						if (this.Anim) this.Anim.SetTrigger(this.ANIM_CHAR_STUMBLE);
+						if (this._animator) this._animator.SetTrigger(this.ANIM_CHAR_STUMBLE);
 					}
 				}
 
 				// set animators
-				if (this.Anim) {
-					this.Anim.SetBool(this.ANIM_CHAR_IS_SLIDING, value == CMovState.Sliding);
-					this.Anim.SetBool(this.ANIM_CHAR_IS_WALKING, value == CMovState.Walking);
-					this.Anim.SetBool(this.ANIM_CHAR_IS_RUNNING, value == CMovState.Running);
+				if (this._animator) {
+					this._animator.SetBool(this.ANIM_CHAR_IS_SLIDING, value == CMovState.Sliding);
+					this._animator.SetBool(this.ANIM_CHAR_IS_WALKING, value == CMovState.Walking);
+					this._animator.SetBool(this.ANIM_CHAR_IS_RUNNING, value == CMovState.Running);
 
 					//this.Anim.SetBool(this.ANIM_CHAR_IS_SPRINTING, value == CMovState.Sprint);
 				}
@@ -261,7 +261,7 @@ namespace CDK {
 			this._charInitialHeight = this._charController.height;
 			this._blockingEventsManager = CDependencyResolver.Get<CBlockingEventsManager>();
 
-			if (this.Anim && !this.Anim.applyRootMotion) {
+			if (this._animator && !this._animator.applyRootMotion) {
 				Debug.LogWarning($"{this.name} had an Animator with Root motion disabled, it will be enable because Characters use root motion.", this);
 				this.SetAnimationRootMotion(true);
 			}
@@ -299,17 +299,6 @@ namespace CDK {
 
 		protected virtual void OnDestroy() {
 			this.StopTalking();
-		}
-
-		private void OnAnimatorMove() {
-			if (CTime.TimeScale == 0f) {
-				this._rootMotionDeltaPosition = Vector3.zero;
-				return;
-			}
-
-			if (this.Anim == null) return;
-
-			this._rootMotionDeltaPosition = this.Anim.deltaPosition;
 		}
 
 		#if UNITY_EDITOR
@@ -355,7 +344,7 @@ namespace CDK {
 
 			// strafe
 			this.IsStrafingRx.TakeUntilDisable(this).DistinctUntilChanged().Subscribe(isStrafing => {
-				if (this.Anim) this.Anim.SetBool(this.ANIM_CHAR_IS_STRAFING, isStrafing);
+				if (this._animator) this._animator.SetBool(this.ANIM_CHAR_IS_STRAFING, isStrafing);
 			});
 
 			// can slide
@@ -391,25 +380,25 @@ namespace CDK {
 			}).AddTo(this._disposables);
 
 			this._isTouchingTheGroundRx.TakeUntilDisable(this).DistinctUntilChanged().Subscribe(isTouchingTheGround => {
-				if (isTouchingTheGround && this.Anim != null) {
+				if (isTouchingTheGround && this._animator != null) {
 					int fallAnimIndex = 0;
 					if (this._distanceOnFreeFall.Value >= 6f) {
 						fallAnimIndex = 2;
 					}else if (this._distanceOnFreeFall.Value >= 2f) {
 						fallAnimIndex = 1;
 					}
-					this.Anim.SetInteger(ANIM_FALL_LANDING_ANIM_INDEX, fallAnimIndex);
+					this._animator.SetInteger(ANIM_FALL_LANDING_ANIM_INDEX, fallAnimIndex);
 				}
 				this._movementMomentumXZ = isTouchingTheGround ? Vector3.zero : this._myVelocityXZ;
 			});
 			
 			this._isOnFreeFall.TakeUntilDisable(this).DistinctUntilChanged().Subscribe(isFallingNow => {
-				this.Anim.CSetBoolSafe(this.ANIM_CHAR_IS_FALLING, isFallingNow);
+				this._animator.CSetBoolSafe(this.ANIM_CHAR_IS_FALLING, isFallingNow);
 				this._distanceOnFreeFall.Value = 0f;
 			});
 
 			this._distanceOnFreeFall.TakeUntilDisable(this).DistinctUntilChanged().Subscribe(distanceOnFreeFall => {
-				this.Anim.CSetFloatSafe(this.ANIM_DISTANCE_ON_FREE_FALL, distanceOnFreeFall);
+				this._animator.CSetFloatSafe(this.ANIM_DISTANCE_ON_FREE_FALL, distanceOnFreeFall);
 			});
 
 			#endregion <<---------- Fall ---------->>
@@ -717,7 +706,7 @@ namespace CDK {
 		#region <<---------- Stumble ---------->>
 
 		public void Stumble() {
-			if(this.Anim) this.Anim.SetTrigger(this.ANIM_CHAR_STUMBLE);
+			if(this._animator) this._animator.SetTrigger(this.ANIM_CHAR_STUMBLE);
 		}
 		
 		#endregion <<---------- Stumble ---------->>
@@ -730,13 +719,13 @@ namespace CDK {
 		public void Stun(CEnumStunType stunType) {
 			switch (stunType) {
 				case CEnumStunType.medium:
-					if(this.Anim) this.Anim.SetTrigger(this.ANIM_CHAR_IS_STUNNED_MEDIUM);
+					if(this._animator) this._animator.SetTrigger(this.ANIM_CHAR_IS_STUNNED_MEDIUM);
 					break;
 				case CEnumStunType.heavy:
-					if(this.Anim) this.Anim.SetTrigger(this.ANIM_CHAR_IS_STUNNED_HEAVY);
+					if(this._animator) this._animator.SetTrigger(this.ANIM_CHAR_IS_STUNNED_HEAVY);
 					break;
 				default:
-					if(this.Anim) this.Anim.SetTrigger(this.ANIM_CHAR_IS_STUNNED_LIGHT);
+					if(this._animator) this._animator.SetTrigger(this.ANIM_CHAR_IS_STUNNED_LIGHT);
 					break;
 			}
 		}
@@ -786,7 +775,7 @@ namespace CDK {
 		#region <<---------- Animations State Machine Behaviours ---------->>
 		
 		public void SetAnimationRootMotion(bool state) {
-			if(this.Anim) this.Anim.applyRootMotion = state;
+			if(this._animator) this._animator.applyRootMotion = state;
 		}
 		
 		#endregion <<---------- Animations State Machine Behaviours ---------->>
