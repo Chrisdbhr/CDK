@@ -58,8 +58,20 @@ namespace CDK {
 
 		#endregion <<---------- Initialization ---------->>
 
+		
+		
+
+		#region <<---------- Platform Features ---------->>
+
+		void PlatformSpecificFeatures() {
+			var supportsComputeShaders = SystemInfo.supportsComputeShaders;
+			
+		}
+		
+		#endregion <<---------- Platform Features ---------->>
 
 
+		
 
 		#region <<---------- Dependencies ---------->>
 
