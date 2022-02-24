@@ -71,7 +71,8 @@ namespace CDK {
 		
 		public enum CameraType {
 			@default,
-			smallAreaCloseLimitedVision
+			smallAreaCloseLimitedVision,
+			bigOpenArea
 		}
 
 		#endregion <<---------- Enums ---------->>
