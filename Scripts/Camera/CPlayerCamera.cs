@@ -249,8 +249,8 @@ namespace CDK {
 			// is close to the character?
 			Observable.EveryUpdate().TakeUntilDisable(this).Subscribe(_ => {
 				if (CApplication.Quitting) return;
-				if (this._cinemachineBrain == null || this._cinemachineBrain.ActiveVirtualCamera == null) return;
-				this._currentDistanceFromTarget = Vector3.Distance(this._cinemachineBrain.ActiveVirtualCamera.LookAt.position, this._unityCamera.transform.position); 
+				if (this._cinemachineBrain == null || this._cinemachineBrain.ActiveVirtualCamera == null || this._cinemachineBrain.ActiveVirtualCamera.Follow == null) return;
+				this._currentDistanceFromTarget = Vector3.Distance(this._cinemachineBrain.ActiveVirtualCamera.Follow.position, this._unityCamera.transform.position); 
 				this._isCloseToTheCharacterRx.Value = this._currentDistanceFromTarget <= this._distanceToConsiderCloseForCharacter;
 			});
 			this._isCloseToTheCharacterRx.TakeUntilDisable(this).Subscribe(isClose => {
