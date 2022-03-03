@@ -1,5 +1,4 @@
 ﻿using System;
-using CDK;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.Playables;
@@ -10,8 +9,10 @@ namespace CDK {
 		#region <<---------- Properties ---------->>
 		
 		[SerializeField] private PlayableDirector _playableDirector;
+		[SerializeField] private bool _autoSetIsPlayingCutsceneOnBlockingEventsManager = true;
 		[SerializeField] private UnityEvent _cutscenePlayed;
 		[SerializeField] private UnityEvent _cutsceneStopped;
+		
 		private CBlockingEventsManager _blockingEventsManager;
 
 		#endregion <<---------- Properties ---------->>
@@ -21,7 +22,7 @@ namespace CDK {
 		
 		#region <<---------- MonoBehaviour ---------->>
 
-		private void Awake() {
+		protected virtual void Awake() {
 			_blockingEventsManager = CDependencyResolver.Get<CBlockingEventsManager>();
 		}
 
@@ -49,12 +50,12 @@ namespace CDK {
 		#region <<---------- Callbacks ---------->>
 		
 		private void OnCutscenePlayed(PlayableDirector playableDirector) {
-			_blockingEventsManager.IsPlayingCutscene = true;
+			if(_autoSetIsPlayingCutsceneOnBlockingEventsManager) _blockingEventsManager.IsPlayingCutscene = true;
 			_cutscenePlayed?.Invoke();
 		}
 
 		void OnCutsceneStopped(PlayableDirector playableDirector) {
-			_blockingEventsManager.IsPlayingCutscene = false;
+			if(_autoSetIsPlayingCutsceneOnBlockingEventsManager) _blockingEventsManager.IsPlayingCutscene = false;
 			_cutsceneStopped?.Invoke();
 		}
 		
