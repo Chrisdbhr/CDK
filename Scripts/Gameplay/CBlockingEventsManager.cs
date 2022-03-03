@@ -103,7 +103,7 @@ namespace CDK {
 			this._isOnMenuRx = new BoolReactiveProperty();
 			this._isOnMenuRx.Subscribe(onMenu => {
 				CTime.TimeScale = (onMenu ? 0f : 1f);
-				Debug.Log($"IsOnMenuEvent: {onMenu}");
+				Debug.Log($"<color={"#4fafb6"}>IsOnMenuEvent: {onMenu}</color>");
 				this._onMenu?.Invoke(onMenu);
 			});
 			
@@ -111,7 +111,7 @@ namespace CDK {
 			this._isPlayingCutsceneRx?.Dispose();
 			this._isPlayingCutsceneRx = new BoolReactiveProperty();
 			this._isPlayingCutsceneRx.Subscribe(isPlayingCutscene => {
-				Debug.Log($"IsPlayingCutscene: {isPlayingCutscene}");
+				Debug.Log($"<color={"#cc5636"}>IsPlayingCutscene: {isPlayingCutscene}</color>");
 				this._onPlayCutscene?.Invoke(isPlayingCutscene);
 			});
 
@@ -125,7 +125,7 @@ namespace CDK {
 			this._isDoingBlockingAction.IsRetainedRx,
 			(isOnMenu, isPlayingCutscene, isDoingBlockingAction) => isOnMenu || isPlayingCutscene || isDoingBlockingAction)
 			.Subscribe(blockingEventHappening => {
-				Debug.Log($"IsBlockingEventHappening changed to: {blockingEventHappening}");
+				Debug.Log($"<color={"#b62a24"}>IsBlockingEventHappening changed to: {blockingEventHappening}</color>");
 				this._isAnyBlockingEventHappening = blockingEventHappening;
 				this._onAnyBlockingEventHappening?.Invoke(blockingEventHappening);
 			});
