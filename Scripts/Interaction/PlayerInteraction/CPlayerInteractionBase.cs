@@ -6,11 +6,11 @@ namespace CDK {
 	public abstract class CPlayerInteractionBase : MonoBehaviour {
 		
 		[NonSerialized] protected LayerMask _interactionLayerMask = 1;
-		[NonSerialized] protected Transform _myTransform;
 		[NonSerialized] protected CBlockingEventsManager _blockingEventsManager;
+		protected Transform transform;
 
 		protected virtual void Awake() {
-			this._myTransform = this.transform;
+			this.transform = base.transform;
 			this._blockingEventsManager = CDependencyResolver.Get<CBlockingEventsManager>();
 		}
 

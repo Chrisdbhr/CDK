@@ -5,13 +5,18 @@ using UnityEngine;
 namespace CDK {
 	public class CPlayerInteractionThirdPerson : CPlayerInteractionBase {
 
-		[NonSerialized] private float _interactionSphereCheckRadius = 0.5f;
-		[NonSerialized] private const float INTERACT_SPHERE_CHECK_MULTIPLIER = 0.75f;
-		[NonSerialized] private float _yCheckOffset = 0.5f;
-		
+		#region <<---------- Properties and Fields ---------->>
+
+		private float _interactionSphereCheckRadius = 0.4f;
+		private float _yCheckOffset = 0.5f;
+
+		#endregion <<---------- Properties and Fields ---------->>
+
+
+
+
 		#if UNITY_EDITOR
 		private void OnDrawGizmosSelected() {
-			this._myTransform = this.transform;
 			Gizmos.color = Color.cyan;
 			Gizmos.DrawWireSphere(
 				this.GetCenterSphereCheckPosition(),
@@ -43,8 +48,8 @@ namespace CDK {
 
 			if (interactableColliders.Count <= 0) return;
 
-			originPos.x = this._myTransform.position.x;
-			originPos.z = this._myTransform.position.z;
+			originPos.x = this.transform.position.x;
+			originPos.z = this.transform.position.z;
 
 			// get closest interactable collider index
 			int closestColliderIndex = 0;
@@ -62,7 +67,7 @@ namespace CDK {
 			// get target interactable to try to interact
 			var targetInteractableCollider = interactableColliders[closestColliderIndex];
 			var direction = targetInteractableCollider.transform.position - originPos;
-			
+
 			bool hasSomethingBlockingLineOfSight = Physics.Raycast(
 				originPos,
 				direction,
@@ -78,11 +83,19 @@ namespace CDK {
 			}
 
 			var chosenInteractable = targetInteractableCollider.GetComponent<CIInteractable>();
-			chosenInteractable.OnInteract(this._myTransform);
+			chosenInteractable.OnInteract(this.transform);
 		}
-		
+
+		private float GetYCheckOffset() {
+			return this._yCheckOffset;
+		}
+
+		private Vector3 GetCheckHeight() {
+			return this.transform.position + Vector3.up * this.GetYCheckOffset();
+		}
+
 		protected Vector3 GetCenterSphereCheckPosition() {
-			return this._myTransform.position + this._myTransform.forward * (this._interactionSphereCheckRadius * INTERACT_SPHERE_CHECK_MULTIPLIER) + (Vector3.up * this._yCheckOffset);
+			return this.GetCheckHeight() + this.transform.forward * this._interactionSphereCheckRadius;
 		}
 	}
 }

@@ -17,7 +17,6 @@ namespace CDK {
 		
 		#if UNITY_EDITOR
 		private void OnDrawGizmosSelected() {
-			this._myTransform = this.transform;
 			Gizmos.color = Color.white;
 			Gizmos.DrawWireSphere(
 				this.GetCenterCircleCheckPosition(),
