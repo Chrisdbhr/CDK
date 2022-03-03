@@ -300,9 +300,15 @@ namespace CDK {
 		private void InputInteract(InputActionEventData data) {
 			if (this._blockingEventsManager.IsAnyBlockingEventHappening) return;
 			var character = this.GetControllingCharacter();
-			if (character == null) return;
-			var interactionComponent = character.GetComponent<CPlayerInteractionBase>();
-			if (interactionComponent == null) return;
+			if (character == null) {
+				Debug.LogError($"Character number '{this.PlayerNumber}' tried to interact but is not controlling any character.");
+				return;
+			}
+			var interactionComponent = character.GetComponentInChildren<CPlayerInteractionBase>();
+			if (interactionComponent == null) {
+				Debug.LogError($"Character number '{this.PlayerNumber}' tried to interact but doesnt have any interaction component.");
+				return;
+			}
 			interactionComponent.TryToInteract();
 		}
 		
