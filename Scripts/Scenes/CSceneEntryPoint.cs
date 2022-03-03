@@ -9,6 +9,9 @@ namespace CDK {
 	public class CSceneEntryPoint : MonoBehaviour {
 		
 		[SerializeField] private int _number;
+		private float _radius = 0.2f;
+
+
 
 		public static Transform GetSceneEntryPointTransform(int entryPointNumber) {
 			var sceneEntryPoints = GameObject.FindObjectsOfType<CSceneEntryPoint>();
@@ -37,7 +40,7 @@ namespace CDK {
 			
 			// gizmo
 			Gizmos.color = color;
-			Gizmos.DrawWireSphere(pos, 0.5f);
+			Gizmos.DrawWireSphere(pos + Vector3.up * _radius, _radius);
 			Gizmos.DrawLine(pos, pos + fwd);
 			
 			// text
