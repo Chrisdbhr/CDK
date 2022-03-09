@@ -15,9 +15,10 @@ namespace CDK {
 		public float WetAmount;
 		
 		#if FMOD
-		[EventRef]
-		#endif
+		public EventReference Audio;
+		#else
 		public string Audio;
+		#endif
 		
 		public Material[] Materials;
 		

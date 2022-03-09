@@ -140,7 +140,7 @@ namespace CDK {
 			}
 
 			// play random audio
-			if (footstepInfo.Audio.CIsNullOrEmpty()) return;
+			if (footstepInfo.Audio.IsNull) return;
 			
 			#if FMOD
 			FMODUnity.RuntimeManager.PlayOneShot(footstepInfo.Audio, raycastHit.point);
