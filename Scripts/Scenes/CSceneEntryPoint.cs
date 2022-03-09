@@ -9,7 +9,10 @@ namespace CDK {
 	public class CSceneEntryPoint : MonoBehaviour {
 		
 		[SerializeField] private int _number;
-		private float _radius = 0.2f;
+		#if UNITY_EDITOR
+		private float _editorRadius = 0.2f;
+		#endif
+		
 
 
 
@@ -37,14 +40,17 @@ namespace CDK {
 			var tranf = this.transform;
 			var fwd = tranf.forward;
 			var pos = tranf.position;
+			pos += Vector3.up * this._editorRadius;
 			
 			// gizmo
 			Gizmos.color = color;
-			Gizmos.DrawWireSphere(pos + Vector3.up * _radius, _radius);
-			Gizmos.DrawLine(pos, pos + fwd);
+			Gizmos.DrawWireSphere(pos, this._editorRadius);
+			Gizmos.DrawLine(pos, pos + fwd * _editorRadius * 2f);
+
+			Handles.color = color;
+			Handles.Slider(pos + fwd * _editorRadius * 2f, fwd, (_editorRadius * .5f), Handles.ConeHandleCap, 0f);
 			
 			// text
-			Handles.color = color;
 			Handles.Label(pos, $"Entry point {this._number}");
 		}
 		#endif
