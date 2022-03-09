@@ -139,6 +139,10 @@ namespace CDK {
 		#region <<---------- Game Object Retain ---------->>
 		
 		public void RetainFromUnityObject(UnityEngine.Object unityObject) {
+			if (unityObject == null) {
+				Debug.LogError($"Will not retain a null object.");
+				return;
+			}
 			if (this.RetainedObjects.Add(unityObject)) {
 				Debug.Log($"Retaining BlockingEvents from '{unityObject.name}'");
 				this.IsDoingBlockingAction.Retain();
@@ -148,6 +152,11 @@ namespace CDK {
 		}
 
 		public void ReleaseFromUnityObject(UnityEngine.Object unityObject) {
+			if (unityObject == null) {
+				Debug.LogError($"Tried to release a null object.");
+				return;
+			}
+
 			if (this.RetainedObjects.Remove(unityObject)) {
 				Debug.Log($"Releasing BlockingEvents from '{unityObject.name}'");
 				this.IsDoingBlockingAction.Release();
