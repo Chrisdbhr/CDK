@@ -7,10 +7,8 @@ namespace CDK {
 		
 		[NonSerialized] protected LayerMask _interactionLayerMask = 1;
 		[NonSerialized] protected CBlockingEventsManager _blockingEventsManager;
-		protected Transform transform;
 
 		protected virtual void Awake() {
-			this.transform = base.transform;
 			this._blockingEventsManager = CDependencyResolver.Get<CBlockingEventsManager>();
 		}
 

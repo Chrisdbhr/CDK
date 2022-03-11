@@ -19,7 +19,7 @@ namespace CDK.UI {
 			get {
 				if (_instance != null) return _instance;
 				Debug.Log($"Creating new instance of {nameof(CUINavigation)}");
-				CApplication.IsQuitting += () => {
+				CApplication.QuittingEvent += () => {
 					_instance = null;
 				};
 				return _instance = new CUINavigation();
@@ -61,12 +61,18 @@ namespace CDK.UI {
 		#region <<---------- Open / Close ---------->>
 
 		#if UnityAddressables
+	
+		public async Task<T> OpenMenu<T>(AssetReference uiReference, CUIBase originUI, CUIInteractable originButton) {
+			var openedMenu = await OpenMenu(uiReference, originUI, originButton);
+			return openedMenu != null ? openedMenu.GetComponent<T>() : default;
+		}
+
 		/// <summary>
 		/// Opens a menu, registering the button that opened it.
 		/// </summary>
 		/// <returns>returns the new opened menu.</returns>
-		public async Task<CUIBase> OpenMenu(AssetReference uiReference, CUIInteractable originButton, CUIBase originUI) {
-			if (CApplication.Quitting) return null;
+		public async Task<CUIBase> OpenMenu(AssetReference uiReference, CUIBase originUI, CUIInteractable originButton) {
+			if (CApplication.IsQuitting) return null;
 
 			var ui = await CAssets.LoadAndInstantiateUI(uiReference);
 			if (ui == null) {
@@ -77,7 +83,7 @@ namespace CDK.UI {
 			bool alreadyOpened = this._navigationHistory.Any(x => x == ui);
 			if (alreadyOpened) {
 				Debug.LogError($"Tried to open the same menu twice! Will not open menu '{ui.name}'");
-				Addressables.ReleaseInstance(ui.gameObject);
+				CAssets.UnloadAsset(ui.gameObject);
 				return null;
 			}
 			
@@ -93,6 +99,7 @@ namespace CDK.UI {
 			
 			return ui;
 		}
+		
 		#endif
 
 		/// <summary>
@@ -151,20 +158,22 @@ namespace CDK.UI {
 			this._blockingEventsManager.IsOnMenu = true;
 			
 			Observable.EveryUpdate().Subscribe(_ => {
-				if (CInputManager.ActiveInputType != CInputManager.InputType.JoystickController) return;
+				//if (CInputManager.ActiveInputType != CInputManager.InputType.JoystickController) return;
 				if (this._navigationHistory.Count <= 0) return;
 				var current = EventSystem.current;
 				if (current == null) return;
 				if (current.currentSelectedGameObject != null) return;
 				var activeUi = this._navigationHistory.Peek();
 				current.SetSelectedGameObject(activeUi.FirstSelectedObject);
-			}).AddTo(this._navigationDisposables);
+			})
+			.AddTo(this._navigationDisposables);
 		}
 
 		private void CheckIfIsLastMenu() {
 			if (this._navigationHistory.Count > 0) return;
 			
 			this._blockingEventsManager.IsOnMenu = false;
+			CTime.TimeScale = 1f;
 			
 			this._navigationDisposables?.Dispose();
 		}

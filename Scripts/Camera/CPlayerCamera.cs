@@ -33,23 +33,13 @@ namespace CDK {
 			this._ownerPlayer = ownerPlayer;
 
 			// character object
-			var ownerCharacter = this._ownerPlayer.GetControllingCharacter();
+			this._ownerCharacter = this._ownerPlayer.GetControllingCharacter();
 			
 			// renderers to hide
-			this._renderToHideWhenCameraIsClose = ownerCharacter.GetComponentsInChildren<Renderer>(); 
+			this._renderToHideWhenCameraIsClose = this._ownerCharacter.GetComponentsInChildren<Renderer>(); 
 			
 			// cinemachine
-
-			var lookTarget = ownerCharacter.GetComponentInChildren<CCameraLookAndFollowTarget>();
-			
-			#if Cinemachine
-			foreach (var cam in this._cinemachineCameras) {
-				cam.Follow = ownerCharacter.transform;
-				cam.LookAt = lookTarget != null ? lookTarget.transform : ownerCharacter.transform;
-			}
-			#else
-			Debug.LogError("'PlayerCamera' will not work without Cinemachine");
-			#endif
+			this.UpdateCameraTargets();
 
 			#if FMOD
 			// fmod listener
@@ -86,7 +76,7 @@ namespace CDK {
 		public float RotationX { get; private set; }
 		public float RotationY { get; private set; }
 		#if DOTween
-		[NonSerialized] private Tween _recenterRotationTween;
+		private Tween _recenterRotationTween;
 		#endif
 		
 		// Camera 
@@ -95,18 +85,24 @@ namespace CDK {
 		[SerializeField] private CinemachineBrain _cinemachineBrain;
 		[SerializeField] private CinemachineVirtualCameraBase[] _cinemachineCameras;
 		#endif
-		[NonSerialized] private int _currentGameFrame;
+		private int _currentGameFrame;
 
+		[Header("Shake")]
+		[SerializeField] private float _shakeLerpAmount = 0.7f;
+		[SerializeField] private float _fallShakeMultiplier = 3f;
+		[SerializeField] [Range(0f, 20f)] private float _cameraShakeMinimumSpeedToApply = 6f;
+		[SerializeField] [Range(0f, 1f)] private float _cameraShakeAmplitude;
+		[SerializeField] [Range(0f, 1f)] private float _cameraShakeFrequency;
 		[SerializeField] private Renderer[] _renderToHideWhenCameraIsClose;
-		[NonSerialized] private float _currentDistanceFromTarget = 10.0f;
-		[NonSerialized] private float _distanceToConsiderCloseForCharacter = 0.5f;
-		[NonSerialized] private ReactiveProperty<bool> _isCloseToTheCharacterRx;
-		[NonSerialized] private float _clampMaxDistanceSpeed = 3f;
+		private float _currentDistanceFromTarget = 10.0f;
+		private float _distanceToConsiderCloseForCharacter = 0.5f;
+		private ReactiveProperty<bool> _isCloseToTheCharacterRx;
+		private float _clampMaxDistanceSpeed = 3f;
 
 		// Screen print
 		[SerializeField] private RawImage _screenCrossfadeRawImage;
-		[NonSerialized] private bool _getRenderImgOnNextFrame;
-		[NonSerialized] private Texture2D _screenShootTexture2d;
+		private bool _getRenderImgOnNextFrame;
+		private Texture2D _screenShootTexture2d;
 		
 		// Audio
 		#if FMOD
@@ -114,15 +110,16 @@ namespace CDK {
 		#endif
 		
 		// Cache
-		[NonSerialized] private CGamePlayer _ownerPlayer;
-		[NonSerialized] private Transform _transform;
+		private CGamePlayer _ownerPlayer;
+		private Transform _transform;
+		private CCharacterBase _ownerCharacter;
 		
 		#if DOTween
-		[NonSerialized] private Tweener _tween;
+		private Tweener _tween;
 		#endif
 		
-		[NonSerialized] private CFader _fader;
-		[NonSerialized] private CBlockingEventsManager _blockingEventsManager;
+		private CFader _fader;
+		private CBlockingEventsManager _blockingEventsManager;
 		
 		// Camera Profiles
 		private List<CCameraProfileVolume> ActiveCameraProfiles;
@@ -139,6 +136,7 @@ namespace CDK {
 			this._fader = CDependencyResolver.Get<CFader>();
 			this._blockingEventsManager = CDependencyResolver.Get<CBlockingEventsManager>();
 			this.ActiveCameraProfiles = new ();
+			this._isCloseToTheCharacterRx = new ReactiveProperty<bool>(false);
 			this.SearchForGlobalVolume();
 			this.ApplyLastOrDefaultCameraProfile();
 		}
@@ -147,6 +145,50 @@ namespace CDK {
 			var angles = this._transform.eulerAngles;
 			this.RotationY = angles.y;
 			this.RotationX = angles.x;
+			
+			// is close to the character?
+			Observable.EveryUpdate().TakeUntilDisable(this).Subscribe(_ => {
+				if (CApplication.IsQuitting) return;
+				if (this._cinemachineBrain == null || this._cinemachineBrain.ActiveVirtualCamera == null || this._cinemachineBrain.ActiveVirtualCamera.Follow == null) return;
+				
+				// camera shake intensity
+				if (this._ownerCharacter && this._cinemachineBrain.ActiveVirtualCamera is CinemachineFreeLook cam) {
+					var velocity = this._ownerCharacter.MyVelocity;
+					if(velocity.y < 0) velocity.y *= _fallShakeMultiplier;
+					var magnitude = velocity.magnitude;
+					float amplitude = 0f;
+					float frequency = 0f;
+					if (magnitude <= _cameraShakeMinimumSpeedToApply) {
+						amplitude = 0f;
+						frequency = 0f;
+					}
+					else {
+						amplitude = magnitude * this._cameraShakeAmplitude;
+						frequency = magnitude * this._cameraShakeFrequency;
+					}
+					for (int i = 0; i < 3; i++) {
+						var rig = cam.GetRig(i);
+						if (rig) {
+							var noise = rig.GetCinemachineComponent<CinemachineBasicMultiChannelPerlin>();
+							if (noise) {
+								noise.m_AmplitudeGain = noise.m_AmplitudeGain.CLerp(amplitude, this._shakeLerpAmount * CTime.DeltaTimeScaled);
+								noise.m_FrequencyGain = noise.m_FrequencyGain.CLerp(frequency, this._shakeLerpAmount * CTime.DeltaTimeScaled);
+							}
+						}
+					}
+				}
+				
+				this._currentDistanceFromTarget = Vector3.Distance(this._cinemachineBrain.ActiveVirtualCamera.Follow.position, this._unityCamera.transform.position); 
+				this._isCloseToTheCharacterRx.Value = this._currentDistanceFromTarget <= this._distanceToConsiderCloseForCharacter;
+			});
+			this._isCloseToTheCharacterRx.TakeUntilDisable(this).Subscribe(isClose => {
+				if (this._renderToHideWhenCameraIsClose.Length <= 0) return;
+				// disable renderers
+				foreach (var objToDisable in this._renderToHideWhenCameraIsClose) {
+					if (objToDisable == null) continue;
+					objToDisable.enabled = !isClose;
+				}
+			});
 			
 			this.SubscribeToEvents();
 			
@@ -209,6 +251,19 @@ namespace CDK {
 			return this._unityCamera.transform;
 		}
 
+		public void UpdateCameraTargets() {
+			#if Cinemachine
+			var lookTarget = this._ownerCharacter.GetComponentInChildren<CCameraLookAndFollowTarget>();
+			var target = lookTarget != null ? lookTarget.transform : this._ownerCharacter.transform;
+			foreach (var cam in this._cinemachineCameras) {
+				cam.Follow = target;
+				cam.LookAt = target;
+			}
+			#else
+			Debug.LogError("'PlayerCamera' will not work without Cinemachine");
+			#endif
+		}
+
 		#endregion <<---------- General ---------->>
 		
 
@@ -218,7 +273,6 @@ namespace CDK {
 
 		private void SubscribeToEvents() {
 			#if Cinemachine
-			this._isCloseToTheCharacterRx = new ReactiveProperty<bool>(false);
 
 			// camera sensitivity changed
 			CSave.getRx.ObserveEveryValueChanged(p=>p.Value.CameraSensitivity.x).TakeUntilDisable(this).Subscribe(value => {
@@ -246,22 +300,6 @@ namespace CDK {
 			
 			// active camera changed
 			this._cinemachineBrain.m_CameraActivatedEvent.AddListener(this.ActiveCameraChanged);
-
-			// is close to the character?
-			Observable.EveryUpdate().TakeUntilDisable(this).Subscribe(_ => {
-				if (CApplication.Quitting) return;
-				if (this._cinemachineBrain == null || this._cinemachineBrain.ActiveVirtualCamera == null || this._cinemachineBrain.ActiveVirtualCamera.Follow == null) return;
-				this._currentDistanceFromTarget = Vector3.Distance(this._cinemachineBrain.ActiveVirtualCamera.Follow.position, this._unityCamera.transform.position); 
-				this._isCloseToTheCharacterRx.Value = this._currentDistanceFromTarget <= this._distanceToConsiderCloseForCharacter;
-			});
-			this._isCloseToTheCharacterRx.TakeUntilDisable(this).Subscribe(isClose => {
-				if (this._renderToHideWhenCameraIsClose.Length <= 0) return;
-				// disable renderers
-				foreach (var objToDisable in this._renderToHideWhenCameraIsClose) {
-					if (objToDisable == null) continue;
-					objToDisable.enabled = !isClose;
-				}
-			});
 			#endif
 
 			SceneManager.activeSceneChanged += ActiveSceneChanged;
@@ -277,11 +315,12 @@ namespace CDK {
 		#if Cinemachine
 		private void ActiveCameraChanged(ICinemachineCamera newCamera, ICinemachineCamera oldCamera) {
 			if (newCamera == null) return;
-			Debug.Log($"Player Cinemachine Active Camera Changed to '{newCamera.Name}'");
+			this.UpdateCameraTargets();
 			this.ApplyLastOrDefaultCameraProfile();
 			if (this._cinemachineBrain.ActiveVirtualCamera is CinemachineFreeLook freeLookCamera) {
 				freeLookCamera.m_YAxis.Value = 0.5f;
 			}
+			Debug.Log($"Player Cinemachine Active Camera Changed to '{newCamera.Name}'", newCamera.VirtualCameraGameObject);
 		}
 		#endif
 
@@ -295,6 +334,7 @@ namespace CDK {
 		private void ActiveSceneChanged(Scene oldScene, Scene newScene) {
 			this.SearchForGlobalVolume();
 			this.ApplyLastOrDefaultCameraProfile();
+			this.UpdateCameraTargets();
 		}
 		
 		#endregion <<---------- Callbacks ---------->>

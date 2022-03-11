@@ -18,7 +18,7 @@ namespace CDK {
 			#endif
 		} 
 		
-		public static readonly Version VERSION = new Version(0,1,1);
+		public static readonly Version VERSION = new Version(0,2,0);
 		private const string VERSION_UPDATE_URL = "https://raw.githubusercontent.com/Chrisdbhr/CDK/master/Resources/CDKVersion.txt";
 
 	}

@@ -102,7 +102,6 @@ namespace CDK {
 			this._isOnMenuRx?.Dispose();
 			this._isOnMenuRx = new BoolReactiveProperty();
 			this._isOnMenuRx.Subscribe(onMenu => {
-				CTime.TimeScale = (onMenu ? 0f : 1f);
 				Debug.Log($"<color={"#4fafb6"}>IsOnMenuEvent: {onMenu}</color>");
 				this._onMenu?.Invoke(onMenu);
 			});

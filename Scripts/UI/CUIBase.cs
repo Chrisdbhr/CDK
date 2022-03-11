@@ -22,11 +22,13 @@ namespace CDK.UI {
 		
 		[Header("Setup")]
 		[SerializeField] protected EventSystem _eventSystem;
-		
-		[NonSerialized] private CUIBase _previousUI;
-		[NonSerialized] private CUIInteractable _previousButton;
-		[NonSerialized] private Canvas _canvas;
 
+		public bool ShouldPauseTheGame = true;
+		
+		private CUIBase _previousUI;
+		private CUIInteractable _previousButton;
+		private Canvas _canvas;
+		
 		public event Action OnOpen {
 			add {
 				this._onOpen -= value;
@@ -36,7 +38,7 @@ namespace CDK.UI {
 				this._onOpen -= value;
 			}
 		}
-		[NonSerialized] private Action _onOpen;
+		private Action _onOpen;
 		
 		public event Action<CUIBase> OnClose {
 			add {
@@ -47,11 +49,11 @@ namespace CDK.UI {
 				this._onClose -= value;
 			}
 		}
-		[NonSerialized] private Action<CUIBase> _onClose;
+		private Action<CUIBase> _onClose;
 
-		[NonSerialized] protected CGameSettings _gameSettings;
-		[NonSerialized] protected CFader _fader;
-		[NonSerialized] protected CBlockingEventsManager _blockingEventsManager;
+		protected CGameSettings _gameSettings;
+		protected CFader _fader;
+		protected CBlockingEventsManager _blockingEventsManager;
 
 		#endregion <<---------- Properties and Fields ---------->>
 
@@ -101,6 +103,7 @@ namespace CDK.UI {
 			Debug.LogError("'Play Open menu sound' not implemented without FMOD");
 			#endif
 
+			UpdateCTime();
 		}
 		public void Close() {
 			Debug.Log($"Closing UI {this.gameObject.name}", this);
@@ -109,7 +112,7 @@ namespace CDK.UI {
 			if (this._previousUI != null) this._previousUI.ShowIfHidden(this._previousButton);
 
 			#if UnityAddressables
-			if (!Addressables.ReleaseInstance(this.gameObject)) {
+			if (!CAssets.UnloadAsset(this.gameObject)) {
 				Debug.LogError($"Error releasing instance of object '{this.gameObject.name}'", this);
 			}
 			#else
@@ -168,9 +171,21 @@ namespace CDK.UI {
 		public void ShowIfHidden(CUIInteractable buttonToSelect) {
 			this.gameObject.SetActive(true);
 			if(buttonToSelect) this.UpdateEventSystemAndCheckForObjectSelection(buttonToSelect.gameObject);
+			UpdateCTime();
 		}
 		
 		#endregion <<---------- Visibility ---------->>
 
+
+
+
+		#region <<---------- Time ---------->>
+
+		private void UpdateCTime() {
+			CTime.TimeScale = this.ShouldPauseTheGame ? 0f : 1f;
+		}
+		
+		#endregion <<---------- Time ---------->>
+		
 	}
 }

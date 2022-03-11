@@ -8,6 +8,8 @@ namespace CDK {
 
 		[SerializeField] private Vector3 _rotateDirectionAndSpeed;
 		[SerializeField] private bool _onlyUpdateWhenVisible = true;
+		[SerializeField] private bool _ignoreTimescale;
+		
 		[NonSerialized] private bool _isVisible;
 		
 		#endregion <<---------- Properties and Fields ---------->>
@@ -22,7 +24,7 @@ namespace CDK {
 
 		protected override void Execute(float deltaTime) {
 			if (this._onlyUpdateWhenVisible && !this._isVisible) return;
-			this.transform.Rotate(this._rotateDirectionAndSpeed * (CTime.DeltaTimeScaled));
+			this.transform.Rotate(this._rotateDirectionAndSpeed * (_ignoreTimescale ? Time.deltaTime : CTime.DeltaTimeScaled));
 		}
 	}
 }

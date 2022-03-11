@@ -65,7 +65,9 @@ namespace CDK {
 		#endif
 		
 		private Transform _cameraTransform;
-		private CPlayerCamera _cPlayerCamera;
+
+		public CPlayerCamera GetCamera => this._playerCamera;
+		private CPlayerCamera _playerCamera;
 
 		private readonly List<CCharacterBase> _characters = new List<CCharacterBase>();
 
@@ -226,10 +228,10 @@ namespace CDK {
 			
 			Debug.Log($"Created {mainChar.name} Camera", createdGo);
 
-			this._cPlayerCamera = createdGo.GetComponent<CPlayerCamera>();
+			this._playerCamera = createdGo.GetComponent<CPlayerCamera>();
 			
-			this._cPlayerCamera.Initialize(this);
-			this._cameraTransform = this._cPlayerCamera.GetCameraTransform();
+			this._playerCamera.Initialize(this);
+			this._cameraTransform = this._playerCamera.GetCameraTransform();
 			#else
 			Debug.LogError("Default player camera creation not implemented without UnityAddressables");
 			#endif
@@ -285,8 +287,8 @@ namespace CDK {
 		private void InputResetCameraRotation(InputActionEventData data) {
 			if (this._blockingEventsManager.IsAnyBlockingEventHappening) return;
 			if (!data.GetButtonDown()) return;
-			if (this._cPlayerCamera == null) return;
-			this._cPlayerCamera.ResetRotation();
+			if (this._playerCamera == null) return;
+			this._playerCamera.ResetRotation();
 		}
 		
 		private void InputRun(InputActionEventData data) {

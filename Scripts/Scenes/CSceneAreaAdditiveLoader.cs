@@ -56,9 +56,11 @@ namespace CDK {
 			#endif
 		}
 
+		#if UNITY_EDITOR
 		private void EditorApplicationOnPlayModeStateChanged(PlayModeStateChange newState) {
 			this.UnloadScene();
 		}
+		#endif
 
 		private void OnDisable() {
 			_checkDisposable?.Dispose();

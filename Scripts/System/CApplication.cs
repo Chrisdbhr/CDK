@@ -1,6 +1,8 @@
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
+using ThreadPriority = UnityEngine.ThreadPriority;
 
 #if UnityAddressables
 using UnityEngine.AddressableAssets;
@@ -29,7 +31,7 @@ namespace CDK {
 		}
 
 		private static async Task InitializeApplication() {
-			Application.backgroundLoadingPriority = ThreadPriority.High;
+			Application.backgroundLoadingPriority = ThreadPriority.High; // high to load fast first assets.
 
 			Application.targetFrameRate = 60;
 
@@ -43,12 +45,15 @@ namespace CDK {
 			await LocalizationInitialize();
 			#endif
 
-			Quitting = false;
-			Application.quitting -= IsQuitting;
-			Application.quitting += IsQuitting;
+			// app quit
+			IsQuitting = false;
+			QuittingCancellationTokenSource = new CancellationTokenSource();
+			Application.quitting -= QuittingEvent;
+			Application.quitting += QuittingEvent;
 			Application.quitting += () => {
 				Debug.Log("CApplication is quitting...");
-				Quitting = true;
+				IsQuitting = true;
+				QuittingCancellationTokenSource.Cancel();
 			};
 			
 			ApplicationInitialized?.Invoke();
@@ -58,6 +63,16 @@ namespace CDK {
 
 		#endregion <<---------- Initialization ---------->>
 
+
+
+		#region <<---------- Properties and Fields ---------->>
+		
+		public static event Action QuittingEvent;
+		public static event Action ApplicationInitialized;
+		public static bool IsQuitting { get; private set; }
+		public static CancellationTokenSource QuittingCancellationTokenSource;
+		
+		#endregion <<---------- Properties and Fields ---------->>
 		
 		
 
@@ -78,7 +93,10 @@ namespace CDK {
 		private static void InitializeDependecyContainerAndBinds() {
 			
 			CDependencyResolver.Bind<CGameSettings>(() => Resources.Load<CGameSettings>("GameSettings"));
+			CDependencyResolver.Bind<CLoading>(() => new CLoading());
 			CDependencyResolver.Bind<CBlockingEventsManager>(() => new CBlockingEventsManager());
+			CDependencyResolver.Bind<CGamePlayerManager>(() => new CGamePlayerManager());
+
 			CDependencyResolver.Bind<CFootstepDatabase>(() => Resources.Load<CFootstepDatabase>("FootstepsDatabase"));
 			
 			CDependencyResolver.Bind<CCursorManager>(() => new CCursorManager());
@@ -138,10 +156,6 @@ namespace CDK {
 
 		#region <<---------- Application Quit ---------->>
 		
-		public static event Action IsQuitting;
-		public static event Action ApplicationInitialized;
-		public static bool Quitting { get; private set; }
-
 		public static void Quit() {
 			Debug.Log("Requesting Application.Quit()");
 			

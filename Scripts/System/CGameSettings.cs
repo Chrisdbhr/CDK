@@ -31,11 +31,8 @@ namespace CDK {
 
 		#if UnityAddressables
 		
-		public AssetReference AssetRef_UiLoading => this._assetRefUiLoading;
-		[Header("Asset References")]
-		[SerializeField] protected AssetReference _assetRefUiLoading;
-
 		public AssetReference AssetRef_PauseMenu => this._assetRefPauseMenu;
+		[Header("Asset References")]
 		[SerializeField] protected AssetReference _assetRefPauseMenu;
 		
 		public AssetReference AssetRef_ConfirmationPopup => this._assetRefConfirmationPopup;

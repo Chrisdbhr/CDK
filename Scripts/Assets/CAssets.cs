@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using CDK.UI;
 using UniRx;
@@ -23,7 +24,7 @@ namespace CDK {
 			get {
 				if (_instance != null) return _instance;
 				Debug.Log($"Creating new instance of {nameof(CAssets)}");
-				CApplication.IsQuitting += () => {
+				CApplication.QuittingEvent += () => {
 					_instance = null;
 				};
 				return _instance = new CAssets();
@@ -31,13 +32,11 @@ namespace CDK {
 		}
 		private static CAssets _instance;
 		
-		private Task _loadLoadingCanvasTask;
-		private Canvas _loadingCanvas;
-		private CRetainable _loadingCanvasRetainable;
-		private TimeSpan TimeToShowLoadingIndicator = TimeSpan.FromSeconds(1);
+		private CanvasGroup _loadingCanvas;
 		private IDisposable _loadingCanvasTimer;
 
 		private readonly CGameSettings _gameSettings;
+		private readonly CLoading _loading;
 		
 		#endregion <<---------- Properties ---------->>
 
@@ -48,11 +47,7 @@ namespace CDK {
 		
 		private CAssets() {
 			this._gameSettings = CDependencyResolver.Get<CGameSettings>();
-			
-			this._loadingCanvasRetainable = new CRetainable();
-			#if UnityAddressables
-			(this._loadLoadingCanvasTask = this.CheckForLoadingCanvas()).CAwait();
-			#endif
+			this._loading = CDependencyResolver.Get<CLoading>();
 		}
 
 		#endregion <<---------- Initializers ---------->>
@@ -63,7 +58,7 @@ namespace CDK {
 		#region <<---------- Loaders ---------->>
 
 		public static async Task<T> LoadObjectAsync<T>(string key) {
-			Debug.Log($"Loading asset '{key}'");
+			Debug.Log($"Loading asset key '{key}'");
 			#if UnityAddressables
 			return await Addressables.LoadAssetAsync<T>(key);
 			#else
@@ -84,9 +79,7 @@ namespace CDK {
 		#endif
 		
 		public static async Task<CUIBase> LoadAndInstantiateUI(string key, Transform parent = null, bool instantiateInWorldSpace = false, bool trackHandle = true) {
-			await get._loadLoadingCanvasTask;
-
-			get.LoadingCanvasRetain();
+			get._loading.LoadingCanvasRetain();
 
 			try {
 				#if UnityAddressables
@@ -113,7 +106,7 @@ namespace CDK {
 				Debug.LogError(e);
 			}
 			finally {
-				get.LoadingCanvasRelease();
+				get._loading.LoadingCanvasRelease();
 			}
 			return null;
 		}
@@ -126,10 +119,15 @@ namespace CDK {
 		
 		#if UnityAddressables
 		public static async Task<GameObject> LoadAndInstantiateGameObjectAsync(string key, Transform parent = null, bool instantiateInWorldSpace = false, bool trackHandle = true) {
-			Debug.Log($"Loading GameObject with key '{key}'");
-
+			Debug.Log($"Starting to load GameObject with key '{key}'");
 			try {
-				return await Addressables.InstantiateAsync(key, parent, instantiateInWorldSpace, trackHandle);
+				var asyncOp = Addressables.InstantiateAsync(key, parent, instantiateInWorldSpace, trackHandle);
+				var go = await asyncOp.WithCancellation(CApplication.QuittingCancellationTokenSource.Token);
+				if (go == null) {
+					throw new NullReferenceException($"Could not Instantiate object with key '{key}'.");
+				}
+				Debug.Log($"Loaded GameObject with key '{key}' ", go);
+				return go;
 			} catch (Exception e) {
 				Debug.LogError(e);
 			}
@@ -138,52 +136,31 @@ namespace CDK {
 		}
 		#endif
 
+		public static T LoadAndInstantiateFromResources<T>(string key) where T : UnityEngine.Object {
+			var resource = Resources.Load<T>(key);
+			return Object.Instantiate(resource);
+		}
+		
 		#endregion <<---------- Loaders ---------->>
 
 
 		
-		
-		#region <<---------- Retainables ---------->>
-		
-		private void LoadingCanvasRetain() {
-			Debug.Log("Retaining to show loading indicator.");
-			this._loadingCanvasRetainable.Retain();
-			this._loadingCanvasTimer = Observable.Timer(this.TimeToShowLoadingIndicator).Subscribe(_ => {
-				if (this._loadingCanvas == null) return;
-				this._loadingCanvas.enabled = true;
-			});
-		}
-		private void LoadingCanvasRelease() {
-			this._loadingCanvasRetainable.Release();
-			if (!this._loadingCanvasRetainable.IsRetained()) {
-				this._loadingCanvasTimer?.Dispose();
-				this._loadingCanvas.enabled = false;
-				Debug.Log("Released loading indicator.");
+
+		#region <<---------- Unloaders ---------->>
+
+		public static bool UnloadAsset(GameObject goToUnload, bool destroyIfCantReleaseInstance = true) {
+			if (goToUnload == null) {
+				Debug.LogError($"Will not unload a null asset.");
+				return false;
 			}
+			bool success = Addressables.ReleaseInstance(goToUnload);
+			if (success) return true;
+			Debug.LogError($"There was something wrong ReleasingInstance of gameObject. '{goToUnload.name}'." + (destroyIfCantReleaseInstance ? " Object will be destroyed." : string.Empty), goToUnload);
+			goToUnload.CDestroy();
+			return destroyIfCantReleaseInstance;
 		}
-
-		#endregion <<---------- Retainables ---------->>
-
-
-
-
-		#region <<---------- Loading Canvas ---------->>
 		
-		#if UnityAddressables
-		private async Task CheckForLoadingCanvas() {
-			if (CApplication.Quitting) return;
-			if (this._loadingCanvas != null) return;
-			this._loadingCanvas = (await Addressables.InstantiateAsync(this._gameSettings.AssetRef_UiLoading)).GetComponent<Canvas>();
-			if (CApplication.Quitting) {
-				this._loadingCanvas.CDestroy();
-				return;
-			}
-			this._loadingCanvas.enabled = false;
-			Object.DontDestroyOnLoad(this._loadingCanvas.gameObject);
-		}
-		#endif
-		
-		#endregion <<---------- Loading Canvas ---------->>
+		#endregion <<---------- Unloaders ---------->>
 
 	}
 }

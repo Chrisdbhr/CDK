@@ -1,55 +1,23 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 
 namespace CDK {
-	public class CGamePlayerManager : IDisposable {
+	public class CGamePlayerManager {
 
 		#region <<---------- Properties ---------->>
-		
-		public static CGamePlayerManager get {
-			get { return _instance = _instance ?? new CGamePlayerManager(); }
-		}
-		private static CGamePlayerManager _instance;
-
 
 		private readonly List<CGamePlayer> _gamePlayers = new List<CGamePlayer>();
 
-		private static Task _rewiredLoadTask;
-		
 		#endregion <<---------- Properties ---------->>
 
 		
-		
-
-		#region <<---------- Initializers ---------->>
-		
-		/// <summary>
-		/// ANTES da scene load.
-		/// </summary>
-		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-		private static void InitializeBeforeSceneLoad() {
-			get?.Dispose();
-
-			#if Rewired
-			if (!Rewired.ReInput.isReady && GameObject.FindObjectOfType<Rewired.InputManager_Base>() == null) {
-				_rewiredLoadTask = CAssets.LoadAndInstantiateGameObjectAsync("Rewired Input Manager");
-			}
-			#endif
-		}
-
-		#endregion <<---------- Initializers ---------->>
-
 
 		
-
 		#region <<---------- Player ---------->>
 
 		public async Task<CGamePlayer> CreatePlayer() {
-			if(_rewiredLoadTask != null) await _rewiredLoadTask;
-			
 			var pNumber = this._gamePlayers.Count;
 			var player = new CGamePlayer(pNumber);
 			this._gamePlayers.Add(player);
@@ -74,6 +42,10 @@ namespace CDK {
 			}
 			return new List<GameObject>();
 		}
+
+		public CGamePlayer GetPlayerControllingCharacter(CCharacterBase characterBase) {
+			return this._gamePlayers.FirstOrDefault(player => player.IsControllingCharacter(characterBase));
+		}
 		
 		public bool IsTransformFromAPlayerCharacter(Transform aTransform) {
 			if (!aTransform.gameObject.activeInHierarchy) return false;
@@ -93,17 +65,6 @@ namespace CDK {
 		}
 
 		#endregion <<---------- Characters Managment ---------->>
-		
-		
-		
-		
-		#region <<---------- Dispose ---------->>
-		
-		public void Dispose() {
-			_instance = null;
-		}
-		
-		#endregion <<---------- Dispose ---------->>
 
 	}
 }
