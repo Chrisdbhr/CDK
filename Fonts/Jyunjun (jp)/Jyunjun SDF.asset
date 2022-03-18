@@ -17,7 +17,8 @@ MonoBehaviour:
   materialHashCode: 750786184
   m_Version: 1.1.0
   m_SourceFontFileGUID: 0b929baab6004394e944d5c08468ff2a
-  m_SourceFontFile_EditorRef: {fileID: 12800000, guid: 0b929baab6004394e944d5c08468ff2a, type: 3}
+  m_SourceFontFile_EditorRef: {fileID: 12800000, guid: 0b929baab6004394e944d5c08468ff2a,
+    type: 3}
   m_SourceFontFile: {fileID: 12800000, guid: 0b929baab6004394e944d5c08468ff2a, type: 3}
   m_AtlasPopulationMode: 1
   m_FaceInfo:
@@ -4704,6 +4705,34 @@ MonoBehaviour:
       m_Height: 26
     m_Scale: 1
     m_AtlasIndex: 0
+  - m_Index: 603
+    m_Metrics:
+      m_Width: 0
+      m_Height: 0
+      m_HorizontalBearingX: 0
+      m_HorizontalBearingY: 0
+      m_HorizontalAdvance: 16.5
+    m_GlyphRect:
+      m_X: 0
+      m_Y: 0
+      m_Width: 0
+      m_Height: 0
+    m_Scale: 1
+    m_AtlasIndex: 0
+  - m_Index: 602
+    m_Metrics:
+      m_Width: 0
+      m_Height: 0
+      m_HorizontalBearingX: 0
+      m_HorizontalBearingY: 0
+      m_HorizontalAdvance: 16.5
+    m_GlyphRect:
+      m_X: 0
+      m_Y: 0
+      m_Width: 0
+      m_Height: 0
+    m_Scale: 1
+    m_AtlasIndex: 0
   m_CharacterTable:
   - m_ElementType: 1
     m_Unicode: 32
@@ -6036,6 +6065,14 @@ MonoBehaviour:
   - m_ElementType: 1
     m_Unicode: 40658
     m_GlyphIndex: 14629
+    m_Scale: 1
+  - m_ElementType: 1
+    m_Unicode: 1111
+    m_GlyphIndex: 603
+    m_Scale: 1
+  - m_ElementType: 1
+    m_Unicode: 1110
+    m_GlyphIndex: 602
     m_Scale: 1
   m_AtlasTextures:
   - {fileID: 1640643871889307632}
