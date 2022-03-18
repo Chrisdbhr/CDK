@@ -497,8 +497,7 @@ namespace CDK {
 			if (!this._isTouchingTheGroundRx.Value && (this._movementMomentumXZ.x.CImprecise() != 0.0f || this._movementMomentumXZ.z.CImprecise() != 0.0f)) {
 				targetMotion += this._movementMomentumXZ;
 				if(this._debug) Debug.Log($"Applying {this._movementMomentumXZ}, targetMotion now is {targetMotion}");
-				var momentumLoseValue = this._movementMomentumXZ - (this._movementMomentumXZ * (this._aerialMomentumMaintainPercentage));
-				this._movementMomentumXZ -= momentumLoseValue * deltaTime;
+				this._movementMomentumXZ *= this._aerialMomentumMaintainPercentage * deltaTime;
 			}
 			
 			// root motion
