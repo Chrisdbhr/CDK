@@ -91,7 +91,7 @@ namespace CDK {
 		}
 
 		private Vector3 GetCheckHeight() {
-			return this.transform.position + Vector3.up * this.GetYCheckOffset();
+			return this.transform.position + this.transform.up * this.GetYCheckOffset();
 		}
 
 		protected Vector3 GetCenterSphereCheckPosition() {

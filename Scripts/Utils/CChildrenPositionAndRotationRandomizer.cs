@@ -12,7 +12,7 @@ namespace CDK {
 		
 		#region <<---------- Properties and Fields ---------->>
 
-		[SerializeField] private Vector3 _scaleRange = Vector3.one * 0.10f;
+		[SerializeField] private Vector2 _scaleRange = new Vector2(1f, 2f);
 		[SerializeField] private Vector3 _angleRange = Vector3.one * 30;
 		[SerializeField] private Vector3 _positionRange = Vector3.one * 10;
 		[SerializeField] private float _minimumSpaceBetweenObjs = 1f;
@@ -55,19 +55,23 @@ namespace CDK {
 		}
 		public void RandomizeScalesEditor() {
 			this.DoForEachGameObject(target => {
-				var scale = target.localScale;
-				scale.x += scale.x * this._scaleRange.x;
-				scale.y += scale.y * this._scaleRange.y;
-				scale.z += scale.z * this._scaleRange.z;
-				Undo.RecordObject(target, $"undo-{target.name}");
-				target.localScale = scale;
+                float scale = Random.Range(_scaleRange.x, _scaleRange.y);
+                Undo.RecordObject(target, $"undo-{target.name}");
+				target.localScale = scale * Vector3.one;
 			});
 		}
+
+        public void RandomizeAll() {
+            this.RandomizePositionsEditor();
+            this.RandomizeRotationsEditor();
+            this.RandomizeScalesEditor();
+        }
+        
 		#endif
 
 		private void DoForEachGameObject(Action<Transform> actionOnTransform) {
 			#if UNITY_EDITOR
-			string progressBarTitle = "Randomizing Rotations";
+			string progressBarTitle = "Randomizing Objects";
 			string progressBarInfo = "";
 			EditorUtility.DisplayProgressBar(progressBarTitle, progressBarInfo, 0f); 
 			#endif
@@ -138,6 +142,9 @@ namespace CDK {
 			if(GUILayout.Button(nameof(CChildrenPositionAndRotationRandomizer.RandomizeScalesEditor))) {
 				myScript.RandomizeScalesEditor();
 			}
+            if(GUILayout.Button(nameof(CChildrenPositionAndRotationRandomizer.RandomizeAll))) {
+                myScript.RandomizeAll();
+            }
 		}
 	}
 	#endif

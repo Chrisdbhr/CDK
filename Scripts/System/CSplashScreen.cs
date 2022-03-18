@@ -45,6 +45,10 @@ namespace CDK {
             }
         }
 
+        private void Reset() {
+            if (this._playableDirector == null) this._playableDirector = this.GetComponent<PlayableDirector>();
+        }
+
         #endregion <<---------- MonoBehaviour ---------->>
 
     }
