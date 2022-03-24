@@ -24,12 +24,12 @@ namespace CDK {
 		[SerializeField] private Transform _footR;
 		[SerializeField] private LayerMask _footCollisionLayers = 1;
 
-		[NonSerialized] private CFootstepDatabase _database;
-		[NonSerialized] private float _rayOffset = 0.25f;
-		[NonSerialized] private float _feetSizeForSphereCast = 0.1f;
-		[NonSerialized] private Vector3 _lastValidHitPoint;
+		private CFootstepDatabase _database;
+		private float _rayOffset = 0.25f;
+		private float _feetSizeForSphereCast = 0.1f;
+		private Vector3 _lastValidHitPoint;
 
-		[NonSerialized] private Dictionary<ParticleSystem, ParticleSystem> _spawnedParticleInstances = new Dictionary<ParticleSystem, ParticleSystem>();
+		private Dictionary<ParticleSystem, ParticleSystem> _spawnedParticleInstances = new Dictionary<ParticleSystem, ParticleSystem>();
 		
 		
 		public event Action<CFootstepInfo, FootstepFeet> OnFootstep {
