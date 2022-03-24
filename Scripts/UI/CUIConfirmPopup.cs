@@ -29,7 +29,7 @@ namespace CDK.UI {
 				await CUINavigation.get.CloseCurrentMenu();
 			});
 					
-			EventSystem.current.SetSelectedGameObject(this._buttonConfirm.gameObject);
+			this._eventSystem.SetSelectedGameObject(this._buttonConfirm.gameObject);
 		}
 
 	}

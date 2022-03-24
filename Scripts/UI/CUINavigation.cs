@@ -35,7 +35,7 @@ namespace CDK.UI {
 		#region <<---------- Initializers ---------->>
 
 		public CUINavigation() {
-			this._navigationHistory = new Stack<CUIBase>();
+			this._navigationHistory = new ();
 			this._blockingEventsManager = CDependencyResolver.Get<CBlockingEventsManager>();
 		}
 		
@@ -45,13 +45,13 @@ namespace CDK.UI {
 		
 
 		#region <<---------- Properties ---------->>
-		public CUIBase[] NavigationHistory {
-			get { return this._navigationHistory.ToArray(); }
-		}
+		public CUIBase[] NavigationHistoryToArray => this._navigationHistory.ToArray();
+		
 		private int LastFrameAMenuClosed;
-		private CompositeDisposable _navigationDisposables;
-		[NonSerialized] private readonly Stack<CUIBase> _navigationHistory;
-		[NonSerialized] private readonly CBlockingEventsManager _blockingEventsManager;
+		private IDisposable _disposableIsNavigating;
+
+        private readonly HashSet<CUIBase> _navigationHistory;
+		private readonly CBlockingEventsManager _blockingEventsManager;
 
 		#endregion <<---------- Properties ---------->>
 		
@@ -74,12 +74,14 @@ namespace CDK.UI {
 		public async Task<CUIBase> OpenMenu(AssetReference uiReference, CUIBase originUI, CUIInteractable originButton) {
 			if (CApplication.IsQuitting) return null;
 
-			var ui = await CAssets.LoadAndInstantiateUI(uiReference);
+            var ui = await CAssets.LoadAndInstantiateUI(uiReference);
 			if (ui == null) {
 				Debug.LogError($"Could not open menu '{uiReference.RuntimeKey}'");
 				return null;
 			}
-			
+            
+            this.RemoveNullFromNavigationHistory();
+	
 			bool alreadyOpened = this._navigationHistory.Any(x => x == ui);
 			if (alreadyOpened) {
 				Debug.LogError($"Tried to open the same menu twice! Will not open menu '{ui.name}'");
@@ -95,7 +97,7 @@ namespace CDK.UI {
 			
 			this.CheckIfIsFirstMenu();
 			
-			this._navigationHistory.Push(ui);
+			this._navigationHistory.Add(ui);
 			
 			return ui;
 		}
@@ -106,40 +108,37 @@ namespace CDK.UI {
 		/// Closes active menu selecting previous button.
 		/// </summary>
 		public async Task CloseCurrentMenu() {
+            this.RemoveNullFromNavigationHistory();
 			if (this._navigationHistory.Count <= 0) {
 				Debug.LogError("No menu to close");
 				return;
 			}
 
+            var lastInHistory = this._navigationHistory.Last();
 			if (this.LastFrameAMenuClosed == Time.frameCount) {
-				var lastInHistory = this._navigationHistory.Peek();
 				Debug.LogWarning($"Will not close menu '{lastInHistory.name}' because one already closed in this frame.", lastInHistory);
 				return;
 			}
 
-			var ui = this._navigationHistory.Pop();
-
-			if (ui == null) {
-				Debug.LogError("UI popped from Stack was null");
-			}
+			this._navigationHistory.Remove(lastInHistory);
 			
 			this.CheckIfIsLastMenu();
 
-			if (ui != null) {
-				Debug.Log($"Closing Menu '{ui.name}'", ui);
-				this.LastFrameAMenuClosed = Time.frameCount;
-				ui.Close();
-			}
+            Debug.Log($"Closing Menu '{lastInHistory.name}'", lastInHistory);
+            this.LastFrameAMenuClosed = Time.frameCount;
+            lastInHistory.Close();
 		}
 
 		public async Task EndNavigation() {
 			Debug.Log($"Requested EndNavigation of {this._navigationHistory.Count} Menus in history.");
+            RemoveNullFromNavigationHistory();
 			foreach (var ui in this._navigationHistory) {
-				if(ui == null) continue;
 				ui.Close();
 			}
+            this._disposableIsNavigating?.Dispose();
 			this._navigationHistory.Clear();
 			this._blockingEventsManager.IsOnMenu = false;
+            CTime.TimeScale = 1f;
 		}
 		
 		#endregion <<---------- Open / Close ---------->>
@@ -148,45 +147,57 @@ namespace CDK.UI {
 		
 		
 		#region <<---------- Navigation ---------->>
-		
+
+        private bool RemoveNullFromNavigationHistory() {
+            int removedCount = this._navigationHistory.RemoveWhere(x => x == null);
+            if (removedCount > 0) {
+                Debug.LogWarning($"<color=yellow>Removed {removedCount} null UI from navigation history.</color>");
+                return true;
+            }
+            return false;
+        }
+        
 		private void CheckIfIsFirstMenu() {
+            this.RemoveNullFromNavigationHistory();
 			if (this._navigationHistory.Count > 0) return;
-			
-			this._navigationDisposables?.Dispose();
-			this._navigationDisposables = new CompositeDisposable();
-			
-			this._blockingEventsManager.IsOnMenu = true;
-			
-			Observable.EveryUpdate().Subscribe(_ => {
+
+            this._blockingEventsManager.IsOnMenu = true;
+
+			this._disposableIsNavigating?.Dispose();
+            this._disposableIsNavigating = Observable.EveryUpdate().Subscribe(_ => {
 				//if (CInputManager.ActiveInputType != CInputManager.InputType.JoystickController) return;
+                this.RemoveNullFromNavigationHistory();
 				if (this._navigationHistory.Count <= 0) return;
 				var current = EventSystem.current;
 				if (current == null) return;
 				if (current.currentSelectedGameObject != null) return;
-				var activeUi = this._navigationHistory.Peek();
-				current.SetSelectedGameObject(activeUi.FirstSelectedObject);
-			})
-			.AddTo(this._navigationDisposables);
+				var activeUi = this._navigationHistory.Last();
+                var objectToSelect = activeUi.FirstSelectedObject;
+                if (objectToSelect != null) {
+                    current.SetSelectedGameObject(objectToSelect);
+                    return;
+                }
+                var firstInteractable = activeUi.GetComponentsInChildren<CUIInteractable>().FirstOrDefault();
+                if (firstInteractable == null) return;
+                current.SetSelectedGameObject(firstInteractable.gameObject);
+            });
 		}
 
 		private void CheckIfIsLastMenu() {
-			if (this._navigationHistory.Count > 0) return;
-			
-			this._blockingEventsManager.IsOnMenu = false;
-			CTime.TimeScale = 1f;
-			
-			this._navigationDisposables?.Dispose();
-		}
+            if (this.RemoveNullFromNavigationHistory() && this._navigationHistory.Count <= 0) {
+                // there was null UI on navigation history now it doesnt have anything, end navigation.
+                this.EndNavigation().CAwait();
+                return;
+            }
+            if (this._navigationHistory.Count > 0) return;
+            this.EndNavigation().CAwait();
+        }
 		
 		private void HideLastMenuIfSet() {
+            this.RemoveNullFromNavigationHistory();
 			if (this._navigationHistory.Count <= 0) return;
-			var current = this._navigationHistory.Peek();
-			if (current == null) {
-				Debug.LogError("There was a null item on navigation history, this should not happen!");
-			}
-			else {
-				current.HideIfSet(); 
-			}
+			var current = this._navigationHistory.Last();
+            current.HideIfSet(); 
 		}
 		
 		#endregion <<---------- Navigation ---------->>

@@ -129,7 +129,7 @@ namespace CDK {
 				Debug.Log($"Loaded GameObject with key '{key}' ", go);
 				return go;
 			} catch (Exception e) {
-				Debug.LogError(e);
+				Debug.LogError($"Exception trying to Load and Instantiate GameObject Async with key '{key}':\n" + e);
 			}
 
 			return null;

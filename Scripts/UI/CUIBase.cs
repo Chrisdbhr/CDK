@@ -80,6 +80,12 @@ namespace CDK.UI {
 		protected virtual void OnDisable() {
 			
 		}
+
+        protected virtual void Reset() {
+            if (this._eventSystem == null) {
+                this._eventSystem = this.GetComponentInChildren<EventSystem>();
+            }
+        }
 		
 		#endregion <<---------- MonoBehaviour ---------->>
 		
