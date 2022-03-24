@@ -51,7 +51,7 @@ namespace CDK {
 			Application.quitting -= QuittingEvent;
 			Application.quitting += QuittingEvent;
 			Application.quitting += () => {
-				Debug.Log("CApplication is quitting...");
+				Debug.Log("<color=red>CApplication is quitting...</color>");
 				IsQuitting = true;
 				QuittingCancellationTokenSource.Cancel();
 			};
