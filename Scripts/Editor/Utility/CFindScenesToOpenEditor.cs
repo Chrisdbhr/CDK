@@ -193,6 +193,6 @@ public class CFindScenesToOpenEditor : EditorWindow {
 
     private static void CloseWindow() {
         if (window == null) return;
-        window.Close();
+        window?.Close();
     }
 }
