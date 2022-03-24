@@ -4,7 +4,9 @@
         "Unity.TextMeshPro",
         "UniRx",
         "CDK",
-        "FMODUnity"
+        "FMODUnity",
+        "Unity.Localization",
+        "Unity.Localization.Editor"
     ],
     "includePlatforms": [
         "Editor"
