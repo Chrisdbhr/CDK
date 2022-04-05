@@ -421,10 +421,9 @@ namespace CDK {
 		protected virtual void ProcessMovement() {
 			this._animator.CSetFloatWithLerp(this.ANIM_CHAR_MOV_SPEED_XZ, this.MyVelocityXZ.magnitude, ANIMATION_BLENDTREE_LERP * CTime.DeltaTimeScaled * this.TimelineTimescale);
 			if (!this._charController.enabled) return;
-
 			if (CTime.TimeScale == 0f) return;
-			
-			var deltaTime = CTime.DeltaTimeScaled * this.TimelineTimescale;
+
+            var deltaTime = CTime.DeltaTimeScaled * this.TimelineTimescale;
 			
 			// horizontal movement
 			var targetMotion = this.ProcessHorizontalMovement(deltaTime);
@@ -571,7 +570,10 @@ namespace CDK {
 		}
 		
 		protected virtual void ProcessAerialAndFallMovement() {
-			if (this._isTouchingTheGroundRx.Value || this.MyVelocity.y >= 0f) {
+			if (this._isTouchingTheGroundRx.Value || this.MyVelocity.y >= 0f
+            || this._blockingEventsManager.IsPlayingCutscene // check if is playing cutscene so char dont die when teleport or during cutscene
+                ) {
+                
 				// not falling
 				this.ResetFallCalculation();
 				this._isOnFreeFall.Value = false;
