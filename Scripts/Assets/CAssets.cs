@@ -119,7 +119,7 @@ namespace CDK {
 		
 		#if UnityAddressables
 		public static async Task<GameObject> LoadAndInstantiateGameObjectAsync(string key, Transform parent = null, bool instantiateInWorldSpace = false, bool trackHandle = true) {
-			Debug.Log($"Starting to load GameObject with key '{key}'");
+			Debug.Log($"Starting to load GameObject with key '{key}'{(parent != null ? $" on parent '{parent.name}'" : string.Empty)}");
 			try {
 				var asyncOp = Addressables.InstantiateAsync(key, parent, instantiateInWorldSpace, trackHandle);
 				var go = await asyncOp.WithCancellation(CApplication.QuittingCancellationTokenSource.Token);
