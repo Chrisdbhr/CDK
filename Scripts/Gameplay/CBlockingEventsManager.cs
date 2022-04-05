@@ -115,8 +115,12 @@ namespace CDK {
 			});
 
 			// is doing blocking action
+            this._isDoingBlockingAction = null;
 			this._isDoingBlockingAction = new CRetainable();
-			
+            this._isDoingBlockingAction.IsRetainedRx.Subscribe(retained => {
+                this._onDoingBlockingAction?.Invoke(retained);
+            });
+            
 			// blocking Event Happening
 			Observable.CombineLatest(
 			this._isOnMenuRx, 
