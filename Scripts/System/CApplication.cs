@@ -35,7 +35,7 @@ namespace CDK {
 
 			Application.targetFrameRate = 60;
 
-			InitializeDependecyContainerAndBinds();
+			InitializeDependencyContainerAndBinds();
 			
 			#if UnityAddressables
 			await AddressablesInitialize();
@@ -65,6 +65,7 @@ namespace CDK {
 
 
 
+		
 		#region <<---------- Properties and Fields ---------->>
 		
 		public static event Action QuittingEvent;
@@ -76,6 +77,7 @@ namespace CDK {
 		
 		
 
+		
 		#region <<---------- Platform Features ---------->>
 
 		void PlatformSpecificFeatures() {
@@ -90,7 +92,7 @@ namespace CDK {
 
 		#region <<---------- Dependencies ---------->>
 
-		private static void InitializeDependecyContainerAndBinds() {
+		private static void InitializeDependencyContainerAndBinds() {
 			
 			CDependencyResolver.Bind<CGameSettings>(() => Resources.Load<CGameSettings>("GameSettings"));
 			CDependencyResolver.Bind<CLoading>(() => new CLoading());

@@ -12,15 +12,16 @@ namespace CDK {
 		[System.Serializable]
 		class AudiosList {
 			#if FMOD
-			[EventRef]
-			#endif
+			public EventReference audio;
+			#else
 			public string audio;
+			#endif
 		}
 		
 		
-		public string[] Audios {
+		public EventReference[] Audios {
 			get {
-				return (from audioList in this._audios where audioList != null && !audioList.audio.CIsNullOrEmpty() select audioList.audio).ToArray();
+				return (from audioList in this._audios where audioList != null && !audioList.audio.IsNull select audioList.audio).ToArray();
 			}
 		}
 		[SerializeField] private AudiosList[] _audios = new AudiosList[1];

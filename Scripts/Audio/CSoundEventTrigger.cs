@@ -29,10 +29,14 @@ namespace CDK {
 		[SerializeField] private MonoStopTime _eventStopTime;
 		[SerializeField] private bool _is3d;
 		
+		[SerializeField] private 
 		#if FMOD
-		[EventRef]
+		EventReference
+		#else
+		string
 		#endif
-		[SerializeField] private string _soundEvent;
+		_soundEvent;
+		
 
 		#if FMOD
 		private EventInstance _soundState;
@@ -70,7 +74,7 @@ namespace CDK {
 		
 		protected override void TriggerEvent() {
 			#if FMOD
-			if (this._soundEvent.CIsNullOrEmpty()) {
+			if (this._soundEvent.IsNull) {
 				Debug.LogWarning($"{this.name} is not referencing a valid Music (EventRef)!");
 				return;
 			}
