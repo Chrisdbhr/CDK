@@ -224,7 +224,7 @@ namespace CDK {
 			
 			#if UnityAddressables
 			var createdGo = await CAssets.LoadAndInstantiateGameObjectAsync("PlayerCamera");
-			createdGo.name = $"[Camera] {mainChar.name}";
+			createdGo.name = $"[CAM] {mainChar.name}";
 			
 			Debug.Log($"Created {mainChar.name} Camera", createdGo);
 
