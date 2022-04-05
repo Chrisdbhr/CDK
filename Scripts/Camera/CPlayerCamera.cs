@@ -302,6 +302,8 @@ namespace CDK {
 			this._cinemachineBrain.m_CameraActivatedEvent.AddListener(this.ActiveCameraChanged);
 			#endif
 
+            CTime.OnTimeScaleChanged += this.TimeScaleChanged;
+            
 			SceneManager.activeSceneChanged += ActiveSceneChanged;
 		}
 		
@@ -336,6 +338,10 @@ namespace CDK {
 			this.ApplyLastOrDefaultCameraProfile();
 			this.UpdateCameraTargets();
 		}
+
+        private void TimeScaleChanged(float oldTime, float newTime) {
+            if (this._cinemachineBrain != null) this._cinemachineBrain.enabled = newTime != 0f;
+        }
 		
 		#endregion <<---------- Callbacks ---------->>
 		
