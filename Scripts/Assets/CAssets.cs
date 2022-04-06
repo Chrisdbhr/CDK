@@ -138,6 +138,10 @@ namespace CDK {
 
 		public static T LoadAndInstantiateFromResources<T>(string key) where T : UnityEngine.Object {
 			var resource = Resources.Load<T>(key);
+			if (resource == null) {
+				Debug.LogError($"Could not {nameof(LoadAndInstantiateFromResources)} from key '{key}'");
+				return null;
+			}
 			return Object.Instantiate(resource);
 		}
 		
