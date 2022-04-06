@@ -32,8 +32,7 @@ namespace CDK {
 
 		private static async Task InitializeApplication() {
 			Application.backgroundLoadingPriority = ThreadPriority.High; // high to load fast first assets.
-
-			Application.targetFrameRate = 60;
+            Application.targetFrameRate = 15;
 
 			InitializeDependencyContainerAndBinds();
 			
@@ -55,9 +54,12 @@ namespace CDK {
 				IsQuitting = true;
 				QuittingCancellationTokenSource.Cancel();
 			};
+            
+            CAssets.LoadAndInstantiateFromResources<Rewired.InputManager_Base>("Rewired Input Manager");
 			
-			ApplicationInitialized?.Invoke();
+            ApplicationInitialized?.Invoke();
 			
+            Application.targetFrameRate = 60;
 			Application.backgroundLoadingPriority = ThreadPriority.Low;
 		}
 
