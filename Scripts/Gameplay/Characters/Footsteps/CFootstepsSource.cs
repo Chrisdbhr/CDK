@@ -20,9 +20,9 @@ namespace CDK {
 		#region <<---------- Properties and Fields ---------->>
 
 		[SerializeField] private bool _debugFootstep;
-		[SerializeField] private Transform _footL;
-		[SerializeField] private Transform _footR;
-		[SerializeField] private LayerMask _footCollisionLayers = 1;
+		public Transform FootL;
+        public Transform FootR;
+		public LayerMask FootCollisionLayers = 1;
 
 		private CFootstepDatabase _database;
 		private float _rayOffset = 0.25f;
@@ -65,8 +65,8 @@ namespace CDK {
 		#if UNITY_EDITOR
 		private void OnDrawGizmosSelected() {
 			Gizmos.color = Color.white;
-			if(this._footL) Gizmos.DrawWireSphere(this._footL.position, this._feetSizeForSphereCast);
-			if(this._footR) Gizmos.DrawWireSphere(this._footR.position, this._feetSizeForSphereCast);
+			if(this.FootL) Gizmos.DrawWireSphere(this.FootL.position, this._feetSizeForSphereCast);
+			if(this.FootR) Gizmos.DrawWireSphere(this.FootR.position, this._feetSizeForSphereCast);
 			Gizmos.DrawWireSphere(this._lastValidHitPoint, this._feetSizeForSphereCast);
 		}
 
@@ -90,7 +90,7 @@ namespace CDK {
 		public void Footstep(FootstepFeet feet) {
 			var originTransform = this.transform.root;
 			
-			var rayOrigin = feet == FootstepFeet.left ? (this._footL ? this._footL : originTransform) : (this._footR ? this._footR : originTransform);
+			var rayOrigin = feet == FootstepFeet.left ? (this.FootL ? this.FootL : originTransform) : (this.FootR ? this.FootR : originTransform);
 
 			var transformUp = originTransform.up;
 			bool feetHitSomething = Physics.SphereCast(
@@ -99,7 +99,7 @@ namespace CDK {
 				(transformUp * -1).normalized, // down
 				out var raycastHit,
 				2f * this._rayOffset,
-				this._footCollisionLayers,
+				this.FootCollisionLayers,
 				QueryTriggerInteraction.Ignore
 			);
 			if (!feetHitSomething) return;

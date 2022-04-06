@@ -91,6 +91,8 @@ namespace CDK {
 		
 
 		#region <<---------- Run and Walk ---------->>
+        [Header("Walk")]
+        [SerializeField] private CMovState _currentMovState;
 		public CMovState CurrentMovState {
 			get { return this._currentMovState; }
 			protected set {
@@ -121,12 +123,9 @@ namespace CDK {
 			}
 		}
 
-		[SerializeField] private CMovState _currentMovState;
-
 		public float MovementSpeed {
 			get { return this._movementSpeed; }
 		}
-
 		[SerializeField] [Min(0f)] private float _movementSpeed = 1f;
 
 		public float WalkMultiplier {
@@ -135,10 +134,11 @@ namespace CDK {
 
 		private float _walkMultiplier = 0.6f;
 
+        [Header("Run")]
+        [SerializeField] private float _runSpeedMultiplier = 2f;
 		public float RunSpeedMultiplier {
 			get { return this._runSpeedMultiplier; }
 		}
-		[SerializeField] private float _runSpeedMultiplier = 2f;
 
 		public ReactiveProperty<bool> CanMoveRx { get; protected set; }
 
@@ -151,9 +151,9 @@ namespace CDK {
 
 		#region <<---------- Sliding ---------->>
 
-		protected ReactiveProperty<bool> _enableSlideRx;
-
+        [Header("Sliding")]
 		[SerializeField] protected float _slideSpeed = 3f;
+        protected ReactiveProperty<bool> _enableSlideRx;
 
 		private bool CanSlide {
 			get { return this._canSlide; }
@@ -178,6 +178,7 @@ namespace CDK {
 		#endregion <<---------- Sliding ---------->>
 
 		#region <<---------- Aerial Movement ---------->>
+        [Header("Aerial Movement")]
 		[SerializeField] private float _gravityMultiplier = 1f;
 		[SerializeField] [Range(0f,1f)] private float _aerialMomentumMaintainPercentage = 0.90f;
 		protected Vector3 _groundNormal;
@@ -189,6 +190,7 @@ namespace CDK {
 		#endregion <<---------- Aerial Movement ---------->>
 
 		#region <<---------- Rotation ---------->>
+        [Header("Rotation")]
 		[SerializeField] private float _rotateTowardsSpeed = 10f;
 
 		protected Quaternion _targetLookRotation;
