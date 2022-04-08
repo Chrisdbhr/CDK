@@ -3,18 +3,14 @@ namespace CDK {
 		/// <summary>
 		///   <para>Lowest priority.</para>
 		/// </summary>
-		Low = 0,
-		/// <summary>
-		///   <para>Below normal priority.</para>
-		/// </summary>
-		BelowNormal = 1,
+		Low,
 		/// <summary>
 		///   <para>Normal priority.</para>
 		/// </summary>
-		Normal = 2,
+		Normal,
 		/// <summary>
 		///   <para>Highest priority.</para>
 		/// </summary>
-		High = 4,
+		High
 	}
 }
