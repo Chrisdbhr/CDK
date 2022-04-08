@@ -62,8 +62,9 @@ namespace CDK {
 		public enum CameraType {
 			@default,
 			smallAreaCloseLimitedVision,
-			bigOpenArea
-		}
+			bigOpenArea,
+            twoDCamera
+        }
 
 		#endregion <<---------- Enums ---------->>
 		
@@ -137,6 +138,7 @@ namespace CDK {
 			this._blockingEventsManager = CDependencyResolver.Get<CBlockingEventsManager>();
 			this.ActiveCameraProfiles = new ();
 			this._isCloseToTheCharacterRx = new ReactiveProperty<bool>(false);
+
 			this.SearchForGlobalVolume();
 			this.ApplyLastOrDefaultCameraProfile();
 		}
@@ -153,7 +155,7 @@ namespace CDK {
 				
 				// camera shake intensity
 				if (this._ownerCharacter && this._cinemachineBrain.ActiveVirtualCamera is CinemachineFreeLook cam) {
-					var velocity = this._ownerCharacter.MyVelocity;
+					var velocity = this._ownerCharacter.GetMyVelocity();
 					if(velocity.y < 0) velocity.y *= _fallShakeMultiplier;
 					var magnitude = velocity.magnitude;
 					float amplitude = 0f;

@@ -14,12 +14,14 @@ using FMODUnity;
 #endif
 
 namespace CDK {
-	[SelectionBase] [RequireComponent(typeof(CharacterController))]
+	[SelectionBase] 
 	public abstract class CCharacterBase : MonoBehaviour, ICStunnable {
 
 		#region <<---------- Properties ---------->>
 
-		#region <<---------- Debug ---------->>
+        [SerializeField] private CMonobehaviourExecutionLoop _updateTime = CMonobehaviourExecutionLoop.Update;
+		
+        #region <<---------- Debug ---------->>
 
 		[SerializeField] protected bool _debug;
 
@@ -30,9 +32,7 @@ namespace CDK {
 		[Header("Cache and References")]
 		[SerializeField] protected Animator _animator;
 
-		[NonSerialized] protected CharacterController _charController;
-		[NonSerialized] protected CBlockingEventsManager _blockingEventsManager;
-		[NonSerialized] private float _charInitialHeight;
+		protected CBlockingEventsManager _blockingEventsManager;
 		protected Transform transform;
 
 		public Vector3 Position {
@@ -73,13 +73,10 @@ namespace CDK {
 
 		#region <<---------- Movement Properties ---------->>
 		protected Vector3 _previousPosition { get; private set; }
-
-		public Vector3 MyVelocity => this._charController.velocity;
-		public float MyVelocityMagnitude => this._charController.velocity.magnitude;
-
+        
 		public Vector3 MyVelocityXZ {
 			get {
-				var velocity = this.MyVelocity;
+				var velocity = this.GetMyVelocity();
 				velocity.y = 0f;
 				return velocity;
 			}
@@ -92,36 +89,12 @@ namespace CDK {
 
 		#region <<---------- Run and Walk ---------->>
         [Header("Walk")]
-        [SerializeField] private CMovState _currentMovState;
+        [SerializeField] protected CMovState _currentMovState;
 		public CMovState CurrentMovState {
 			get { return this._currentMovState; }
-			protected set {
-				if (this._currentMovState == value) return;
-				var oldValue = this._currentMovState;
-				this._currentMovState = value;
-
-				// sliding
-				if (value == CMovState.Sliding) {
-					// is sliding now
-					this._slideBeginTime = Time.time;
-				}
-				else if (oldValue == CMovState.Sliding) {
-					// was sliding
-					if (Time.time >= this._slideBeginTime + this._slideTimeToStumble) {
-						if (this._animator) this._animator.SetTrigger(this.ANIM_CHAR_STUMBLE);
-					}
-				}
-
-				// set animators
-				if (this._animator) {
-					this._animator.SetBool(this.ANIM_CHAR_IS_SLIDING, value == CMovState.Sliding);
-					this._animator.SetBool(this.ANIM_CHAR_IS_WALKING, value == CMovState.Walking);
-					this._animator.SetBool(this.ANIM_CHAR_IS_RUNNING, value == CMovState.Running);
-
-					//this.Anim.SetBool(this.ANIM_CHAR_IS_SPRINTING, value == CMovState.Sprint);
-				}
-			}
 		}
+
+        protected abstract void SetMovementState(CMovState value);
 
 		public float MovementSpeed {
 			get { return this._movementSpeed; }
@@ -148,47 +121,7 @@ namespace CDK {
 
 		public bool BlockRunFromEnvironment;
 		#endregion <<---------- Run and Walk ---------->>
-
-		#region <<---------- Sliding ---------->>
-
-        [Header("Sliding")]
-		[SerializeField] protected float _slideSpeed = 3f;
-        protected ReactiveProperty<bool> _enableSlideRx;
-
-		private bool CanSlide {
-			get { return this._canSlide; }
-			set {
-				if (this._canSlide == value) return;
-				this._canSlide = value;
-				this._timeThatCanToggleSlide = Time.realtimeSinceStartup + DELAY_TO_TOGGLE_SLIDE;
-			}
-		}
-
-		[SerializeField] private bool _canSlide;
-		[SerializeField] private float _timeThatCanToggleSlide;
-
-		public virtual float SlideControlAmmount => 0.5f;
-
-		protected float _slideTimeToStumble = 1.0f;
-		protected float _slideBeginTime;
-
-		private const float DELAY_TO_TOGGLE_SLIDE = 0.4f;
-		private const float SLIDE_FROM_CHAR_SLOPE_LIMIT_MULTIPLIER = 0.6f;
-
-		#endregion <<---------- Sliding ---------->>
-
-		#region <<---------- Aerial Movement ---------->>
-        [Header("Aerial Movement")]
-		[SerializeField] private float _gravityMultiplier = 1f;
-		[SerializeField] [Range(0f,1f)] private float _aerialMomentumMaintainPercentage = 0.90f;
-		protected Vector3 _groundNormal;
-		private float _lastYPositionCharWasNotFalling;
-		protected BoolReactiveProperty _isTouchingTheGroundRx;
-		protected BoolReactiveProperty _isOnFreeFall;
-		protected FloatReactiveProperty _distanceOnFreeFall;
-		private const float HEIGHT_PERCENTAGE_TO_CONSIDER_FREE_FALL = 0.25f;
-		#endregion <<---------- Aerial Movement ---------->>
-
+        
 		#region <<---------- Rotation ---------->>
         [Header("Rotation")]
 		[SerializeField] private float _rotateTowardsSpeed = 10f;
@@ -216,11 +149,13 @@ namespace CDK {
 
 		#region <<---------- Animation Parameters ---------->>
 		protected readonly int ANIM_CHAR_MOV_SPEED_XZ = Animator.StringToHash("speedXZ");
+        protected readonly int ANIM_CHAR_MOV_SPEED_X = Animator.StringToHash("speedX");
+        protected readonly int ANIM_CHAR_MOV_SPEED_Y = Animator.StringToHash("speedY");
 		protected readonly int ANIM_DISTANCE_ON_FREE_FALL = Animator.StringToHash("distanceOnFreeFall");
 		protected readonly int ANIM_FALL_LANDING_ANIM_INDEX = Animator.StringToHash("fallLandingAnim");
 
 		// actions
-		private readonly int ANIM_CHAR_STUMBLE = Animator.StringToHash("stumble");
+        protected readonly int ANIM_CHAR_STUMBLE = Animator.StringToHash("stumble");
 
 		// condition states
 		protected readonly int ANIM_CHAR_IS_STRAFING = Animator.StringToHash("isStrafing");
@@ -260,15 +195,8 @@ namespace CDK {
 		#region <<---------- MonoBehaviour ---------->>
 		protected virtual void Awake() {
 			this.transform = base.transform;
-			this._charController = this.GetComponent<CharacterController>();
-			this._charInitialHeight = this._charController.height;
 			this._blockingEventsManager = CDependencyResolver.Get<CBlockingEventsManager>();
-
-			if (this._animator && !this._animator.applyRootMotion) {
-				Debug.LogWarning($"{this.name} had an Animator with Root motion disabled, it will be enable because Characters use root motion.", this);
-				this.SetAnimationRootMotion(true);
-			}
-		}
+        }
 
 		protected virtual void OnEnable() {
 			this.SubscribeToEvents();
@@ -277,19 +205,17 @@ namespace CDK {
 		protected virtual void Start() { }
 
 		protected virtual void Update() {
-			this.CheckIfIsGrounded();
-
-			this.ProcessAerialAndFallMovement();
-			//this.ProcessSlide(); // disabled until bugs are fixed.
-			this.ProcessMovement();
-			this.ProcessRotation();
-			this.ProcessAim();
-
-			this._previousPosition = this.Position;
-		}
+            if (this._updateTime != CMonobehaviourExecutionLoop.Update) return;
+            UpdateCharacter();
+        }
 
 		protected virtual void LateUpdate() { }
 
+        protected virtual void FixedUpdate() {
+            if (this._updateTime != CMonobehaviourExecutionLoop.FixedUpdate) return;
+            UpdateCharacter();
+        }
+        
 		protected virtual void OnDisable() {
 			this.UnsubscribeToEvents();
 		}
@@ -297,25 +223,27 @@ namespace CDK {
 		protected virtual void OnDestroy() {
 			this.StopTalking();
 		}
-
-		#if UNITY_EDITOR
-		protected virtual void OnDrawGizmosSelected() {
-			if (!this._debug) return;
-			Gizmos.color = Color.red;
-			Gizmos.DrawWireSphere(this._aimTargetPos, 0.05f);
-			Handles.Label(this._aimTargetPos, $"{this.name} aimTargetPos");
-
-			// draw ground check sphere
-			if (this._charController == null) this._charController = this.GetComponent<CharacterController>();
-			var ray = this.GetGroundCheckRay(this._charController.height * HEIGHT_PERCENTAGE_TO_CONSIDER_FREE_FALL);
-
-			//DebugExtension.DrawCapsule(ray.origin, ray.origin + ray.direction, Color.grey, this._charController.radius);
-			//DebugExtension.DebugCapsule(ray.origin, ray.origin + ray.direction, Color.grey, this._charController.radius);
-		}
-		#endif
+        
 		#endregion <<---------- MonoBehaviour ---------->>
 
 
+
+
+        #region <<---------- Update ---------->>
+
+        private void UpdateCharacter() {
+            this.UpdateIfIsGrounded();
+
+            //this.ProcessSlide(); // disabled until bugs are fixed.
+            this.ProcessMovement();
+            this.ProcessRotation();
+            this.ProcessAim();
+
+            this._previousPosition = this.Position;
+        }
+        
+        #endregion <<---------- Update ---------->>
+        
 
 
 		#region <<---------- Events ---------->>
@@ -326,12 +254,7 @@ namespace CDK {
 			#region <<---------- RX Creations ---------->>
 
 			this.CanMoveRx = new ReactiveProperty<bool>(true);
-			this._enableSlideRx = new ReactiveProperty<bool>(true);
-
-			this._isTouchingTheGroundRx = new BoolReactiveProperty(true);
-			this._isOnFreeFall = new BoolReactiveProperty(false);
-			this._distanceOnFreeFall = new FloatReactiveProperty();
-
+			
 			this._isAimingRx = new ReactiveProperty<bool>();
 			this.IsStrafingRx = new ReactiveProperty<bool>();
 
@@ -344,50 +267,14 @@ namespace CDK {
 				if (this._animator) this._animator.SetBool(this.ANIM_CHAR_IS_STRAFING, isStrafing);
 			});
 
-			// can slide
-			this._enableSlideRx.TakeUntilDisable(this).DistinctUntilChanged().Subscribe(canSlide => {
-				// stopped sliding
-				if (!canSlide && this.CurrentMovState == CMovState.Sliding) {
-					this.CurrentMovState = CMovState.Walking;
-				}
-			});
-
 			// can mov
 			this.CanMoveRx.TakeUntilDisable(this).DistinctUntilChanged().Subscribe(canMove => {
 				if (!canMove && this.CurrentMovState > CMovState.Idle) {
-					this.CurrentMovState = CMovState.Idle;
+					this.SetMovementState(CMovState.Idle);
 				}
 			});
 
 			#endregion <<---------- Movement ---------->>
-
-			#region <<---------- Fall ---------->>
-
-			this._isTouchingTheGroundRx.TakeUntilDisable(this).DistinctUntilChanged().Subscribe(isTouchingTheGround => {
-				if (isTouchingTheGround && this._animator != null) {
-					if(this._debug) Debug.Log($"<color={"#D76787"}>{this.name}</color> touched the ground, velocityY: '{this.MyVelocity.y}', {nameof(this._distanceOnFreeFall)}: '{this._distanceOnFreeFall.Value}', {nameof(this._lastYPositionCharWasNotFalling)}: '{this._lastYPositionCharWasNotFalling}'");
-					int fallAnimIndex = 0;
-					if (this._distanceOnFreeFall.Value >= 6f) {
-						fallAnimIndex = 2;
-					}else if (this._distanceOnFreeFall.Value >= 2f) {
-						fallAnimIndex = 1;
-					}
-					this._animator.SetInteger(ANIM_FALL_LANDING_ANIM_INDEX, fallAnimIndex);
-				}
-				this._movementMomentumXZ = isTouchingTheGround ? Vector3.zero : this.MyVelocityXZ;
-			});
-			
-			this._isOnFreeFall.TakeUntilDisable(this).DistinctUntilChanged().Subscribe(isFallingNow => {
-				this._animator.CSetBoolSafe(this.ANIM_CHAR_IS_FALLING, isFallingNow);
-				this._distanceOnFreeFall.Value = 0f;
-			});
-
-			this._distanceOnFreeFall.TakeUntilDisable(this).DistinctUntilChanged().Subscribe(distanceOnFreeFall => {
-				this._animator.CSetFloatSafe(this.ANIM_DISTANCE_ON_FREE_FALL, distanceOnFreeFall);
-			});
-
-			#endregion <<---------- Fall ---------->>
-
 
 			// events
 			this._blockingEventsManager.OnDoingBlockingAction += this.DoingBlockingAction;
@@ -407,7 +294,7 @@ namespace CDK {
 			this.CanMoveRx.Value = !isDoing;
 		}
 
-		protected void OnActiveSceneChanged(Scene oldScene, Scene newScene) {
+		protected virtual void OnActiveSceneChanged(Scene oldScene, Scene newScene) {
 			if (this == null) return;
 			this.StopTalking();
 			this.ResetFallCalculation();
@@ -420,200 +307,33 @@ namespace CDK {
 
 		#region <<---------- Movement ---------->>
 
-		protected virtual void ProcessMovement() {
-			this._animator.CSetFloatWithLerp(this.ANIM_CHAR_MOV_SPEED_XZ, this.MyVelocityXZ.magnitude, ANIMATION_BLENDTREE_LERP * CTime.DeltaTimeScaled * this.TimelineTimescale);
-			if (!this._charController.enabled) return;
-			if (CTime.TimeScale == 0f) return;
+        protected abstract void ProcessMovement();
 
-            var deltaTime = CTime.DeltaTimeScaled * this.TimelineTimescale;
-			
-			// horizontal movement
-			var targetMotion = this.ProcessHorizontalMovement(deltaTime);
-			
-			// vertical movement
-			targetMotion.y = this.ProcessVerticalMovement(deltaTime);
-			
-			if (targetMotion == Vector3.zero) return;
-			
-			this._charController.Move(targetMotion);
-		}
+        protected abstract void UpdateIfIsGrounded();
 
-		private Vector3 ProcessHorizontalMovement(float deltaTime) {
-			Vector3 targetMotion = this.InputMovementDirRelativeToCam;
-			float targetMovSpeed = 0f;
+        public abstract Vector3 GetMyVelocity();
 
-			
-			// manual movement
-			if (this.CanMoveRx.Value && this.CurrentMovState != CMovState.Sliding && !this._blockingEventsManager.IsDoingBlockingAction.IsRetained()) {
-				// input movement
-				if (targetMotion != Vector3.zero) {
-					if (this.InputRun && this.CanRun && !this._isAimingRx.Value) {
-						this.CurrentMovState = CMovState.Running;
-					}
-					else {
-						this.CurrentMovState = CMovState.Walking;
-					}
-				}
-				else {
-					this.CurrentMovState = CMovState.Idle;
-				}
-
-				// set is strafing
-				this.IsStrafingRx.Value = this._isAimingRx.Value && this.CurrentMovState <= CMovState.Walking;
-
-				// target movement speed
-				switch (this.CurrentMovState) {
-					case CMovState.Walking: {
-						targetMovSpeed = this.MovementSpeed > 0f ? this.MovementSpeed * this.WalkMultiplier : this.WalkMultiplier;
-						break;
-					}
-					case CMovState.Running: {
-						targetMovSpeed = this.MovementSpeed > 0f ? this.MovementSpeed * this.RunSpeedMultiplier : this.RunSpeedMultiplier;
-						break;
-					}
-					default: {
-						targetMovSpeed = this.MovementSpeed;
-						break;
-					}
-				}
-
-
-				if (this.IsAiming) {
-					targetMovSpeed *= 0.5f;
-				}
-
-				if (Debug.isDebugBuild && Input.GetKey(KeyCode.RightShift)) {
-					targetMovSpeed *= 20f;
-				}
-			}
-
-			// is sliding
-			if (this.CurrentMovState == CMovState.Sliding) {
-				targetMotion = this.InputMovementDirRelativeToCam * this.SlideControlAmmount
-						+ this.transform.forward + (this._groundNormal * 2f);
-				targetMovSpeed = this._slideSpeed;
-			}
-
-			// momentum
-			if (!this._isTouchingTheGroundRx.Value && (this._movementMomentumXZ.x.CImprecise() != 0.0f || this._movementMomentumXZ.z.CImprecise() != 0.0f)) {
-				targetMotion += this._movementMomentumXZ;
-				if(this._debug) Debug.Log($"Applying {this._movementMomentumXZ}, targetMotion now is {targetMotion}");
-				this._movementMomentumXZ *= this._aerialMomentumMaintainPercentage * deltaTime;
-			}
-			
-			// root motion
-			var rootMotionDeltaPos = this._rootMotionDeltaPosition;
-			rootMotionDeltaPos.y = 0f;
-
-			// move character
-			return (targetMotion * (targetMovSpeed * deltaTime)) + rootMotionDeltaPos;
-		}
-
-		private float ProcessVerticalMovement(float deltaTime) {
-
-			var verticalDelta = this._rootMotionDeltaPosition.y;
-			verticalDelta += this.MyVelocity.y > 0f ? 0f : this.MyVelocity.y; // consider only fall velocity
-			verticalDelta += Physics.gravity.y * this._gravityMultiplier;
-			
-			return verticalDelta * deltaTime;
-		}
-
-		protected void CheckIfIsGrounded() {
-			float heightFraction = this._charController.height * HEIGHT_PERCENTAGE_TO_CONSIDER_FREE_FALL;
-			var ray = this.GetGroundCheckRay(heightFraction);
-			bool isGrounded = Physics.SphereCast(
-				ray.origin,
-				this._charController.radius,
-				ray.direction,
-				out var hitInfo,
-				heightFraction,
-				1,
-				QueryTriggerInteraction.Ignore
-			) || this._charController.isGrounded || (this._charController.collisionFlags & CollisionFlags.Below) != 0;
-			
-			if (isGrounded) {
-				this._groundNormal = hitInfo.normal;
-			}
-			else {
-				this._groundNormal = Vector3.up;
-			}
-			this._isTouchingTheGroundRx.Value = isGrounded;
-		}
-
-		protected void ProcessSlide() {
-			if (Time.realtimeSinceStartup < this._timeThatCanToggleSlide + DELAY_TO_TOGGLE_SLIDE) return;
-
-			var angleFromGround = Vector3.SignedAngle(Vector3.up, this._groundNormal, base.transform.right);
-
-			this.CanSlide = this._enableSlideRx.Value
-					&& this._isTouchingTheGroundRx.Value
-					&& this.CurrentMovState >= CMovState.Running
-					&& angleFromGround >= this._charController.slopeLimit * SLIDE_FROM_CHAR_SLOPE_LIMIT_MULTIPLIER;
-
-			if (Time.realtimeSinceStartup < this._timeThatCanToggleSlide) return;
-
-			if (this.CanSlide) {
-				this.CurrentMovState = CMovState.Sliding;
-			}
-			else if (this.CurrentMovState == CMovState.Sliding) {
-				this.CurrentMovState = CMovState.Walking;
-			}
-		}
+        public float GetMyVelocityMagnitude() {
+            return this.GetMyVelocity().magnitude;
+        }
 
 		#endregion <<---------- Movement ---------->>
 
 
 
 
-		#region <<---------- Aerial and Falling ---------->>
+        #region <<---------- Fail ---------->>
 
-		protected virtual void ResetFallCalculation() {
-			this._lastYPositionCharWasNotFalling = this.Position.y;
-		}
-		
-		protected virtual void ProcessAerialAndFallMovement() {
-			if (this._isTouchingTheGroundRx.Value || this.MyVelocity.y >= 0f
-            || this._blockingEventsManager.IsPlayingCutscene // check if is playing cutscene so char dont die when teleport or during cutscene
-                ) {
-                
-				// not falling
-				this.ResetFallCalculation();
-				this._isOnFreeFall.Value = false;
-				return;
-			}
-
-			// is falling
-			this._isOnFreeFall.Value = true;
-			this._distanceOnFreeFall.Value = (this._lastYPositionCharWasNotFalling - this.Position.y).CAbs();
-		}
-
-		protected (Vector3 origin, Vector3 direction) GetGroundCheckRay(float heightFraction) {
-			var radius = this._charController.radius;
-			return (this.Position + Vector3.up * (radius + heightFraction * 0.5f),
-					Vector3.down * (heightFraction + radius));
-		}
-
-		#endregion <<---------- Aerial and Falling ---------->>
+        protected abstract void ResetFallCalculation();
+        
+        #endregion <<---------- Fail ---------->>
 
 		
 		
 		
 		#region <<---------- Rotation ---------->>
-		
-		protected virtual void ProcessRotation() {
-			if (this._blockingEventsManager.IsAnyBlockingEventHappening) return;
-			if (this.IsStrafingRx.Value) {
-				this.RotateTowardsDirection(this._aimTargetDirection);
-			}
-			else {
-				if (this.CurrentMovState == CMovState.Sliding) {
-					this.RotateTowardsDirection(this._groundNormal + this.MyVelocityXZ);
-				}
-				else {
-					this.RotateTowardsDirection(this.InputMovementDirRelativeToCam);
-				}
-			}
-		}
+
+        protected abstract void ProcessRotation();
 		
 		protected void RotateTowardsDirection(Vector3 dir) {
 			dir.y = 0f;
