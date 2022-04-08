@@ -3,49 +3,44 @@ using UnityEngine;
 using UnityEditor;
 #endif
 
-namespace CDK
-{
-     
+namespace CDK {
     [System.Serializable]
-    public class SingleLayerMask
-    {
+    public class CSingleLayerMask {
+
+        public CSingleLayerMask(int startingLayer = 0) {
+            LayerIndex = startingLayer;
+        }
+        
         [SerializeField]
         private int m_LayerIndex = 0;
-        public int LayerIndex
-        {
+
+        public int LayerIndex {
             get { return this.m_LayerIndex; }
-            set
-            {
-                if (value > 0 && value < 32)
-                {
+            set {
+                if (value > 0 && value < 32) {
                     this.m_LayerIndex = value;
                 }
             }
         }
- 
-        public static implicit operator int(SingleLayerMask layerMask)
-        {
+
+        public static implicit operator int(CSingleLayerMask layerMask) {
             return 1 << layerMask.m_LayerIndex;
         }
-        
     }
 
 #if UNITY_EDITOR
-    [CustomPropertyDrawer(typeof(SingleLayerMask))]
-    public class SingleUnityLayerPropertyDrawer : PropertyDrawer 
-    {
-        public override void OnGUI(Rect _position, SerializedProperty _property, GUIContent _label)
-        {
+    [CustomPropertyDrawer(typeof(CSingleLayerMask))]
+    public class SingleUnityLayerPropertyDrawer : PropertyDrawer {
+        public override void OnGUI(Rect _position, SerializedProperty _property, GUIContent _label) {
             EditorGUI.BeginProperty(_position, GUIContent.none, _property);
             SerializedProperty layerIndex = _property.FindPropertyRelative("m_LayerIndex");
             _position = EditorGUI.PrefixLabel(_position, GUIUtility.GetControlID(FocusType.Passive), _label);
-            if (layerIndex != null)
-            {
+            if (layerIndex != null) {
                 layerIndex.intValue = EditorGUI.LayerField(_position, layerIndex.intValue);
             }
-            EditorGUI.EndProperty( );
+
+            EditorGUI.EndProperty();
         }
     }
 #endif
-    
 }
