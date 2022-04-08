@@ -30,6 +30,10 @@ namespace CDK
             return value >= a && value <= b;
         }
 
+        public static int CAbs(this int value) {
+            return Mathf.Abs(value);
+        }
+
         public static float CAbs(this float value) {
             return Mathf.Abs(value);
         }
