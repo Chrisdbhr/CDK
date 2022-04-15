@@ -23,8 +23,15 @@ namespace CDK {
 		}
 
 		public CFootstepInfo GetFootstepInfoByTerrainLayer(TerrainLayer targetTerrainLayer) {
-			return (from footstepInfo in this.FootstepInfos where footstepInfo != null from terLayer in footstepInfo.TerrainLayers where terLayer == targetTerrainLayer select footstepInfo).FirstOrDefault();
-		}
+            foreach (var footstepInfo in this.FootstepInfos) {
+                if (footstepInfo == null) continue;
+                foreach (var terLayer in footstepInfo.TerrainLayers) {
+                    if (terLayer == null) continue;
+                    if (terLayer == targetTerrainLayer) return footstepInfo;
+                }
+            }
+            return null;
+        }
 		
 	}
 
