@@ -36,7 +36,8 @@ namespace CDK {
 			this._ownerCharacter = this._ownerPlayer.GetControllingCharacter();
 			
 			// renderers to hide
-			this._renderToHideWhenCameraIsClose = this._ownerCharacter.GetComponentsInChildren<Renderer>(); 
+			this._renderToHideWhenCameraIsClose = this._ownerCharacter.GetComponentsInChildren<SkinnedMeshRenderer>()
+            .Where(s=> s.name is "Face" or "Body" or "Hair").ToArray(); 
 			
 			// cinemachine
 			this.UpdateCameraTargets();
@@ -56,7 +57,6 @@ namespace CDK {
 
 		public enum CameraTransitionType {
 			fade,
-			crossfade
 		}
 		
 		public enum CameraType {
@@ -94,17 +94,12 @@ namespace CDK {
 		[SerializeField] [Range(0f, 20f)] private float _cameraShakeMinimumSpeedToApply = 6f;
 		[SerializeField] [Range(0f, 1f)] private float _cameraShakeAmplitude;
 		[SerializeField] [Range(0f, 1f)] private float _cameraShakeFrequency;
-		[SerializeField] private Renderer[] _renderToHideWhenCameraIsClose;
+		[SerializeField] private SkinnedMeshRenderer[] _renderToHideWhenCameraIsClose;
 		private float _currentDistanceFromTarget = 10.0f;
 		private float _distanceToConsiderCloseForCharacter = 0.5f;
 		private ReactiveProperty<bool> _isCloseToTheCharacterRx;
 		private float _clampMaxDistanceSpeed = 3f;
 
-		// Screen print
-		[SerializeField] private RawImage _screenCrossfadeRawImage;
-		private bool _getRenderImgOnNextFrame;
-		private Texture2D _screenShootTexture2d;
-		
 		// Audio
 		#if FMOD
 		[SerializeField] private StudioListener _studioListener;
@@ -193,32 +188,10 @@ namespace CDK {
 			});
 			
 			this.SubscribeToEvents();
-			
-			this._screenShootTexture2d = new Texture2D(Screen.width, Screen.height, TextureFormat.RGB24, false, true);
-		}
+        }
 
 		private void OnDisable() {
 			this.UnsubscribeToEvents();
-		}
-
-		private void OnDestroy() {
-			Destroy(this._screenShootTexture2d);
-			this._screenShootTexture2d = null;
-		}
-		
-		private void OnPostRender() {
-			if (this._getRenderImgOnNextFrame) {
-				#if UNITY_2021_2
-				this._screenShootTexture2d.Reinitialize(Screen.width, Screen.height);
-				#else
-				this._screenShootTexture2d.Resize(Screen.width, Screen.height);
-				#endif
-				this._screenShootTexture2d.ReadPixels(new Rect(0, 0, Screen.width, Screen.height), 0, 0);
-				this._screenShootTexture2d.Apply();
-				this._screenCrossfadeRawImage.texture = this._screenShootTexture2d;
-				this._screenCrossfadeRawImage.color = Color.white;
-				this._getRenderImgOnNextFrame = false;
-			}
 		}
 
 		#if UNITY_EDITOR
@@ -402,10 +375,7 @@ namespace CDK {
 					print($"[CPlayerCamera] Start fade transition with duration {duration}.");
 					this._fader.FadeToBlack(duration, false);
 					break;
-			case CameraTransitionType.crossfade:
-					print($"[CPlayerCamera] Start {CameraTransitionType.crossfade.ToString()} transition with duration {duration}.");
-					this._getRenderImgOnNextFrame = true;
-					break;
+			
 			}
 
 			this._blockingEventsManager.IsPlayingCutscene = true;
@@ -421,18 +391,7 @@ namespace CDK {
 					print($"[CPlayerCamera] Reverse fade transition with duration {duration}.");
 					this._fader.FadeToTransparent(duration, false);
 					break;
-				case CameraTransitionType.crossfade:
-					#if DOTween
-					Debug.Log($"[CPlayerCamera] Reverse {CameraTransitionType.crossfade.ToString()} transition with duration {duration}.");
-					this._tween = DOVirtual.Float(this._screenCrossfadeRawImage.color.a, 0f, duration, value => {
-						var color = this._screenCrossfadeRawImage.color;
-						color = new Color(color.r, color.g, color.b, value);
-						this._screenCrossfadeRawImage.color = color;
-					});					
-					#else	
-					Debug.LogError("'Camera Crossfade transition doesnt work yet without DOTween'");
-					#endif
-					break;
+				
 			}
 
 			this._blockingEventsManager.IsPlayingCutscene = false;
