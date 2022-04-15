@@ -221,7 +221,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2c1c91e0beb24e50979974408a656886, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _loadingUI: {fileID: 4374606664751812691}
+  _loadingUI: {fileID: 3193542399584752688}
 --- !u!223 &3193542399584752688
 Canvas:
   m_ObjectHideFlags: 0
@@ -275,7 +275,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7919194616240196166}
-  - component: {fileID: 4374606664751812691}
   m_Layer: 5
   m_Name: Loading UI
   m_TagString: Untagged
@@ -306,18 +305,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!225 &4374606664751812691
-CanvasGroup:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3460615188339733901}
-  m_Enabled: 1
-  m_Alpha: 1
-  m_Interactable: 0
-  m_BlocksRaycasts: 0
-  m_IgnoreParentGroups: 0
 --- !u!1 &8073995398848300568
 GameObject:
   m_ObjectHideFlags: 0
