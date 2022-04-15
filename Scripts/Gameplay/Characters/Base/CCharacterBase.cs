@@ -223,6 +223,12 @@ namespace CDK {
 		protected virtual void OnDestroy() {
 			this.StopTalking();
 		}
+
+        #if UNITY_EDITOR
+        protected virtual void Reset() {
+            if (this._animator == null) this.GetComponentInChildren<Animator>();
+        }
+        #endif
         
 		#endregion <<---------- MonoBehaviour ---------->>
 
