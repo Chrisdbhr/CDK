@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections;
+using FMODUnity;
+using Rewired;
 using UnityEngine;
 using UnityEngine.Playables;
 using UnityEngine.SceneManagement;
@@ -23,6 +25,11 @@ namespace CDK {
         
         private IEnumerator Start() {
             this._playableDirector.Play();
+            this._playableDirector.Pause();
+            while (!ReInput.isReady) yield return null;
+            while (!RuntimeManager.HaveMasterBanksLoaded) yield return null;
+            yield return null;
+            this._playableDirector.Play();
             this._playableDirector.stopped += OnPlayableDirectorStopped;
             
             var asyncOp = SceneManager.LoadSceneAsync(this._sceneToLoad, LoadSceneMode.Single);
@@ -37,12 +44,6 @@ namespace CDK {
         private void OnPlayableDirectorStopped(PlayableDirector pd) {
             Debug.Log("OnPlayableDirectorStopped.");
             this._splashEnded = true;
-        }
-
-        private void Update() {
-            if (Input.anyKeyDown) {
-                this._playableDirector.Stop();
-            }
         }
 
         private void Reset() {
