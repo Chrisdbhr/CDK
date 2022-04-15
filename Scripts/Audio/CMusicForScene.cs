@@ -55,7 +55,7 @@ namespace CDK.Audio {
 
 		#region <<---------- Music ---------->>
 
-		public void Stop() {
+        public void Stop() {
 			#if FMOD
 			this._musicState.stop(STOP_MODE.ALLOWFADEOUT);
 			#else
