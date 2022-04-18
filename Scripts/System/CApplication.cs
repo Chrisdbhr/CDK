@@ -77,20 +77,8 @@ namespace CDK {
 		
 		#endregion <<---------- Properties and Fields ---------->>
 		
-		
-
-		
-		#region <<---------- Platform Features ---------->>
-
-		void PlatformSpecificFeatures() {
-			var supportsComputeShaders = SystemInfo.supportsComputeShaders;
-			
-		}
-		
-		#endregion <<---------- Platform Features ---------->>
-
-
-		
+        
+        
 
 		#region <<---------- Dependencies ---------->>
 
@@ -101,8 +89,6 @@ namespace CDK {
 			CDependencyResolver.Bind<CBlockingEventsManager>(() => new CBlockingEventsManager());
 			CDependencyResolver.Bind<CGamePlayerManager>(() => new CGamePlayerManager());
 
-			CDependencyResolver.Bind<CFootstepDatabase>(() => Resources.Load<CFootstepDatabase>("FootstepsDatabase"));
-			
 			CDependencyResolver.Bind<CCursorManager>(() => new CCursorManager());
 			CDependencyResolver.Get<CCursorManager>(); // force create instance
 			

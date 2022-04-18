@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 #if FMOD
@@ -8,26 +9,26 @@ namespace CDK {
 	[System.Serializable]
 	public class CFootstepInfo {
 		
-		public string Name;
-		
-		public float BloodAmount;
-		
-		public float WetAmount;
-		
 		#if FMOD
 		public EventReference Audio;
 		#else
 		public string Audio;
 		#endif
 		
+        [SerializeField] private ParticleSystem[] _particleSystems;
+
+        
+        
+        
+        [Obsolete]
 		public Material[] Materials;
 		
+        [Obsolete]
 		public TerrainLayer[] TerrainLayers;
 		
-		[SerializeField] private ParticleSystem[] _particleSystems;
 		
 		
-		
+        
 		
 		public ParticleSystem GetRandomParticleSystem() {
 			return this._particleSystems.CRandomElement();

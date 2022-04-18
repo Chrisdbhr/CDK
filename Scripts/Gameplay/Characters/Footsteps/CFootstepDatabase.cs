@@ -1,13 +1,15 @@
-﻿using System.Linq;
+﻿using System;
 using UnityEngine;
 
 namespace CDK {
-	[CreateAssetMenu(fileName = "FootstepDatabase", menuName = CConst.EDITOR_SCRIPTABLEOBJECT_CREATION_PREFIX + "Footstep database", order = 101)]
+    [Obsolete]
 	public class CFootstepDatabase : ScriptableObject {
 		
 		public CFootstepInfo[] FootstepInfos;
 		
 
+        
+        
 		public CFootstepInfo GetFootstepInfoByMaterial(Material targetMaterial) {
 			foreach (var footstepInfo in this.FootstepInfos) {
 				if (footstepInfo == null) continue;

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using System.Linq;
 
 namespace CDK {
 	public class CFootstepsSource : MonoBehaviour {
@@ -13,7 +14,19 @@ namespace CDK {
 		}
 		
 		#endregion <<---------- Enums ---------->>
-		
+
+
+
+        #region <<---------- Initializers ---------->>
+
+        public void Initialize(LayerMask footCollisionLayers, Transform footL = null, Transform footR = null) {
+            this.FootCollisionLayers = footCollisionLayers;
+            this.FootL = footL;
+            this.FootR = footR;
+            this.FindFootTransformsIfNeeded();
+        }
+        
+        #endregion <<---------- Initializers ---------->>
 		
 		
 		
@@ -24,7 +37,6 @@ namespace CDK {
         public Transform FootR;
 		public LayerMask FootCollisionLayers = 1;
 
-		private CFootstepDatabase _database;
 		private float _rayOffset = 0.25f;
 		private float _feetSizeForSphereCast = 0.1f;
 		private Vector3 _lastValidHitPoint;
@@ -32,7 +44,7 @@ namespace CDK {
 		private Dictionary<ParticleSystem, ParticleSystem> _spawnedParticleInstances = new Dictionary<ParticleSystem, ParticleSystem>();
 		
 		
-		public event Action<CFootstepInfo, FootstepFeet> OnFootstep {
+		public event Action<CFootstepInfo, FootstepFeet, Collider> OnFootstep {
 			add {
 				this._onFootstep -= value;
 				this._onFootstep += value;
@@ -41,7 +53,7 @@ namespace CDK {
 				this._onFootstep -= value;
 			}
 		}
-		private Action<CFootstepInfo, FootstepFeet> _onFootstep;
+		private Action<CFootstepInfo, FootstepFeet, Collider> _onFootstep;
 
 		#endregion <<---------- Properties and Fields ---------->>
 
@@ -50,7 +62,7 @@ namespace CDK {
 		
 		#region <<---------- MonoBehaviour ---------->>
 		private void Awake() {
-			this._database = CDependencyResolver.Get<CFootstepDatabase>();
+            this.FindFootTransformsIfNeeded();
 		}
 
 		private void OnEnable() {
@@ -74,6 +86,10 @@ namespace CDK {
 			if (this.GetComponent<Animator>() == null) {
 				Debug.LogError($"[{this.GetType().Name}] need to have also an Animator to receive Animation Trigger.");
 			}
+		}
+		
+		private void Reset(){
+		    this.FindFootTransformsIfNeeded();
 		}
 		#endif
 		
@@ -115,14 +131,10 @@ namespace CDK {
 				return;
 			}
 
-			var footstepInfo = this.GetFootstepInfoFromMeshRenderer(raycastHit);
-			if (footstepInfo == null) {
-				// Try to get footstep info from a terrain
-				footstepInfo = this.GetFootstepInfoFromTerrain(raycastHit);
-				if (footstepInfo == null) return;
-			}
+            CFootstepInfo footstepInfo = GetFootstepInfo(raycastHit);
+            if(footstepInfo == null)return;
 
-			this._onFootstep?.Invoke(footstepInfo, feet);
+			this._onFootstep?.Invoke(footstepInfo, feet, raycastHit.collider);
 
 			// new footstep particle effect.
 			var particlePrefab = footstepInfo.GetRandomParticleSystem();
@@ -147,66 +159,16 @@ namespace CDK {
 			#endif
 		}
 
-		private CFootstepInfo GetFootstepInfoFromMeshRenderer(RaycastHit raycastHit) {
-			// check for mesh
-			var meshFilter = raycastHit.collider.GetComponent<MeshFilter>();
-			if (meshFilter == null) return null;
-			var sharedMesh = meshFilter.sharedMesh;
-			if (sharedMesh == null) return null;
-			var rend = meshFilter.GetComponent<Renderer>();
-			if (!rend) return null;
+        public void FindFootTransformsIfNeeded() {
+            if(!this.FootL) this.FootL = this.GetComponentsInChildren<Transform>().FirstOrDefault(t => t.name.ToLower().Contains("foot") && t.name.ToLower().Contains('l'));
+            if(!this.FootR) this.FootR = this.GetComponentsInChildren<Transform>().FirstOrDefault(t => t.name.ToLower().Contains("foot") && t.name.ToLower().Contains('r'));
+        }
 
-			var materialId = -1;
-
-			if (!sharedMesh.isReadable || !(raycastHit.collider is MeshCollider)) {
-				materialId = 0;
-			}
-			else {
-				var triangleIndex = raycastHit.triangleIndex;
-				if (triangleIndex <= -1) return null;
-				var triangles = sharedMesh.triangles;
-				int lookupIndex1 = triangles[triangleIndex * 3];
-				int lookupIndex2 = triangles[triangleIndex * 3 + 1];
-				int lookupIndex3 = triangles[triangleIndex * 3 + 2];
-				var subMeshCount = sharedMesh.subMeshCount;
-
-				// get material index
-				for (int i = 0; i < subMeshCount; i++) {
-					var tr = sharedMesh.GetTriangles(i);
-					for (int j = 0; j < tr.Length; j++) {
-						if (tr[j] != lookupIndex1 || 
-							tr[j + 1] != lookupIndex2 || 
-							tr[j + 2] != lookupIndex3) continue;
-						materialId = i;
-						break;
-					}
-					if (materialId != -1) break;
-				}
-
-				if (materialId == -1) return null;
-			}
-
-			var material = rend.sharedMaterials[materialId];
-			if (!material) return null;
-
-			return this._database.GetFootstepInfoByMaterial(material);
-		}
-
-		private CFootstepInfo GetFootstepInfoFromTerrain(RaycastHit raycastHit) {
-			var terrain = raycastHit.collider.GetComponent<Terrain>();
-			if (terrain == null) return null;
-		
-			var terrainTextureDetector = terrain.GetComponent<CTerrainTextureDetector>();
-			if (terrainTextureDetector == null) {
-				Debug.LogWarning($"{this.name} step on a Terrain without a {nameof(CTerrainTextureDetector)} attached to it to detect footstep!");
-				return null;
-			}
-
-			var dominantLayer = terrainTextureDetector.GetFirstTextureAt(raycastHit.point);
-			if (dominantLayer == null) return null;
-
-			return this._database.GetFootstepInfoByTerrainLayer(dominantLayer);
-		}
+        private CFootstepInfo GetFootstepInfo(RaycastHit hit) {
+            if (hit.collider == null) return null;
+            var surface = hit.collider.GetComponent<CIFootstepSurfaceBase>();
+            return surface != null ? surface.GetFootstepInfoFromRaycastHit(hit) : null;
+        }
 		
 		#endregion <<---------- General ---------->>
 
@@ -217,23 +179,22 @@ namespace CDK {
 
 		private ParticleSystem GetOrCreateParticleInstance(ParticleSystem key) {
 			if (key == null) return null;
+
+            // if particle is already on scene dont need to spawn
+            if (key.gameObject.scene != default) return key;
+            
 			if (this._spawnedParticleInstances.TryGetValue(key, out var particleSystem) && particleSystem != null) {
 				return particleSystem;
 			}
 			var spawnedParticle = Instantiate(key);
-			if (this._spawnedParticleInstances.ContainsKey(key)) {
-				this._spawnedParticleInstances[key] = spawnedParticle;
-			}
-			else {
-				this._spawnedParticleInstances.Add(key, spawnedParticle);
-			}
+            this._spawnedParticleInstances[key] = spawnedParticle;
 			return spawnedParticle;
 		}
 		
 		private void DestroyAllParticleInstances() {
 			foreach (var spawnedParticleInstance in this._spawnedParticleInstances.Values) {
 				if (spawnedParticleInstance == null) continue;
-				Destroy(spawnedParticleInstance.gameObject);
+                spawnedParticleInstance.gameObject.CDestroy();
 			}
 		}
 		

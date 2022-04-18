@@ -4,7 +4,7 @@ using UnityEngine;
 namespace CDK {
     /// <summary>
     /// Utility for getting the dominant texture from a splat blend at a given point on a terrain.
-    /// From https://github.com/JimmyCushnie/JimmysUnityUtilities
+    /// Based on https://github.com/JimmyCushnie/JimmysUnityUtilities
     /// </summary>
     [RequireComponent(typeof(Terrain))]
     public class CTerrainTextureDetector : MonoBehaviour {
@@ -20,7 +20,7 @@ namespace CDK {
         }
 
         
-        public TerrainLayer GetFirstTextureAt(Vector3 worldPosition) {
+        public TerrainLayer GetTerrainLayerAtPosition(Vector3 worldPosition) {
             int index = this.GetDominantTextureIndexAt(worldPosition);
             if (index < 0) return null;
             return this.ThisTerrainData.terrainLayers.CGetAtIndexSafe(index);
