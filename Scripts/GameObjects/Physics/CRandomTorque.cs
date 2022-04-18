@@ -3,8 +3,8 @@
 namespace CDK {
 	public class CRandomTorque : CAutoTriggerCompBase {
 		
-		[SerializeField] private Vector3 _torqueRangeMin = new (0f,-1f,0f);
-		[SerializeField] private Vector3 _torqueRangeMax = new (0f,1f,0f);
+		[SerializeField] private Vector3 _torqueRangeMin = new Vector3(0f,-1f,0f);
+		[SerializeField] private Vector3 _torqueRangeMax = new Vector3(0f,1f,0f);
 		[SerializeField] private Rigidbody _rb;
 		
 		

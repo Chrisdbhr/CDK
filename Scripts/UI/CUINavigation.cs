@@ -35,7 +35,7 @@ namespace CDK.UI {
 		#region <<---------- Initializers ---------->>
 
 		public CUINavigation() {
-			this._navigationHistory = new ();
+			this._navigationHistory = new HashSet<CUIBase>();
 			this._blockingEventsManager = CDependencyResolver.Get<CBlockingEventsManager>();
 		}
 		

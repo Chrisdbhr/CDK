@@ -37,7 +37,7 @@ namespace CDK {
 			
 			// renderers to hide
 			this._renderToHideWhenCameraIsClose = this._ownerCharacter.GetComponentsInChildren<SkinnedMeshRenderer>()
-            .Where(s=> s.name is "Face" or "Body" or "Hair").ToArray(); 
+            .Where(s=> s.name == "Face" || s.name == "Body" || s.name ==  "Hair").ToArray(); 
 			
 			// cinemachine
 			this.UpdateCameraTargets();
@@ -131,7 +131,7 @@ namespace CDK {
 			this._transform = this.transform;
 			this._fader = CDependencyResolver.Get<CFader>();
 			this._blockingEventsManager = CDependencyResolver.Get<CBlockingEventsManager>();
-			this.ActiveCameraProfiles = new ();
+			this.ActiveCameraProfiles = new List<CCameraProfileVolume>();
 			this._isCloseToTheCharacterRx = new ReactiveProperty<bool>(false);
 
 			this.SearchForGlobalVolume();
