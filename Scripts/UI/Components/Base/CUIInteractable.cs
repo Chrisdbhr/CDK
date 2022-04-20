@@ -16,13 +16,15 @@ namespace CDK.UI {
 		[SerializeField] private bool _debug;
 		
 		#if FMOD
-		[NonSerialized] private EventInstance _soundEventInstance;
+		private EventInstance _soundEventInstance;
 		#endif
-		[NonSerialized] private CGameSettings _gameSettings;
+        private CGameSettings _gameSettings;
+        protected CUINavigationManager _navigationManager;
 
 		private void Awake() {
 			this._gameSettings = CDependencyResolver.Get<CGameSettings>();
-		}
+            this._navigationManager = CDependencyResolver.Get<CUINavigationManager>();
+        }
 
 		private void PlaySound(EventReference sound) {
 			#if FMOD
@@ -36,9 +38,9 @@ namespace CDK.UI {
 			#endif
 		}
 
-		public virtual void Selected() {
+		public virtual void Selected(bool playSound = true) {
 			if(this._debug) Debug.Log($"Selected: CUIInteractable '{this.gameObject.name}'", this);
-			this.PlaySound(this._gameSettings.SoundSelect);
+			if(playSound) this.PlaySound(this._gameSettings.SoundSelect);
 		}
 
 		public virtual void Submited() {
@@ -65,8 +67,8 @@ namespace CDK.UI {
 		
 		public void OnCancel(BaseEventData eventData) {
 			if (!this.gameObject.activeInHierarchy) return;
-			CUINavigation.get.CloseCurrentMenu().CAwait();
-			this.Canceled();
+            this.Canceled();
+            this._navigationManager.CloseCurrentMenu().CAwait();
 		}
 
 		// Pointer
@@ -75,7 +77,7 @@ namespace CDK.UI {
 			var selectable = this.GetComponent<Selectable>();
 			if (selectable == null) return;
 			selectable.Select();
-			this.Selected();
+			this.Selected(false);
 		}
 		
 		public void OnPointerClick(PointerEventData eventData) {

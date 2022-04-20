@@ -1,11 +1,9 @@
 using System;
-using System.Threading.Tasks;
 using UniRx;
 using UnityEngine;
-using UnityEngine.EventSystems;
 
 namespace CDK.UI {
-	public class CUIConfirmPopup : CUIBase {
+	public class CUIConfirmPopup : CUIViewBase {
 		
 		[Header("Confirmation")]
 		[SerializeField] private CUIButton _buttonConfirm;
@@ -19,14 +17,14 @@ namespace CDK.UI {
 			this._buttonConfirm.Button.OnClickAsObservable().Subscribe(async _ => {
 				onConfirm?.Invoke();
 				Debug.Log($"SUBMIT: Confirm Popup '{this.gameObject.name}'", this);
-				await CUINavigation.get.CloseCurrentMenu();
+				await this._navigationManager.CloseCurrentMenu();
 			});
 					
 			// cancel exit
 			this._buttonCancel.Button.interactable = true;
 			this._buttonCancel.Button.OnClickAsObservable().Subscribe(async _ => {
 				Debug.Log($"CANCEL: Confirm Popup '{this.gameObject.name}'", this);
-				await CUINavigation.get.CloseCurrentMenu();
+				await this._navigationManager.CloseCurrentMenu();
 			});
 					
 			this._eventSystem.SetSelectedGameObject(this._buttonConfirm.gameObject);

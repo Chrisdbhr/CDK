@@ -1,4 +1,4 @@
-using System;
+using CDK.UI;
 using UnityEngine;
 
 namespace CDK {
@@ -8,8 +8,9 @@ namespace CDK {
 		
 		[SerializeField] private bool onlyWorkOneTimePerSceneLoad;
 		[SerializeField] private CUnityEventTransform InteractEvent;
-		[NonSerialized] private CBlockingEventsManager _blockingEventsManager;
-		
+		private CBlockingEventsManager _blockingEventsManager;
+        protected CUINavigationManager _navigationManager;
+
 		#endregion <<---------- Properties and Fields ---------->>
 
 
@@ -17,11 +18,12 @@ namespace CDK {
 		
 		#region <<---------- MonoBehaviour ---------->>
 		
-		private void Awake() {
+		protected virtual void Awake() {
 			this._blockingEventsManager = CDependencyResolver.Get<CBlockingEventsManager>();
-		}
+            this._navigationManager = CDependencyResolver.Get<CUINavigationManager>();
+        }
 
-		private void OnEnable() {
+		protected virtual void OnEnable() {
 			// show enable checkbox
 		}
 

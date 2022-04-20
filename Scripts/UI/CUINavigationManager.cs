@@ -5,37 +5,19 @@ using System.Threading.Tasks;
 using UniRx;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using Object = UnityEngine.Object;
 
 #if UnityAddressables
 using UnityEngine.AddressableAssets;
 #endif
 
 namespace CDK.UI {
-	public class CUINavigation {
+	public class CUINavigationManager {
 
-		#region <<---------- Singleton ---------->>
-		
-		public static CUINavigation get {
-			get {
-				if (_instance != null) return _instance;
-				Debug.Log($"Creating new instance of {nameof(CUINavigation)}");
-				CApplication.QuittingEvent += () => {
-					_instance = null;
-				};
-				return _instance = new CUINavigation();
-			}
-		}
-		private static CUINavigation _instance;
-		
-		#endregion <<---------- Singleton ---------->>
+        #region <<---------- Initializers ---------->>
 
-
-		
-
-		#region <<---------- Initializers ---------->>
-
-		public CUINavigation() {
-			this._navigationHistory = new HashSet<CUIBase>();
+		public CUINavigationManager() {
+			this._navigationHistory = new HashSet<CUIViewBase>();
 			this._blockingEventsManager = CDependencyResolver.Get<CBlockingEventsManager>();
 		}
 		
@@ -45,12 +27,12 @@ namespace CDK.UI {
 		
 
 		#region <<---------- Properties ---------->>
-		public CUIBase[] NavigationHistoryToArray => this._navigationHistory.ToArray();
+		public CUIViewBase[] NavigationHistoryToArray => this._navigationHistory.ToArray();
 		
 		private int LastFrameAMenuClosed;
 		private IDisposable _disposableIsNavigating;
 
-        private readonly HashSet<CUIBase> _navigationHistory;
+        private readonly HashSet<CUIViewBase> _navigationHistory;
 		private readonly CBlockingEventsManager _blockingEventsManager;
 
 		#endregion <<---------- Properties ---------->>
@@ -62,7 +44,7 @@ namespace CDK.UI {
 
 		#if UnityAddressables
 	
-		public async Task<T> OpenMenu<T>(AssetReference uiReference, CUIBase originUI, CUIInteractable originButton) {
+		public async Task<T> OpenMenu<T>(AssetReference uiReference, CUIViewBase originUI, CUIInteractable originButton) {
 			var openedMenu = await OpenMenu(uiReference, originUI, originButton);
 			return openedMenu != null ? openedMenu.GetComponent<T>() : default;
 		}
@@ -71,7 +53,7 @@ namespace CDK.UI {
 		/// Opens a menu, registering the button that opened it.
 		/// </summary>
 		/// <returns>returns the new opened menu.</returns>
-		public async Task<CUIBase> OpenMenu(AssetReference uiReference, CUIBase originUI, CUIInteractable originButton) {
+		public async Task<CUIViewBase> OpenMenu(AssetReference uiReference, CUIViewBase originUI, CUIInteractable originButton) {
 			if (CApplication.IsQuitting) return null;
 
             var ui = await CAssets.LoadAndInstantiateUI(uiReference);
@@ -157,9 +139,9 @@ namespace CDK.UI {
             return false;
         }
         
-		private void CheckIfIsFirstMenu() {
+		private bool CheckIfIsFirstMenu() {
             this.RemoveNullFromNavigationHistory();
-			if (this._navigationHistory.Count > 0) return;
+			if (this._navigationHistory.Count > 0) return false;
 
             this._blockingEventsManager.IsOnMenu = true;
 
@@ -181,8 +163,10 @@ namespace CDK.UI {
                 if (firstInteractable == null) return;
                 current.SetSelectedGameObject(firstInteractable.gameObject);
             });
-		}
 
+            return true;
+        }
+        
 		private void CheckIfIsLastMenu() {
             if (this.RemoveNullFromNavigationHistory() && this._navigationHistory.Count <= 0) {
                 // there was null UI on navigation history now it doesnt have anything, end navigation.

@@ -73,12 +73,12 @@ namespace CDK {
 		#endif
 		
 		#if UnityAddressables
-		public static async Task<CUIBase> LoadAndInstantiateUI(AssetReference key, Transform parent = null, bool instantiateInWorldSpace = false, bool trackHandle = true) {
+		public static async Task<CUIViewBase> LoadAndInstantiateUI(AssetReference key, Transform parent = null, bool instantiateInWorldSpace = false, bool trackHandle = true) {
 			return await LoadAndInstantiateUI(key.RuntimeKey.ToString(), parent, instantiateInWorldSpace, trackHandle);
 		}
 		#endif
 		
-		public static async Task<CUIBase> LoadAndInstantiateUI(string key, Transform parent = null, bool instantiateInWorldSpace = false, bool trackHandle = true) {
+		public static async Task<CUIViewBase> LoadAndInstantiateUI(string key, Transform parent = null, bool instantiateInWorldSpace = false, bool trackHandle = true) {
 			get._loading.LoadingCanvasRetain();
 
 			try {
@@ -86,14 +86,14 @@ namespace CDK {
 				var uiGameObject = await LoadAndInstantiateGameObjectAsync(key, parent, instantiateInWorldSpace, trackHandle);
 				if (uiGameObject == null) return null;
 
-				var ui = uiGameObject.GetComponent<CUIBase>();
+				var ui = uiGameObject.GetComponent<CUIViewBase>();
 				if (ui != null) {
 					uiGameObject.name = $"[MENU] {uiGameObject.name}";
 					Debug.Log($"Created UI menu: {uiGameObject.name}", uiGameObject);
 				}
 				else {
 					uiGameObject.name = $"[INVALID-MENU] {uiGameObject.name}";
-					Debug.LogError($"Created UI gameobject {uiGameObject.name} but it does not inherit from {nameof(CUIBase)}", uiGameObject);
+					Debug.LogError($"Created UI gameobject {uiGameObject.name} but it does not inherit from {nameof(CUIViewBase)}", uiGameObject);
 					return ui;
 				}
 
@@ -119,6 +119,7 @@ namespace CDK {
 		
 		#if UnityAddressables
 		public static async Task<GameObject> LoadAndInstantiateGameObjectAsync(string key, Transform parent = null, bool instantiateInWorldSpace = false, bool trackHandle = true) {
+            if (!Application.isPlaying) return null;
 			Debug.Log($"Starting to load GameObject with key '{key}'{(parent != null ? $" on parent '{parent.name}'" : string.Empty)}");
 			try {
 				var asyncOp = Addressables.InstantiateAsync(key, parent, instantiateInWorldSpace, trackHandle);
@@ -137,6 +138,7 @@ namespace CDK {
 		#endif
 
 		public static T LoadAndInstantiateFromResources<T>(string key) where T : UnityEngine.Object {
+            if (!Application.isPlaying) return null;
 			var resource = Resources.Load<T>(key);
 			if (resource == null) {
 				Debug.LogError($"Could not {nameof(LoadAndInstantiateFromResources)} from key '{key}'");

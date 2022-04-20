@@ -14,7 +14,7 @@ using UnityEngine.AddressableAssets;
 #endif
 
 namespace CDK.UI {
-	public abstract class CUIBase : MonoBehaviour {
+	public abstract class CUIViewBase : MonoBehaviour {
 
 		#region <<---------- Properties and Fields ---------->>
 
@@ -23,9 +23,10 @@ namespace CDK.UI {
 		[Header("Setup")]
 		[SerializeField] protected EventSystem _eventSystem;
 
-		public bool ShouldPauseTheGame = true;
+        public bool ShouldPauseTheGame = true;
+        protected bool _shouldPlayOpenAndCloseMenuSound;
 		
-		private CUIBase _previousUI;
+		private CUIViewBase _previousUI;
 		private CUIInteractable _previousButton;
 		private Canvas _canvas;
 		
@@ -40,7 +41,7 @@ namespace CDK.UI {
 		}
 		private Action _onOpen;
 		
-		public event Action<CUIBase> OnClose {
+		public event Action<CUIViewBase> OnClose {
 			add {
 				this._onClose -= value;
 				this._onClose += value;
@@ -49,11 +50,12 @@ namespace CDK.UI {
 				this._onClose -= value;
 			}
 		}
-		private Action<CUIBase> _onClose;
+		private Action<CUIViewBase> _onClose;
 
 		protected CGameSettings _gameSettings;
 		protected CFader _fader;
 		protected CBlockingEventsManager _blockingEventsManager;
+        protected CUINavigationManager _navigationManager;
 
 		#endregion <<---------- Properties and Fields ---------->>
 
@@ -67,6 +69,7 @@ namespace CDK.UI {
 			this._blockingEventsManager = CDependencyResolver.Get<CBlockingEventsManager>();
 			this._canvas = this.GetComponent<Canvas>();
 			this._fader = CDependencyResolver.Get<CFader>();
+            this._navigationManager = CDependencyResolver.Get<CUINavigationManager>();
 		}
 
 		protected virtual void Start() {
@@ -75,9 +78,21 @@ namespace CDK.UI {
 		
 		protected virtual void OnEnable() {
 			this.UpdateEventSystemAndCheckForObjectSelection(this._eventSystem.firstSelectedGameObject);
-		}
-		
-		protected virtual void OnDisable() {
+
+            Observable.EveryUpdate().TakeUntilDisable(this).Subscribe(_ => {
+                if (this == null) return;
+                if (this._eventSystem == null || (this._eventSystem.currentSelectedGameObject != null && this._eventSystem.currentSelectedGameObject.GetComponent<CUIInteractable>() != null)) return;
+                var toSelect = this.GetComponentInChildren<CUIInteractable>();
+                if (toSelect == null) {
+                    Debug.LogError($"Could not find object to select with a '{nameof(CUIInteractable)}' in '{this.name}', this will lead to non functional UI on controllers.", this);
+                    return;
+                }
+                Debug.Log($"Auto selecting item '{toSelect.name}' on menu '{this.name}'", toSelect);
+                this._eventSystem.SetSelectedGameObject(toSelect.gameObject);
+            });
+        }
+
+        protected virtual void OnDisable() {
 			
 		}
 
@@ -94,7 +109,7 @@ namespace CDK.UI {
 		
 		#region <<---------- Open / Close ---------->>
 
-		public async Task Open(int sortOrder, CUIBase originUI, CUIInteractable originButton) {
+		public async Task Open(int sortOrder, CUIViewBase originUI, CUIInteractable originButton) {
 			Debug.Log($"Open UI {this.gameObject.name}");
 			this._previousUI = originUI;
 			this._previousButton = originButton;
@@ -102,14 +117,16 @@ namespace CDK.UI {
 			this._onOpen?.Invoke();
 
 			this._canvas.sortingOrder = sortOrder;
-			
-			#if FMOD
-			RuntimeManager.PlayOneShot(this._gameSettings.SoundOpenMenu);
-			#else
-			Debug.LogError("'Play Open menu sound' not implemented without FMOD");
-			#endif
 
-			UpdateCTime();
+            if (this._shouldPlayOpenAndCloseMenuSound) {
+			    #if FMOD
+                RuntimeManager.PlayOneShot(this._gameSettings.SoundOpenMenu);
+			    #else
+			    Debug.LogError("'Play Open menu sound' not implemented without FMOD");
+			    #endif
+            }
+
+            UpdateCTime();
 		}
 		public void Close() {
 			Debug.Log($"Closing UI {this.gameObject.name}", this);
@@ -117,6 +134,14 @@ namespace CDK.UI {
 
 			if (this._previousUI != null) this._previousUI.ShowIfHidden(this._previousButton);
 
+            if (this._shouldPlayOpenAndCloseMenuSound) {
+			    #if FMOD
+                RuntimeManager.PlayOneShot(this._gameSettings.SoundCloseMenu);
+			    #else
+			    Debug.LogError("'Play Close menu sound' not implemented without FMOD");
+			    #endif
+            }
+            
 			#if UnityAddressables
 			if (!CAssets.UnloadAsset(this.gameObject)) {
 				Debug.LogError($"Error releasing instance of object '{this.gameObject.name}'", this);
@@ -124,13 +149,7 @@ namespace CDK.UI {
 			#else
 			this.gameObject.CDestroy();
 			#endif
-			
-			#if FMOD
-			RuntimeManager.PlayOneShot(this._gameSettings.SoundCloseMenu);
-			#else
-			Debug.LogError("'Play Close menu sound' not implemented without FMOD");
-			#endif
-		}
+        }
 		
 		#endregion <<---------- Open / Close ---------->>
 
