@@ -19,9 +19,7 @@ namespace CDK {
 		#region <<---------- Constants ---------->>
 
 		private const string GAME_SETTINGS_ASSET_PATH = "Assets/Resources/GameSettings.asset";
-		
-		public const float MAX_NAVMESH_FINDPOSITION_DISTANCE = 1000f;
-		
+        
 		#endregion <<---------- Constants ---------->>
 		
 		

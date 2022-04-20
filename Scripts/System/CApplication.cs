@@ -1,6 +1,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using CDK.UI;
 using UnityEngine;
 using ThreadPriority = UnityEngine.ThreadPriority;
 
@@ -85,8 +86,9 @@ namespace CDK {
 		private static void InitializeDependencyContainerAndBinds() {
 			
 			CDependencyResolver.Bind<CGameSettings>(() => Resources.Load<CGameSettings>("GameSettings"));
-			CDependencyResolver.Bind<CLoading>(() => new CLoading());
-			CDependencyResolver.Bind<CBlockingEventsManager>(() => new CBlockingEventsManager());
+            CDependencyResolver.Bind<CLoading>(() => new CLoading());
+            CDependencyResolver.Bind<CBlockingEventsManager>(() => new CBlockingEventsManager());
+            CDependencyResolver.Bind<CUINavigationManager>(() => new CUINavigationManager());
 			CDependencyResolver.Bind<CGamePlayerManager>(() => new CGamePlayerManager());
 
 			CDependencyResolver.Bind<CCursorManager>(() => new CCursorManager());

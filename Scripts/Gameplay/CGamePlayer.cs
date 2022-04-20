@@ -27,7 +27,8 @@ namespace CDK {
 
 			this._gameSettings = CDependencyResolver.Get<CGameSettings>();
 			this._blockingEventsManager = CDependencyResolver.Get<CBlockingEventsManager>();
-			
+            this._navigationManager = CDependencyResolver.Get<CUINavigationManager>();
+
 			this._compositeDisposable?.Dispose();
 			this._compositeDisposable = new CompositeDisposable();
 
@@ -71,12 +72,12 @@ namespace CDK {
 
 		private readonly List<CCharacterBase> _characters = new List<CCharacterBase>();
 
-		[NonSerialized] private readonly CompositeDisposable _compositeDisposable;
-		[NonSerialized] private readonly CGameSettings _gameSettings;
-		[NonSerialized] private readonly CBlockingEventsManager _blockingEventsManager;
-		
-		
-		#endregion <<---------- Properties and Fields ---------->>
+		private readonly CompositeDisposable _compositeDisposable;
+		private readonly CGameSettings _gameSettings;
+		private readonly CBlockingEventsManager _blockingEventsManager;
+        private CUINavigationManager _navigationManager;
+
+        #endregion <<---------- Properties and Fields ---------->>
 
 		
 		
@@ -356,7 +357,7 @@ namespace CDK {
 			this._blockingEventsManager.IsOnMenu = true;
 			try {
 				#if UnityAddressables
-				await CUINavigation.get.OpenMenu(this._gameSettings.AssetRef_PauseMenu, null, null);
+				await this._navigationManager.OpenMenu(this._gameSettings.AssetRef_PauseMenu, null, null);
 				#else
 				Debug.LogError("'GamePlayer OpenMenu' not implemented without UnityAddressables");
 				#endif

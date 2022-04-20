@@ -1,3 +1,4 @@
+using FMODUnity;
 using UnityEngine;
 using UnityEngine.Playables;
 using UnityEngine.UI;
@@ -9,6 +10,8 @@ namespace CDK {
         [Space]
         [SerializeField] private Canvas _progressCanvas;
         [SerializeField] private Image _progressImage;
+        [SerializeField] private EventReference _soundOnSkip;
+        
 
         public float InputHoldSeconds {
             get => this._inputHoldSeconds;
@@ -17,8 +20,7 @@ namespace CDK {
                 this._progressCanvas.enabled = (this._inputHoldSeconds > 0f);
                 this._progressImage.fillAmount = this._inputHoldSeconds / this._secondsToSkip;
                 if (this._inputHoldSeconds >= this._secondsToSkip) {
-                    this._cutsceneToSkip.time = this._cutsceneToSkip.duration;
-                    this._cutsceneToSkip.Stop();
+                    this.SkipCutscene();
                 }
             }
         }
@@ -26,7 +28,7 @@ namespace CDK {
         private float _inputHoldSeconds;
         [Range(0.1f, 2f)] private float _secondsToSkip = 1.5f;
         private bool _isPlayingCutscene;
-        
+        private bool _skipped;
         
         
         private void Awake() {
@@ -34,6 +36,7 @@ namespace CDK {
         }
 
         private void Update() {
+            if (_skipped) return;
             if (this._cutsceneToSkip.time <= 0 || this._cutsceneToSkip.time >= this._cutsceneToSkip.duration) {
                 this.InputHoldSeconds = 0f;
                 return;
@@ -44,6 +47,17 @@ namespace CDK {
             else if (this.InputHoldSeconds > 0f) {
                 this.InputHoldSeconds -= Time.deltaTime;
             }
+        }
+
+
+
+        public void SkipCutscene() {
+            if (this._skipped) return;
+            this._progressCanvas.enabled = false;
+            this._cutsceneToSkip.time = this._cutsceneToSkip.duration;
+            this._cutsceneToSkip.Stop();
+            if(!this._soundOnSkip.IsNull) RuntimeManager.PlayOneShot(this._soundOnSkip);
+            this._skipped = true;
         }
         
     }
