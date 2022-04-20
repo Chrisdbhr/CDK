@@ -42,7 +42,10 @@ namespace CDK {
 		#if Newtonsoft_Json_for_Unity
 		[JsonProperty("cameraSensitivity")]
 		#endif
-		public Vector2 CameraSensitivity = new Vector2(7.5f, 0.15f);
+		public Vector2 CameraSensitivity = DefaultMaxCameraSensitivity * 0.5f;
+        
+        [JsonIgnore]
+        public static readonly Vector2 DefaultMaxCameraSensitivity = new Vector2(7.5f, 0.15f);
 
 		#if Newtonsoft_Json_for_Unity
 		[JsonProperty("language")]
