@@ -8,7 +8,8 @@ namespace CDK {
 		[SerializeField] [Range(1f, 99f)]private float _chanceToTrigger = 50f;
 		[SerializeField] private bool _triggerAffectsSelfActiveState = true;
 
-		[SerializeField] private CUnityEventBool _randomResultEvent;
+        [SerializeField] private CUnityEventBool _randomResultEvent;
+        [SerializeField] private CUnityEventBool _randomResultInvertedEvent;
 		[SerializeField] private UnityEvent _randomPositiveEvent;
 		[SerializeField] private UnityEvent _randomNegativeEvent;
 		
@@ -21,7 +22,8 @@ namespace CDK {
 				this.gameObject.SetActive(willTrigger);
 			}
 			
-			this._randomResultEvent?.Invoke(willTrigger);
+            this._randomResultEvent?.Invoke(willTrigger);
+            this._randomResultInvertedEvent?.Invoke(!willTrigger);
 			if (willTrigger) {
 				this._randomPositiveEvent?.Invoke();
 			}

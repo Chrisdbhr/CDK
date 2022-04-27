@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace CDK {
@@ -16,8 +17,12 @@ namespace CDK {
 		
 		
 		protected bool WillIgnoreTrigger(Component col) {
-			return !this._tag.CIsNullOrEmpty() && !col.CompareTag(this._tag);
+			return !this._tag.CIsNullOrEmpty() && !col.CompareTag(this._tag) && !(col is Transform);
 		}
 
-	}
+        protected void Reset() {
+            var col = this.GetComponent<Collider>();
+            if (col) col.isTrigger = this._isTrigger;
+        }
+    }
 }
