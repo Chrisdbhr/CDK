@@ -14,7 +14,8 @@ namespace CDK.UI {
 	                               IPointerEnterHandler, IPointerClickHandler {
 
 		[SerializeField] private bool _debug;
-		
+        [SerializeField] private bool _playInteractionSound = true;
+        
 		#if FMOD
 		private EventInstance _soundEventInstance;
 		#endif
@@ -28,7 +29,7 @@ namespace CDK.UI {
 
 		private void PlaySound(EventReference sound) {
 			#if FMOD
-			if (!sound.IsNull) {
+			if (this._playInteractionSound && !sound.IsNull) {
 				this._soundEventInstance.stop(STOP_MODE.IMMEDIATE);
 				this._soundEventInstance = FMODUnity.RuntimeManager.CreateInstance(sound);
 				this._soundEventInstance.start();
