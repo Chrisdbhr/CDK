@@ -26,7 +26,7 @@ namespace CDK {
         }
 
         private float _inputHoldSeconds;
-        [Range(0.1f, 2f)] private float _secondsToSkip = 1.5f;
+        [Range(0.1f, 2f)] private float _secondsToSkip = 1.3f;
         private bool _isPlayingCutscene;
         private bool _skipped;
         
