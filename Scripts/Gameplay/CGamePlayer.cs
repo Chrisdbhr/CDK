@@ -193,8 +193,11 @@ namespace CDK {
 			this._characters.Add(character);
 		}
 
-		public async Task RemoveAllControllingCharacters() {
-			this._characters.Clear();
+		public async Task RemoveAndDestroyAllControllingCharacters() {
+            foreach (var character in this._characters) {
+                character.CDestroy();
+            }
+            this._characters.Clear();
 		}
 		
 		public CCharacterBase GetControllingCharacter() {
@@ -210,6 +213,10 @@ namespace CDK {
 		public bool IsControllingCharacter(CCharacterBase characterBase) {
 			return this._characters.Contains(characterBase);
 		}
+        
+        public bool IsTransformRelatedToPlayer(Transform transformToCheck) {
+            return this._characters.Any(character => character != null && character.transform == transformToCheck);
+        }
 
 		#endregion <<---------- Character Control ---------->>
 
@@ -383,5 +390,5 @@ namespace CDK {
 		
 		#endregion <<---------- Disposable ---------->>
 
-	}
+    }
 }
