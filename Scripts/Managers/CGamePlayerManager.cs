@@ -46,9 +46,14 @@ namespace CDK {
 		public CGamePlayer GetPlayerControllingCharacter(CCharacterBase characterBase) {
 			return this._gamePlayers.FirstOrDefault(player => player.IsControllingCharacter(characterBase));
 		}
+        
+        public CGamePlayer GetPlayerFromTransform(Transform transformToCheck) {
+            return this._gamePlayers.FirstOrDefault(player => player.IsTransformRelatedToPlayer(transformToCheck));
+        }
 		
 		public bool IsTransformFromAPlayerCharacter(Transform aTransform) {
-			if (!aTransform.gameObject.activeInHierarchy) return false;
+            if(aTransform == null) return false;
+			if(!aTransform.gameObject.activeInHierarchy) return false;
 			return this.IsGameObjectAPlayerCharacter(aTransform.gameObject);
 		}
 		
