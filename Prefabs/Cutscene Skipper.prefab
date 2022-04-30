@@ -150,11 +150,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_StringReference:
     m_TableReference:
-      m_TableCollectionName: GUID:633161c6bc2a90547b25d976d27d509c
+      m_TableCollectionName: GUID:cf8ee8fe7888676458bae098692ea3a6
     m_TableEntryReference:
       m_KeyId: 144727960775651328
       m_Key: 
     m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
   m_FormatArguments: []
   m_UpdateString:
     m_PersistentCalls:
@@ -171,6 +173,8 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 1
+  references:
+    version: 1
 --- !u!1 &1746275858868196660
 GameObject:
   m_ObjectHideFlags: 0
