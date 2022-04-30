@@ -36,13 +36,13 @@ namespace CDK {
             this._timerDisposable?.Dispose();
             this._timerDisposable = Observable.Timer(TimeSpan.FromSeconds(1f), TimeSpan.Zero).Subscribe(_ => {
                 if (this == null) return;
-                this._loadingUI.enabled = true;
+                if(this._loadingUI) this._loadingUI.enabled = true;
             });
         }
 		
         public void HideLoadingUI() {
             this._timerDisposable?.Dispose();
-            this._loadingUI.enabled = false;
+            if(this._loadingUI) this._loadingUI.enabled = false;
         }
         
         #endregion <<---------- General ---------->>

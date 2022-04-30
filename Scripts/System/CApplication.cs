@@ -23,11 +23,9 @@ namespace CDK {
 
 		#region <<---------- Initialization ---------->>
 		
-		/// <summary>
-		/// ANTES da scene load.
-		/// </summary>
-		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSplashScreen)]
 		private static void InitializeBeforeSceneLoad() {
+            Debug.Log($"{nameof(CApplication)} Initializing Application.");
 			InitializeApplication().CAwait();
 		}
 
@@ -35,12 +33,12 @@ namespace CDK {
 			Application.backgroundLoadingPriority = ThreadPriority.High; // high to load fast first assets.
             Application.targetFrameRate = 15;
 
-			InitializeDependencyContainerAndBinds();
-			
-			#if UnityAddressables
-			await AddressablesInitialize();
+            InitializeDependencyContainerAndBinds();
+
+            #if UnityAddressables
+            await AddressablesInitialize();
 			#endif
-			
+
 			#if UnityLocalization
 			await LocalizationInitialize();
 			#endif
@@ -125,6 +123,7 @@ namespace CDK {
 		#if UnityLocalization
 
 		private static async Task LocalizationInitialize() {
+            Debug.Log("Initializing Localization System.");
 			await LocalizationSettings.InitializationOperation.Task;
 			var systemCulture = System.Globalization.CultureInfo.CurrentCulture;
 			foreach (var locale in LocalizationSettings.AvailableLocales.Locales) {
@@ -133,7 +132,7 @@ namespace CDK {
 					Equals(currentCulture, systemCulture.Parent)) {
 					Debug.Log($"Detected {systemCulture} and auto selected language {currentCulture}");
 					LocalizationSettings.SelectedLocale = locale;
-					return;
+                    return;
 				}
 			}
 			Debug.Log($"Could not auto select language for {systemCulture}");

@@ -42,7 +42,7 @@ namespace CDK {
 		/// <summary>
 		/// ANTES da scene load.
 		/// </summary>
-		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSplashScreen)]
 		private static void InitializeBeforeSceneLoad() {
 			Debug.Log($"Initializing {nameof(CInputManager)}");
 
