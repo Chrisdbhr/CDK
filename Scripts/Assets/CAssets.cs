@@ -59,7 +59,7 @@ namespace CDK {
 
 		public static async Task<T> LoadObjectAsync<T>(string key) {
 			Debug.Log($"Loading asset key '{key}'");
-			#if UnityAddressables
+			#if UnityAddressables && UniTask
 			return await Addressables.LoadAssetAsync<T>(key);
 			#else
 			throw new NotImplementedException();
@@ -117,9 +117,10 @@ namespace CDK {
 		}
 		#endif
 		
-		#if UnityAddressables
+		#if UnityAddressables 
 		public static async Task<GameObject> LoadAndInstantiateGameObjectAsync(string key, Transform parent = null, bool instantiateInWorldSpace = false, bool trackHandle = true) {
             if (!Application.isPlaying) return null;
+			#if UniTask
 			Debug.Log($"Starting to load GameObject with key '{key}'{(parent != null ? $" on parent '{parent.name}'" : string.Empty)}");
 			try {
 				var asyncOp = Addressables.InstantiateAsync(key, parent, instantiateInWorldSpace, trackHandle);
@@ -132,6 +133,9 @@ namespace CDK {
 			} catch (Exception e) {
 				Debug.LogError($"Exception trying to Load and Instantiate GameObject Async with key '{key}':\n" + e);
 			}
+			#else
+			Debug.Log($"UniTask is not installed in project with UnityAddressables, could not Load Asset.");
+			#endif
 
 			return null;
 		}
