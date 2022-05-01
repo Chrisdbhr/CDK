@@ -1,7 +1,10 @@
-using FMODUnity;
 using UnityEngine;
 using UnityEngine.Playables;
 using UnityEngine.UI;
+
+#if FMOD
+using FMODUnity;
+#endif
 
 namespace CDK {
     public class CCutsceneSkipper : MonoBehaviour {
@@ -10,8 +13,9 @@ namespace CDK {
         [Space]
         [SerializeField] private Canvas _progressCanvas;
         [SerializeField] private Image _progressImage;
+        #if FMOD
         [SerializeField] private EventReference _soundOnSkip;
-        
+        #endif
 
         public float InputHoldSeconds {
             get => this._inputHoldSeconds;
@@ -56,7 +60,9 @@ namespace CDK {
             this._progressCanvas.enabled = false;
             this._cutsceneToSkip.time = this._cutsceneToSkip.duration;
             this._cutsceneToSkip.Stop();
+            #if FMOD
             if(!this._soundOnSkip.IsNull) RuntimeManager.PlayOneShot(this._soundOnSkip);
+            #endif
             this._skipped = true;
         }
         

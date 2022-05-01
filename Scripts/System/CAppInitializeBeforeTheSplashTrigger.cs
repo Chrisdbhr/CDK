@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections;
-using FMODUnity;
 using UniRx;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+
+#if FMOD
+using FMODUnity;
+#endif
 
 #if Rewired
 using Rewired;

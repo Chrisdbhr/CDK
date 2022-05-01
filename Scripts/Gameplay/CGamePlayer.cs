@@ -40,8 +40,10 @@ namespace CDK {
 
 			this.SignToInputEvents();
 			
+			#if Rewired
 			SetInputLayout(this._rePlayer, false);
 			this._blockingEventsManager.OnMenu += this.SetInputLayout;
+			#endif
 
 			if (!Application.isEditor) {
 				Application.focusChanged += async focused => {
@@ -331,6 +333,7 @@ namespace CDK {
 
 		#region <<---------- Controlls Mappings ---------->>
 
+		#if Rewired
 		private void SetInputLayout(bool onMenu) {
 			SetInputLayout(this._rePlayer, onMenu);
 		}
@@ -351,6 +354,7 @@ namespace CDK {
 			
 			Debug.Log($"Player ID '{rePlayer.id}' controllers maps onMenu changed to '{onMenu}'\nCustom Controllers: {customControllersCount}, JoystickControllers: {joystickControllersCount}");
 		}
+		#endif
 		
 		#endregion <<---------- Controlls Mappings ---------->>
 		
@@ -385,7 +389,9 @@ namespace CDK {
 			this._compositeDisposable?.Dispose();
 
 			this.UnsignFromInputEvents();
-			this._blockingEventsManager.OnMenu -= this.SetInputLayout; 
+			#if Rewired
+			this._blockingEventsManager.OnMenu -= this.SetInputLayout;
+			#endif
 		}
 		
 		#endregion <<---------- Disposable ---------->>

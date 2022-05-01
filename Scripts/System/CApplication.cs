@@ -54,9 +54,11 @@ namespace CDK {
 				QuittingCancellationTokenSource.Cancel();
 			};
             
+			#if Rewired
             CAssets.LoadAndInstantiateFromResources<Rewired.InputManager_Base>("Rewired Input Manager");
-			
-            ApplicationInitialized?.Invoke();
+			#endif
+
+			ApplicationInitialized?.Invoke();
 			
             Application.targetFrameRate = 60;
 			Application.backgroundLoadingPriority = ThreadPriority.Low;

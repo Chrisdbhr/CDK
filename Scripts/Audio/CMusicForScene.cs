@@ -11,8 +11,10 @@ namespace CDK.Audio {
 	public class CMusicForScene : MonoBehaviour {
 	
 		[SerializeField] private bool _is3d;
+		#if FMOD
 		[SerializeField] private EventReference _music;
 		[NonSerialized] private FMOD.Studio.EventInstance _musicState;
+		#endif
 
 
 
@@ -21,12 +23,12 @@ namespace CDK.Audio {
 		#region <<---------- MonoBehaviour ---------->>
 
 		private void OnEnable() {
+			#if FMOD
 			if (this._music.IsNull) {
 				Debug.LogWarning($"{this.name} is not referencing a valid Music (EventRef)!");
 				return;
 			}
 				
-			#if FMOD
 			this._musicState = RuntimeManager.CreateInstance(this._music);
 
 			if (this._is3d) {
@@ -35,7 +37,6 @@ namespace CDK.Audio {
 			
 			if(this._musicState.isValid()) this._musicState.start();
 			#endif
-
 		}
 		
 		private void OnDisable() {

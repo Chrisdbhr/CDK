@@ -1,10 +1,10 @@
 using System;
-using FMODUnity;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 #if FMOD
+using FMODUnity;
 using FMOD.Studio;
 using STOP_MODE = FMOD.Studio.STOP_MODE;
 #endif
@@ -27,31 +27,35 @@ namespace CDK.UI {
             this._navigationManager = CDependencyResolver.Get<CUINavigationManager>();
         }
 
+		#if FMOD
 		private void PlaySound(EventReference sound) {
-			#if FMOD
 			if (this._playInteractionSound && !sound.IsNull) {
 				this._soundEventInstance.stop(STOP_MODE.IMMEDIATE);
 				this._soundEventInstance = FMODUnity.RuntimeManager.CreateInstance(sound);
 				this._soundEventInstance.start();
 			}
-			#else
-			throw new NotImplementedException();
-			#endif
 		}
+		#endif
 
 		public virtual void Selected(bool playSound = true) {
 			if(this._debug) Debug.Log($"Selected: CUIInteractable '{this.gameObject.name}'", this);
-			if(playSound) this.PlaySound(this._gameSettings.SoundSelect);
+			#if FMOD
+			if(playSound) this.PlaySound(this._gameSettings.SoundSelect);	
+			#endif
 		}
 
 		public virtual void Submited() {
 			if(this._debug) Debug.Log($"SUBMIT: CUIInteractable '{this.gameObject.name}'", this);
+			#if FMOD
 			this.PlaySound(this._gameSettings.SoundSubmit);
+			#endif
 		}
 
 		public virtual void Canceled() {
 			if(this._debug) Debug.Log($"CANCEL: CUIInteractable '{this.gameObject.name}'", this);
+			#if FMOD
 			this.PlaySound(this._gameSettings.SoundCancel);
+			#endif
 		}
 		
 		#region <<---------- IHandlers ---------->>

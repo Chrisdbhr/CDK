@@ -44,7 +44,7 @@ namespace CDK {
 		public LayerMask LineOfSightBlockingLayers => this._lineOfSightBlockingLayers;
 		[SerializeField] protected LayerMask _lineOfSightBlockingLayers = 1;
 
-
+		#if FMOD
 		[Header("Default Sounds")]
 		[SerializeField] protected EventReference _soundSelect;
 		public EventReference SoundSelect => this._soundSelect;
@@ -60,6 +60,7 @@ namespace CDK {
 
 		[SerializeField] protected EventReference _soundCloseMenu;
 		public EventReference SoundCloseMenu => this._soundCloseMenu;
+		#endif
 		
 		#endregion <<---------- Properties ---------->>
 

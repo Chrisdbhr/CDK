@@ -19,11 +19,13 @@ namespace CDK {
 		}
 		
 		
+		#if FMOD
 		public EventReference[] Audios {
 			get {
 				return (from audioList in this._audios where audioList != null && !audioList.audio.IsNull select audioList.audio).ToArray();
 			}
 		}
+		#endif
 		[SerializeField] private AudiosList[] _audios = new AudiosList[1];
 	}
 }

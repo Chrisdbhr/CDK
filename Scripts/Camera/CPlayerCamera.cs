@@ -144,6 +144,7 @@ namespace CDK {
 			this.RotationX = angles.x;
 			
 			// is close to the character?
+			#if Cinemachine
 			Observable.EveryUpdate().TakeUntilDisable(this).Subscribe(_ => {
 				if (CApplication.IsQuitting) return;
 				if (this._cinemachineBrain == null || this._cinemachineBrain.ActiveVirtualCamera == null || this._cinemachineBrain.ActiveVirtualCamera.Follow == null) return;
@@ -178,6 +179,7 @@ namespace CDK {
 				this._currentDistanceFromTarget = Vector3.Distance(this._cinemachineBrain.ActiveVirtualCamera.Follow.position, this._unityCamera.transform.position); 
 				this._isCloseToTheCharacterRx.Value = this._currentDistanceFromTarget <= this._distanceToConsiderCloseForCharacter;
 			});
+			#endif
 			this._isCloseToTheCharacterRx.TakeUntilDisable(this).Subscribe(isClose => {
 				if (this._renderToHideWhenCameraIsClose.Length <= 0) return;
 				// disable renderers
@@ -315,7 +317,9 @@ namespace CDK {
 		}
 
         private void TimeScaleChanged(float oldTime, float newTime) {
+			#if Cinemachine
             if (this._cinemachineBrain != null) this._cinemachineBrain.enabled = newTime != 0f;
+			#endif
         }
 		
 		#endregion <<---------- Callbacks ---------->>
@@ -431,10 +435,12 @@ namespace CDK {
 		}
 
 		private void EnableCameraFromType(CameraType cameraType) {
+			#if Cinemachine
 			int typeIndex = cameraType.CToInt();
 			for (int i = 0; i < this._cinemachineCameras.Length; i++) {
 				this._cinemachineCameras[i].gameObject.SetActive(i == typeIndex);
 			}
+			#endif
 		}
 		
 		#endregion <<---------- Camera Area and Profiles ---------->>

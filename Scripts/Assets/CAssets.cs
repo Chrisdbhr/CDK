@@ -159,9 +159,11 @@ namespace CDK {
 				Debug.LogError($"Will not unload a null asset.");
 				return false;
 			}
+			#if UnityAddressables
 			bool success = Addressables.ReleaseInstance(goToUnload);
 			if (success) return true;
 			Debug.LogError($"There was something wrong ReleasingInstance of gameObject. '{goToUnload.name}'." + (destroyIfCantReleaseInstance ? " Object will be destroyed." : string.Empty), goToUnload);
+			#endif
 			goToUnload.CDestroy();
 			return destroyIfCantReleaseInstance;
 		}
