@@ -44,8 +44,8 @@ namespace CDK.UI {
 
 		#if UnityAddressables
 	
-		public async Task<T> OpenMenu<T>(AssetReference uiReference, CUIViewBase originUI, CUIInteractable originButton) {
-			var openedMenu = await OpenMenu(uiReference, originUI, originButton);
+		public async Task<T> OpenMenuAsync<T>(AssetReference uiReference, CUIViewBase originUI, CUIInteractable originButton) {
+			var openedMenu = await this.OpenMenuAsync(uiReference, originUI, originButton);
 			return openedMenu != null ? openedMenu.GetComponent<T>() : default;
 		}
 
@@ -53,7 +53,7 @@ namespace CDK.UI {
 		/// Opens a menu, registering the button that opened it.
 		/// </summary>
 		/// <returns>returns the new opened menu.</returns>
-		public async Task<CUIViewBase> OpenMenu(AssetReference uiReference, CUIViewBase originUI, CUIInteractable originButton) {
+		public async Task<CUIViewBase> OpenMenuAsync(AssetReference uiReference, CUIViewBase originUI, CUIInteractable originButton) {
 			if (CApplication.IsQuitting) return null;
 
             var ui = await CAssets.LoadAndInstantiateUI(uiReference);
@@ -89,7 +89,7 @@ namespace CDK.UI {
 		/// <summary>
 		/// Closes active menu selecting previous button.
 		/// </summary>
-		public async Task CloseCurrentMenu() {
+		public async Task CloseCurrentMenuAsync() {
             this.RemoveNullFromNavigationHistory();
 			if (this._navigationHistory.Count <= 0) {
 				Debug.LogError("No menu to close");
@@ -111,7 +111,7 @@ namespace CDK.UI {
             lastInHistory.Close();
 		}
 
-		public async Task EndNavigation() {
+		public async Task EndNavigationAsync() {
 			Debug.Log($"Requested EndNavigation of {this._navigationHistory.Count} Menus in history.");
             RemoveNullFromNavigationHistory();
 			foreach (var ui in this._navigationHistory) {
@@ -170,11 +170,11 @@ namespace CDK.UI {
 		private void CheckIfIsLastMenu() {
             if (this.RemoveNullFromNavigationHistory() && this._navigationHistory.Count <= 0) {
                 // there was null UI on navigation history now it doesnt have anything, end navigation.
-                this.EndNavigation().CAwait();
+                this.EndNavigationAsync().CAwait();
                 return;
             }
             if (this._navigationHistory.Count > 0) return;
-            this.EndNavigation().CAwait();
+            this.EndNavigationAsync().CAwait();
         }
 		
 		private void HideLastMenuIfSet() {

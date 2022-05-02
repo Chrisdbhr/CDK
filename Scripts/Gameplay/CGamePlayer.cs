@@ -381,7 +381,7 @@ namespace CDK {
 			this._blockingEventsManager.IsOnMenu = true;
 			try {
 				#if UnityAddressables
-				await this._navigationManager.OpenMenu(this._gameSettings.AssetRef_PauseMenu, null, null);
+				await this._navigationManager.OpenMenuAsync(this._gameSettings.AssetRef_PauseMenu, null, null);
 				#else
 				Debug.LogError("'GamePlayer OpenMenu' not implemented without UnityAddressables");
 				#endif

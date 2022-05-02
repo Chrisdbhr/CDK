@@ -17,14 +17,14 @@ namespace CDK.UI {
 			this._buttonConfirm.Button.OnClickAsObservable().Subscribe(async _ => {
 				onConfirm?.Invoke();
 				Debug.Log($"SUBMIT: Confirm Popup '{this.gameObject.name}'", this);
-				await this._navigationManager.CloseCurrentMenu();
+				await this._navigationManager.CloseCurrentMenuAsync();
 			});
 					
 			// cancel exit
 			this._buttonCancel.Button.interactable = true;
 			this._buttonCancel.Button.OnClickAsObservable().Subscribe(async _ => {
 				Debug.Log($"CANCEL: Confirm Popup '{this.gameObject.name}'", this);
-				await this._navigationManager.CloseCurrentMenu();
+				await this._navigationManager.CloseCurrentMenuAsync();
 			});
 					
 			this._eventSystem.SetSelectedGameObject(this._buttonConfirm.gameObject);
