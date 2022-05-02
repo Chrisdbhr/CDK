@@ -56,6 +56,11 @@
             "name": "com.unity.nuget.newtonsoft-json",
             "expression": "0.0.0",
             "define": "Newtonsoft_Json_for_Unity"
+        },
+        {
+          "name" : "com.neuecc.unirx",
+          "expression": "0.0.0",
+          "define" : "UniRx"
         }
     ],
     "noEngineReferences": false
