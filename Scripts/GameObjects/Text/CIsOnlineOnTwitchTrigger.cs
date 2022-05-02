@@ -14,9 +14,10 @@ namespace CDK.Text {
 		
 		
 		protected override void TriggerEvent() {
-			var get = UnityWebRequest.Get($"m.twitch.tv/{this._userName}");
+			var get = UnityWebRequest.Get($"https://twitch.tv/{this._userName}");
 			get.SendWebRequest().completed += asyncOp => {
-				this._isOnline?.Invoke(get.downloadHandler.text.Contains("Stream Chat"));
+                if (this == null) return;
+				this._isOnline?.Invoke(get.downloadHandler.text.Contains("isLiveBroadcast"));
 				get.Dispose();
 			};
 		}
