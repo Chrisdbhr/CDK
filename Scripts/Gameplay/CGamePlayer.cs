@@ -139,23 +139,37 @@ namespace CDK {
 		#region <<---------- Character Creation and Exclusion ---------->>
 		
 		#if UnityAddressables
-		public async Task<CCharacterBase> InstantiateAndAssignCharacter(AssetReference charToCreate) {
-			
-			if (charToCreate == null || !charToCreate.RuntimeKeyIsValid()) {
-				Debug.LogWarning($"Created player {this.PlayerNumber} with no controlling character.");
+		public async Task<CCharacterBase> InstantiateAndAssignCharacter(string key) {
+			if (key.CIsNullOrEmpty()) {
+				Debug.LogWarning($"Cant instantiate character from null or empty Addressable key '{key}'.");
 				return null;
 			}
 
-			var createdGo = await CAssets.LoadAndInstantiateGameObjectAsync(charToCreate.RuntimeKey.ToString());
+			return await LoadObjectAndInstantiateAsync(key);
+		}
+		
+		public async Task<CCharacterBase> InstantiateAndAssignCharacter(AssetReference charToCreate) {
+			
+			if (charToCreate == null || !charToCreate.RuntimeKeyIsValid()) {
+				Debug.LogWarning($"Created player {this.PlayerNumber} with no controlling character because '{nameof(charToCreate)}' is null or its RuntimeKey is invalid.");
+				return null;
+			}
+
+			return await LoadObjectAndInstantiateAsync(charToCreate.RuntimeKey.ToString());
+		}
+		#endif
+
+		private async Task<CCharacterBase> LoadObjectAndInstantiateAsync(string key) {
+			var createdGo = await CAssets.LoadAndInstantiateGameObjectAsync(key);
 			if (createdGo == null) {
-				Debug.LogWarning($"Player {this.PlayerNumber} cant find character '{charToCreate}' to control.");
+				Debug.LogWarning($"Player {this.PlayerNumber} cant find character with key '{key}' to control.");
 				return null;
 			}
 
 			var character = createdGo.GetComponent<CCharacterBase>();
 
 			if (character == null) {
-				Debug.LogError($"{charToCreate} gameobject doesnt have a {nameof(CCharacterBase)} component on it! could not create player!");
+				Debug.LogError($"Asset key '{key}' gameobject doesnt have a {nameof(CCharacterBase)} component on it! could not create player!");
 				return null;
 			}
 
@@ -177,7 +191,6 @@ namespace CDK {
 
 			return character;
 		}
-		#endif
 
 		#endregion <<---------- Character Creation and Exclusion ---------->>
 
