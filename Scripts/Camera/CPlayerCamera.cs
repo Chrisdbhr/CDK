@@ -252,28 +252,9 @@ namespace CDK {
 			#if Cinemachine
 
 			// camera sensitivity changed
-			CSave.getRx.ObserveEveryValueChanged(p=>p.Value.CameraSensitivity.x).TakeUntilDisable(this).Subscribe(value => {
-				// freelook camera
-				if (this._cinemachineBrain.ActiveVirtualCamera is CinemachineFreeLook freeLookCamera) freeLookCamera.m_XAxis.m_MaxSpeed = value;
-				
-				// virtual camera
-				if (this._cinemachineBrain.ActiveVirtualCamera is CinemachineVirtualCamera virtualCamera) {
-					var pov = virtualCamera.GetCinemachineComponent<CinemachinePOV>();
-					if (pov == null) return;
-					pov.m_HorizontalAxis.m_MaxSpeed = value;
-				}
-			});
-			CSave.getRx.ObserveEveryValueChanged(p=>p.Value.CameraSensitivity.y).TakeUntilDisable(this).Subscribe(value => {
-				// freelook camera
-				if (this._cinemachineBrain.ActiveVirtualCamera is CinemachineFreeLook freeLookCamera) freeLookCamera.m_YAxis.m_MaxSpeed = value;
-				
-				// virtual camera
-				if (this._cinemachineBrain.ActiveVirtualCamera is CinemachineVirtualCamera virtualCamera) {
-					var pov = virtualCamera.GetCinemachineComponent<CinemachinePOV>();
-					if (pov == null) return;
-					pov.m_VerticalAxis.m_MaxSpeed = value;
-				}
-			});
+            Observable.EveryGameObjectUpdate().TakeUntilDisable(this).Subscribe(_ => {
+                SetCameraSensitivity(CSave.get.CameraSensitivity);
+            });
 			
 			// active camera changed
 			this._cinemachineBrain.m_CameraActivatedEvent.AddListener(this.ActiveCameraChanged);
@@ -302,6 +283,29 @@ namespace CDK {
 			Debug.Log($"Player Cinemachine Active Camera Changed to '{newCamera.Name}'", newCamera.VirtualCameraGameObject);
 		}
 		#endif
+
+        private void SetCameraSensitivity(Vector2 value) {
+            var activeCamera = this._cinemachineBrain.ActiveVirtualCamera;
+            if (activeCamera == null) return;
+            
+            if (!this._cinemachineCameras.Contains(activeCamera)) return;
+            
+            // freelook camera
+            if (this._cinemachineBrain.ActiveVirtualCamera is CinemachineFreeLook freeLookCamera) {
+                freeLookCamera.m_XAxis.m_MaxSpeed = value.x;
+                freeLookCamera.m_YAxis.m_MaxSpeed = value.y;
+                return;
+            }
+
+            // virtual camera
+            if (this._cinemachineBrain.ActiveVirtualCamera is CinemachineVirtualCamera virtualCamera) {
+                var pov = virtualCamera.GetCinemachineComponent<CinemachinePOV>();
+                if (pov == null) return;
+                pov.m_HorizontalAxis.m_MaxSpeed = value.x;
+                pov.m_VerticalAxis.m_MaxSpeed = value.y;
+                return;
+            }
+        }
 
 		#endregion <<---------- Events ---------->>
 		
