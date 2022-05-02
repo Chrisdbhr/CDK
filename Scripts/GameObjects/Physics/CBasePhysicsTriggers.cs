@@ -17,7 +17,7 @@ namespace CDK {
 		
 		
 		protected bool WillIgnoreTrigger(Component col) {
-			return !this._tag.CIsNullOrEmpty() && !col.CompareTag(this._tag) && !(col is Transform);
+			return !this._tag.CIsNullOrEmpty() && !col.CompareTag(this._tag);
 		}
 
         protected void Reset() {
