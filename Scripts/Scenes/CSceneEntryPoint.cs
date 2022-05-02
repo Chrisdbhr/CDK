@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using UnityEngine;
 
@@ -52,6 +53,10 @@ namespace CDK {
 			
 			// text
 			Handles.Label(pos, $"Entry point {this._number}");
+		}
+
+		private void Reset() {
+			this.name = nameof(CSceneEntryPoint);
 		}
 		#endif
 	}
