@@ -7,6 +7,10 @@ namespace CDK {
 		public static bool IsMoving(this CMovState movState) {
 			return movState > CMovState.Idle;
 		}
+        
+        public static bool IsMovingFast(this CMovState movState) {
+            return movState > CMovState.Walking;
+        }
 
 	}
 }

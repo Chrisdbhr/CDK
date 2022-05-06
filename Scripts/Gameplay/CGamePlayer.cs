@@ -115,7 +115,8 @@ namespace CDK {
 			
 			#if Rewired
 			this._rePlayer.AddInputEventDelegate(this.InputInteract, UpdateLoopType.Update, InputActionEventType.ButtonJustPressed, CInputKeys.INTERACT);
-			this._rePlayer.AddInputEventDelegate(this.InputRun, UpdateLoopType.Update, CInputKeys.RUN);
+            this._rePlayer.AddInputEventDelegate(this.InputRun, UpdateLoopType.Update, CInputKeys.RUN);
+            this._rePlayer.AddInputEventDelegate(this.InputWalk, UpdateLoopType.Update, CInputKeys.WALK);
 			this._rePlayer.AddInputEventDelegate(this.InputResetCameraRotation, UpdateLoopType.Update, CInputKeys.RESET_CAM_ROTATION);
 			this._rePlayer.AddInputEventDelegate(this.InputPause, UpdateLoopType.Update, InputActionEventType.ButtonJustPressed, CInputKeys.MENU_PAUSE);
 			#endif
@@ -125,7 +126,8 @@ namespace CDK {
 		private void UnsignFromInputEvents() {
 			#if Rewired
 			this._rePlayer?.RemoveInputEventDelegate(this.InputInteract);
-			this._rePlayer?.RemoveInputEventDelegate(this.InputRun);
+            this._rePlayer?.RemoveInputEventDelegate(this.InputWalk);
+            this._rePlayer?.RemoveInputEventDelegate(this.InputRun);
 			this._rePlayer?.RemoveInputEventDelegate(this.InputResetCameraRotation);
 			this._rePlayer?.RemoveInputEventDelegate(this.InputPause);
 			#endif
@@ -314,6 +316,14 @@ namespace CDK {
 			this._playerCamera.ResetRotation();
 		}
 		
+        private void InputWalk(InputActionEventData data) {
+            if (this._blockingEventsManager.IsAnyBlockingEventHappening) return;
+            var character = this.GetControllingCharacter();
+            if (character == null) return;
+            var inputWalk = data.GetButton();
+            character.InputWalk = inputWalk;
+        }
+        
 		private void InputRun(InputActionEventData data) {
 			if (this._blockingEventsManager.IsAnyBlockingEventHappening) return;
 			var character = this.GetControllingCharacter();

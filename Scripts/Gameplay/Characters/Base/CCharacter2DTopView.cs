@@ -55,7 +55,7 @@ namespace CDK {
         }
 
         protected override void ProcessMovement() {
-            _rb.velocity = InputMovementRaw * (MovementSpeed * CTime.DeltaTimeScaled);
+            _rb.velocity = InputMovementRaw * (WalkSpeed * CTime.DeltaTimeScaled);
             return;
         }
 

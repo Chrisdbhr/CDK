@@ -13,5 +13,9 @@ namespace CDK {
 			return Convert.ToInt32(@enum);
 		}
 
+        public static T CGetMaxValue<T>() {
+            var values = CGetValues<T>();
+            return values != null ? values.Max() : default;
+        }
 	}
 }

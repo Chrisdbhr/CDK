@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using CDK.Characters.Enums;
 using CDK.Characters.Interfaces;
 using UniRx;
@@ -49,7 +51,8 @@ namespace CDK {
 		#region <<---------- Input ---------->>
 		public Vector2 InputMovementRaw { get; set; }
 		public Vector3 InputMovementDirRelativeToCam { get; set; }
-		public bool InputRun { get; set; }
+        public bool InputWalk { get; set; }
+        public bool InputRun { get; set; }
 		public bool InputAim { get; set; }
 		#endregion <<---------- Input ---------->>
 
@@ -86,9 +89,10 @@ namespace CDK {
 		//private Vector3 _rootMotionDeltaPosition = Vector3.zero;
 		public Vector3 _rootMotionDeltaPosition = Vector3.zero;
 		
+        private List<CSceneArea> _activeSceneAreas = new List<CSceneArea>();
 
 		#region <<---------- Run and Walk ---------->>
-        [Header("Walk")]
+        [Header("Movement")]
         [SerializeField] protected CMovState _currentMovState;
 		public CMovState CurrentMovState {
 			get { return this._currentMovState; }
@@ -96,35 +100,28 @@ namespace CDK {
 
         protected abstract void SetMovementState(CMovState value);
 
-		public float MovementSpeed {
-			get { return this._movementSpeed; }
-		}
-		[SerializeField] [Min(0f)] private float _movementSpeed = 1f;
-
-		public float WalkMultiplier {
-			get { return this._walkMultiplier; }
+		public float WalkSpeed {
+			get { return this._walkSpeed; }
 		}
 
-		private float _walkMultiplier = 0.6f;
-
-        [Header("Run")]
-        [SerializeField] private float _runSpeedMultiplier = 2f;
-		public float RunSpeedMultiplier {
-			get { return this._runSpeedMultiplier; }
+        [SerializeField] [Min(0f)] private float _walkSpeed = 0.6f;
+		public float RunSpeed {
+			get { return this._runSpeed; }
 		}
+        [SerializeField] [Min(0f)] private float _runSpeed = 1.5f;
+
+        public float SprintSpeed {
+            get { return this._sprintSpeed; }
+        }
+        [SerializeField] [Min(0f)] private float _sprintSpeed = 3f;
 
 		public ReactiveProperty<bool> CanMoveRx { get; protected set; }
 
-		public bool CanRun {
-			get { return !this.BlockRunFromEnvironment; }
-		}
-
-		public bool BlockRunFromEnvironment;
-		#endregion <<---------- Run and Walk ---------->>
+        #endregion <<---------- Run and Walk ---------->>
         
 		#region <<---------- Rotation ---------->>
         [Header("Rotation")]
-		[SerializeField] private float _rotateTowardsSpeed = 10f;
+        [SerializeField] private AnimationCurve _curveRotationRateOverSpeed = AnimationCurve.Linear(0f,666f,10f,1f);
 
 		protected Quaternion _targetLookRotation;
 		#endregion <<---------- Rotation ---------->>
@@ -161,7 +158,8 @@ namespace CDK {
 		protected readonly int ANIM_CHAR_IS_STRAFING = Animator.StringToHash("isStrafing");
 		protected readonly int ANIM_CHAR_IS_SLIDING = Animator.StringToHash("isSliding");
 		protected readonly int ANIM_CHAR_IS_WALKING = Animator.StringToHash("isWalking");
-		protected readonly int ANIM_CHAR_IS_RUNNING = Animator.StringToHash("isRunning");
+        protected readonly int ANIM_CHAR_IS_RUNNING = Animator.StringToHash("isRunning");
+        protected readonly int ANIM_CHAR_IS_SPRINTING = Animator.StringToHash("isSprinting");
 		protected readonly int ANIM_CHAR_IS_FALLING = Animator.StringToHash("isFalling");
 
 		// Stun
@@ -304,7 +302,10 @@ namespace CDK {
 			if (this == null) return;
 			this.StopTalking();
 			this.ResetFallCalculation();
-		}
+            if (this._activeSceneAreas.RemoveAll(a => a == null) > 0) {
+                Debug.Log($"Removed null scene areas when scene changed for character '{this.name}'");
+            }
+        }
 
 		#endregion <<---------- Events ---------->>
 
@@ -326,6 +327,37 @@ namespace CDK {
 		#endregion <<---------- Movement ---------->>
 
 
+        
+
+        #region <<---------- Scene Areas ---------->>
+        
+        public void AddSceneArea(CSceneArea area) {
+            this._activeSceneAreas.Add(area);
+        }
+		
+        public void RemoveSceneArea(CSceneArea area) {
+            this._activeSceneAreas.Remove(area);
+        }
+
+        protected CMovState GetMaxMovementSpeed() {
+            return this._activeSceneAreas.Count > 0 
+                ? this._activeSceneAreas.Max(a => a.MaximumMovementState) 
+                : CMovState.Sprint;
+        }
+
+        protected float GetSpeedForCurrentMovementState() {
+            switch (this.CurrentMovState) {
+                case CMovState.Sprint:
+                    return this.SprintSpeed;
+                case CMovState.Running:
+                    return this.RunSpeed;
+            }
+            return this.WalkSpeed;
+        }
+        
+        #endregion <<---------- Scene Areas ---------->>
+
+        
 
 
         #region <<---------- Fail ---------->>
@@ -346,17 +378,16 @@ namespace CDK {
 			if (dir == Vector3.zero) return;
 			this._targetLookRotation = Quaternion.LookRotation(dir);
 
-			var rotateSpeed = this._rotateTowardsSpeed;
-			if (this.CurrentMovState >= CMovState.Running) rotateSpeed *= 0.5f;
+			var rotateSpeed = this._curveRotationRateOverSpeed.Evaluate(this.GetMyVelocityMagnitude());
 			
 			// lerp rotation
-			this.transform.rotation = Quaternion.Lerp(
+			this.transform.rotation = Quaternion.RotateTowards(
 													this.transform.rotation,
 													this._targetLookRotation,
 													rotateSpeed * CTime.DeltaTimeScaled * this.TimelineTimescale);
 		}
-		
-		#endregion <<---------- Rotation ---------->>
+        
+        #endregion <<---------- Rotation ---------->>
 
 		
 		

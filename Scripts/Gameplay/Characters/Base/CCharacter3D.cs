@@ -1,3 +1,4 @@
+using System;
 using UniRx;
 using UnityEngine;
 
@@ -202,8 +203,7 @@ namespace CDK {
                 this._animator.SetBool(this.ANIM_CHAR_IS_SLIDING, value == CMovState.Sliding);
                 this._animator.SetBool(this.ANIM_CHAR_IS_WALKING, value == CMovState.Walking);
                 this._animator.SetBool(this.ANIM_CHAR_IS_RUNNING, value == CMovState.Running);
-
-                //this.Anim.SetBool(this.ANIM_CHAR_IS_SPRINTING, value == CMovState.Sprint);
+                this._animator.SetBool(this.ANIM_CHAR_IS_SPRINTING, value == CMovState.Sprint);
             }
         }
 
@@ -234,12 +234,15 @@ namespace CDK {
 			if (this.CanMoveRx.Value && this.CurrentMovState != CMovState.Sliding && !this._blockingEventsManager.IsDoingBlockingAction.IsRetained()) {
 				// input movement
 				if (targetMotion != Vector3.zero) {
-					if (this.InputRun && this.CanRun && !this._isAimingRx.Value) {
-                        this.SetMovementState(CMovState.Running);
-					}
-					else {
+                    var maxMovSpeed = this.GetMaxMovementSpeed();
+                    if (maxMovSpeed <= CMovState.Walking || this._isAimingRx.Value || this.InputWalk){
                         this.SetMovementState(CMovState.Walking);
-					}
+					} else if(maxMovSpeed < CMovState.Sprint) {
+                        this.SetMovementState(this.InputRun ? CMovState.Running : CMovState.Walking);
+                    }
+                    else {
+                        this.SetMovementState(this.InputRun ? CMovState.Sprint : CMovState.Running);
+                    }
 				}
 				else {
 					this.SetMovementState(CMovState.Idle);
@@ -249,24 +252,9 @@ namespace CDK {
 				this.IsStrafingRx.Value = this._isAimingRx.Value && this.CurrentMovState <= CMovState.Walking;
 
 				// target movement speed
-				switch (this.CurrentMovState) {
-					case CMovState.Walking: {
-						targetMovSpeed = this.MovementSpeed > 0f ? this.MovementSpeed * this.WalkMultiplier : this.WalkMultiplier;
-						break;
-					}
-					case CMovState.Running: {
-						targetMovSpeed = this.MovementSpeed > 0f ? this.MovementSpeed * this.RunSpeedMultiplier : this.RunSpeedMultiplier;
-						break;
-					}
-					default: {
-						targetMovSpeed = this.MovementSpeed;
-						break;
-					}
-				}
-
-
+                targetMovSpeed = this.GetSpeedForCurrentMovementState();
 				if (this.IsAiming) {
-					targetMovSpeed *= 0.5f;
+                    targetMovSpeed *= 0.5f;
 				}
 
 				if (Debug.isDebugBuild && Input.GetKey(KeyCode.RightShift)) {
@@ -276,7 +264,7 @@ namespace CDK {
 
 			// is sliding
 			if (this.CurrentMovState == CMovState.Sliding) {
-				targetMotion = this.InputMovementDirRelativeToCam * this.SlideControlAmmount
+				targetMotion = (this.InputMovementDirRelativeToCam * this.SlideControlAmmount)
 						+ this.transform.forward + (this._groundNormal * 2f);
 				targetMovSpeed = this._slideSpeed;
 			}
@@ -293,7 +281,8 @@ namespace CDK {
 			rootMotionDeltaPos.y = 0f;
 
 			// move character
-			return (targetMotion * (targetMovSpeed * deltaTime)) + rootMotionDeltaPos;
+            if(this.IsStrafingRx.Value) return (targetMotion * (targetMovSpeed * deltaTime)) + rootMotionDeltaPos;
+			return (this.transform.forward * (targetMotion.magnitude * targetMovSpeed * deltaTime)) + rootMotionDeltaPos;
 		}
 
         protected float ProcessVerticalMovement(float deltaTime) {
