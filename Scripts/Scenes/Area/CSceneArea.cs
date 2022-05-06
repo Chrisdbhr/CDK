@@ -1,35 +1,31 @@
-using System;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace CDK {
-	[Obsolete]
+    [RequireComponent(typeof(Collider))]
 	public class CSceneArea : MonoBehaviour {
-		[SerializeField] private CSceneAreaData _data;
-		[NonSerialized] private HashSet<CSceneAreaCharacterReceiver> _affectedReceivers = new HashSet<CSceneAreaCharacterReceiver>();
+
+        public CMovState MaximumMovementState => this._maximumMovementState;
+        [SerializeField] private CMovState _maximumMovementState = CMovState.Walking;
 		
-		
-		private void OnDestroy() {
-			foreach (var receiver in this._affectedReceivers) {
-				if (receiver == null) continue;
-				receiver.RemoveArea(this._data);
-			}
-		}
+        
+        
 
 		private void OnTriggerEnter(Collider other) {
-			var receiver = other.GetComponent<CSceneAreaCharacterReceiver>();
+			var receiver = other.GetComponent<CCharacterBase>();
 			if (receiver == null) return;
-			this._affectedReceivers.Add(receiver);
-			receiver.AddArea(this._data);
+            receiver.AddSceneArea(this);
 		}
 
 		private void OnTriggerExit(Collider other) {
-			var receiver = other.GetComponent<CSceneAreaCharacterReceiver>();
+			var receiver = other.GetComponent<CCharacterBase>();
 			if (receiver == null) return;
-			this._affectedReceivers.Remove(receiver);
-			receiver.RemoveArea(this._data);
+            receiver.RemoveSceneArea(this);
 		}
 
-		
-	}
+
+        private void Reset() {
+            var col = this.GetComponent<Collider>();
+            if (col) col.isTrigger = true;
+        }
+    }
 }
