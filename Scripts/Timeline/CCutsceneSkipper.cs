@@ -1,3 +1,6 @@
+using System;
+using System.Collections;
+using UniRx;
 using UnityEngine;
 using UnityEngine.Playables;
 using UnityEngine.UI;
@@ -33,26 +36,38 @@ namespace CDK {
         [Range(0.1f, 2f)] private float _secondsToSkip = 1.3f;
         private bool _isPlayingCutscene;
         private bool _skipped;
+        private Coroutine _skipCoroutine;
         
         
         private void Awake() {
             this.InputHoldSeconds = 0f;
         }
 
-        private void Update() {
-            if (_skipped) return;
-            if (this._cutsceneToSkip.time <= 0 || this._cutsceneToSkip.time >= this._cutsceneToSkip.duration) {
-                this.InputHoldSeconds = 0f;
-                return;
-            }
-            if (Input.anyKey) {
-                this.InputHoldSeconds += Time.deltaTime;
-            }
-            else if (this.InputHoldSeconds > 0f) {
-                this.InputHoldSeconds -= Time.deltaTime;
-            }
+        private void OnEnable() {
+            this._skipCoroutine = this.CStartCoroutine(SkipRoutine());
         }
 
+        private void OnDisable() {
+            this.CStopCoroutine(this._skipCoroutine);
+        }
+
+        IEnumerator SkipRoutine() {
+            yield return new WaitForSeconds(1f);
+            while (!_skipped) {
+                yield return null;
+                if (this._cutsceneToSkip.time <= 0 || this._cutsceneToSkip.time >= this._cutsceneToSkip.duration) {
+                    this.InputHoldSeconds = 0f;
+                }
+                else {
+                    if (Input.anyKey) {
+                        this.InputHoldSeconds += Time.deltaTime;
+                    }
+                    else if (this.InputHoldSeconds > 0f) {
+                        this.InputHoldSeconds -= Time.deltaTime;
+                    }
+                }
+            }
+        }
 
 
         public void SkipCutscene() {
