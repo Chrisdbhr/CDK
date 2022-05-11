@@ -8,12 +8,13 @@ namespace CDK {
 
 		#region <<---------- Properties ---------->>
 		
-		[SerializeField] private PlayableDirector _playableDirector;
-		[SerializeField] private bool _autoSetIsPlayingCutsceneOnBlockingEventsManager = true;
-		[SerializeField] private UnityEvent _cutscenePlayed;
-		[SerializeField] private UnityEvent _cutsceneStopped;
+		[SerializeField] protected PlayableDirector _playableDirector;
+		[SerializeField] protected bool _autoSetIsPlayingCutsceneOnBlockingEventsManager = true;
+		[SerializeField] protected UnityEvent _cutscenePlayed;
+        [SerializeField] protected UnityEvent _cutsceneStopped;
+        [SerializeField] protected CUnityEventBool _cutscenePlayingStateChanged;
 		
-		private CBlockingEventsManager _blockingEventsManager;
+        protected CBlockingEventsManager _blockingEventsManager;
 
 		#endregion <<---------- Properties ---------->>
 
@@ -23,22 +24,25 @@ namespace CDK {
 		#region <<---------- MonoBehaviour ---------->>
 
 		protected virtual void Awake() {
-			_blockingEventsManager = CDependencyResolver.Get<CBlockingEventsManager>();
-		}
+            this._blockingEventsManager = CDependencyResolver.Get<CBlockingEventsManager>();
+            if (this._playableDirector.extrapolationMode != DirectorWrapMode.None) {
+                Debug.LogError($"PlayableDirector {this._playableDirector.name} extrapolationMode must be set to None.");
+            }
+        }
 
-		private void OnEnable() {
-			this._playableDirector.played += OnCutscenePlayed;
+        protected virtual void OnEnable() {
+            this._playableDirector.played += OnCutscenePlayed;
 			this._playableDirector.stopped += OnCutsceneStopped;
 		}
 		
-		private void OnDisable() {
+        protected virtual void OnDisable() {
 			this._playableDirector.played -= OnCutscenePlayed;
 			this._playableDirector.stopped -= OnCutsceneStopped;
 		}
 		
 		#if UNITY_EDITOR
-		void Reset() {
-			this._playableDirector = this.GetComponent<PlayableDirector>();
+		protected virtual void Reset() {
+			if(!this._playableDirector) this._playableDirector = this.GetComponent<PlayableDirector>();
 		}
 		#endif
 		
@@ -49,14 +53,16 @@ namespace CDK {
 		
 		#region <<---------- Callbacks ---------->>
 		
-		private void OnCutscenePlayed(PlayableDirector playableDirector) {
+        protected virtual void OnCutscenePlayed(PlayableDirector playableDirector) {
 			if(_autoSetIsPlayingCutsceneOnBlockingEventsManager) _blockingEventsManager.IsPlayingCutscene = true;
-			_cutscenePlayed?.Invoke();
+            this._cutscenePlayed?.Invoke();
+            this._cutscenePlayingStateChanged?.Invoke(true);
 		}
 
-		void OnCutsceneStopped(PlayableDirector playableDirector) {
+        protected virtual void OnCutsceneStopped(PlayableDirector playableDirector) {
 			if(_autoSetIsPlayingCutsceneOnBlockingEventsManager) _blockingEventsManager.IsPlayingCutscene = false;
-			_cutsceneStopped?.Invoke();
+            this._cutsceneStopped?.Invoke();
+            this._cutscenePlayingStateChanged?.Invoke(false);
 		}
 		
 		#endregion <<---------- Callbacks ---------->>
