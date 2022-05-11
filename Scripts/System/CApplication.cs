@@ -26,21 +26,25 @@ namespace CDK {
 		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSplashScreen)]
 		private static void InitializeBeforeSceneLoad() {
             Debug.Log($"{nameof(CApplication)} Initializing Application.");
-			InitializeApplication().CAwait();
+			InitializeApplicationAsync().CAwait();
 		}
 
-		private static async Task InitializeApplication() {
+		private static async Task InitializeApplicationAsync() {
 			Application.backgroundLoadingPriority = ThreadPriority.High; // high to load fast first assets.
             Application.targetFrameRate = 15;
-
+            
             InitializeDependencyContainerAndBinds();
+            
+            #if Rewired
+            CAssets.LoadAndInstantiateFromResources<Rewired.InputManager_Base>("Rewired Input Manager");
+			#endif
 
             #if UnityAddressables
-            await AddressablesInitialize();
+            await AddressablesInitializeAsync();
 			#endif
 
 			#if UnityLocalization
-			await LocalizationInitialize();
+			await LocalizationInitializeAsync();
 			#endif
 
 			// app quit
@@ -54,10 +58,6 @@ namespace CDK {
 				QuittingCancellationTokenSource.Cancel();
 			};
             
-			#if Rewired
-            CAssets.LoadAndInstantiateFromResources<Rewired.InputManager_Base>("Rewired Input Manager");
-			#endif
-
 			ApplicationInitialized?.Invoke();
 			
             Application.targetFrameRate = 60;
@@ -108,7 +108,7 @@ namespace CDK {
 
 		#if UnityAddressables
 		
-		private static async Task AddressablesInitialize() {
+		private static async Task AddressablesInitializeAsync() {
 			Debug.Log("CApplication initializing Addressables");
 			await Addressables.InitializeAsync().Task;
 		}
@@ -124,7 +124,7 @@ namespace CDK {
 
 		#if UnityLocalization
 
-		private static async Task LocalizationInitialize() {
+		private static async Task LocalizationInitializeAsync() {
             Debug.Log("Initializing Localization System.");
 			await LocalizationSettings.InitializationOperation.Task;
 			var systemCulture = System.Globalization.CultureInfo.CurrentCulture;
