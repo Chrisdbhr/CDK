@@ -46,7 +46,7 @@ namespace CDK {
             if (this._animator) {
                 this._animator.SetBool(this.ANIM_CHAR_IS_WALKING, value == CMovState.Walking);
                 this._animator.SetBool(this.ANIM_CHAR_IS_RUNNING, value == CMovState.Running);
-                //this.Anim.SetBool(this.ANIM_CHAR_IS_SPRINTING, value == CMovState.Sprint);
+                this._animator.SetBool(this.ANIM_CHAR_IS_SPRINTING, value == CMovState.Sprint);
             }
         }
 
@@ -55,6 +55,7 @@ namespace CDK {
         }
 
         protected override void ProcessMovement() {
+            if (!this.CanMoveRx.Value) return;
             _rb.velocity = InputMovementRaw * (WalkSpeed * CTime.DeltaTimeScaled);
             return;
         }

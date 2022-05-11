@@ -226,12 +226,12 @@ namespace CDK {
 		}
 
 		protected Vector3 ProcessHorizontalMovement(float deltaTime) {
-			Vector3 targetMotion = this.InputMovementDirRelativeToCam;
+			Vector3 targetMotion = this.CanMoveRx.Value ? this.InputMovementDirRelativeToCam : Vector3.zero;
 			float targetMovSpeed = 0f;
 
 			
 			// manual movement
-			if (this.CanMoveRx.Value && this.CurrentMovState != CMovState.Sliding && !this._blockingEventsManager.IsDoingBlockingAction.IsRetained()) {
+			if (this.CurrentMovState != CMovState.Sliding && !this._blockingEventsManager.IsDoingBlockingAction.IsRetained()) {
 				// input movement
 				if (targetMotion != Vector3.zero) {
                     var maxMovSpeed = this.GetMaxMovementSpeed();

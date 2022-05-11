@@ -89,7 +89,7 @@ namespace CDK {
 		//private Vector3 _rootMotionDeltaPosition = Vector3.zero;
 		public Vector3 _rootMotionDeltaPosition = Vector3.zero;
 		
-        private List<CSceneArea> _activeSceneAreas = new List<CSceneArea>();
+        private readonly List<CSceneArea> _activeSceneAreas = new List<CSceneArea>();
 
 		#region <<---------- Run and Walk ---------->>
         [Header("Movement")]
@@ -341,7 +341,7 @@ namespace CDK {
 
         protected CMovState GetMaxMovementSpeed() {
             return this._activeSceneAreas.Count > 0 
-                ? this._activeSceneAreas.Max(a => a.MaximumMovementState) 
+                ? this._activeSceneAreas.Min(a => a.MaximumMovementState) 
                 : CMovState.Sprint;
         }
 
