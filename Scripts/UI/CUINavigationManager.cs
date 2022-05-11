@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using UniRx;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -44,8 +43,8 @@ namespace CDK.UI {
 
 		#if UnityAddressables
 	
-		public async Task<T> OpenMenuAsync<T>(AssetReference uiReference, CUIViewBase originUI, CUIInteractable originButton) {
-			var openedMenu = await this.OpenMenuAsync(uiReference, originUI, originButton);
+		public T OpenMenu<T>(AssetReference uiReference, CUIViewBase originUI, CUIInteractable originButton) {
+			var openedMenu = this.OpenMenu(uiReference, originUI, originButton);
 			return openedMenu != null ? openedMenu.GetComponent<T>() : default;
 		}
 
@@ -53,10 +52,10 @@ namespace CDK.UI {
 		/// Opens a menu, registering the button that opened it.
 		/// </summary>
 		/// <returns>returns the new opened menu.</returns>
-		public async Task<CUIViewBase> OpenMenuAsync(AssetReference uiReference, CUIViewBase originUI, CUIInteractable originButton) {
+		public CUIViewBase OpenMenu(AssetReference uiReference, CUIViewBase originUI, CUIInteractable originButton) {
 			if (CApplication.IsQuitting) return null;
 
-            var ui = await CAssets.LoadAndInstantiateUI(uiReference);
+            var ui = CAssets.LoadAndInstantiateUI(uiReference);
 			if (ui == null) {
 				Debug.LogError($"Could not open menu '{uiReference.RuntimeKey}'");
 				return null;
@@ -75,7 +74,7 @@ namespace CDK.UI {
 
 			this.HideLastMenuIfSet();
 			
-			await ui.Open(this._navigationHistory.Count, originUI, originButton);
+			ui.Open(this._navigationHistory.Count, originUI, originButton);
 			
 			this.CheckIfIsFirstMenu();
 			
@@ -89,7 +88,7 @@ namespace CDK.UI {
 		/// <summary>
 		/// Closes active menu selecting previous button.
 		/// </summary>
-		public async Task CloseCurrentMenuAsync() {
+		public void CloseCurrentMenuAsync() {
             this.RemoveNullFromNavigationHistory();
 			if (this._navigationHistory.Count <= 0) {
 				Debug.LogError("No menu to close");
@@ -111,7 +110,7 @@ namespace CDK.UI {
             lastInHistory.Close();
 		}
 
-		public async Task EndNavigationAsync() {
+		public void EndNavigation() {
 			Debug.Log($"Requested EndNavigation of {this._navigationHistory.Count} Menus in history.");
             RemoveNullFromNavigationHistory();
 			foreach (var ui in this._navigationHistory) {
@@ -170,11 +169,11 @@ namespace CDK.UI {
 		private void CheckIfIsLastMenu() {
             if (this.RemoveNullFromNavigationHistory() && this._navigationHistory.Count <= 0) {
                 // there was null UI on navigation history now it doesnt have anything, end navigation.
-                this.EndNavigationAsync().CAwait();
+                this.EndNavigation();
                 return;
             }
             if (this._navigationHistory.Count > 0) return;
-            this.EndNavigationAsync().CAwait();
+            this.EndNavigation();
         }
 		
 		private void HideLastMenuIfSet() {

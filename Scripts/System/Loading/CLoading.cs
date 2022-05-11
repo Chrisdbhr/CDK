@@ -1,7 +1,9 @@
+using System;
 using UnityEngine;
 using UniRx;
 
 namespace CDK {
+    [Obsolete]
 	public class CLoading {
 
 		private CLoadingCanvas _loadingCanvas;
@@ -14,7 +16,7 @@ namespace CDK {
 			this._disposables?.Dispose();
 			this._disposables = new CompositeDisposable();
 			
-			this._loadingCanvas = CAssets.LoadAndInstantiateFromResources<CLoadingCanvas>("Loading Canvas");
+			this._loadingCanvas = CAssets.LoadAndInstantiate<CLoadingCanvas>("Loading Canvas");
 			
 			this._loadingUIRetainable = new CRetainable();
 

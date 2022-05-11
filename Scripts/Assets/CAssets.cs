@@ -19,44 +19,22 @@ namespace CDK {
 	public class CAssets {
 
 		#region <<---------- Properties ---------->>
-
-		public static CAssets get {
-			get {
-				if (_instance != null) return _instance;
-				Debug.Log($"Creating new instance of {nameof(CAssets)}");
-				CApplication.QuittingEvent += () => {
-					_instance = null;
-				};
-				return _instance = new CAssets();
-			}
-		}
-		private static CAssets _instance;
 		
 		private CanvasGroup _loadingCanvas;
 		private IDisposable _loadingCanvasTimer;
 
-		private readonly CGameSettings _gameSettings;
-		private readonly CLoading _loading;
-		
 		#endregion <<---------- Properties ---------->>
 
-		
-		
-		
-		#region <<---------- Initializers ---------->>
-		
-		private CAssets() {
-			this._gameSettings = CDependencyResolver.Get<CGameSettings>();
-			this._loading = CDependencyResolver.Get<CLoading>();
-		}
-
-		#endregion <<---------- Initializers ---------->>
-
-		
-		
-
+        
+        
+        
 		#region <<---------- Loaders ---------->>
 
+        public static T LoadObject<T>(string key) {
+            var op = Addressables.LoadAssetAsync<T>(key);
+            return op.WaitForCompletion();
+        }
+        
 		public static async Task<T> LoadObjectAsync<T>(string key) {
 			Debug.Log($"Loading asset key '{key}'");
 			#if UnityAddressables && UniTask
@@ -66,58 +44,60 @@ namespace CDK {
 			#endif
 		}
 
+        public static T LoadAndInstantiateFromResources<T>(string key) where T : UnityEngine.Object {
+            if (!Application.isPlaying) return null;
+            var resource = Resources.Load<T>(key);
+            if (resource == null) {
+                Debug.LogError($"Could not {nameof(LoadAndInstantiateFromResources)} from key '{key}'");
+                return null;
+            }
+            return Object.Instantiate(resource);
+        }
+
 		#if UnityAddressables
+        
 		public static async Task<T> LoadObjectAsync<T>(AssetReference key) {
 			return await LoadObjectAsync<T>(key.RuntimeKey.ToString());
 		}
-		#endif
 		
-		#if UnityAddressables
-		public static async Task<CUIViewBase> LoadAndInstantiateUI(AssetReference key, Transform parent = null, bool instantiateInWorldSpace = false, bool trackHandle = true) {
-			return await LoadAndInstantiateUI(key.RuntimeKey.ToString(), parent, instantiateInWorldSpace, trackHandle);
-		}
-		#endif
-		
-		public static async Task<CUIViewBase> LoadAndInstantiateUI(string key, Transform parent = null, bool instantiateInWorldSpace = false, bool trackHandle = true) {
-			get._loading.LoadingCanvasRetain();
-
-			try {
-				#if UnityAddressables
-				var uiGameObject = await LoadAndInstantiateGameObjectAsync(key, parent, instantiateInWorldSpace, trackHandle);
-				if (uiGameObject == null) return null;
-
-				var ui = uiGameObject.GetComponent<CUIViewBase>();
-				if (ui != null) {
-					uiGameObject.name = $"[MENU] {uiGameObject.name}";
-					Debug.Log($"Created UI menu: {uiGameObject.name}", uiGameObject);
-				}
-				else {
-					uiGameObject.name = $"[INVALID-MENU] {uiGameObject.name}";
-					Debug.LogError($"Created UI gameobject {uiGameObject.name} but it does not inherit from {nameof(CUIViewBase)}", uiGameObject);
-					return ui;
-				}
-
-				return ui;
-				#else
-				throw new NotImplementedException();
-				#endif
-			}
-			catch (Exception e) {
-				Debug.LogError(e);
-			}
-			finally {
-				get._loading.LoadingCanvasRelease();
-			}
-			return null;
+		public static CUIViewBase LoadAndInstantiateUI(AssetReference key, Transform parent = null, bool instantiateInWorldSpace = false, bool trackHandle = true) {
+			return LoadAndInstantiateUI(key.RuntimeKey.ToString(), parent, instantiateInWorldSpace, trackHandle);
 		}
 		
-		#if UnityAddressables
+		public static CUIViewBase LoadAndInstantiateUI(string key, Transform parent = null, bool instantiateInWorldSpace = false, bool trackHandle = true) {
+			#if UnityAddressables
+            var ui = LoadAndInstantiate<CUIViewBase>(key, parent, instantiateInWorldSpace, trackHandle);
+            Debug.Log($"Created UI menu: '{ui.name}'", ui);
+            ui.name = $"[MENU] {ui.name}";
+            return ui;
+			#else
+			throw new NotImplementedException();
+			#endif
+		}
+
+        public static T LoadAndInstantiate<T>(AssetReference key, Transform parent = null, bool instantiateInWorldSpace = false, bool trackHandle = true) where T : Component  {
+            return LoadAndInstantiate<T>(key.RuntimeKey.ToString(), parent, instantiateInWorldSpace, trackHandle);
+        }
+        
+        public static T LoadAndInstantiate<T>(string key, Transform parent = null, bool instantiateInWorldSpace = false, bool trackHandle = true) where T : Component {
+            var go = LoadAndInstantiateGameObject(key, parent, instantiateInWorldSpace, trackHandle);
+            Debug.Log($"Loaded gameObject to instantiate '{(go != null ? go.name : "<color=red>is null!</color>")}'");
+            return go != null ? go.GetComponent<T>() : default;
+        }
+
+        public static GameObject LoadAndInstantiateGameObject(AssetReference key, Transform parent = null, bool instantiateInWorldSpace = false, bool trackHandle = true) {
+            return LoadAndInstantiateGameObject(key.RuntimeKey.ToString(), parent, instantiateInWorldSpace, trackHandle);
+        }
+        
+        public static GameObject LoadAndInstantiateGameObject(string key, Transform parent = null, bool instantiateInWorldSpace = false, bool trackHandle = true) {
+            var op = Addressables.InstantiateAsync(key, parent, instantiateInWorldSpace, trackHandle);
+            return op.WaitForCompletion();
+        }
+        
 		public static async Task<GameObject> LoadAndInstantiateGameObjectAsync(AssetReference key, Transform parent = null, bool instantiateInWorldSpace = false, bool trackHandle = true) {
 			return await LoadAndInstantiateGameObjectAsync(key.RuntimeKey.ToString(), parent, instantiateInWorldSpace, trackHandle);
 		}
-		#endif
 		
-		#if UnityAddressables 
 		public static async Task<GameObject> LoadAndInstantiateGameObjectAsync(string key, Transform parent = null, bool instantiateInWorldSpace = false, bool trackHandle = true) {
             if (!Application.isPlaying) return null;
 			#if UniTask
@@ -139,17 +119,8 @@ namespace CDK {
 
 			return null;
 		}
-		#endif
-
-		public static T LoadAndInstantiateFromResources<T>(string key) where T : UnityEngine.Object {
-            if (!Application.isPlaying) return null;
-			var resource = Resources.Load<T>(key);
-			if (resource == null) {
-				Debug.LogError($"Could not {nameof(LoadAndInstantiateFromResources)} from key '{key}'");
-				return null;
-			}
-			return Object.Instantiate(resource);
-		}
+		
+        #endif
 		
 		#endregion <<---------- Loaders ---------->>
 

@@ -109,7 +109,7 @@ namespace CDK.UI {
 		
 		#region <<---------- Open / Close ---------->>
 
-		public async Task Open(int sortOrder, CUIViewBase originUI, CUIInteractable originButton) {
+		public void Open(int sortOrder, CUIViewBase originUI, CUIInteractable originButton) {
 			Debug.Log($"Open UI {this.gameObject.name}");
 			this._previousUI = originUI;
 			this._previousButton = originButton;

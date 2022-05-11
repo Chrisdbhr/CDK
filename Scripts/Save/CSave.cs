@@ -79,7 +79,7 @@ namespace CDK {
 				using (var streamWriter = File.CreateText(filePath)) {
 					await streamWriter.WriteAsync(json);
 				}
-			
+
 				Debug.Log($"Game saved.");
 
 				#else
@@ -95,7 +95,7 @@ namespace CDK {
 
 
 
-		
+
 		#region <<---------- Loading ---------->>
 
 		public static bool LoadGame() {
@@ -137,10 +137,10 @@ namespace CDK {
 		}
 
 		#endregion <<---------- Loading ---------->>
-		
-		
-		
-		
+
+
+
+
 		#region <<---------- Path ---------->>
 
 		private static string GetSaveFileDirectory() {

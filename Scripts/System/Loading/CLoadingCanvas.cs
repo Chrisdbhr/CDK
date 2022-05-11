@@ -3,6 +3,7 @@ using UniRx;
 using UnityEngine;
 
 namespace CDK {
+    [Obsolete]
 	public class CLoadingCanvas : MonoBehaviour {
 
         #region <<---------- Properties and Fields ---------->>
@@ -25,6 +26,7 @@ namespace CDK {
         private void OnDestroy() {
             this._timerDisposable?.Dispose();
         }
+        
         #endregion <<---------- MonoBehaviour ---------->>
 
 

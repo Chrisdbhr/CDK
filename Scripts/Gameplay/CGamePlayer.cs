@@ -46,8 +46,8 @@ namespace CDK {
 			#endif
 
 			if (!Application.isEditor) {
-				Application.focusChanged += async focused => {
-					if(!focused) await this.OpenMenu();
+				Application.focusChanged += focused => {
+					if(!focused) this.OpenMenu();
 				};
 			}
 			
@@ -305,7 +305,7 @@ namespace CDK {
 			if (Time.timeScale <= 0) return;
 			
 			if (!this._blockingEventsManager.IsOnMenu) {
-				this.OpenMenu().CAwait();
+				this.OpenMenu();
 			}
 		}
 
@@ -386,12 +386,12 @@ namespace CDK {
 
 		#region <<---------- Pause Menu ---------->>
 		
-		private async Task OpenMenu() {
+		private void OpenMenu() {
 			if (this._blockingEventsManager.IsOnMenu) return;
 			this._blockingEventsManager.IsOnMenu = true;
 			try {
 				#if UnityAddressables
-				await this._navigationManager.OpenMenuAsync(this._gameSettings.AssetRef_PauseMenu, null, null);
+				this._navigationManager.OpenMenu(this._gameSettings.AssetRef_PauseMenu, null, null);
 				#else
 				Debug.LogError("'GamePlayer OpenMenu' not implemented without UnityAddressables");
 				#endif
