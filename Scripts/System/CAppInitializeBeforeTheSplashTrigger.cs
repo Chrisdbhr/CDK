@@ -17,14 +17,36 @@ namespace CDK {
 
         [SerializeField] private CanvasGroup _loadingCanvas;
         [SerializeField] private CSceneField _nextScene;
+        private Coroutine _initializationRoutine;
 
 
 
+
+        #region <<---------- MonoBehaviour ---------->>
+        
         private void Awake() {
             if(this._loadingCanvas) this._loadingCanvas.alpha = 0f;
+            this._initializationRoutine = this.CStartCoroutine(Initialize());
         }
 
-        private IEnumerator Start() {
+        private void OnEnable() {
+            Observable.Timer(TimeSpan.FromSeconds(2f)).TakeUntilDisable(this).Subscribe(_ => {
+                if(this._loadingCanvas) this._loadingCanvas.alpha = 1f;
+            });
+        }
+
+        private void OnDisable() {
+            this.CStopCoroutine(this._initializationRoutine);
+        }
+        
+        #endregion <<---------- MonoBehaviour ---------->>
+
+
+
+
+        #region <<---------- General ---------->>
+        
+        private IEnumerator Initialize() {
             Debug.Log("Initializing scene that preloads initial assets.");
             
             #if Rewired
@@ -42,11 +64,7 @@ namespace CDK {
             asyncOp.allowSceneActivation = true;
         }
 
+        #endregion <<---------- General ---------->>
 
-        private void OnEnable() {
-            Observable.Timer(TimeSpan.FromSeconds(2f)).TakeUntilDisable(this).Subscribe(_ => {
-                if(this._loadingCanvas) this._loadingCanvas.alpha = 1f;
-            });
-        }
     }
 }

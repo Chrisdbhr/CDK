@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace CDK {
@@ -12,12 +11,12 @@ namespace CDK {
 
 		#endregion <<---------- Properties ---------->>
 
-		
 
-		
+
+
 		#region <<---------- Player ---------->>
 
-		public async Task<CGamePlayer> CreatePlayer() {
+		public CGamePlayer CreatePlayer() {
 			var pNumber = this._gamePlayers.Count;
 			var player = new CGamePlayer(pNumber);
 			this._gamePlayers.Add(player);
@@ -31,8 +30,8 @@ namespace CDK {
 		#endregion <<---------- Player ---------->>
 
 
-		
-		
+
+
 		#region <<---------- Characters Managment ---------->>
 		
 		public List<GameObject> GetAllGameObjectsRelatedToCharacter(CCharacterBase characterBase) {

@@ -17,7 +17,7 @@ namespace CDK {
 
 		public void AddToPlayer(int playerNumber = 0) {
 			var player = _gamePlayerManager.GetPlayerByPlayerNumber(playerNumber);
-			player.AddControllingCharacter(_characterToControl).CAwait();
+			player.AddControllingCharacter(_characterToControl);
 		}
 		
 	}

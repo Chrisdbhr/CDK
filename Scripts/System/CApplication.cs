@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using CDK.UI;
 using UnityEngine;
+using UnityEngine.AddressableAssets.ResourceLocators;
 using ThreadPriority = UnityEngine.ThreadPriority;
 
 #if UnityAddressables
@@ -26,38 +27,39 @@ namespace CDK {
 		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSplashScreen)]
 		private static void InitializeBeforeSceneLoad() {
             Debug.Log($"{nameof(CApplication)} Initializing Application.");
+            
+            // app quit
+            IsQuitting = false;
+            Application.quitting -= QuittingEvent;
+            Application.quitting += QuittingEvent;
+            Application.quitting += () => {
+                Debug.Log("<color=red>CApplication is quitting...</color>");
+                IsQuitting = true;
+                QuittingCancellationTokenSource?.Cancel();
+            };
+            
+            #if Rewired
+            CAssets.LoadAndInstantiateFromResources<GameObject>("Rewired Input Manager");
+			#endif
+
+            InitializeDependencyContainerAndBinds();
+
 			InitializeApplicationAsync().CAwait();
 		}
 
 		private static async Task InitializeApplicationAsync() {
-			Application.backgroundLoadingPriority = ThreadPriority.High; // high to load fast first assets.
+            Application.backgroundLoadingPriority = ThreadPriority.High; // high to load fast first assets.
             Application.targetFrameRate = 15;
-            
-            InitializeDependencyContainerAndBinds();
-            
-            #if Rewired
-            CAssets.LoadAndInstantiateFromResources<Rewired.InputManager_Base>("Rewired Input Manager");
-			#endif
-
+ 
             #if UnityAddressables
-            await AddressablesInitializeAsync();
+            var resourceLocator = await AddressablesInitializeAsync();
+            Debug.Log($"Resource Locator Id: '{(resourceLocator != null ? resourceLocator.LocatorId : "null")}'");
 			#endif
-
+            
 			#if UnityLocalization
 			await LocalizationInitializeAsync();
 			#endif
 
-			// app quit
-			IsQuitting = false;
-			QuittingCancellationTokenSource = new CancellationTokenSource();
-			Application.quitting -= QuittingEvent;
-			Application.quitting += QuittingEvent;
-			Application.quitting += () => {
-				Debug.Log("<color=red>CApplication is quitting...</color>");
-				IsQuitting = true;
-				QuittingCancellationTokenSource.Cancel();
-			};
-            
 			ApplicationInitialized?.Invoke();
 			
             Application.targetFrameRate = 60;
@@ -68,25 +70,24 @@ namespace CDK {
 
 
 
-		
+
 		#region <<---------- Properties and Fields ---------->>
 		
 		public static event Action QuittingEvent;
 		public static event Action ApplicationInitialized;
 		public static bool IsQuitting { get; private set; }
-		public static CancellationTokenSource QuittingCancellationTokenSource;
+		public static CancellationTokenSource QuittingCancellationTokenSource = new CancellationTokenSource();
 		
 		#endregion <<---------- Properties and Fields ---------->>
-		
-        
-        
+
+
+
 
 		#region <<---------- Dependencies ---------->>
 
 		private static void InitializeDependencyContainerAndBinds() {
 			
 			CDependencyResolver.Bind<CGameSettings>(() => Resources.Load<CGameSettings>("GameSettings"));
-            CDependencyResolver.Bind<CLoading>(() => new CLoading());
             CDependencyResolver.Bind<CBlockingEventsManager>(() => new CBlockingEventsManager());
             CDependencyResolver.Bind<CUINavigationManager>(() => new CUINavigationManager());
 			CDependencyResolver.Bind<CGamePlayerManager>(() => new CGamePlayerManager());
@@ -100,26 +101,28 @@ namespace CDK {
 		}
 
 		#endregion <<---------- Dependencies ---------->>
-		
-		
-		
+
+
+
 
 		#region <<---------- Addressables ---------->>
 
 		#if UnityAddressables
 		
-		private static async Task AddressablesInitializeAsync() {
+		private static async Task<IResourceLocator> AddressablesInitializeAsync() {
 			Debug.Log("CApplication initializing Addressables");
-			await Addressables.InitializeAsync().Task;
-		}
+            var op = Addressables.InitializeAsync();
+            var resourceLocator = await op.Task;
+            return resourceLocator;
+        }
 		
 		#endif
 
 		#endregion <<---------- Addressables ---------->>
 
 
-		
-		
+
+
 		#region <<---------- Language ---------->>
 
 		#if UnityLocalization
@@ -145,7 +148,7 @@ namespace CDK {
 		#endregion <<---------- Language ---------->>
 
 
-		
+
 
 		#region <<---------- Application Quit ---------->>
 		
