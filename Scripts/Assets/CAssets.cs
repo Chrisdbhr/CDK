@@ -45,7 +45,10 @@ namespace CDK {
 		}
 
         public static T LoadAndInstantiateFromResources<T>(string key) where T : UnityEngine.Object {
-            if (!Application.isPlaying) return null;
+            if (!Application.isPlaying) {
+                Debug.LogError($"Will not load from resources because application is not playing.");
+                return null;
+            }
             var resource = Resources.Load<T>(key);
             if (resource == null) {
                 Debug.LogError($"Could not {nameof(LoadAndInstantiateFromResources)} from key '{key}'");
@@ -103,7 +106,7 @@ namespace CDK {
 			#if UniTask
 			Debug.Log($"Starting to load GameObject with key '{key}'{(parent != null ? $" on parent '{parent.name}'" : string.Empty)}");
 			try {
-				var asyncOp = Addressables.InstantiateAsync(key, parent, instantiateInWorldSpace, trackHandle);
+                var asyncOp = Addressables.InstantiateAsync(key, parent, instantiateInWorldSpace, trackHandle);
 				var go = await asyncOp.WithCancellation(CApplication.QuittingCancellationTokenSource.Token);
 				if (go == null) {
 					throw new NullReferenceException($"Could not Instantiate object with key '{key}'.");
