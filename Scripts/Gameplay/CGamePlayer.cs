@@ -141,58 +141,48 @@ namespace CDK {
 		#region <<---------- Character Creation and Exclusion ---------->>
 		
 		#if UnityAddressables
-		public async Task<CCharacterBase> InstantiateAndAssignCharacter(string key) {
-			if (key.CIsNullOrEmpty()) {
+		public CCharacterBase InstantiateAndAssignCharacter(AssetReference key) {
+			if (key == null || !key.RuntimeKeyIsValid()) {
 				Debug.LogWarning($"Cant instantiate character from null or empty Addressable key '{key}'.");
 				return null;
 			}
 
-			return await LoadObjectAndInstantiateAsync(key);
+			return this.InstantiateAndAssignCharacter(key.RuntimeKey.ToString());
 		}
 		
-		public async Task<CCharacterBase> InstantiateAndAssignCharacter(AssetReference charToCreate) {
+		public CCharacterBase InstantiateAndAssignCharacter(string key) {
 			
-			if (charToCreate == null || !charToCreate.RuntimeKeyIsValid()) {
-				Debug.LogWarning($"Created player {this.PlayerNumber} with no controlling character because '{nameof(charToCreate)}' is null or its RuntimeKey is invalid.");
+			if (key.CIsNullOrEmpty()) {
+				Debug.LogWarning($"Created player {this.PlayerNumber} with no controlling character because '{nameof(key)}' is null or its RuntimeKey is invalid.");
 				return null;
 			}
 
-			return await LoadObjectAndInstantiateAsync(charToCreate.RuntimeKey.ToString());
+            var character = CAssets.LoadAndInstantiate<CCharacterBase>(key);
+
+            if (character == null) {
+                Debug.LogError($"Asset key '{key}' gameobject doesnt have a {nameof(CCharacterBase)} component on it! could not create player!");
+                return null;
+            }
+
+            var entryPoint = CSceneEntryPoint.GetSceneEntryPointTransform(0);
+            if (entryPoint != null) {
+                Debug.Log($"Setting '{character.name}' to entryPoint number'{0}'", entryPoint.gameObject);
+                character.TeleportToLocation(entryPoint.transform.position, entryPoint.transform.rotation);
+                Physics.SyncTransforms();
+            }
+            character.gameObject.SetActive(false);
+            character.name = $"[Character] {character.name}";
+			
+            this.AddControllingCharacter(character);
+            character.gameObject.SetActive(true);
+			
+            this.CheckIfNeedToCreateCamera();
+
+            Debug.Log($"Created player {this.PlayerNumber} controlling character '{character.name}'.", character);
+
+            return character;
 		}
 		#endif
-
-		private async Task<CCharacterBase> LoadObjectAndInstantiateAsync(string key) {
-			var createdGo = await CAssets.LoadAndInstantiateGameObjectAsync(key);
-			if (createdGo == null) {
-				Debug.LogWarning($"Player {this.PlayerNumber} cant find character with key '{key}' to control.");
-				return null;
-			}
-
-			var character = createdGo.GetComponent<CCharacterBase>();
-
-			if (character == null) {
-				Debug.LogError($"Asset key '{key}' gameobject doesnt have a {nameof(CCharacterBase)} component on it! could not create player!");
-				return null;
-			}
-
-			var entryPoint = CSceneEntryPoint.GetSceneEntryPointTransform(0);
-			if (entryPoint != null) {
-				Debug.Log($"Setting '{createdGo.name}' to entryPoint number'{0}'", entryPoint.gameObject);
-				character.TeleportToLocation(entryPoint.transform.position, entryPoint.transform.rotation);
-				Physics.SyncTransforms();
-			}
-			createdGo.SetActive(false);
-			createdGo.name = $"[Character] {createdGo.name}";
-			
-			await this.AddControllingCharacter(character);
-			createdGo.SetActive(true);
-			
-			await this.CheckIfNeedToCreateCamera();
-
-			Debug.Log($"Created player {this.PlayerNumber} controlling character '{createdGo.name}'.", createdGo);
-
-			return character;
-		}
 
 		#endregion <<---------- Character Creation and Exclusion ---------->>
 
@@ -201,7 +191,7 @@ namespace CDK {
 		
 		#region <<---------- Character Control ---------->>
 
-		public async Task AddControllingCharacter(CCharacterBase character) {
+		public void AddControllingCharacter(CCharacterBase character) {
 			if (this._characters.Contains(character)) {
 				Debug.LogError($"Will not add {character.name} to player {this.PlayerNumber} control because it is already controlling it!");
 				return;
@@ -242,19 +232,17 @@ namespace CDK {
 
 		#region <<---------- Player Camera ---------->>
 
-		private async Task CheckIfNeedToCreateCamera() {
+		private void CheckIfNeedToCreateCamera() {
 			if (this._cameraTransform != null) return;
 			var mainChar = this.GetControllingCharacter();
 			if (mainChar == null) return;
 			
 			#if UnityAddressables
-			var createdGo = await CAssets.LoadAndInstantiateGameObjectAsync("PlayerCamera");
-			createdGo.name = $"[CAM] {mainChar.name}";
-			
-			Debug.Log($"Created {mainChar.name} Camera", createdGo);
+			this._playerCamera = CAssets.LoadAndInstantiate<CPlayerCamera>("PlayerCamera");
+            this._playerCamera.name = $"[CAM] {mainChar.name}";
+           
+            Debug.Log($"Created {mainChar.name} Camera", this._playerCamera);
 
-			this._playerCamera = createdGo.GetComponent<CPlayerCamera>();
-			
 			this._playerCamera.Initialize(this);
 			this._cameraTransform = this._playerCamera.GetCameraTransform();
 			#else

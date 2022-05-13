@@ -193,7 +193,7 @@ namespace CDK {
 		#region <<---------- MonoBehaviour ---------->>
 		protected virtual void Awake() {
 			this.transform = base.transform;
-			this._blockingEventsManager = CDependencyResolver.Get<CBlockingEventsManager>();
+            this._blockingEventsManager = CDependencyResolver.Get<CBlockingEventsManager>();
         }
 
 		protected virtual void OnEnable() {

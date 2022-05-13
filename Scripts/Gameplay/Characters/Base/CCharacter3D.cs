@@ -63,7 +63,7 @@ namespace CDK {
         #region <<---------- MonoBehaviour ---------->>
         protected override void Awake() {
             base.Awake();			
-            this._charController = this.GetComponent<CharacterController>();
+            if (this._charController == null) this._charController = this.GetComponent<CharacterController>();
             this._charInitialHeight = this._charController.height;
             
             if (this._animator && !this._animator.applyRootMotion) {
@@ -231,7 +231,7 @@ namespace CDK {
 
 			
 			// manual movement
-			if (this.CurrentMovState != CMovState.Sliding && !this._blockingEventsManager.IsDoingBlockingAction.IsRetained()) {
+			if (this.CurrentMovState != CMovState.Sliding && !this._blockingEventsManager.IsAnyBlockingEventHappening) {
 				// input movement
 				if (targetMotion != Vector3.zero) {
                     var maxMovSpeed = this.GetMaxMovementSpeed();
