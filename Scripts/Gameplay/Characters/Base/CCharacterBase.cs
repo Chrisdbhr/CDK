@@ -85,9 +85,9 @@ namespace CDK {
 			}
 		}
 
-		public Vector3 _movementMomentumXZ = Vector3.zero;
-		//private Vector3 _rootMotionDeltaPosition = Vector3.zero;
-		public Vector3 _rootMotionDeltaPosition = Vector3.zero;
+		public Vector3 MovementMomentumXZ = Vector3.zero;
+        public Vector3 RootMotionDeltaPosition = Vector3.zero;
+        public Vector3 AdditionalMovementFromAnimator = Vector3.zero;
 		
         private readonly List<CSceneArea> _activeSceneAreas = new List<CSceneArea>();
 

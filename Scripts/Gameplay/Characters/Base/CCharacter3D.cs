@@ -97,7 +97,7 @@ namespace CDK {
         #endregion <<---------- MonoBehaviour ---------->>
 
 
-        
+
 
         #region <<---------- Events ---------->>
         protected override void SubscribeToEvents() {
@@ -130,7 +130,7 @@ namespace CDK {
                     }
                     this._animator.SetInteger(ANIM_FALL_LANDING_ANIM_INDEX, fallAnimIndex);
                 }
-                this._movementMomentumXZ = isTouchingTheGround ? Vector3.zero : this.MyVelocityXZ;
+                this.MovementMomentumXZ = isTouchingTheGround ? Vector3.zero : this.MyVelocityXZ;
             });
 			
             this._isOnFreeFall.TakeUntilDisable(this).DistinctUntilChanged().Subscribe(isFallingNow => {
@@ -145,10 +145,10 @@ namespace CDK {
             #endregion <<---------- Fall ---------->>
         }
         #endregion <<---------- Events ---------->>
-        
-        
-        
-        
+
+
+
+
         #region <<---------- Aerial and Falling ---------->>
 
         protected override void ResetFallCalculation() {
@@ -172,10 +172,10 @@ namespace CDK {
         }
 		
         #endregion <<---------- Aerial and Falling ---------->>
-        
-        
-        
-        
+
+
+
+
         #region <<---------- Movement ---------->>
         public override Vector3 GetMyVelocity() {
             return this._charController.velocity;
@@ -228,8 +228,7 @@ namespace CDK {
 		protected Vector3 ProcessHorizontalMovement(float deltaTime) {
 			Vector3 targetMotion = this.CanMoveRx.Value ? this.InputMovementDirRelativeToCam : Vector3.zero;
 			float targetMovSpeed = 0f;
-
-			
+            
 			// manual movement
 			if (this.CurrentMovState != CMovState.Sliding && !this._blockingEventsManager.IsAnyBlockingEventHappening) {
 				// input movement
@@ -261,36 +260,41 @@ namespace CDK {
 					targetMovSpeed *= 20f;
 				}
 			}
-
+            
 			// is sliding
 			if (this.CurrentMovState == CMovState.Sliding) {
 				targetMotion = (this.InputMovementDirRelativeToCam * this.SlideControlAmmount)
 						+ this.transform.forward + (this._groundNormal * 2f);
 				targetMovSpeed = this._slideSpeed;
 			}
-
+            
 			// momentum
-			if (!this._isTouchingTheGroundRx.Value && (this._movementMomentumXZ.x.CImprecise() != 0.0f || this._movementMomentumXZ.z.CImprecise() != 0.0f)) {
-				targetMotion += this._movementMomentumXZ;
-				if(this._debug) Debug.Log($"Applying {this._movementMomentumXZ}, targetMotion now is {targetMotion}");
-				this._movementMomentumXZ *= this._aerialMomentumMaintainPercentage * deltaTime;
+			if (!this._isTouchingTheGroundRx.Value && (this.MovementMomentumXZ.x.CImprecise() != 0.0f || this.MovementMomentumXZ.z.CImprecise() != 0.0f)) {
+                var momentum = this.MovementMomentumXZ * (this._aerialMomentumMaintainPercentage * deltaTime);
+                targetMotion += momentum;
+				if(this._debug) Debug.Log($"Applying {this.MovementMomentumXZ}, targetMotion now is {targetMotion}");
+				this.MovementMomentumXZ = momentum;
 			}
 			
+            // additional movement
+            var additionalMovement = this.AdditionalMovementFromAnimator;
+            additionalMovement.y = 0f;
+            
 			// root motion
-			var rootMotionDeltaPos = this._rootMotionDeltaPosition;
+			var rootMotionDeltaPos = this.RootMotionDeltaPosition;
 			rootMotionDeltaPos.y = 0f;
-
+            
 			// move character
-            if(this.IsStrafingRx.Value) return (targetMotion * (targetMovSpeed * deltaTime)) + rootMotionDeltaPos;
-			return (this.transform.forward * (targetMotion.magnitude * targetMovSpeed * deltaTime)) + rootMotionDeltaPos;
+            if(this.IsStrafingRx.Value) return (targetMotion * (targetMovSpeed * deltaTime)) + rootMotionDeltaPos + (additionalMovement * deltaTime);
+			return (this.transform.forward * (targetMotion.magnitude * targetMovSpeed * deltaTime)) + rootMotionDeltaPos + (additionalMovement * deltaTime);
 		}
 
         protected float ProcessVerticalMovement(float deltaTime) {
 
-			var verticalDelta = this._rootMotionDeltaPosition.y;
+			var verticalDelta = this.RootMotionDeltaPosition.y + this.AdditionalMovementFromAnimator.y;
 			verticalDelta += this.GetMyVelocity().y > 0f ? 0f : this.GetMyVelocity().y; // consider only fall velocity
 			verticalDelta += Physics.gravity.y * this._gravityMultiplier;
-			
+            
 			return verticalDelta * deltaTime;
 		}
 
@@ -345,7 +349,7 @@ namespace CDK {
         #endregion <<---------- Movement ---------->>
 
 
-        
+
 
         #region <<---------- Rotation ---------->>
         
