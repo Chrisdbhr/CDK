@@ -298,10 +298,20 @@ namespace CDK {
 			this.CanMoveRx.Value = !isDoing;
 		}
 
-		protected virtual void OnActiveSceneChanged(Scene oldScene, Scene newScene) {
-			if (this == null) return;
-			this.StopTalking();
-			this.ResetFallCalculation();
+        protected virtual void OnActiveSceneChanged(Scene oldScene, Scene newScene) {
+            if (this == null) return;
+            this.StopTalking();
+            this.ResetFallCalculation();
+
+            this.RootMotionDeltaPosition = Vector3.zero;
+            this.AdditionalMovementFromAnimator = Vector3.zero;
+
+            this._animator.CDoIfNotNull(a => {
+                a.Rebind();
+                a.Update(0f);
+            });
+            this._blockingEventsManager.ReleaseFromUnityObject(this);
+
             if (this._activeSceneAreas.RemoveAll(a => a == null) > 0) {
                 Debug.Log($"Removed null scene areas when scene changed for character '{this.name}'");
             }
@@ -379,8 +389,8 @@ namespace CDK {
 			this._targetLookRotation = Quaternion.LookRotation(dir);
 
 			var rotateSpeed = this._curveRotationRateOverSpeed.Evaluate(this.GetMyVelocityMagnitude());
-			
-			// lerp rotation
+
+            // lerp rotation
 			this.transform.rotation = Quaternion.RotateTowards(
 													this.transform.rotation,
 													this._targetLookRotation,
@@ -518,7 +528,7 @@ namespace CDK {
 
 		public void TeleportToLocation(Vector3 targetPos, Quaternion targetRotation = default) {
 			if (targetRotation != default) {
-				base.transform.rotation = targetRotation;
+                transform.rotation = targetRotation;
 			}
 			this._previousPosition = targetPos;
 			this.Position = targetPos;

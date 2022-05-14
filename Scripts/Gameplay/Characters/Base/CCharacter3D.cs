@@ -329,7 +329,7 @@ namespace CDK {
         protected void ProcessSlide() {
             if (Time.realtimeSinceStartup < this._timeThatCanToggleSlide + DELAY_TO_TOGGLE_SLIDE) return;
 
-            var angleFromGround = Vector3.SignedAngle(Vector3.up, this._groundNormal, base.transform.right);
+            var angleFromGround = Vector3.SignedAngle(Vector3.up, this._groundNormal, transform.right);
 
             this.CanSlide = this._enableSlideRx.Value
             && this._isTouchingTheGroundRx.Value
