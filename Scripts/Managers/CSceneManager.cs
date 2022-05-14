@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Cysharp.Threading.Tasks;
 using UniRx;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -67,9 +68,11 @@ namespace CDK {
 			// fade out
 			float fadeOutTime = 0.3f;
 			this._fader.FadeToBlack(fadeOutTime, false);
-			await Observable.Timer(TimeSpan.FromSeconds(fadeOutTime));
+            await Task.Delay(TimeSpan.FromSeconds(fadeOutTime));
 
-			var minimumTimeToReturnFromLoading = Time.time + MINIMUM_LOADING_TIME;
+            CTime.TimeScale = 0f;
+            
+			var minimumTimeToReturnFromLoading = Time.realtimeSinceStartup + MINIMUM_LOADING_TIME;
 
 			Debug.Log($"TODO implement loading screen");
 			
@@ -102,31 +105,42 @@ namespace CDK {
 			SceneManager.SetActiveScene(sceneToTeleport);
 			
 			await Observable.NextFrame();
-			// move objects to loaded scene
+			
+            // move objects to loaded scene
 			foreach (var rootGo in gameObjectsToTeleport) {
 				SceneManager.MoveGameObjectToScene(rootGo, sceneToTeleport);
 			}
-			await Observable.NextFrame();
+			
+            await Observable.NextFrame();
 
 			// move transform to scene entry points
 			foreach (var rootGo in gameObjectsToTeleport) {
 				SetTransformToSceneEntryPoint(rootGo.transform, entryPointNumber);
 			}
-			Physics.SyncTransforms();
+            Physics.SyncTransforms();
 
-			SceneManager.UnloadSceneAsync(tempHolderScene);
-			 
-			LightProbes.TetrahedralizeAsync();
-
+			await SceneManager.UnloadSceneAsync(tempHolderScene);
+            
 			Debug.Log($"TODO remove loading screen");
 			
+            await Observable.NextFrame();
 			await this.WaitUntilMinimumTimeToReturnFromLoading(minimumTimeToReturnFromLoading);
 
-			// fade in
-			float fadeInTime = 0.5f;
-			this._fader.FadeToTransparent(fadeInTime, false);
+            LightProbes.TetrahedralizeAsync();
+            
+            await Observable.NextFrame();
+            
+            CTime.TimeScale = 1f;
 
-			this._blockingEventsManager.IsPlayingCutscene = false;
+            this._blockingEventsManager.IsPlayingCutscene = false;
+
+            await Task.Delay(TimeSpan.FromSeconds(1f));
+
+            // fade in
+            float fadeInTime = 1f;
+            this._fader.FadeToTransparent(fadeInTime, true);
+            
+            this._blockingEventsManager.IsPlayingCutscene = false;
 		}
 
 		public static void SetTransformToSceneEntryPoint(Transform transformToMove, int entryPointNumber = 0) {
@@ -157,13 +171,11 @@ namespace CDK {
 		}
 
 		private async Task WaitUntilMinimumTimeToReturnFromLoading(float timeToReturnFromLoading) {
-			var currentTime = Time.time;
-			if (currentTime >= timeToReturnFromLoading) return;
-			var secondsToWait = timeToReturnFromLoading - currentTime;
-			Debug.Log($"Will wait {secondsToWait} more seconds to scene load.");
-			await Observable.Timer(TimeSpan.FromSeconds(secondsToWait));
+			Debug.Log($"Waiting until minimum time to return from loading is reached.");
+            while (Time.realtimeSinceStartup <= timeToReturnFromLoading) {
+                await Observable.NextFrame();
+            }
 		}
-		
 		
 		
 		#region <<---------- Extensions ---------->>
