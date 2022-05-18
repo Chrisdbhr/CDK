@@ -4,7 +4,7 @@ using UnityEngine;
 namespace CDK {
 	[DisallowMultipleComponent]
 	public abstract class CPlayerInteractionBase : MonoBehaviour {
-		
+
 		[SerializeField] protected LayerMask _interactionLayerMask = 1;
 		protected CBlockingEventsManager _blockingEventsManager;
 

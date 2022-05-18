@@ -1,5 +1,4 @@
-using System;
-using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace CDK {
@@ -39,63 +38,62 @@ namespace CDK {
 			if (colliders == null || colliders.Length <= 0) return;
 
 			// get list of interactables
-			var interactableColliders = new List<Collider>();
-			foreach (var col in colliders) {
-				var interactable = col.GetComponent<CIInteractable>();
-				if (interactable == null) continue;
-				interactableColliders.Add(col);
-			}
-
-			if (interactableColliders.Count <= 0) return;
-
+			var interactableColliders = colliders.Where(c => c != null && c.GetComponent<CIInteractable>() != null).ToArray();
+			if (interactableColliders.Length <= 0) return;
+            
 			originPos.x = this.transform.position.x;
 			originPos.z = this.transform.position.z;
 
-			// get closest interactable collider index
-			int closestColliderIndex = 0;
-			if (interactableColliders.Count == 1) closestColliderIndex = 0;
-			else {
-				float closestDistance = this._interactionSphereCheckRadius * 2f;
-				for (int i = 0; i < interactableColliders.Count; i++) {
-					float distance = (originPos - interactableColliders[i].transform.position).sqrMagnitude;
-					if (distance >= closestDistance) continue;
-					closestDistance = distance;
-					closestColliderIndex = i;
-				}
-			}
-
+            // get closer interaction point
+            interactableColliders = interactableColliders.OrderBy(c => (originPos - c.ClosestPoint(originPos)).sqrMagnitude).ToArray();
+            
 			// get target interactable to try to interact
-			var targetInteractableCollider = interactableColliders[closestColliderIndex];
-			var direction = targetInteractableCollider.transform.position - originPos;
+            bool foundValidInteractable = false;
+            Collider chosenInteractable = null;
+            foreach (var interactableCol in interactableColliders) {
+                var direction = (interactableCol.ClosestPoint(originPos) - originPos).normalized;
 
-			bool hasSomethingBlockingLineOfSight = Physics.Raycast(
-				originPos,
-				direction,
-				out var rayInfo,
-				direction.magnitude,
-				1,
-				QueryTriggerInteraction.Collide
-			);
+                var ray = new Ray(
+                    originPos,
+                    direction
+                );
+                
+                #if UNITY_EDITOR
+                Debug.DrawRay(ray.origin, ray.direction * (this._interactionSphereCheckRadius * 2f), Color.white, 3f);
+                #endif
 
-			if (hasSomethingBlockingLineOfSight && rayInfo.collider != targetInteractableCollider) {
-				Debug.Log($"{this.name} cant interact, {rayInfo.collider.name} is blocking line of sight.", rayInfo.collider);
-				return;
-			}
+                bool hitSomething = Physics.Raycast(
+                    ray,
+                    out var rayInfo,
+                    this._interactionSphereCheckRadius * 2f,
+                    1,
+                    QueryTriggerInteraction.Collide
+                );
 
-			var chosenInteractable = targetInteractableCollider.GetComponent<CIInteractable>();
-			chosenInteractable.OnInteract(this.transform);
-		}
+                if (!hitSomething) continue;
 
-		private float GetYCheckOffset() {
-			return this._yCheckOffset;
+                foundValidInteractable = rayInfo.collider == interactableCol;
+
+                #if UNITY_EDITOR
+                Debug.DrawLine(ray.origin, rayInfo.point, foundValidInteractable ? Color.green : Color.yellow, 3f);
+                #endif
+                
+                if (!foundValidInteractable) continue;
+                chosenInteractable = interactableCol;
+                break;
+            }
+
+            if (!foundValidInteractable) return;
+            
+            chosenInteractable.GetComponent<CIInteractable>().OnInteract(this.transform);
 		}
 
 		private Vector3 GetCheckHeight() {
-			return this.transform.position + this.transform.up * this.GetYCheckOffset();
+			return this.transform.position + (this.transform.up * this._yCheckOffset);
 		}
 
 		protected Vector3 GetCenterSphereCheckPosition() {
-			return this.GetCheckHeight() + this.transform.forward * this._interactionSphereCheckRadius;
+			return this.GetCheckHeight() + (this.transform.forward * this._interactionSphereCheckRadius);
 		}
 	}
 }

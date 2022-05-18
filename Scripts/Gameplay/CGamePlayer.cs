@@ -200,7 +200,7 @@ namespace CDK {
 			this._characters.Add(character);
 		}
 
-		public async Task RemoveAndDestroyAllControllingCharacters() {
+		public void RemoveAndDestroyAllControllingCharacters() {
             foreach (var character in this._characters) {
                 character.CDestroy();
             }
