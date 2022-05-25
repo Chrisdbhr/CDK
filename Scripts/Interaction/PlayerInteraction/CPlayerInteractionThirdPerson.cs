@@ -45,13 +45,13 @@ namespace CDK {
 			originPos.z = this.transform.position.z;
 
             // get closer interaction point
-            interactableColliders = interactableColliders.OrderBy(c => (originPos - c.ClosestPoint(originPos)).sqrMagnitude).ToArray();
+            interactableColliders = interactableColliders.OrderBy(c => (originPos - this.GetColliderCenterPosition(c)).sqrMagnitude).ToArray();
             
 			// get target interactable to try to interact
             bool foundValidInteractable = false;
             Collider chosenInteractable = null;
-            foreach (var interactableCol in interactableColliders) {
-                var direction = (interactableCol.ClosestPoint(originPos) - originPos).normalized;
+            foreach (var c in interactableColliders) {
+                var direction = (this.GetColliderCenterPosition(c) - originPos).normalized;
 
                 var ray = new Ray(
                     originPos,
@@ -66,20 +66,20 @@ namespace CDK {
                     ray,
                     out var rayInfo,
                     this._interactionSphereCheckRadius * 2f,
-                    1,
+                    this._interactionLayerMask,
                     QueryTriggerInteraction.Collide
                 );
 
                 if (!hitSomething) continue;
 
-                foundValidInteractable = rayInfo.collider == interactableCol;
+                foundValidInteractable = rayInfo.collider == c;
 
                 #if UNITY_EDITOR
                 Debug.DrawLine(ray.origin, rayInfo.point, foundValidInteractable ? Color.green : Color.yellow, 3f);
                 #endif
                 
                 if (!foundValidInteractable) continue;
-                chosenInteractable = interactableCol;
+                chosenInteractable = c;
                 break;
             }
 
@@ -95,5 +95,21 @@ namespace CDK {
 		protected Vector3 GetCenterSphereCheckPosition() {
 			return this.GetCheckHeight() + (this.transform.forward * this._interactionSphereCheckRadius);
 		}
+
+        protected Vector3 GetColliderCenterPosition(Collider c) {
+            if (c is BoxCollider bc) {
+                return c.transform.position + bc.center;
+            }
+
+            if (c is SphereCollider sc) {
+                return c.transform.position + sc.center;
+            }
+
+            if (c is CapsuleCollider cc) {
+                return c.transform.position + cc.center;
+            }
+
+            return c.transform.position;
+        }
 	}
 }

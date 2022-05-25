@@ -44,7 +44,7 @@ namespace CDK {
 		#region <<---------- Static SceneManager Wrappers ---------->>
 		
 		public static AsyncOperation LoadSceneSingle(string sceneName) {
-			return SceneManager.LoadSceneAsync(sceneName);
+			return SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Single);
 		}
 		
 		#endregion <<---------- Static SceneManager Wrappers ---------->>
@@ -66,7 +66,7 @@ namespace CDK {
 			var allLoadedScenes = GetAllLoadedScenes();
 			
 			// fade out
-			float fadeOutTime = 0.3f;
+			float fadeOutTime = 0.5f;
 			this._fader.FadeToBlack(fadeOutTime, false);
             await Task.Delay(TimeSpan.FromSeconds(fadeOutTime));
 
@@ -131,8 +131,6 @@ namespace CDK {
             await Observable.NextFrame();
             
             CTime.TimeScale = 1f;
-
-            this._blockingEventsManager.IsPlayingCutscene = false;
 
             await Task.Delay(TimeSpan.FromSeconds(1f));
 

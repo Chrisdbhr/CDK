@@ -16,6 +16,10 @@ namespace CDK {
 
 		#region <<---------- Player ---------->>
 
+        public CGamePlayer GetOrCreatePlayerOne() {
+            return this._gamePlayers.Any() ? this._gamePlayers.First() : this.CreatePlayer();
+        }
+        
 		public CGamePlayer CreatePlayer() {
 			var pNumber = this._gamePlayers.Count;
 			var player = new CGamePlayer(pNumber);
@@ -26,7 +30,14 @@ namespace CDK {
 		public CGamePlayer GetPlayerByPlayerNumber(int playerNumber) {
 			return this._gamePlayers.FirstOrDefault(x => x.PlayerNumber == playerNumber);
 		}
-		
+
+        public void RemoveAndDestroyCharactersFromAllPlayers() {
+            Debug.Log($"Removing and destroying all '{this._gamePlayers.Count}' players.");
+            foreach (var player in this._gamePlayers) {
+                player.RemoveAndDestroyAllControllingCharacters();   
+            }
+        }
+        
 		#endregion <<---------- Player ---------->>
 
 

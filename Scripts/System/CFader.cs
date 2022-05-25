@@ -34,7 +34,7 @@ namespace CDK {
 				goCanvas.sortingLayerID++;
 			} catch (Exception e) {
 				Console.WriteLine(e);
-			}			
+			}
 			
 			// canvas group
 			this._fadeCanvasGroup = parentGo.AddComponent<CanvasGroup>();
@@ -67,12 +67,14 @@ namespace CDK {
 		#region <<---------- General ---------->>
 		
 		public void FadeToBlack(float fadeTime, bool ignoreTimeScale = true) {
+            Debug.Log($"Requesting fade to black, time '{fadeTime}' seconds with ignoreTimeScale set to '{ignoreTimeScale}'");
 			this.TargetAlpha = 1f;
 			this.TargetFadeTime = fadeTime;
 			this.IgnoreTimeScale = ignoreTimeScale;
 		}
 
 		public void FadeToTransparent(float fadeTime, bool ignoreTimeScale = true) {
+            Debug.Log($"Requesting fade to transparent, time '{fadeTime}' seconds with ignoreTimeScale set to '{ignoreTimeScale}'");
 			this.TargetAlpha = 0f;
 			this.TargetFadeTime = fadeTime;
 			this.IgnoreTimeScale = ignoreTimeScale;
