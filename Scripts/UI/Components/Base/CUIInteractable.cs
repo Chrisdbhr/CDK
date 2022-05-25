@@ -72,9 +72,10 @@ namespace CDK.UI {
 		
 		public void OnCancel(BaseEventData eventData) {
 			if (!this.gameObject.activeInHierarchy) return;
-            this.Canceled();
-            this._navigationManager.CloseCurrentMenuAsync();
-		}
+            if (this._navigationManager.CloseCurrentMenu(true)) {
+                this.Canceled();
+            }
+        }
 
 		// Pointer
 		public void OnPointerEnter(PointerEventData eventData) {
@@ -87,7 +88,8 @@ namespace CDK.UI {
 		
 		public void OnPointerClick(PointerEventData eventData) {
 			if (!this.gameObject.activeInHierarchy) return;
-			this.Submited();
+            if (eventData.button == PointerEventData.InputButton.Right) return;
+            this.Submited();
 		}
 		
 		#endregion <<---------- IHandlers ---------->>

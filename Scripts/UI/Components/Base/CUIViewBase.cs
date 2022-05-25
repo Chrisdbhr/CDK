@@ -25,6 +25,8 @@ namespace CDK.UI {
 
         public bool ShouldPauseTheGame = true;
         protected bool _shouldPlayOpenAndCloseMenuSound;
+        public bool CanCloseByReturnButton => this._canCloseByReturnButton;
+        protected bool _canCloseByReturnButton = true;
 		
 		private CUIViewBase _previousUI;
 		private CUIInteractable _previousButton;
@@ -109,11 +111,13 @@ namespace CDK.UI {
 		
 		#region <<---------- Open / Close ---------->>
 
-		public void Open(int sortOrder, CUIViewBase originUI, CUIInteractable originButton) {
+		public void Open(int sortOrder, CUIViewBase originUI, CUIInteractable originButton, bool canCloseByReturnButton = true) {
 			Debug.Log($"Open UI {this.gameObject.name}");
 			this._previousUI = originUI;
 			this._previousButton = originButton;
 
+            this._canCloseByReturnButton = canCloseByReturnButton;
+            
 			this._onOpen?.Invoke();
 
 			this._canvas.sortingOrder = sortOrder;
@@ -128,7 +132,12 @@ namespace CDK.UI {
 
             UpdateCTime();
 		}
-		public void Close() {
+		
+        /// <summary>
+        /// Close the menu.
+        /// </summary>
+        /// <returns>Returns TRUE if the menu closed without errors.</returns>
+        public bool Close() {
 			Debug.Log($"Closing UI {this.gameObject.name}", this);
 			this._onClose?.Invoke(this);
 
@@ -149,6 +158,7 @@ namespace CDK.UI {
 			#else
 			this.gameObject.CDestroy();
 			#endif
+            return true;
         }
 		
 		#endregion <<---------- Open / Close ---------->>
@@ -168,7 +178,7 @@ namespace CDK.UI {
 			if (gameObjectToSelect != null && gameObjectToSelect.activeInHierarchy) {
 				toSelect = gameObjectToSelect;
 			}
-			else if (this.FirstSelectedObject.activeInHierarchy) {
+			else if (this.FirstSelectedObject != null && this.FirstSelectedObject.activeInHierarchy) {
 				toSelect = this.FirstSelectedObject;
 			}else {
 				Debug.LogWarning($"Could not select default object on event system, will try to find a CUIInteractable.");

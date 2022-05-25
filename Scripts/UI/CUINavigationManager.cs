@@ -43,8 +43,8 @@ namespace CDK.UI {
 
 		#if UnityAddressables
 	
-		public T OpenMenu<T>(AssetReference uiReference, CUIViewBase originUI, CUIInteractable originButton) {
-			var openedMenu = this.OpenMenu(uiReference, originUI, originButton);
+		public T OpenMenu<T>(AssetReference uiReference, CUIViewBase originUI, CUIInteractable originButton, bool canCloseByReturnButton = true) {
+			var openedMenu = this.OpenMenu(uiReference, originUI, originButton, canCloseByReturnButton);
 			return openedMenu != null ? openedMenu.GetComponent<T>() : default;
 		}
 
@@ -52,7 +52,7 @@ namespace CDK.UI {
 		/// Opens a menu, registering the button that opened it.
 		/// </summary>
 		/// <returns>returns the new opened menu.</returns>
-		public CUIViewBase OpenMenu(AssetReference uiReference, CUIViewBase originUI, CUIInteractable originButton) {
+		public CUIViewBase OpenMenu(AssetReference uiReference, CUIViewBase originUI, CUIInteractable originButton, bool canCloseByReturnButton = true) {
 			if (CApplication.IsQuitting) return null;
 
             var ui = CAssets.LoadAndInstantiateUI(uiReference);
@@ -74,7 +74,7 @@ namespace CDK.UI {
 
 			this.HideLastMenuIfSet();
 			
-			ui.Open(this._navigationHistory.Count, originUI, originButton);
+			ui.Open(this._navigationHistory.Count, originUI, originButton, canCloseByReturnButton);
 			
 			this.CheckIfIsFirstMenu();
 			
@@ -88,27 +88,38 @@ namespace CDK.UI {
 		/// <summary>
 		/// Closes active menu selecting previous button.
 		/// </summary>
-		public void CloseCurrentMenuAsync() {
+		/// <returns>returns TRUE if the menu closed.</returns>
+		public bool CloseCurrentMenu(bool closeRequestedByReturnButton = false) {
             this.RemoveNullFromNavigationHistory();
 			if (this._navigationHistory.Count <= 0) {
 				Debug.LogError("No menu to close");
-				return;
+				return false;
 			}
 
             var lastInHistory = this._navigationHistory.Last();
+            if (lastInHistory == null) {
+                Debug.LogError("Last menu to close in navigation history was null.");
+                return false;
+            }
+
+            if (closeRequestedByReturnButton && !lastInHistory.CanCloseByReturnButton) {
+                Debug.Log("User tried to close a menu that cannot be closed by pressing the return button.");
+                return false;
+            }
+            
 			if (this.LastFrameAMenuClosed == Time.frameCount) {
 				Debug.LogWarning($"Will not close menu '{lastInHistory.name}' because one already closed in this frame.", lastInHistory);
-				return;
+				return false;
 			}
 
-			this._navigationHistory.Remove(lastInHistory);
+            this._navigationHistory.Remove(lastInHistory);
 			
 			this.CheckIfIsLastMenu();
 
             Debug.Log($"Closing Menu '{lastInHistory.name}'", lastInHistory);
             this.LastFrameAMenuClosed = Time.frameCount;
-            lastInHistory.Close();
-		}
+            return lastInHistory.Close();
+        }
 
 		public void EndNavigation() {
 			Debug.Log($"Requested EndNavigation of {this._navigationHistory.Count} Menus in history.");
