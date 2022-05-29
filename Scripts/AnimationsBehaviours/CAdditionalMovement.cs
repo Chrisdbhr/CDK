@@ -18,7 +18,7 @@ namespace CDK {
 		public override void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex) {
 			base.OnStateExit(animator, stateInfo, layerIndex);
             this._normalizedTime = stateInfo.normalizedTime % 1f;
-            animator.transform.parent.GetComponent<CCharacterBase>().CDoIfNotNull(c => {
+            animator.transform.GetParentOrSelf().GetComponentInChildren<CCharacterBase>().CDoIfNotNull(c => {
                 c.AdditionalMovementFromAnimator = Vector3.zero;
             });
 		}
@@ -32,7 +32,7 @@ namespace CDK {
 			
             this._normalizedTime = stateInfo.normalizedTime % 1f;
             
-            animator.transform.parent.GetComponent<CCharacterBase>().CDoIfNotNull(c => {
+            animator.transform.GetParentOrSelf().GetComponentInChildren<CCharacterBase>().CDoIfNotNull(c => {
                 c.AdditionalMovementFromAnimator = animator.transform.forward * (this._intensityMultiplier * this._movementIntensityOverAnimTime.Evaluate(this._normalizedTime));
             });
 		}

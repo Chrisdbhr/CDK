@@ -11,5 +11,10 @@ namespace CDK {
 			}
 		}
 
+        public static Transform GetParentOrSelf(this Transform t) {
+            var target = t.parent;
+            return target != null ? target : t;
+        }
+
 	}
 }
