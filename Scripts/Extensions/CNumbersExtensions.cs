@@ -49,7 +49,7 @@ namespace CDK
         }
 
         public static float CImprecise(this float value) {
-            return ((int) (value * 1000)) * 0.001f;
+            return ((int) (value * 1000f)) * 0.001f;
         }
     }
 }
