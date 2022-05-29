@@ -49,8 +49,7 @@ namespace CDK {
 		#endregion <<---------- References ---------->>
 
 		#region <<---------- Input ---------->>
-		public Vector2 InputMovementRaw { get; set; }
-		public Vector3 InputMovementDirRelativeToCam { get; set; }
+        public Vector3 InputMovement { get; set; }
         public bool InputWalk { get; set; }
         public bool InputRun { get; set; }
 		public bool InputAim { get; set; }
@@ -128,7 +127,7 @@ namespace CDK {
 		#endregion <<---------- Movement Properties ---------->>
 
 		#region <<---------- Strafe ---------->>
-		protected ReactiveProperty<bool> IsStrafingRx;
+		protected ReactiveProperty<bool> IsStrafingRx = new ReactiveProperty<bool>();
 		#endregion <<---------- Strafe ---------->>
 
 		#region <<---------- Aim ---------->>
@@ -334,6 +333,10 @@ namespace CDK {
             return this.GetMyVelocity().magnitude;
         }
 
+        public Vector2 GetInputMovement2d() {
+            return new Vector2(this.InputMovement.x, this.InputMovement.z);
+        }
+        
 		#endregion <<---------- Movement ---------->>
 
 

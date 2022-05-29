@@ -56,7 +56,7 @@ namespace CDK {
 
         protected override void ProcessMovement() {
             if (!this.CanMoveRx.Value) return;
-            _rb.velocity = InputMovementRaw * (WalkSpeed * CTime.DeltaTimeScaled);
+            this._rb.velocity = this.GetInputMovement2d() * (WalkSpeed * CTime.DeltaTimeScaled);
             return;
         }
 
@@ -94,11 +94,12 @@ namespace CDK {
                 
             this._animator.CSetFloatSafe(this.ANIM_CHAR_MOV_SPEED_X, isMoving ? velocity.x : 0f);
             this._animator.CSetFloatSafe(this.ANIM_CHAR_MOV_SPEED_Y, isMoving ? velocity.y : 0f);
-                
+
+            var input2d = this.GetInputMovement2d();
             // last facing direction
-            if (this.InputMovementRaw.x != 0f || this.InputMovementRaw.y != 0f) {
-                this._animator.CSetFloatSafe(this.ANIM_LOOK_DIRECTION_X, this.InputMovementRaw.x);
-                this._animator.CSetFloatSafe(this.ANIM_LOOK_DIRECTION_Y, this.InputMovementRaw.y);
+            if (input2d.x != 0f || input2d.y != 0f) {
+                this._animator.CSetFloatSafe(this.ANIM_LOOK_DIRECTION_X, input2d.x);
+                this._animator.CSetFloatSafe(this.ANIM_LOOK_DIRECTION_Y, input2d.y);
             }
         }
        

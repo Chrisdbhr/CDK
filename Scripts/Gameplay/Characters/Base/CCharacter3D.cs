@@ -200,10 +200,10 @@ namespace CDK {
 
             // set animators
             if (this._animator) {
-                this._animator.SetBool(this.ANIM_CHAR_IS_SLIDING, value == CMovState.Sliding);
-                this._animator.SetBool(this.ANIM_CHAR_IS_WALKING, value == CMovState.Walking);
-                this._animator.SetBool(this.ANIM_CHAR_IS_RUNNING, value == CMovState.Running);
-                this._animator.SetBool(this.ANIM_CHAR_IS_SPRINTING, value == CMovState.Sprint);
+                this._animator.CSetBoolSafe(this.ANIM_CHAR_IS_SLIDING, value == CMovState.Sliding);
+                this._animator.CSetBoolSafe(this.ANIM_CHAR_IS_WALKING, value == CMovState.Walking);
+                this._animator.CSetBoolSafe(this.ANIM_CHAR_IS_RUNNING, value == CMovState.Running);
+                this._animator.CSetBoolSafe(this.ANIM_CHAR_IS_SPRINTING, value == CMovState.Sprint);
             }
         }
 
@@ -226,7 +226,7 @@ namespace CDK {
 		}
 
 		protected Vector3 ProcessHorizontalMovement(float deltaTime) {
-			Vector3 targetMotion = this.CanMoveRx.Value ? this.InputMovementDirRelativeToCam : Vector3.zero;
+			Vector3 targetMotion = this.CanMoveRx.Value ? this.InputMovement : Vector3.zero;
 			float targetMovSpeed = 0f;
             
 			// manual movement
@@ -263,7 +263,7 @@ namespace CDK {
             
 			// is sliding
 			if (this.CurrentMovState == CMovState.Sliding) {
-				targetMotion = (this.InputMovementDirRelativeToCam * this.SlideControlAmmount)
+				targetMotion = (this.InputMovement * this.SlideControlAmmount)
 						+ this.transform.forward + (this._groundNormal * 2f);
 				targetMovSpeed = this._slideSpeed;
 			}
@@ -363,7 +363,7 @@ namespace CDK {
                     this.RotateTowardsDirection(this._groundNormal + this.MyVelocityXZ);
                 }
                 else {
-                    this.RotateTowardsDirection(this.InputMovementDirRelativeToCam);
+                    this.RotateTowardsDirection(this.InputMovement);
                 }
             }
         }
