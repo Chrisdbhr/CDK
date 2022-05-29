@@ -23,23 +23,33 @@ namespace CDK {
 		public CSceneManager() {
 			this._fader = CDependencyResolver.Get<CFader>();
 			this._blockingEventsManager = CDependencyResolver.Get<CBlockingEventsManager>();
-		}
+            LoadedSceneThisFrame = false;
+            SceneManager.activeSceneChanged += ActiveSceneChanged;
+        }
+        
+        ~CSceneManager() {
+            this._boolSceneLoadedDisposable?.Dispose();
+            SceneManager.activeSceneChanged -= ActiveSceneChanged;
+        }
 
 		#endregion <<---------- Initializers ---------->>
 
 
-		
+
 
 		#region <<---------- Properties and Fields ---------->>
 
+        public static bool LoadedSceneThisFrame { get; private set; }
+        private IDisposable _boolSceneLoadedDisposable;
+        
 		private const float MINIMUM_LOADING_TIME = 1f;
-		[NonSerialized] private readonly CFader _fader;
-		[NonSerialized] private readonly CBlockingEventsManager _blockingEventsManager;
+		private readonly CFader _fader;
+		private readonly CBlockingEventsManager _blockingEventsManager;
 
 		#endregion <<---------- Properties and Fields ---------->>
 
 
-		
+
 
 		#region <<---------- Static SceneManager Wrappers ---------->>
 		
@@ -49,10 +59,12 @@ namespace CDK {
 		
 		#endregion <<---------- Static SceneManager Wrappers ---------->>
 
-		
-		
 
-		public async Task Teleport(string sceneToLoadName, int entryPointNumber, IReadOnlyList<GameObject> gameObjectsToTeleport) {
+
+
+        #region <<---------- General ---------->>
+
+        public async Task Teleport(string sceneToLoadName, int entryPointNumber, IReadOnlyList<GameObject> gameObjectsToTeleport) {
 
 			if (gameObjectsToTeleport == null || !gameObjectsToTeleport.Any()) {
 				Debug.LogError($"List of null objects tried to Teleport, canceling operation.");
@@ -141,41 +153,75 @@ namespace CDK {
             this._blockingEventsManager.IsPlayingCutscene = false;
 		}
 
-		public static void SetTransformToSceneEntryPoint(Transform transformToMove, int entryPointNumber = 0) {
-			if (transformToMove == null) {
-				Debug.LogError("Cant move a null game object.");
-				return;
-			}
+        public static void SetTransformToSceneEntryPoint(Transform transformToMove, int entryPointNumber = 0) {
+            if (transformToMove == null) {
+                Debug.LogError("Cant move a null game object.");
+                return;
+            }
 
-			Transform targetEntryPointTransform = CSceneEntryPoint.GetSceneEntryPointTransform(entryPointNumber);
+            Transform targetEntryPointTransform = CSceneEntryPoint.GetSceneEntryPointTransform(entryPointNumber);
 
-			var offset = new Vector3(0f, 0.001f, 0f);
-			if (targetEntryPointTransform == null) {
-				transformToMove.position = Vector3.zero + offset;
-				transformToMove.rotation = Quaternion.identity;
-			}
-			else {
-				var character = transformToMove.GetComponent<CCharacterBase>();
-				if (character != null) {
-					character.TeleportToLocation(targetEntryPointTransform.position, targetEntryPointTransform.rotation);					
-				}
-				else {
-					transformToMove.position = targetEntryPointTransform.position + offset;
-					transformToMove.rotation = targetEntryPointTransform.rotation;
-				}
-			}
+            var offset = new Vector3(0f, 0.001f, 0f);
+            if (targetEntryPointTransform == null) {
+                transformToMove.position = Vector3.zero + offset;
+                transformToMove.rotation = Quaternion.identity;
+            }
+            else {
+                var character = transformToMove.GetComponent<CCharacterBase>();
+                if (character != null) {
+                    character.TeleportToLocation(targetEntryPointTransform.position, targetEntryPointTransform.rotation);					
+                }
+                else {
+                    transformToMove.position = targetEntryPointTransform.position + offset;
+                    transformToMove.rotation = targetEntryPointTransform.rotation;
+                }
+            }
 			
-			Debug.Log($"Moving {transformToMove.name} to {nameof(entryPointNumber)}:'{entryPointNumber}' at position {transformToMove.position}", targetEntryPointTransform);
-		}
+            Debug.Log($"Moving {transformToMove.name} to {nameof(entryPointNumber)}:'{entryPointNumber}' at position {transformToMove.position}", targetEntryPointTransform);
+        }
 
-		private async Task WaitUntilMinimumTimeToReturnFromLoading(float timeToReturnFromLoading) {
+        private void CheckToRetainSceneChangedBool() {
+            if (this._boolSceneLoadedDisposable != null) return;
+            Debug.Log($"Setting {nameof(LoadedSceneThisFrame)} value to true.");
+            LoadedSceneThisFrame = true;
+            this._boolSceneLoadedDisposable = Observable.NextFrame(FrameCountType.EndOfFrame).Subscribe(_ => {
+                Debug.Log($"Setting {nameof(LoadedSceneThisFrame)} value to false.");
+                LoadedSceneThisFrame = false;
+                this._boolSceneLoadedDisposable?.Dispose();
+                Debug.Log($"{nameof(_boolSceneLoadedDisposable)} is '{this._boolSceneLoadedDisposable}'");
+            });
+        }
+        
+        #endregion <<---------- General ---------->>
+
+
+
+
+        #region <<---------- Callbacks ---------->>
+
+        private void ActiveSceneChanged(Scene oldScene, Scene newScene) {
+            CheckToRetainSceneChangedBool();
+        }
+
+        #endregion <<---------- Callbacks ---------->>
+
+        
+
+        
+        #region <<---------- Loading ---------->>
+
+        private async Task WaitUntilMinimumTimeToReturnFromLoading(float timeToReturnFromLoading) {
 			Debug.Log($"Waiting until minimum time to return from loading is reached.");
             while (Time.realtimeSinceStartup <= timeToReturnFromLoading) {
                 await Observable.NextFrame();
             }
 		}
-		
-		
+
+        #endregion <<---------- Loading ---------->>
+
+        
+
+
 		#region <<---------- Extensions ---------->>
 
 		public static bool IsSceneValid(string sceneName) {
@@ -190,10 +236,10 @@ namespace CDK {
 		}
 
 		#endregion <<---------- Extensions ---------->>
-	
-		
-		
-		
+
+
+
+
 		#region <<---------- Scene All Objects ---------->>
 		
 		public static Scene[] GetAllLoadedScenes() {
