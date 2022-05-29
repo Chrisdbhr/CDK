@@ -1,11 +1,9 @@
-using System;
 using UniRx;
 using UnityEngine;
 
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
-
 
 namespace CDK {
     [RequireComponent(typeof(CharacterController))]
@@ -16,8 +14,9 @@ namespace CDK {
         protected CharacterController _charController;
         
         [Header("Aerial Movement")]
-        [SerializeField] private float _gravityMultiplier = 1f;
-        [SerializeField] [Range(0f,1f)] private float _aerialMomentumMaintainPercentage = 0.90f;
+        [SerializeField] private float _gravityMultiplier = 0.075f;
+        [SerializeField] [Range(0f,1f)] private float _aerialMomentumLoosePercentage = 0.50f;
+        [SerializeField] [Range(0f,1f)] private float _airControl = 0.50f;
         private const float HEIGHT_PERCENTAGE_TO_CONSIDER_FREE_FALL = 0.25f;
         protected Vector3 _groundNormal;
         private float _lastYPositionCharWasNotFalling;
@@ -26,6 +25,12 @@ namespace CDK {
         protected FloatReactiveProperty _distanceOnFreeFall;
         
         private float _charInitialHeight;
+        
+        #region <<---------- Rotation ---------->>
+        [Header("Rotation")]
+        [SerializeField] private AnimationCurve _curveRotationRateOverSpeed = AnimationCurve.Linear(0f,666f,10f,1f);
+        protected Quaternion _targetLookRotation;
+        #endregion <<---------- Rotation ---------->>
 
         #region <<---------- Sliding ---------->>
 
@@ -121,7 +126,7 @@ namespace CDK {
 
             this._isTouchingTheGroundRx.TakeUntilDisable(this).DistinctUntilChanged().Subscribe(isTouchingTheGround => {
                 if (isTouchingTheGround && this._animator != null) {
-                    if(this._debug) Debug.Log($"<color={"#D76787"}>{this.name}</color> touched the ground, velocityY: '{this.GetMyVelocity().y}', {nameof(this._distanceOnFreeFall)}: '{this._distanceOnFreeFall.Value}', {nameof(this._lastYPositionCharWasNotFalling)}: '{this._lastYPositionCharWasNotFalling}'");
+                    if(this._debug) Debug.Log($"<color={"#D76787"}>{this.name}</color> touched the ground, velocityY: '{this.Velocity.y}', {nameof(this._distanceOnFreeFall)}: '{this._distanceOnFreeFall.Value}', {nameof(this._lastYPositionCharWasNotFalling)}: '{this._lastYPositionCharWasNotFalling}'");
                     int fallAnimIndex = 0;
                     if (this._distanceOnFreeFall.Value >= 6f) {
                         fallAnimIndex = 2;
@@ -130,7 +135,7 @@ namespace CDK {
                     }
                     this._animator.SetInteger(ANIM_FALL_LANDING_ANIM_INDEX, fallAnimIndex);
                 }
-                this.MovementMomentumXZ = isTouchingTheGround ? Vector3.zero : this.MyVelocityXZ;
+                this.MovementMomentumXZ = isTouchingTheGround ? Vector3.zero : this.GetMyVelocityXZ();
             });
 			
             this._isOnFreeFall.TakeUntilDisable(this).DistinctUntilChanged().Subscribe(isFallingNow => {
@@ -156,7 +161,7 @@ namespace CDK {
         }
 		
         protected virtual void ProcessAerialAndFallMovement() {
-            if (this._isTouchingTheGroundRx.Value || this.GetMyVelocity().y >= 0f
+            if (this._isTouchingTheGroundRx.Value || this.Velocity.y >= 0f
                 || this._blockingEventsManager.IsPlayingCutscene // check if is playing cutscene so char dont die when teleport or during cutscene
                ) {
                 
@@ -177,8 +182,15 @@ namespace CDK {
 
 
         #region <<---------- Movement ---------->>
-        public override Vector3 GetMyVelocity() {
-            return this._charController.velocity;
+
+        protected Vector3 GetMyVelocityXZ() {
+            var velocity = this.Velocity;
+            velocity.y = 0f;
+            return velocity;
+        }
+        
+        protected float GetMyVelocity_XZ_Magnitude() {
+            return this.GetMyVelocityXZ().magnitude;
         }
 
         protected override void SetMovementState(CMovState value) {
@@ -208,7 +220,7 @@ namespace CDK {
         }
 
         protected override void ProcessMovement() {
-			this._animator.CSetFloatWithLerp(this.ANIM_CHAR_MOV_SPEED_XZ, this.MyVelocityXZ.magnitude, ANIMATION_BLENDTREE_LERP * CTime.DeltaTimeScaled * this.TimelineTimescale);
+			this._animator.CSetFloatWithLerp(this.ANIM_CHAR_MOV_SPEED_XZ, this.GetMyVelocity_XZ_Magnitude() * 100f, ANIMATION_BLENDTREE_LERP * CTime.DeltaTimeScaled * this.TimelineTimescale);
 			if (!this._charController.enabled) return;
 			if (CTime.TimeScale == 0f) return;
 
@@ -227,10 +239,17 @@ namespace CDK {
 
 		protected Vector3 ProcessHorizontalMovement(float deltaTime) {
 			Vector3 targetMotion = this.CanMoveRx.Value ? this.InputMovement : Vector3.zero;
-			float targetMovSpeed = 0f;
+			float movSpeedMultiplier = 1f;
+
+            bool isTouchingTheGround = this._isTouchingTheGroundRx.Value;
             
-			// manual movement
-			if (this.CurrentMovState != CMovState.Sliding && !this._blockingEventsManager.IsAnyBlockingEventHappening) {
+            // air control
+            if (!isTouchingTheGround) {
+                targetMotion *= this._airControl;
+            }
+
+            // manual movement
+			if (isTouchingTheGround && this.CurrentMovState != CMovState.Sliding && !this._blockingEventsManager.IsAnyBlockingEventHappening) {
 				// input movement
 				if (targetMotion != Vector3.zero) {
                     var maxMovSpeed = this.GetMaxMovementSpeed();
@@ -251,29 +270,27 @@ namespace CDK {
 				this.IsStrafingRx.Value = this._isAimingRx.Value && this.CurrentMovState <= CMovState.Walking;
 
 				// target movement speed
-                targetMovSpeed = this.GetSpeedForCurrentMovementState();
+                movSpeedMultiplier = this.GetSpeedForCurrentMovementState();
 				if (this.IsAiming) {
-                    targetMovSpeed *= 0.5f;
+                    movSpeedMultiplier *= 0.5f;
 				}
 
 				if (Debug.isDebugBuild && Input.GetKey(KeyCode.RightShift)) {
-					targetMovSpeed *= 20f;
+					movSpeedMultiplier *= 20f;
 				}
 			}
             
 			// is sliding
-			if (this.CurrentMovState == CMovState.Sliding) {
+			if (isTouchingTheGround && this.CurrentMovState == CMovState.Sliding) {
 				targetMotion = (this.InputMovement * this.SlideControlAmmount)
 						+ this.transform.forward + (this._groundNormal * 2f);
-				targetMovSpeed = this._slideSpeed;
+				movSpeedMultiplier = this._slideSpeed;
 			}
             
 			// momentum
-			if (!this._isTouchingTheGroundRx.Value && (this.MovementMomentumXZ.x.CImprecise() != 0.0f || this.MovementMomentumXZ.z.CImprecise() != 0.0f)) {
-                var momentum = this.MovementMomentumXZ * (this._aerialMomentumMaintainPercentage * deltaTime);
-                targetMotion += momentum;
+			if (!isTouchingTheGround && (MovementMomentumXZ.x != 0f || MovementMomentumXZ.z != 0f)) {
+                this.MovementMomentumXZ -= this.MovementMomentumXZ * (this._aerialMomentumLoosePercentage * deltaTime);
 				if(this._debug) Debug.Log($"Applying {this.MovementMomentumXZ}, targetMotion now is {targetMotion}");
-				this.MovementMomentumXZ = momentum;
 			}
 			
             // additional movement
@@ -285,17 +302,21 @@ namespace CDK {
 			rootMotionDeltaPos.y = 0f;
             
 			// move character
-            if(this.IsStrafingRx.Value) return (targetMotion * (targetMovSpeed * deltaTime)) + rootMotionDeltaPos + (additionalMovement * deltaTime);
-			return (this.transform.forward * (targetMotion.magnitude * targetMovSpeed * deltaTime)) + rootMotionDeltaPos + (additionalMovement * deltaTime);
+			return (targetMotion * (movSpeedMultiplier * deltaTime))
+                + (this.MovementMomentumXZ * deltaTime)
+                + rootMotionDeltaPos 
+                + (additionalMovement * deltaTime)
+            ;
 		}
 
         protected float ProcessVerticalMovement(float deltaTime) {
 
-			var verticalDelta = this.RootMotionDeltaPosition.y + this.AdditionalMovementFromAnimator.y;
-			verticalDelta += this.GetMyVelocity().y > 0f ? 0f : this.GetMyVelocity().y; // consider only fall velocity
-			verticalDelta += Physics.gravity.y * this._gravityMultiplier;
+            var verticalDelta = this.Velocity.y > 0f ? 0f : this.Velocity.y; // consider only fall velocity
+			verticalDelta += this.RootMotionDeltaPosition.y;
+            verticalDelta += this.AdditionalMovementFromAnimator.y * deltaTime;
+			verticalDelta += (Physics.gravity.y * this._gravityMultiplier) * deltaTime;
             
-			return verticalDelta * deltaTime;
+			return verticalDelta;
 		}
 
         protected override void UpdateIfIsGrounded() {
@@ -360,12 +381,30 @@ namespace CDK {
             }
             else {
                 if (this.CurrentMovState == CMovState.Sliding) {
-                    this.RotateTowardsDirection(this._groundNormal + this.MyVelocityXZ);
+                    this.RotateTowardsDirection(this._groundNormal + this.GetMyVelocityXZ());
                 }
                 else {
                     this.RotateTowardsDirection(this.InputMovement);
                 }
             }
+        }
+        
+        protected void RotateTowardsDirection(Vector3 dir) {
+            dir.y = 0f;
+            if (dir == Vector3.zero) return;
+            this._targetLookRotation = Quaternion.LookRotation(dir);
+
+            var rotateSpeed = this._curveRotationRateOverSpeed.Evaluate(this.Velocity.magnitude);
+
+            if (!this._isTouchingTheGroundRx.Value) {
+                rotateSpeed *= this._airControl;
+            }
+            
+            // lerp rotation
+            this.transform.rotation = Quaternion.RotateTowards(
+                this.transform.rotation,
+                this._targetLookRotation,
+                rotateSpeed * CTime.DeltaTimeScaled * this.TimelineTimescale);
         }
         
         #endregion <<---------- Rotation ---------->>

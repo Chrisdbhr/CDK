@@ -74,16 +74,9 @@ namespace CDK {
 		#endregion <<---------- Time ---------->>
 
 		#region <<---------- Movement Properties ---------->>
-		protected Vector3 _previousPosition { get; private set; }
+		public Vector3 Velocity { get; private set; }
+        protected Vector3 _previousPosition { get; private set; }
         
-		public Vector3 MyVelocityXZ {
-			get {
-				var velocity = this.GetMyVelocity();
-				velocity.y = 0f;
-				return velocity;
-			}
-		}
-
 		public Vector3 MovementMomentumXZ = Vector3.zero;
         public Vector3 RootMotionDeltaPosition = Vector3.zero;
         public Vector3 AdditionalMovementFromAnimator = Vector3.zero;
@@ -118,12 +111,6 @@ namespace CDK {
 
         #endregion <<---------- Run and Walk ---------->>
         
-		#region <<---------- Rotation ---------->>
-        [Header("Rotation")]
-        [SerializeField] private AnimationCurve _curveRotationRateOverSpeed = AnimationCurve.Linear(0f,666f,10f,1f);
-
-		protected Quaternion _targetLookRotation;
-		#endregion <<---------- Rotation ---------->>
 		#endregion <<---------- Movement Properties ---------->>
 
 		#region <<---------- Strafe ---------->>
@@ -206,7 +193,9 @@ namespace CDK {
             UpdateCharacter();
         }
 
-		protected virtual void LateUpdate() { }
+        protected virtual void LateUpdate() {
+            if(!CSceneManager.LoadedSceneThisFrame) this.Velocity = this.Position - this._previousPosition;
+        }
 
         protected virtual void FixedUpdate() {
             if (this._updateTime != CMonobehaviourExecutionLoop.FixedUpdate) return;
@@ -234,15 +223,14 @@ namespace CDK {
 
         #region <<---------- Update ---------->>
 
-        private void UpdateCharacter() {
+        protected virtual void UpdateCharacter() {
+            this._previousPosition = this.Position;
             this.UpdateIfIsGrounded();
 
             //this.ProcessSlide(); // disabled until bugs are fixed.
             this.ProcessMovement();
             this.ProcessRotation();
             this.ProcessAim();
-
-            this._previousPosition = this.Position;
         }
         
         #endregion <<---------- Update ---------->>
@@ -327,12 +315,6 @@ namespace CDK {
 
         protected abstract void UpdateIfIsGrounded();
 
-        public abstract Vector3 GetMyVelocity();
-
-        public float GetMyVelocityMagnitude() {
-            return this.GetMyVelocity().magnitude;
-        }
-
         public Vector2 GetInputMovement2d() {
             return new Vector2(this.InputMovement.x, this.InputMovement.z);
         }
@@ -385,21 +367,7 @@ namespace CDK {
 		#region <<---------- Rotation ---------->>
 
         protected abstract void ProcessRotation();
-		
-		protected void RotateTowardsDirection(Vector3 dir) {
-			dir.y = 0f;
-			if (dir == Vector3.zero) return;
-			this._targetLookRotation = Quaternion.LookRotation(dir);
 
-			var rotateSpeed = this._curveRotationRateOverSpeed.Evaluate(this.GetMyVelocityMagnitude());
-
-            // lerp rotation
-			this.transform.rotation = Quaternion.RotateTowards(
-													this.transform.rotation,
-													this._targetLookRotation,
-													rotateSpeed * CTime.DeltaTimeScaled * this.TimelineTimescale);
-		}
-        
         #endregion <<---------- Rotation ---------->>
 
 		

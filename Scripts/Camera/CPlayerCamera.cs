@@ -151,7 +151,7 @@ namespace CDK {
 				
 				// camera shake intensity
 				if (this._ownerCharacter && this._cinemachineBrain.ActiveVirtualCamera is CinemachineFreeLook cam) {
-					var velocity = this._ownerCharacter.GetMyVelocity();
+					var velocity = this._ownerCharacter.Velocity;
 					if(velocity.y < 0) velocity.y *= _fallShakeMultiplier;
 					var magnitude = velocity.magnitude;
 					float amplitude = 0f;

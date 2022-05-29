@@ -50,10 +50,6 @@ namespace CDK {
             }
         }
 
-        public override Vector3 GetMyVelocity() {
-            return this._previousPosition - this.transform.position;
-        }
-
         protected override void ProcessMovement() {
             if (!this.CanMoveRx.Value) return;
             this._rb.velocity = this.GetInputMovement2d() * (WalkSpeed * CTime.DeltaTimeScaled);
@@ -83,8 +79,8 @@ namespace CDK {
         
         protected virtual void UpdateAnimator() {
             if (!this._animator) return;
-            var velocity = this.GetMyVelocity();
-            float velocityMagnitude = this.GetMyVelocityMagnitude();
+            var velocity = this.Velocity;
+            float velocityMagnitude = velocity.magnitude;
                 
             bool isMoving = velocityMagnitude.CAbs() > 0f;
                 
