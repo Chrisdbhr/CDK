@@ -2,7 +2,7 @@
 %TAG !u! tag:unity3d.com,2011:
 --- !u!21 &2100000
 Material:
-  serializedVersion: 6
+  serializedVersion: 8
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -10,7 +10,8 @@ Material:
   m_Name: Prototype Grid
   m_Shader: {fileID: -6465566751694194690, guid: b2a0fda8dc57eb94a92020a26ca1924e,
     type: 3}
-  m_ShaderKeywords: 
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -36,8 +37,11 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    m_Ints: []
     m_Floats:
     - Vector1_954b6124e2c34da4bd1c093bc86fae4a: 0.1
+    - _QueueControl: 0
+    - _QueueOffset: 0
     m_Colors:
     - Color_41ba0769a052457fb67c8f35f77a576e: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []

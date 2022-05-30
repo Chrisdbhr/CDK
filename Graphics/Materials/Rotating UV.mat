@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: RotatingUV
+  m_Name: Rotating UV
   m_Shader: {fileID: -6465566751694194690, guid: 08c3ae50cef535a449d65912709a0629,
     type: 3}
   m_ShaderKeywords: 
