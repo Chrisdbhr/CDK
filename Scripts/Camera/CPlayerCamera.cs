@@ -44,7 +44,7 @@ namespace CDK {
 
 			#if FMOD
 			// fmod listener
-			this._studioListener.ListenerNumber = this._ownerPlayer.PlayerNumber;
+			// this._studioListener. = this._ownerPlayer.PlayerNumber;
 			#endif
 		}
 		

@@ -39,7 +39,7 @@ namespace CDK {
             };
             
             #if Rewired
-            CAssets.LoadAndInstantiateFromResources<GameObject>("Rewired Input Manager");
+            CAssets.LoadAndInstantiateGameObject("Rewired Input Manager");
 			#endif
 
             InitializeDependencyContainerAndBinds();

@@ -225,12 +225,7 @@ namespace CDK {
 
         protected virtual void UpdateCharacter() {
             this._previousPosition = this.Position;
-            this.UpdateIfIsGrounded();
-
-            //this.ProcessSlide(); // disabled until bugs are fixed.
             this.ProcessMovement();
-            this.ProcessRotation();
-            this.ProcessAim();
         }
         
         #endregion <<---------- Update ---------->>
@@ -288,7 +283,6 @@ namespace CDK {
         protected virtual void OnActiveSceneChanged(Scene oldScene, Scene newScene) {
             if (this == null) return;
             this.StopTalking();
-            this.ResetFallCalculation();
 
             this.RootMotionDeltaPosition = Vector3.zero;
             this.AdditionalMovementFromAnimator = Vector3.zero;
@@ -312,8 +306,6 @@ namespace CDK {
 		#region <<---------- Movement ---------->>
 
         protected abstract void ProcessMovement();
-
-        protected abstract void UpdateIfIsGrounded();
 
         public Vector2 GetInputMovement2d() {
             return new Vector2(this.InputMovement.x, this.InputMovement.z);
@@ -352,34 +344,12 @@ namespace CDK {
         
         #endregion <<---------- Scene Areas ---------->>
 
+     
         
-
-
-        #region <<---------- Fail ---------->>
-
-        protected abstract void ResetFallCalculation();
-        
-        #endregion <<---------- Fail ---------->>
-
-		
-		
-		
-		#region <<---------- Rotation ---------->>
-
-        protected abstract void ProcessRotation();
-
-        #endregion <<---------- Rotation ---------->>
-
-		
-		
 
 		#region <<---------- Aim ---------->>
-
-		protected void ProcessAim() {
-			this._isAimingRx.Value = this.InputAim;
-		}
-		
-		public void SetAimTargetPosition(Vector3 targetPos) {
+        
+        public void SetAimTargetPosition(Vector3 targetPos) {
 			this._aimTargetPos = targetPos;
 		}
 
@@ -497,13 +467,12 @@ namespace CDK {
 
 		#region <<---------- Transform ---------->>
 
-		public void TeleportToLocation(Vector3 targetPos, Quaternion targetRotation = default) {
+		public virtual void TeleportToLocation(Vector3 targetPos, Quaternion targetRotation = default) {
 			if (targetRotation != default) {
                 transform.rotation = targetRotation;
 			}
 			this._previousPosition = targetPos;
 			this.Position = targetPos;
-			this.ResetFallCalculation();
 		}
 		
 		#endregion <<---------- Transform ---------->>

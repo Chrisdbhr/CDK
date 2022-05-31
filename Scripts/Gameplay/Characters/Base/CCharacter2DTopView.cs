@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 namespace CDK {
@@ -11,7 +10,7 @@ namespace CDK {
         protected readonly int ANIM_LOOK_DIRECTION_X = Animator.StringToHash("facingDirectionX");
         protected readonly int ANIM_LOOK_DIRECTION_Y = Animator.StringToHash("facingDirectionY");
         
-        
+
 
         #region <<---------- MonoBehaviour ---------->>
         protected override void Awake() {
@@ -19,23 +18,17 @@ namespace CDK {
             if (this._rb == null) _rb = this.GetComponent<Rigidbody2D>();
         }
 
-        protected override void Update() {
-            this.UpdateAnimator();
-            base.Update();
-        }
-
-        protected override void FixedUpdate() {
-            base.FixedUpdate();
-        }
- 
         #endregion <<---------- MonoBehaviour ---------->>
 
         
         
         
         #region <<---------- CCharacterBase ---------->>
-        
-        #region <<---------- Movement ---------->>
+
+        protected override void UpdateCharacter() {
+            base.UpdateCharacter();
+            this.UpdateAnimator();
+        }
         
         protected override void SetMovementState(CMovState value) {
             if (this._currentMovState == value) return;
@@ -53,21 +46,6 @@ namespace CDK {
         protected override void ProcessMovement() {
             if (!this.CanMoveRx.Value) return;
             this._rb.velocity = this.GetInputMovement2d() * (WalkSpeed * CTime.DeltaTimeScaled);
-            return;
-        }
-
-        #endregion <<---------- Movement ---------->>
-
-        protected override void UpdateIfIsGrounded() {
-            return;
-        }
-
-        protected override void ResetFallCalculation() {
-            return;
-        }
-
-        protected override void ProcessRotation() {
-            return;
         }
 
         #endregion <<---------- CCharacterBase ---------->>

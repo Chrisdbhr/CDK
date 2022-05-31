@@ -1,5 +1,6 @@
 using UniRx;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -7,12 +8,15 @@ using UnityEditor;
 
 namespace CDK {
     [RequireComponent(typeof(CharacterController))]
-	public class CCharacter3D : CCharacterBase {
+	public class CPlayerCharacter3D : CCharacterBase {
 
         #region <<---------- Properties and Fields ---------->>
         
         protected CharacterController _charController;
-        
+        private float _charInitialHeight;
+
+        #region <<---------- Aerial ---------->>
+
         [Header("Aerial Movement")]
         [SerializeField] private float _gravityMultiplier = 0.075f;
         [SerializeField] [Range(0f,1f)] private float _aerialMomentumLoosePercentage = 0.50f;
@@ -23,8 +27,8 @@ namespace CDK {
         protected BoolReactiveProperty _isTouchingTheGroundRx;
         protected BoolReactiveProperty _isOnFreeFall;
         protected FloatReactiveProperty _distanceOnFreeFall;
-        
-        private float _charInitialHeight;
+
+        #endregion <<---------- Aerial ---------->>
         
         #region <<---------- Rotation ---------->>
         [Header("Rotation")]
@@ -59,7 +63,7 @@ namespace CDK {
         private const float SLIDE_FROM_CHAR_SLOPE_LIMIT_MULTIPLIER = 0.6f;
 
         #endregion <<---------- Sliding ---------->>
-        
+
         #endregion <<---------- Properties and Fields ---------->>
 
 
@@ -75,12 +79,6 @@ namespace CDK {
                 Debug.LogWarning($"{this.name} had an Animator with Root motion disabled, it will be enable because Characters use root motion.", this);
                 this.SetAnimationRootMotion(true);
             }
-        }
-
-        protected override void Update() {
-            base.Update();			
-            this.ProcessAerialAndFallMovement();
-            //this.ProcessSlide();
         }
 
         #if UNITY_EDITOR
@@ -100,6 +98,32 @@ namespace CDK {
 		#endif
         
         #endregion <<---------- MonoBehaviour ---------->>
+
+
+        
+
+        #region <<---------- CCharacterBase ---------->>
+
+        protected override void UpdateCharacter() {
+            this.UpdateIfIsGrounded();
+            this.ProcessAerialAndFallMovement();
+            base.UpdateCharacter();
+            this.ProcessRotation();
+            this.ProcessAim();
+            //this.ProcessSlide();
+        }
+
+        protected override void OnActiveSceneChanged(Scene oldScene, Scene newScene) {
+            base.OnActiveSceneChanged(oldScene, newScene);
+            this.ResetFallCalculation();
+        }
+
+        public override void TeleportToLocation(Vector3 targetPos, Quaternion targetRotation = default) {
+            base.TeleportToLocation(targetPos, targetRotation);
+            this.ResetFallCalculation();
+        }
+
+        #endregion <<---------- CCharacterBase ---------->>
 
 
 
@@ -153,14 +177,29 @@ namespace CDK {
 
 
 
+        
+        #region <<---------- Input ---------->>
+
+        protected void ProcessAim() {
+            this._isAimingRx.Value = this.InputAim;
+        }
+        
+        public Vector2 GetInputMovement2d() {
+            return new Vector2(this.InputMovement.x, this.InputMovement.z);
+        }
+
+        #endregion <<---------- Input ---------->>
+
+        
+
 
         #region <<---------- Aerial and Falling ---------->>
 
-        protected override void ResetFallCalculation() {
+        protected void ResetFallCalculation() {
             this._lastYPositionCharWasNotFalling = this.Position.y;
         }
 		
-        protected virtual void ProcessAerialAndFallMovement() {
+        protected void ProcessAerialAndFallMovement() {
             if (this._isTouchingTheGroundRx.Value || this.Velocity.y >= 0f
                 || this._blockingEventsManager.IsPlayingCutscene // check if is playing cutscene so char dont die when teleport or during cutscene
                ) {
@@ -319,7 +358,7 @@ namespace CDK {
 			return verticalDelta;
 		}
 
-        protected override void UpdateIfIsGrounded() {
+        protected void UpdateIfIsGrounded() {
             float heightFraction = this._charController.height * HEIGHT_PERCENTAGE_TO_CONSIDER_FREE_FALL;
             var ray = this.GetGroundCheckRay(heightFraction);
             bool isGrounded = Physics.SphereCast(
@@ -374,7 +413,7 @@ namespace CDK {
 
         #region <<---------- Rotation ---------->>
         
-        protected override void ProcessRotation() {
+        protected void ProcessRotation() {
             if (this._blockingEventsManager.IsAnyBlockingEventHappening) return;
             if (this.IsStrafingRx.Value) {
                 this.RotateTowardsDirection(this._aimTargetDirection);
