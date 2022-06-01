@@ -11,5 +11,10 @@ namespace CDK {
 
 			return biggerValue;
 		}
+        
+        public static bool CImpreciseEqualCompare(this Vector2 a, Vector2 b) {
+            return a.x.CImprecise() == b.x.CImprecise()
+            && a.y.CImprecise() == b.y.CImprecise();
+        }
 	}
 }

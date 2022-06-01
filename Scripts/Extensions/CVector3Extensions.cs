@@ -30,5 +30,11 @@ namespace CDK {
 			}
 			return closerPos;
 		}
+
+        public static bool CImpreciseEqualCompare(this Vector3 a, Vector3 b) {
+            return a.x.CImprecise() == b.x.CImprecise()
+            && a.y.CImprecise() == b.y.CImprecise()
+            && a.z.CImprecise() == b.z.CImprecise();
+        }
 	}
 }
