@@ -1,12 +1,12 @@
 {
     "name": "CDK.Editor",
     "references": [
-        "Unity.TextMeshPro",
-        "UniRx",
-        "CDK",
-        "FMODUnity",
-        "Unity.Localization",
-        "Unity.Localization.Editor"
+      "Unity.TextMeshPro",
+      "UniRx",
+      "CDK",
+      "FMODUnity",
+      "Unity.Localization",
+      "Unity.Localization.Editor"
     ],
     "includePlatforms": [
         "Editor"
