@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using CDK.Characters.Enums;
@@ -13,6 +12,10 @@ using UnityEditor;
 
 #if FMOD
 using FMODUnity;
+#endif
+
+#if LUDIQ_CHRONOS
+using Chronos;
 #endif
 
 namespace CDK {
@@ -77,9 +80,9 @@ namespace CDK {
 		public Vector3 Velocity { get; private set; }
         protected Vector3 _previousPosition { get; private set; }
         
-		public Vector3 MovementMomentumXZ = Vector3.zero;
-        public Vector3 RootMotionDeltaPosition = Vector3.zero;
-        public Vector3 AdditionalMovementFromAnimator = Vector3.zero;
+		[HideInInspector] public Vector3 MovementMomentumXZ = Vector3.zero;
+        [HideInInspector] public Vector3 RootMotionDeltaPosition = Vector3.zero;
+        [HideInInspector] public Vector3 AdditionalMovementFromAnimator = Vector3.zero;
 		
         private readonly List<CSceneArea> _activeSceneAreas = new List<CSceneArea>();
 
@@ -90,7 +93,24 @@ namespace CDK {
 			get { return this._currentMovState; }
 		}
 
-        protected abstract void SetMovementState(CMovState value);
+        /// <summary>
+        /// Set Movement State Enum.
+        /// </summary>
+        /// <returns>Returns if the movement enum was set.</returns>
+        protected virtual bool SetMovementState(CMovState value) {
+            if (this._currentMovState == value) return false;
+            this._currentMovState = value;
+            
+            // set animators
+            if (this._animator) {
+                this._animator.CSetBoolSafe(this.ANIM_CHAR_IS_WALKING, value == CMovState.Walking);
+                this._animator.CSetBoolSafe(this.ANIM_CHAR_IS_RUNNING, value == CMovState.Running);
+                this._animator.CSetBoolSafe(this.ANIM_CHAR_IS_SPRINTING, value == CMovState.Sprint);
+                this._animator.CSetBoolSafe(this.ANIM_CHAR_IS_SLIDING, value == CMovState.Sliding);
+            }
+
+            return true;
+        }
 
 		public float WalkSpeed {
 			get { return this._walkSpeed; }
@@ -183,7 +203,37 @@ namespace CDK {
         }
 
 		protected virtual void OnEnable() {
-			this.SubscribeToEvents();
+            this._disposables?.Dispose();
+            this._disposables = new CompositeDisposable();
+
+            #region <<---------- RX Creations ---------->>
+
+            this.CanMoveRx = new ReactiveProperty<bool>(true);
+			
+            this._isAimingRx = new ReactiveProperty<bool>();
+            this.IsStrafingRx = new ReactiveProperty<bool>();
+
+            #endregion <<---------- RX Creations ---------->>
+
+            #region <<---------- Movement ---------->>
+
+            // strafe
+            this.IsStrafingRx.TakeUntilDisable(this).DistinctUntilChanged().Subscribe(isStrafing => {
+                if (this._animator) this._animator.SetBool(this.ANIM_CHAR_IS_STRAFING, isStrafing);
+            });
+
+            // can mov
+            this.CanMoveRx.TakeUntilDisable(this).DistinctUntilChanged().Subscribe(canMove => {
+                if (!canMove && this.CurrentMovState > CMovState.Idle) {
+                    this.SetMovementState(CMovState.Idle);
+                }
+            });
+
+            #endregion <<---------- Movement ---------->>
+
+            // events
+            this._blockingEventsManager.OnDoingBlockingAction += this.DoingBlockingAction;
+            SceneManager.activeSceneChanged += this.OnActiveSceneChanged;
 		}
 
 		protected virtual void Start() { }
@@ -203,18 +253,26 @@ namespace CDK {
         }
         
 		protected virtual void OnDisable() {
-			this.UnsubscribeToEvents();
+            this._disposables?.Dispose();
+            this._disposables = null;
+
+            this._blockingEventsManager.OnDoingBlockingAction -= this.DoingBlockingAction;
+            SceneManager.activeSceneChanged -= this.OnActiveSceneChanged;
 		}
 
 		protected virtual void OnDestroy() {
 			this.StopTalking();
 		}
 
-        #if UNITY_EDITOR
         protected virtual void Reset() {
-            if (this._animator == null) this.GetComponentInChildren<Animator>();
+            if (this._animator == null) this._animator = this.GetComponentInChildren<Animator>();
+            #if LUDIQ_CHRONOS
+            if (this._timeline == null) this._timeline = this.GetComponentInChildren<Timeline>();
+            #endif
+            #if FMOD
+            if (this._mounthVoiceEmitter == null) this._mounthVoiceEmitter = this.GetComponentInChildren<StudioEventEmitter>();
+            #endif
         }
-        #endif
         
 		#endregion <<---------- MonoBehaviour ---------->>
 
@@ -232,49 +290,8 @@ namespace CDK {
         
 
 
+        
 		#region <<---------- Events ---------->>
-		protected virtual void SubscribeToEvents() {
-			this._disposables?.Dispose();
-			this._disposables = new CompositeDisposable();
-
-			#region <<---------- RX Creations ---------->>
-
-			this.CanMoveRx = new ReactiveProperty<bool>(true);
-			
-			this._isAimingRx = new ReactiveProperty<bool>();
-			this.IsStrafingRx = new ReactiveProperty<bool>();
-
-			#endregion <<---------- RX Creations ---------->>
-
-			#region <<---------- Movement ---------->>
-
-			// strafe
-			this.IsStrafingRx.TakeUntilDisable(this).DistinctUntilChanged().Subscribe(isStrafing => {
-				if (this._animator) this._animator.SetBool(this.ANIM_CHAR_IS_STRAFING, isStrafing);
-			});
-
-			// can mov
-			this.CanMoveRx.TakeUntilDisable(this).DistinctUntilChanged().Subscribe(canMove => {
-				if (!canMove && this.CurrentMovState > CMovState.Idle) {
-					this.SetMovementState(CMovState.Idle);
-				}
-			});
-
-			#endregion <<---------- Movement ---------->>
-
-			// events
-			this._blockingEventsManager.OnDoingBlockingAction += this.DoingBlockingAction;
-			SceneManager.activeSceneChanged += this.OnActiveSceneChanged;
-
-		}
-
-		protected virtual void UnsubscribeToEvents() {
-			this._disposables?.Dispose();
-			this._disposables = null;
-
-			this._blockingEventsManager.OnDoingBlockingAction -= this.DoingBlockingAction;
-			SceneManager.activeSceneChanged -= this.OnActiveSceneChanged;
-		}
 
 		protected void DoingBlockingAction(bool isDoing) {
 			this.CanMoveRx.Value = !isDoing;

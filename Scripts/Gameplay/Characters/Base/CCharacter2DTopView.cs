@@ -29,19 +29,6 @@ namespace CDK {
             base.UpdateCharacter();
             this.UpdateAnimator();
         }
-        
-        protected override void SetMovementState(CMovState value) {
-            if (this._currentMovState == value) return;
-            var oldValue = this._currentMovState;
-            this._currentMovState = value;
-
-            // set animators
-            if (this._animator) {
-                this._animator.SetBool(this.ANIM_CHAR_IS_WALKING, value == CMovState.Walking);
-                this._animator.SetBool(this.ANIM_CHAR_IS_RUNNING, value == CMovState.Running);
-                this._animator.SetBool(this.ANIM_CHAR_IS_SPRINTING, value == CMovState.Sprint);
-            }
-        }
 
         protected override void ProcessMovement() {
             if (!this.CanMoveRx.Value) return;

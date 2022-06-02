@@ -32,7 +32,7 @@ namespace CDK {
         
         #region <<---------- Rotation ---------->>
         [Header("Rotation")]
-        [SerializeField] private AnimationCurve _curveRotationRateOverSpeed = AnimationCurve.Linear(0f,666f,10f,1f);
+        [SerializeField] private AnimationCurve _curveRotationRateOverSpeed = AnimationCurve.Linear(0f,900f,0.15f,90f);
         protected Quaternion _targetLookRotation;
         #endregion <<---------- Rotation ---------->>
 
@@ -81,6 +81,51 @@ namespace CDK {
             }
         }
 
+        protected override void OnEnable() {
+            base.OnEnable();
+            
+            this._enableSlideRx = new ReactiveProperty<bool>(true);
+            this._isTouchingTheGroundRx = new BoolReactiveProperty(true);
+            this._isOnFreeFall = new BoolReactiveProperty(false);
+            this._distanceOnFreeFall = new FloatReactiveProperty();
+
+            
+            // can slide
+            this._enableSlideRx.TakeUntilDisable(this).DistinctUntilChanged().Subscribe(canSlide => {
+                // stopped sliding
+                if (!canSlide && this.CurrentMovState == CMovState.Sliding) {
+                    this.SetMovementState(CMovState.Walking);
+                }
+            });
+            
+            #region <<---------- Fall ---------->>
+
+            this._isTouchingTheGroundRx.TakeUntilDisable(this).DistinctUntilChanged().Subscribe(isTouchingTheGround => {
+                if (isTouchingTheGround && this._animator != null) {
+                    if(this._debug) Debug.Log($"<color={"#D76787"}>{this.name}</color> touched the ground, velocityY: '{this.Velocity.y}', {nameof(this._distanceOnFreeFall)}: '{this._distanceOnFreeFall.Value}', {nameof(this._lastYPositionCharWasNotFalling)}: '{this._lastYPositionCharWasNotFalling}'");
+                    int fallAnimIndex = 0;
+                    if (this._distanceOnFreeFall.Value >= 6f) {
+                        fallAnimIndex = 2;
+                    }else if (this._distanceOnFreeFall.Value >= 2f) {
+                        fallAnimIndex = 1;
+                    }
+                    this._animator.SetInteger(ANIM_FALL_LANDING_ANIM_INDEX, fallAnimIndex);
+                }
+                this.MovementMomentumXZ = isTouchingTheGround ? Vector3.zero : this.GetMyVelocityXZ();
+            });
+			
+            this._isOnFreeFall.TakeUntilDisable(this).DistinctUntilChanged().Subscribe(isFallingNow => {
+                this._animator.CSetBoolSafe(this.ANIM_CHAR_IS_FALLING, isFallingNow);
+                this._distanceOnFreeFall.Value = 0f;
+            });
+
+            this._distanceOnFreeFall.TakeUntilDisable(this).DistinctUntilChanged().Subscribe(distanceOnFreeFall => {
+                this._animator.CSetFloatSafe(this.ANIM_DISTANCE_ON_FREE_FALL, distanceOnFreeFall);
+            });
+
+            #endregion <<---------- Fall ---------->>
+        }
+
         #if UNITY_EDITOR
         protected virtual void OnDrawGizmosSelected() {
             if (!this._debug) return;
@@ -126,57 +171,7 @@ namespace CDK {
         #endregion <<---------- CCharacterBase ---------->>
 
 
-
-
-        #region <<---------- Events ---------->>
-        protected override void SubscribeToEvents() {
-            base.SubscribeToEvents();
-            
-            this._enableSlideRx = new ReactiveProperty<bool>(true);
-            this._isTouchingTheGroundRx = new BoolReactiveProperty(true);
-            this._isOnFreeFall = new BoolReactiveProperty(false);
-            this._distanceOnFreeFall = new FloatReactiveProperty();
-
-            
-            // can slide
-            this._enableSlideRx.TakeUntilDisable(this).DistinctUntilChanged().Subscribe(canSlide => {
-                // stopped sliding
-                if (!canSlide && this.CurrentMovState == CMovState.Sliding) {
-                    this.SetMovementState(CMovState.Walking);
-                }
-            });
-            
-            #region <<---------- Fall ---------->>
-
-            this._isTouchingTheGroundRx.TakeUntilDisable(this).DistinctUntilChanged().Subscribe(isTouchingTheGround => {
-                if (isTouchingTheGround && this._animator != null) {
-                    if(this._debug) Debug.Log($"<color={"#D76787"}>{this.name}</color> touched the ground, velocityY: '{this.Velocity.y}', {nameof(this._distanceOnFreeFall)}: '{this._distanceOnFreeFall.Value}', {nameof(this._lastYPositionCharWasNotFalling)}: '{this._lastYPositionCharWasNotFalling}'");
-                    int fallAnimIndex = 0;
-                    if (this._distanceOnFreeFall.Value >= 6f) {
-                        fallAnimIndex = 2;
-                    }else if (this._distanceOnFreeFall.Value >= 2f) {
-                        fallAnimIndex = 1;
-                    }
-                    this._animator.SetInteger(ANIM_FALL_LANDING_ANIM_INDEX, fallAnimIndex);
-                }
-                this.MovementMomentumXZ = isTouchingTheGround ? Vector3.zero : this.GetMyVelocityXZ();
-            });
-			
-            this._isOnFreeFall.TakeUntilDisable(this).DistinctUntilChanged().Subscribe(isFallingNow => {
-                this._animator.CSetBoolSafe(this.ANIM_CHAR_IS_FALLING, isFallingNow);
-                this._distanceOnFreeFall.Value = 0f;
-            });
-
-            this._distanceOnFreeFall.TakeUntilDisable(this).DistinctUntilChanged().Subscribe(distanceOnFreeFall => {
-                this._animator.CSetFloatSafe(this.ANIM_DISTANCE_ON_FREE_FALL, distanceOnFreeFall);
-            });
-
-            #endregion <<---------- Fall ---------->>
-        }
-        #endregion <<---------- Events ---------->>
-
-
-
+        
         
         #region <<---------- Input ---------->>
 
@@ -232,11 +227,10 @@ namespace CDK {
             return this.GetMyVelocityXZ().magnitude;
         }
 
-        protected override void SetMovementState(CMovState value) {
-            if (this._currentMovState == value) return;
+        protected override bool SetMovementState(CMovState value) {
             var oldValue = this._currentMovState;
-            this._currentMovState = value;
-
+            if(!base.SetMovementState(value)) return false;
+           
             // sliding
             if (value == CMovState.Sliding) {
                 // is sliding now
@@ -249,13 +243,7 @@ namespace CDK {
                 }
             }
 
-            // set animators
-            if (this._animator) {
-                this._animator.CSetBoolSafe(this.ANIM_CHAR_IS_SLIDING, value == CMovState.Sliding);
-                this._animator.CSetBoolSafe(this.ANIM_CHAR_IS_WALKING, value == CMovState.Walking);
-                this._animator.CSetBoolSafe(this.ANIM_CHAR_IS_RUNNING, value == CMovState.Running);
-                this._animator.CSetBoolSafe(this.ANIM_CHAR_IS_SPRINTING, value == CMovState.Sprint);
-            }
+            return true;
         }
 
         protected override void ProcessMovement() {
