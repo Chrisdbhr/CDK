@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
 using UniRx;
 using UnityEngine;
+using UnityEngine.AI;
 using UnityEngine.SceneManagement;
 
 namespace CDK {
@@ -158,24 +159,25 @@ namespace CDK {
                 Debug.LogError("Cant move a null game object.");
                 return;
             }
-
-            Transform targetEntryPointTransform = CSceneEntryPoint.GetSceneEntryPointTransform(entryPointNumber);
-
+            
+            var targetEntryPointTransform = CSceneEntryPoint.GetSceneEntryPointTransform(entryPointNumber);
             var offset = new Vector3(0f, 0.001f, 0f);
-            if (targetEntryPointTransform == null) {
-                transformToMove.position = Vector3.zero + offset;
-                transformToMove.rotation = Quaternion.identity;
+            var targetPos = Vector3.zero + offset;
+            var targetRotation = Quaternion.identity;
+
+            if (targetEntryPointTransform != null) {
+                targetPos = targetEntryPointTransform.position + offset;
+                targetRotation = targetEntryPointTransform.rotation;
+            }
+
+            var character = transformToMove.GetComponent<CCharacterBase>();
+            if (character != null) {
+                character.TeleportToLocation(targetPos, targetRotation);					
             }
             else {
-                var character = transformToMove.GetComponent<CCharacterBase>();
-                if (character != null) {
-                    character.TeleportToLocation(targetEntryPointTransform.position, targetEntryPointTransform.rotation);					
-                }
-                else {
-                    transformToMove.position = targetEntryPointTransform.position + offset;
-                    transformToMove.rotation = targetEntryPointTransform.rotation;
-                }
+                transformToMove.position = targetPos;
             }
+            transformToMove.rotation = targetRotation;
 			
             Debug.Log($"Moving {transformToMove.name} to {nameof(entryPointNumber)}:'{entryPointNumber}' at position {transformToMove.position}", targetEntryPointTransform);
         }
