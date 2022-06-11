@@ -71,16 +71,19 @@ namespace CDK {
 			this.TargetAlpha = 1f;
 			this.TargetFadeTime = fadeTime;
 			this.IgnoreTimeScale = ignoreTimeScale;
-		}
+            this.UpdateOpacity();
+        }
 
 		public void FadeToTransparent(float fadeTime, bool ignoreTimeScale = true) {
             Debug.Log($"Requesting fade to transparent, time '{fadeTime}' seconds with ignoreTimeScale set to '{ignoreTimeScale}'");
 			this.TargetAlpha = 0f;
 			this.TargetFadeTime = fadeTime;
 			this.IgnoreTimeScale = ignoreTimeScale;
+            this.UpdateOpacity();
 		}
 
 		private void UpdateOpacity() {
+            if (this._fadeCanvasGroup == null) return;
 			float currentAlpha = this._fadeCanvasGroup.alpha.CImprecise();
 			if (this.TargetAlpha == currentAlpha) return;
 			float delta = this.IgnoreTimeScale ? Time.unscaledDeltaTime : CTime.DeltaTimeScaled;
