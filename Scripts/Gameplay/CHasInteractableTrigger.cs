@@ -1,3 +1,4 @@
+using CDK.Interaction;
 using UnityEngine;
 
 namespace CDK {
@@ -31,7 +32,7 @@ namespace CDK {
 
 		#region <<---------- Callbacks ---------->>
 
-		private void InteractableChanged(CInteractableObject interactable) {
+		private void InteractableChanged(CInteractable interactable) {
 			this.HasInteractableEvent?.Invoke(interactable != null);
 		}
 

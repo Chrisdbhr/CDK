@@ -1,7 +1,8 @@
+using System;
 using System.Linq;
 using UnityEngine;
 
-namespace CDK {
+namespace CDK.Interaction {
 	public class CPlayerInteractionThirdPerson : CPlayerInteractionBase {
 
 		#region <<---------- Properties and Fields ---------->>
@@ -38,20 +39,28 @@ namespace CDK {
 			if (colliders == null || colliders.Length <= 0) return;
 
 			// get list of interactables
-			var interactableColliders = colliders.Where(c => c != null && c.GetComponent<CIInteractable>() != null).ToArray();
+			var interactableColliders = colliders.Where(c => c != null && c.GetComponent<ICInteractable>() != null).ToArray();
 			if (interactableColliders.Length <= 0) return;
             
 			originPos.x = this.transform.position.x;
 			originPos.z = this.transform.position.z;
 
             // get closer interaction point
-            interactableColliders = interactableColliders.OrderBy(c => (originPos - this.GetColliderCenterPosition(c)).sqrMagnitude).ToArray();
+            interactableColliders = interactableColliders.OrderBy(c => (originPos - this.GetScaledColliderCenterPosition(c)).sqrMagnitude).ToArray();
             
 			// get target interactable to try to interact
             bool foundValidInteractable = false;
             Collider chosenInteractable = null;
             foreach (var c in interactableColliders) {
-                var direction = (this.GetColliderCenterPosition(c) - originPos).normalized;
+                bool isInsideInteractableCollider = IsPointInsideCollider(originPos, c);
+                if (isInsideInteractableCollider) {
+                    Debug.Log($"OriginPos is inside interaction collider '{c.name}', interacting with it.");
+                    foundValidInteractable = true;
+                    chosenInteractable = c;
+                    break;
+                }
+                
+                var direction = (this.GetScaledColliderCenterPosition(c) - originPos).normalized;
 
                 var ray = new Ray(
                     originPos,
@@ -85,7 +94,7 @@ namespace CDK {
 
             if (!foundValidInteractable) return;
             
-            chosenInteractable.GetComponent<CIInteractable>().OnInteract(this.transform);
+            chosenInteractable.GetComponent<ICInteractable>().OnInteract(this.transform);
 		}
 
 		private Vector3 GetCheckHeight() {
@@ -96,20 +105,40 @@ namespace CDK {
 			return this.GetCheckHeight() + (this.transform.forward * this._interactionSphereCheckRadius);
 		}
 
-        protected Vector3 GetColliderCenterPosition(Collider c) {
-            if (c is BoxCollider bc) {
-                return c.transform.position + bc.center;
+        protected Vector3 GetScaledColliderCenterPosition(Collider c) {
+            var localScale = c.transform.localScale;
+            var center = Vector3.zero;
+            switch (c) {
+                case BoxCollider bc:
+                    center = bc.center;
+                    break;
+                case SphereCollider sc:
+                    center = sc.center;
+                    break;
+                case CapsuleCollider cc:
+                    center = cc.center;
+                    break;
             }
-
-            if (c is SphereCollider sc) {
-                return c.transform.position + sc.center;
-            }
-
-            if (c is CapsuleCollider cc) {
-                return c.transform.position + cc.center;
-            }
-
-            return c.transform.position;
+            
+            return c.transform.position + new Vector3(
+                center.x * localScale.x,
+                center.y * localScale.y,
+                center.z * localScale.z
+            );;
+        }
+        
+        protected bool IsPointInsideCollider(Vector3 point, Collider c) {
+            return c.bounds.Contains(point);
+            // switch (c) {
+            //     case BoxCollider boxCollider:
+            //         return boxCollider.bounds.Contains(point);
+            //     case SphereCollider sphereCollider:
+            //         return sphereCollider.bounds.Contains(point);
+            // }
+            //
+            // var isInside = c.bounds.Contains(point);
+            // Debug.LogWarning($"{nameof(IsPointInsideCollider)} using Collider '{c.name}' bounds to check if contains point, this can be imprecise. IsInside: {isInside}", c);
+            // return isInside;
         }
 	}
 }

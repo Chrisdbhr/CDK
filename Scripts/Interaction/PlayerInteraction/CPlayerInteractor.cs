@@ -1,9 +1,8 @@
 using System;
-using System.Threading.Tasks;
 using UniRx;
 using UnityEngine;
 
-namespace CDK {
+namespace CDK.Interaction {
 	public class CPlayerInteractor : MonoBehaviour {
 
 		#region <<---------- Properties and Fields ---------->>
@@ -15,7 +14,7 @@ namespace CDK {
 
 		[NonSerialized] private float _interactionCapsuleCheckRadius = 0.10f;
 
-		[NonSerialized] private ReactiveProperty<CInteractableObject> _currentInteractable;
+		[NonSerialized] private ReactiveProperty<CInteractable> _currentInteractable;
 		[NonSerialized] private Transform _transform;
 
 		[NonSerialized] private bool _jumpNextFrame;
@@ -28,7 +27,7 @@ namespace CDK {
 
 		#region <<---------- Events ---------->>
 
-		public event Action<CInteractableObject> OnInteractableChanged;
+		public event Action<CInteractable> OnInteractableChanged;
 
 		#endregion <<---------- Events ---------->>
 		
@@ -49,7 +48,7 @@ namespace CDK {
 
 		private void OnEnable() {
 			this._currentInteractable?.Dispose();
-			this._currentInteractable = new ReactiveProperty<CInteractableObject>();
+			this._currentInteractable = new ReactiveProperty<CInteractable>();
 			this._currentInteractable.TakeUntilDisable(this).Subscribe(newInteractable => {
 				if (newInteractable != null) {
 					newInteractable.OnLookTo(this._transform);
@@ -114,7 +113,7 @@ namespace CDK {
 				return;
 			}
 			
-			this._currentInteractable.Value = raycastHit.transform.GetComponent<CInteractableObject>();
+			this._currentInteractable.Value = raycastHit.transform.GetComponent<CInteractable>();
 		}
 		
 		private void TryToInteract() {

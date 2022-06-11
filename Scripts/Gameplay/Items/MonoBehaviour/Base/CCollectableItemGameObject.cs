@@ -1,9 +1,10 @@
 using System;
+using CDK.Interaction;
 using UnityEngine;
 
 namespace CDK {
 	[SelectionBase]
-	public abstract class CCollectableItemGameObject : MonoBehaviour, CIInteractable {
+	public abstract class CCollectableItemGameObject : CInteractable {
 
 
 
@@ -18,8 +19,8 @@ namespace CDK {
 
 
 		#region <<---------- MonoBehaviour ---------->>
-		
-		private void Awake() {
+        protected override void Awake() {
+            base.Awake();
 			this._blockingEventsManager = CDependencyResolver.Get<CBlockingEventsManager>();
 		}
 
@@ -39,17 +40,17 @@ namespace CDK {
 		
 
 		#region <<---------- CIInteractable ---------->>
-		public void OnLookTo(Transform lookingTransform) {
-			
+		public override void OnLookTo(Transform lookingTransform) {
+			base.OnLookTo(lookingTransform);
 		}
 
-		public void OnInteract(Transform interactingTransform) {
-			if (!this.enabled || !this.gameObject.activeInHierarchy || this._blockingEventsManager.IsAnyBlockingEventHappening) return;
+		public override bool OnInteract(Transform interactingTransform) {
+            if (!base.OnInteract(interactingTransform)) return false;
 			// try to get object
 			var inventory = interactingTransform.root.GetComponent<CInventory>();
 			if (inventory == null) {
 				Debug.Log($"{interactingTransform}");
-				return;
+				return false;
 			}
 
 			bool itemCollected = false;
@@ -65,9 +66,9 @@ namespace CDK {
 					Debug.LogError($"Could not add item to inventory because there is no switch case implemented for it.");
 					break;
 			}
-			if (!itemCollected) return;
+			if (!itemCollected) return false;
 			Destroy(this.gameObject);
-			return;
+			return true;
 		}
 
 		#endregion <<---------- CIInteractable ---------->>

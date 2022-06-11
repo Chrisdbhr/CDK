@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace CDK {
+namespace CDK.Interaction {
 	[DisallowMultipleComponent]
 	public abstract class CPlayerInteractionBase : MonoBehaviour {
 

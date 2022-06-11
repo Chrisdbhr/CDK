@@ -2,7 +2,7 @@
 using UnityEditor;
 using UnityEngine;
 
-namespace CDK {
+namespace CDK.Interaction {
 	public class CPlayerInteractionFirstPerson : CPlayerInteractionBase {
 		
 		[SerializeField] private Transform _originTransform;
@@ -31,7 +31,7 @@ namespace CDK {
 
 		}
 
-		private CIInteractable GetCollisionInteractable() {
+		private ICInteractable GetCollisionInteractable() {
 			var collided = Physics.Raycast(
 				this._originTransform.transform.position,
 				this._originTransform.forward,
@@ -43,7 +43,7 @@ namespace CDK {
 
 			if (!collided) return null;
 
-			return this._hitInfo.transform.GetComponent<CIInteractable>();
+			return this._hitInfo.transform.GetComponent<ICInteractable>();
 		}
 	}
 }

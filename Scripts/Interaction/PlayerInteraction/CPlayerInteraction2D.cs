@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace CDK {
+namespace CDK.Interaction {
 	public class CPlayerInteraction2D : CPlayerInteractionBase {
 
 		#region <<---------- Properties and Fields ---------->>
@@ -41,7 +41,7 @@ namespace CDK {
 			);
 
 			foreach (var obj in allObjs) {
-				var interactable = obj.transform.GetComponent<CIInteractable>();
+				var interactable = obj.transform.GetComponent<ICInteractable>();
 				if (interactable == null) continue;
 				interactable.OnInteract(this.transform);
 			}

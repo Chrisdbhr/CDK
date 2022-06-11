@@ -123,9 +123,9 @@ namespace CDK {
             
 			// blocking Event Happening
 			Observable.CombineLatest(
-			this._isOnMenuRx, 
-			this._isPlayingCutsceneRx,
-			this._isDoingBlockingAction.IsRetainedRx,
+			this._isOnMenuRx.AsObservable(), 
+			this._isPlayingCutsceneRx.AsObservable(),
+			this._isDoingBlockingAction.IsRetainedRx.AsObservable(),
 			(isOnMenu, isPlayingCutscene, isDoingBlockingAction) => isOnMenu || isPlayingCutscene || isDoingBlockingAction)
 			.Subscribe(blockingEventHappening => {
 				Debug.Log($"<color={"#b62a24"}>IsBlockingEventHappening changed to: {blockingEventHappening}</color>");

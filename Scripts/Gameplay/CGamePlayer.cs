@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using CDK.Interaction;
 using CDK.UI;
 using UniRx;
 using UnityEngine;
@@ -287,12 +288,10 @@ namespace CDK {
 		
 		private void InputPause(InputActionEventData data) {
 			if (!data.GetButtonDown()) return;
-
 			if (Time.timeScale <= 0) return;
-			
-			if (!this._blockingEventsManager.IsOnMenu) {
-				this.OpenMenu();
-			}
+            if (this._blockingEventsManager.IsOnMenu) return; 
+            
+            this.OpenMenu();
 		}
 
 		private void InputResetCameraRotation(InputActionEventData data) {

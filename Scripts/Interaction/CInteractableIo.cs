@@ -2,8 +2,9 @@ using System;
 using UnityEngine;
 using UnityEngine.Events;
 
-namespace CDK {
-	public class CInteractableIoObject : MonoBehaviour, CIInteractable {
+namespace CDK.Interaction {
+    [Obsolete("This script needs revision")]
+	public class CInteractableIo : CInteractable {
 
 		#region <<---------- Properties and Fields ---------->>
 		
@@ -82,18 +83,19 @@ namespace CDK {
 
 		
 		#region <<---------- CInteractable ---------->>
-		public void OnLookTo(Transform lookingTransform) {
+		public override void OnLookTo(Transform lookingTransform) {
 			
 		}
 
-		public void OnInteract(Transform interactingTransform) {
-			if (!this.enabled || !this.gameObject.activeInHierarchy || this._blockingEventsManager.IsAnyBlockingEventHappening) return; 
+		public override bool OnInteract(Transform interactingTransform) {
+            if (!base.OnInteract(interactingTransform)) return false; 
 			if (this.Locked) {
 				this.TryToOpenWhenLocked(interactingTransform);
-				return;
+				return true;
 			}
 			this.SwitchState();
-		}
+            return true;
+        }
 
 		#endregion <<---------- CInteractable ---------->>
 		
