@@ -14,8 +14,8 @@ using UnityEngine.AddressableAssets;
 using UnityEngine.Localization.Settings;
 #endif
 
-#if UNITY_EDITOR
-using UnityEditor;
+#if Rewired
+using Rewired;
 #endif
 
 namespace CDK {
@@ -37,11 +37,9 @@ namespace CDK {
                 IsQuitting = true;
                 QuittingCancellationTokenSource?.Cancel();
             };
-            
-            #if Rewired
-            CAssets.LoadAndInstantiateGameObject("Rewired Input Manager");
-			#endif
 
+            InitializeInputManager();
+            
             InitializeDependencyContainerAndBinds();
 
 			InitializeApplicationAsync().CAwait();
@@ -104,6 +102,32 @@ namespace CDK {
 
 
 
+        
+        #region <<---------- Input ---------->>
+
+        private static void InitializeInputManager() {
+            #if Rewired
+            var rInputManager = GameObject.FindObjectOfType<InputManager_Base>();
+            if (rInputManager) {
+                Debug.Log("Will not Instantiate a new <b>Rewired Input Manager</b> because one is already in the scene.");
+                return;
+            }
+            var rw = CAssets.LoadAndInstantiateGameObject("Rewired Input Manager"); 
+            if (!rw) {
+                Debug.LogError("<b>Rewired Input Manager</b> could not be Instantiated.");
+                return;
+            }
+            Debug.Log("<b>Rewired Input Manager</b> instantiated.");
+            rw.name = rw.name.Replace("(Clone)", string.Empty) + " (Instantiated BeforeSplashScreen)";
+            #else
+            Debug.Log("No input manager setup on initialization.");
+			#endif
+        }
+
+        #endregion <<---------- Input ---------->>
+
+
+
 
 		#region <<---------- Addressables ---------->>
 
@@ -157,7 +181,7 @@ namespace CDK {
 			
 			#if UNITY_EDITOR
 			Time.timeScale = 1f;
-			EditorApplication.isPlaying = false;
+            UnityEditor.EditorApplication.isPlaying = false;
 			#else
 			Application.Quit();			
 			#endif
