@@ -98,6 +98,10 @@ namespace CDK.UI {
 			
 		}
 
+        protected virtual void OnDestroy() {
+			
+        }
+
         protected virtual void Reset() {
             if (this._eventSystem == null) {
                 this._eventSystem = this.GetComponentInChildren<EventSystem>();
@@ -193,7 +197,8 @@ namespace CDK.UI {
 		public async Task SelectGameObjectAsync(GameObject toSelect) {
 			if (toSelect == null) return;
 			await Observable.NextFrame();
-			var selectable = toSelect.GetComponent<Selectable>();
+            if (toSelect == null) return;
+            var selectable = toSelect.GetComponent<Selectable>();
 			if (selectable != null) selectable.Select();
 			await Observable.TimerFrame(1);
 			if (this._eventSystem != null && toSelect != null) this._eventSystem.SetSelectedGameObject(toSelect);
