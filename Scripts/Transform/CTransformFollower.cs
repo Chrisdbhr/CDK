@@ -25,6 +25,7 @@ namespace CDK {
 		[SerializeField] private float _followSpeed = 10f;
 		[NonSerialized] private Transform _myTransform;
 
+        [SerializeField] private bool _ignoreTimeScale;
 		[SerializeField] private bool _ignoreXAxis;
 		[SerializeField] private bool _ignoreYAxis;
 		[SerializeField] private bool _ignoreZAxis;
@@ -57,17 +58,17 @@ namespace CDK {
 
 		private void Update() {
 			if (this.executionLoop != CMonobehaviourExecutionLoop.Update) return;
-			this.FollowTarget(CTime.DeltaTimeScaled);
-		}
+            Execute(this._ignoreTimeScale ? Time.unscaledDeltaTime : CTime.DeltaTimeScaled);
+        }
 
 		private void FixedUpdate() {
 			if (this.executionLoop != CMonobehaviourExecutionLoop.FixedUpdate) return;
-			this.FollowTarget(CTime.FixedDeltaTimeScaled);
+            Execute(this._ignoreTimeScale ? Time.fixedUnscaledDeltaTime : CTime.FixedDeltaTimeScaled);
 		}
 
 		private void LateUpdate() {
 			if (this.executionLoop != CMonobehaviourExecutionLoop.LateUpdate) return;
-			this.FollowTarget(CTime.DeltaTimeScaled);
+            Execute(this._ignoreTimeScale ? Time.unscaledDeltaTime : CTime.DeltaTimeScaled);
 		}
 
 		#if UNITY_EDITOR
@@ -89,6 +90,10 @@ namespace CDK {
 		
 		
 		#region <<---------- General ---------->>
+
+        protected virtual void Execute(float deltaTime) {
+            this.FollowTarget(deltaTime);
+        }
 
 		private void CheckIfWillMove() {
 			if (this._ignoreXAxis && this._ignoreYAxis && this._ignoreZAxis) {
