@@ -68,15 +68,17 @@ namespace CDK {
 		#region <<---------- Collision and Trigger Registry ---------->>
 		
 		protected virtual void StartedCollisionOrTrigger(Transform transf) {
-			this.Enter?.Invoke(transf);
-			this.Entered?.Invoke(true);
-			this.Exited?.Invoke(false);
+            bool exited = false;
+            this.Enter?.Invoke(transf);
+            this.Entered?.Invoke(!exited);
+            this.Exited?.Invoke(exited);
 		}
 
 		protected virtual void ExitedCollisionOrTrigger(Transform transf) {
+            bool exited = true;
 			this.Exit?.Invoke(transf);
-			this.Entered?.Invoke(false);
-			this.Exited?.Invoke(true);
+			this.Entered?.Invoke(!exited);
+			this.Exited?.Invoke(exited);
 		}
 		
 		#endregion <<---------- Collision and Trigger Registry ---------->>
