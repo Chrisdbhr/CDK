@@ -14,6 +14,7 @@ namespace CDK {
         
         protected CharacterController _charController;
         private float _charInitialHeight;
+        protected readonly int ANIM_INPUT_MAGNITUDE = Animator.StringToHash("input magnitude");
 
         #region <<---------- Aerial ---------->>
 

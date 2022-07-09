@@ -171,8 +171,9 @@ namespace CDK {
 		// Stun
 		protected readonly int ANIM_CHAR_IS_STUNNED_LIGHT = Animator.StringToHash("stunL");
 		protected readonly int ANIM_CHAR_IS_STUNNED_MEDIUM = Animator.StringToHash("stunM");
-		protected readonly int ANIM_CHAR_IS_STUNNED_HEAVY = Animator.StringToHash("stunH");
-		#endregion <<---------- Animation Parameters ---------->>
+        protected readonly int ANIM_CHAR_IS_STUNNED_HEAVY = Animator.StringToHash("stunH");
+        
+        #endregion <<---------- Animation Parameters ---------->>
 
 		#endregion <<---------- Animation ---------->>
 
@@ -496,6 +497,7 @@ namespace CDK {
 		
 		
 
+        
 		#region <<---------- Animations State Machine Behaviours ---------->>
 		
 		public void SetAnimationRootMotion(bool state) {
@@ -503,6 +505,6 @@ namespace CDK {
 		}
 		
 		#endregion <<---------- Animations State Machine Behaviours ---------->>
-		
-	}
+        
+    }
 }
