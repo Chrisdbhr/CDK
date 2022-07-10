@@ -143,10 +143,10 @@ MonoBehaviour:
         ignoreInputWhenAppNotInFocus: 1
         useNativeKeyboard: 1
         useNativeMouse: 1
-      maxJoysticksPerPlayer: 100
+      maxJoysticksPerPlayer: 1
       autoAssignJoysticks: 1
       assignJoysticksToPlayingPlayersOnly: 0
-      distributeJoysticksEvenly: 0
+      distributeJoysticksEvenly: 1
       reassignJoystickToPreviousOwnerOnReconnect: 1
       defaultJoystickAxis2DDeadZoneType: 1
       defaultJoystickAxis2DSensitivityType: 0
