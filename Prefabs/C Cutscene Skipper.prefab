@@ -70,8 +70,7 @@ MonoBehaviour:
   m_text: Hold to skip
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 4f9cc72c0791c544abea51001c118248, type: 2}
-  m_sharedMaterial: {fileID: 8381961905607553344, guid: 4f9cc72c0791c544abea51001c118248,
-    type: 2}
+  m_sharedMaterial: {fileID: 8381961905607553344, guid: 4f9cc72c0791c544abea51001c118248, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -404,11 +403,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0cd44c1031e13a943bb63640046fad76, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_UiScaleMode: 0
+  m_UiScaleMode: 1
   m_ReferencePixelsPerUnit: 100
   m_ScaleFactor: 1
-  m_ReferenceResolution: {x: 800, y: 600}
-  m_ScreenMatchMode: 0
+  m_ReferenceResolution: {x: 1280, y: 720}
+  m_ScreenMatchMode: 1
   m_MatchWidthOrHeight: 0
   m_PhysicalUnit: 3
   m_FallbackScreenDPI: 96
@@ -432,8 +431,8 @@ MonoBehaviour:
   _progressImage: {fileID: 1746275858868196662}
   _soundOnSkip:
     Guid:
-      Data1: -921927785
-      Data2: 1157568907
-      Data3: 1821744047
-      Data4: 1623307996
-    Path: event:/sfx/UI/skip-cutscene
+      Data1: -1616219828
+      Data2: 1080809623
+      Data3: -1936456820
+      Data4: 1967889190
+    Path: event:/SFX/UI/skip-cutscene

@@ -1,6 +1,4 @@
-using System;
 using System.Collections;
-using UniRx;
 using UnityEngine;
 using UnityEngine.Playables;
 using UnityEngine.UI;
@@ -80,6 +78,9 @@ namespace CDK {
             #endif
             this._skipped = true;
         }
-        
+
+        private void Reset() {
+            if (this._cutsceneToSkip == null) this._cutsceneToSkip = this.GetComponentInParent<PlayableDirector>();
+        }
     }
 }

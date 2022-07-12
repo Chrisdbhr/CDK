@@ -8,13 +8,14 @@ using AsyncOperation = UnityEngine.AsyncOperation;
 #if UNITY_EDITOR
 using UnityEditor;
 using UnityEditor.SceneManagement;
-using UnityEditor.Experimental.SceneManagement;
 #endif
 
 namespace CDK {
 	[ExecuteInEditMode]
 	public class CSceneAreaAdditiveLoader : MonoBehaviour {
-		
+
+		#region <<---------- Properties and Fields ---------->>
+
 		[SerializeField] private LayerMask _triggerLayer;
 		[SerializeField] private CSceneField _scene;
 		[SerializeField][TagSelector] private string _tag = "Player";
@@ -37,6 +38,10 @@ namespace CDK {
 		[NonSerialized] private bool _editorSceneIsDirty;
 		private IDisposable _checkDisposable;
 		
+		#endregion <<---------- Properties and Fields ---------->>
+
+
+
 
 		#region <<---------- MonoBehaviour ---------->>
 		
@@ -44,6 +49,11 @@ namespace CDK {
 			this._anyTriggerObjectInside = false;
 			this._loadAsyncOperation = null;
 			this._unloadAsyncOperation = null;
+			#if UNITY_EDITOR
+			if (!Application.isPlaying) {
+				EditorSceneManager.OpenScene(AssetDatabase.GetAssetOrScenePath(this._scene.sceneAsset), OpenSceneMode.AdditiveWithoutLoading);
+			}
+			#endif
 		}
 
 		private void OnEnable() {
@@ -135,7 +145,8 @@ namespace CDK {
 		void LoadScene() {
 			#if UNITY_EDITOR
 			if (!Application.isPlaying && !PrefabStageUtility.GetCurrentPrefabStage()) {
-				EditorSceneManager.OpenScene(AssetDatabase.GetAssetOrScenePath(this._scene.sceneAsset), OpenSceneMode.Additive);
+				var scene = EditorSceneManager.OpenScene(AssetDatabase.GetAssetOrScenePath(this._scene.sceneAsset), OpenSceneMode.Additive);
+				CSceneManager.EditorSetSceneExpanded(EditorSceneManager.GetSceneByName(this._scene), false);
 				return;
 			}
 			#endif
