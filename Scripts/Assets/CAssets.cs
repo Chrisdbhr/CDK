@@ -30,6 +30,10 @@ namespace CDK {
         
 		#region <<---------- Loaders ---------->>
 
+		public static T LoadObject<T>(AssetReference key) {
+			return LoadObject<T>(key.RuntimeKey.ToString());
+		}
+		
         public static T LoadObject<T>(string key) {
             var op = Addressables.LoadAssetAsync<T>(key);
             return op.WaitForCompletion();

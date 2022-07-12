@@ -22,11 +22,11 @@ namespace CDK.Weapons {
 		}
 
 		private void Update() {
-			if (Input.GetButtonDown(CInputKeys.ATTACK) && 
+			if (Input.GetButtonDown(CInputKeys.PRIMARY_ACTION) && 
 				this._characterBase.IsAiming &&
 				this._inventory.EquippedWeapon != null &&
 				!this._blockingEventsManager.IsAnyBlockingEventHappening
-				) {
+			   ) {
 				if (this._inventory.EquippedWeapon is CWeaponData gun) {
 					if (!gun.HasAmmo()) {
 						// no ammo
