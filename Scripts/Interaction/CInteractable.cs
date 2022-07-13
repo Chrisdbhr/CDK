@@ -72,7 +72,7 @@ namespace CDK.Interaction {
 			
             var anim = rootTransform.GetComponentInChildren<Animator>();
             if (anim == null) return;
-            if(!this._animationToTrigger.CIsNullOrEmpty()) anim.SetTrigger(this._animationToTrigger);
+            if(!this._animationToTrigger.CIsNullOrEmpty()) anim.CSetTriggerSafe(Animator.StringToHash(this._animationToTrigger));
         }
 
         #endregion <<---------- General ---------->>

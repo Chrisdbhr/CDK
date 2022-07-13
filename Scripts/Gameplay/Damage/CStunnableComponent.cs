@@ -38,15 +38,15 @@ namespace CDK {
 
 				switch (this._stunStatus) {
 					case CStunStatus.lightStun: {
-						this._animator.SetTrigger(this.ANIM_LIGHTSTUN);
+						this._animator.CSetTriggerSafe(this.ANIM_LIGHTSTUN);
 						break;
 					}
 					case CStunStatus.mediumStun: {
-						this._animator.SetTrigger(this.ANIM_MEDIUMSTUN);
+						this._animator.CSetTriggerSafe(this.ANIM_MEDIUMSTUN);
 						break;
 					}
 					case CStunStatus.heavyStun: {
-						this._animator.SetTrigger(this.ANIM_HEAVYSTUN);
+						this._animator.CSetTriggerSafe(this.ANIM_HEAVYSTUN);
 						break;
 					}
 				}

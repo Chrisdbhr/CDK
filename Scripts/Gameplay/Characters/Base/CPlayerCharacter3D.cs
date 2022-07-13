@@ -240,7 +240,7 @@ namespace CDK {
             else if (oldValue == CMovState.Sliding) {
                 // was sliding
                 if (Time.time >= this._slideBeginTime + this._slideTimeToStumble) {
-                    if (this._animator) this._animator.SetTrigger(this.ANIM_CHAR_STUMBLE);
+                    this._animator.CSetTriggerSafe(this.ANIM_CHAR_STUMBLE);
                 }
             }
 

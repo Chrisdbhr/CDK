@@ -434,7 +434,7 @@ namespace CDK {
 		#region <<---------- Stumble ---------->>
 
 		public void Stumble() {
-			if(this._animator) this._animator.SetTrigger(this.ANIM_CHAR_STUMBLE);
+			this._animator.CSetTriggerSafe(this.ANIM_CHAR_STUMBLE);
 		}
 		
 		#endregion <<---------- Stumble ---------->>
@@ -447,13 +447,13 @@ namespace CDK {
 		public void Stun(CEnumStunType stunType) {
 			switch (stunType) {
 				case CEnumStunType.medium:
-					if(this._animator) this._animator.SetTrigger(this.ANIM_CHAR_IS_STUNNED_MEDIUM);
+					this._animator.CSetTriggerSafe(this.ANIM_CHAR_IS_STUNNED_MEDIUM);
 					break;
 				case CEnumStunType.heavy:
-					if(this._animator) this._animator.SetTrigger(this.ANIM_CHAR_IS_STUNNED_HEAVY);
+					this._animator.CSetTriggerSafe(this.ANIM_CHAR_IS_STUNNED_HEAVY);
 					break;
 				default:
-					if(this._animator) this._animator.SetTrigger(this.ANIM_CHAR_IS_STUNNED_LIGHT);
+					this._animator.CSetTriggerSafe(this.ANIM_CHAR_IS_STUNNED_LIGHT);
 					break;
 			}
 		}

@@ -8,7 +8,7 @@ namespace CDK {
         /// Check if self is null and if was the parameter.
         /// </summary>
 		public static void CSetFloatWithLerp(this Animator self, int id, float target, float time) {
-			if (self == null) return;
+			if (!CheckIfIsAvailable(self)) return;
             if (self.parameters.All(p => p.nameHash != id)) return;
 			target = target.CImprecise();
 			var currentFloat = self.GetFloat(id);
@@ -19,7 +19,7 @@ namespace CDK {
         /// Check if self is null and if was the parameter.
         /// </summary>
 		public static void CSetBoolSafe(this Animator self, int id, bool value) {
-			if (self == null) return;
+			if (!CheckIfIsAvailable(self)) return;
             if (self.parameters.All(p => p.nameHash != id)) return;
 			self.SetBool(id, value);
 		}
@@ -28,7 +28,7 @@ namespace CDK {
 		/// Check if self is null and if was the parameter.
 		/// </summary>
 		public static void CSetFloatSafe(this Animator self, int id, float value) {
-			if (self == null) return;
+			if (!CheckIfIsAvailable(self)) return;
             if (self.parameters.All(p => p.nameHash != id)) return;
 			self.SetFloat(id, value.CImprecise());
 		}
@@ -37,10 +37,14 @@ namespace CDK {
         /// Check if self is null and if was the parameter.
         /// </summary>
         public static void CSetTriggerSafe(this Animator self, int id) {
-            if (self == null) return;
-            if (self.parameters.All(p => p.nameHash != id)) return;
+            if (!CheckIfIsAvailable(self)) return;
+			if (self.parameters.All(p => p.nameHash != id)) return;
             self.SetTrigger(id);
         }
+
+		private static bool CheckIfIsAvailable(Animator self) {
+			return self != null && self.isActiveAndEnabled;
+		}
 
 }
 }
