@@ -5,6 +5,6 @@ namespace CDK.Damage {
 		/// <summary>
 		/// Returns TRUE if damaged with success.
 		/// </summary>
-		bool TakeDamage(CHitInfoData hitInfo);
+		bool TakeDamage(CHitInfoData hitInfo, float damageMultiplier = 1f);
 	}
 }

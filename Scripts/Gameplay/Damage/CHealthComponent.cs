@@ -171,7 +171,7 @@ namespace CDK {
 		/// <summary>
 		/// Returns the amount of damage taken.
 		/// </summary>
-		public float TakeDamage(CHitInfoData hitInfo) {
+		public float TakeDamage(CHitInfoData hitInfo, float damageMultiplier) {
 			if (this.IsDead) return 0f;
 			var hitScriptObj = hitInfo.ScriptableObject;
 			if (hitScriptObj.Damage <= 0f) return 0f;
@@ -179,13 +179,8 @@ namespace CDK {
 			this._lastAttacker = hitInfo.AttackerRootTransform;
 
 			// Start total damage calculation.
-			float finalDamage = hitScriptObj.Damage;
+			float finalDamage = hitScriptObj.Damage * damageMultiplier;
 			
-			// external damage multiplier
-			if (hitInfo.DamageMultiplier != 0f) {
-				finalDamage *= hitInfo.DamageMultiplier;
-			}
-
 			//todo calculate armor damage reduction
 			//todo calculate damage bonus
 			//todo repulsion by animation

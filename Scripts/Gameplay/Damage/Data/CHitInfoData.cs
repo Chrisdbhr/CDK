@@ -7,9 +7,8 @@ namespace CDK.Data {
 
 		public CHitInfoScriptableObject ScriptableObject;
 
-		[NonSerialized] public Transform AttackerRootTransform;
-		[NonSerialized] public Vector3 HitPointPosition;
-		[NonSerialized] public float DamageMultiplier = 1f;
+		public Transform AttackerRootTransform;
+		public Vector3 HitPointPosition;
 
 
 

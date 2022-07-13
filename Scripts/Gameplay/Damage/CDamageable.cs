@@ -12,10 +12,9 @@ namespace CDK {
 		
 		
 		
-		public bool TakeDamage(CHitInfoData hitInfo) {
-			hitInfo.DamageMultiplier = _damageMultiplier;
-			if (_healthToNotify != null) _healthToNotify.TakeDamage(hitInfo);
-			_takeDamageEvent?.Invoke();
+		public bool TakeDamage(CHitInfoData hitInfo, float damageMultiplier) {
+			if (this._healthToNotify != null) this._healthToNotify.TakeDamage(hitInfo, this._damageMultiplier * damageMultiplier);
+			this._takeDamageEvent?.Invoke();
 			return true;
 		}
 		
