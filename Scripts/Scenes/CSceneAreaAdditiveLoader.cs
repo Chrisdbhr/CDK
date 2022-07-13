@@ -175,10 +175,7 @@ namespace CDK {
 
 			if (this._unloadAsyncOperation != null) return;
 			var scene = SceneManager.GetSceneByName(this._scene);
-			if (!scene.IsValid()) {
-				Debug.LogWarning($"Will not try to unload scene '{this._scene}' since its is invalid.");
-				return;
-			}
+			if (!scene.isLoaded) return;
 			this._unloadAsyncOperation = SceneManager.UnloadSceneAsync(scene);
 			if (this._unloadAsyncOperation == null) return;
 			this._unloadAsyncOperation.completed += operation => {
