@@ -9,7 +9,8 @@ namespace CDK {
 		
 		#region <<---------- MonoBehaviour ---------->>
 		
-		protected void Awake() {
+		protected override void Awake() {
+            base.Awake();
 			if (this.WeaponHere == null) {
 				Debug.LogError($"{this.GetType()} has no data set, destroying game object.");
 				Destroy(this.gameObject);

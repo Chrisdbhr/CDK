@@ -78,7 +78,7 @@ namespace CDK {
 			}
 			return false;
 		}
-
+        
 		#endregion <<---------- Characters Managment ---------->>
 
 	}

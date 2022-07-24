@@ -115,7 +115,7 @@ namespace CDK {
 		#endif
 		
 		private CFader _fader;
-		private CBlockingEventsManager _blockingEventsManager;
+        private CBlockingEventsManager _blockingEventsManager;
 		
 		// Camera Profiles
 		private List<CCameraProfileVolume> ActiveCameraProfiles;
@@ -253,7 +253,7 @@ namespace CDK {
 
 			// camera sensitivity changed
             Observable.EveryGameObjectUpdate().TakeUntilDisable(this).Subscribe(_ => {
-                SetCameraSensitivity(CSave.get.CameraSensitivity);
+                SetCameraSensitivity(CPlayerPrefs.Current.CameraSensitivity);
             });
 			
 			// active camera changed

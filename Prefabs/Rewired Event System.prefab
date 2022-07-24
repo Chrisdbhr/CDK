@@ -28,6 +28,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
@@ -60,7 +61,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 10efa70eea88e69459c632aac286892d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rewiredInputManager: {fileID: 4388662512576208452, guid: 4b287954e9b1858429e4150af5a8b1d7,
+  m_SendPointerHoverToParent: 1
+  rewiredInputManager: {fileID: 4388662512576208452, guid: 4493cba3ac2276c44b470258996068aa,
     type: 3}
   useAllRewiredGamePlayers: 1
   useRewiredSystemPlayer: 1

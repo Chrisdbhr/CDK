@@ -16,7 +16,7 @@ namespace CDK {
 			this._disposables?.Dispose();
 			this._disposables = new CompositeDisposable();
 			
-			this._loadingCanvas = CAssets.LoadAndInstantiate<CLoadingCanvas>("Loading Canvas");
+			this._loadingCanvas = CAssets.LoadResourceAndInstantiate<CLoadingCanvas>("Loading Canvas");
 			
 			this._loadingUIRetainable = new CRetainable();
 

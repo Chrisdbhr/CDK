@@ -11,7 +11,6 @@ namespace CDK {
 		#region <<---------- Properties and Fields ---------->>
 
 		[SerializeField] private bool _collectOnCollision;
-		[NonSerialized] private CBlockingEventsManager _blockingEventsManager;
 
 		#endregion <<---------- Properties and Fields ---------->>
 
@@ -19,10 +18,6 @@ namespace CDK {
 
 
 		#region <<---------- MonoBehaviour ---------->>
-        protected override void Awake() {
-            base.Awake();
-			this._blockingEventsManager = CDependencyResolver.Get<CBlockingEventsManager>();
-		}
 
 		private void OnCollisionEnter(Collision other) {
 			if (!this._collectOnCollision) return;

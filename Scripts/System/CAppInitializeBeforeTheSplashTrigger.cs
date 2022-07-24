@@ -12,6 +12,10 @@ using FMODUnity;
 using Rewired;
 #endif
 
+#if UnityLocalization
+using UnityEngine.Localization.Settings;
+#endif
+
 namespace CDK {
     public class CAppInitializeBeforeTheSplashTrigger : MonoBehaviour {
 
@@ -59,6 +63,11 @@ namespace CDK {
             while (!RuntimeManager.HaveMasterBanksLoaded) yield return null;
             Debug.Log("FMOD Master Banks are loaded.");
             #endif
+
+            #if UnityLocalization
+            yield return LocalizationSettings.InitializationOperation.Task;
+            #endif
+
             yield return null;
             
             Debug.Log($"Starting to load next scene: '{this._nextScene}'.");

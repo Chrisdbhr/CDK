@@ -6,10 +6,6 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using Object = UnityEngine.Object;
 
-#if UnityAddressables
-using UnityEngine.AddressableAssets;
-#endif
-
 namespace CDK.UI {
 	public class CUINavigationManager {
 
@@ -40,48 +36,75 @@ namespace CDK.UI {
 		
 		
 		#region <<---------- Open / Close ---------->>
-
+        
 		#if UnityAddressables
-	
-		public T OpenMenu<T>(AssetReference uiReference, CUIViewBase originUI, CUIInteractable originButton, bool canCloseByReturnButton = true) {
+	    
+		public T OpenMenu<T>(string uiReference, CUIViewBase originUI, CUIInteractable originButton, bool canCloseByReturnButton = true) {
 			var openedMenu = this.OpenMenu(uiReference, originUI, originButton, canCloseByReturnButton);
 			return openedMenu != null ? openedMenu.GetComponent<T>() : default;
 		}
-
+        
 		/// <summary>
 		/// Opens a menu, registering the button that opened it.
 		/// </summary>
 		/// <returns>returns the new opened menu.</returns>
-		public CUIViewBase OpenMenu(AssetReference uiReference, CUIViewBase originUI, CUIInteractable originButton, bool canCloseByReturnButton = true) {
+		public CUIViewBase OpenMenu(string uiReference, CUIViewBase originUI, CUIInteractable originButton, bool canCloseByReturnButton = true) {
 			if (CApplication.IsQuitting) return null;
-
-            var ui = CAssets.LoadAndInstantiateUI(uiReference);
-			if (ui == null) {
-				Debug.LogError($"Could not open menu '{uiReference.RuntimeKey}'");
-				return null;
-			}
             
-            this.RemoveNullFromNavigationHistory();
-	
-			bool alreadyOpened = this._navigationHistory.Any(x => x == ui);
-			if (alreadyOpened) {
-				Debug.LogError($"Tried to open the same menu twice! Will not open menu '{ui.name}'");
-				CAssets.UnloadAsset(ui.gameObject);
+            var uiGameObject = CAssets.LoadResourceAndInstantiate<CUIViewBase>(uiReference);
+			if (uiGameObject == null) {
+				Debug.LogError($"Could not open menu '{uiReference}'");
 				return null;
 			}
-			
-			Debug.Log($"Requested navigation to '{ui.name}'");
 
-			this.HideLastMenuIfSet();
-			
-			ui.Open(this._navigationHistory.Count, originUI, originButton, canCloseByReturnButton);
-			
-			this.CheckIfIsFirstMenu();
-			
-			this._navigationHistory.Add(ui);
-			
-			return ui;
+            return this.ShowSpawnedMenu(uiGameObject, originUI, originButton, canCloseByReturnButton);
 		}
+        
+        public T OpenMenu<T>(CUIViewBase uiPrefab, CUIViewBase originUI, CUIInteractable originButton, bool canCloseByReturnButton = true) {
+            var openedMenu = OpenMenu(uiPrefab, originUI, originButton, canCloseByReturnButton);
+            return openedMenu.GetComponent<T>();
+        }
+        
+        public CUIViewBase OpenMenu(CUIViewBase uiPrefab, CUIViewBase originUI, CUIInteractable originButton, bool canCloseByReturnButton = true) {
+            if (CApplication.IsQuitting) return null;
+
+            if (uiPrefab == null) {
+                Debug.LogError("Tried to open menu uiPrefab that is null. Maybe the reference in inspector is null.", originUI);
+                return null;
+            }
+            
+            var uiGameObject = Object.Instantiate(uiPrefab);
+            if (uiGameObject == null) {
+                Debug.LogError($"Could not open menu '{uiPrefab}'");
+                return null;
+            }
+
+            return this.ShowSpawnedMenu(uiGameObject, originUI, originButton, canCloseByReturnButton);
+        }
+
+        private CUIViewBase ShowSpawnedMenu(CUIViewBase ui, CUIViewBase originUI, CUIInteractable originButton, bool canCloseByReturnButton = true) {
+            if (CApplication.IsQuitting) return null;
+            this.RemoveNullFromNavigationHistory();
+	        
+            bool alreadyOpened = this._navigationHistory.Any(x => x == ui);
+            if (alreadyOpened) {
+                Debug.LogError($"Tried to open the same menu twice! Will not open menu '{ui.name}'");
+                CAssets.UnloadAsset(ui.gameObject);
+                return null;
+            }
+			
+            Debug.Log($"Requested navigation to '{ui.name}'");
+            
+            this.HideLastMenuIfSet();
+			
+            ui.Open(this._navigationHistory.Count, originUI, originButton, canCloseByReturnButton);
+			
+            this.CheckIfIsFirstMenu();
+			
+            this._navigationHistory.Add(ui);
+            
+            return ui;
+        }
 		
 		#endif
 

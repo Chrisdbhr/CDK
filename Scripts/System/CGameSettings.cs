@@ -27,16 +27,8 @@ namespace CDK {
 		
 		#region <<---------- Properties ---------->>
 
-		#if UnityAddressables
-		
-		public AssetReference AssetRef_PauseMenu => this._assetRefPauseMenu;
-		[Header("Asset References")]
-		[SerializeField] protected AssetReference _assetRefPauseMenu;
-		
-		public AssetReference AssetRef_ConfirmationPopup => this._assetRefConfirmationPopup;
-		[SerializeField] protected AssetReference _assetRefConfirmationPopup;
-		
-		#endif
+		public string AssetRef_PauseMenu => "Prefabs/UI/menus/ui-pausemenu";
+		public string AssetRef_ConfirmationPopup => "Prefabs/UI/menus/ui-confirm popup";
 		
 		public bool CursorStartsHidden => this._cursorStartsHidden;
 		[SerializeField] protected bool _cursorStartsHidden;
