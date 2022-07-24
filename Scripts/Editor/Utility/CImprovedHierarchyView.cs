@@ -1,5 +1,5 @@
 using System.Text;
-#if TMPRO
+#if TextMeshPro
 using TMPro;
 #endif
 using UnityEditor;
@@ -45,27 +45,19 @@ namespace CDK{
 
             if (componentList.Length == 1) {
                 // Managers titles
-                if (
-                    objName.ToUpper().Equals(objName)
-                    || objName.StartsWith("---") 
-                    || objName.StartsWith("# ")
-                    || objName.StartsWith("--")
-                    ) {
-                    Color rectColor = new Color(0.3f, 0.3f, 0.3f);
+                Color rectColor = new Color(0.3f, 0.3f, 0.3f);
+                EditorGUI.DrawRect(selectionRect, rectColor);
+                GUI.Label(selectionRect, objName
+                    .Replace("---", string.Empty)
+                    .Replace("--", string.Empty)
+                    .Replace("# ", string.Empty)
+                    .Trim()
+                    , EditorStyles.boldLabel);
+                if (!obj.activeInHierarchy) {
+                    rectColor = new Color(rectColor.r, rectColor.g, rectColor.b, rectColor.a * 0.5f);
                     EditorGUI.DrawRect(selectionRect, rectColor);
-                    GUI.Label(selectionRect, objName
-                                             .Replace("---", string.Empty)
-                                             .Replace("--", string.Empty)
-                                             .Replace("# ", string.Empty)
-                                             .Trim()
-                                             .ToUpper()
-                        , EditorStyles.boldLabel);
-                    if (!obj.activeInHierarchy) {
-                        rectColor = new Color(rectColor.r, rectColor.g, rectColor.b, rectColor.a * 0.5f);
-                        EditorGUI.DrawRect(selectionRect, rectColor);
-                    }
-                    return;
                 }
+                return;
             }
 
             foreach (var comp in componentList) {
@@ -106,7 +98,7 @@ namespace CDK{
             }
 
             // Text Mesh Pro
-            #if TMPRO
+            #if TextMeshPro
             if (obj.GetComponent<TextMeshPro>() != null) {
                 guiStyleRight.normal.textColor = new Color(0.4f,0.4f, 1f);
                 guiStyleRight.Draw(selectionRect, new GUIContent("Text Mesh Pro"), instanceID );
