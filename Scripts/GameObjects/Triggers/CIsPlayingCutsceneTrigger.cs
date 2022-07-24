@@ -8,6 +8,7 @@ namespace CDK {
 		[SerializeField] private UnityEvent _isPlayingEvent;
 		[SerializeField] private UnityEvent _isNotPlayingEvent;
 		[SerializeField] private CUnityEventBool _isPlayingTriggerEvent;
+		[SerializeField] private CUnityEventBool _isNotPlayingTriggerEvent;
 		private CBlockingEventsManager _blockingEventsManager;
 
 		private void Awake() {
@@ -27,6 +28,7 @@ namespace CDK {
 			else _isNotPlayingEvent?.Invoke();
 			
 			this._isPlayingTriggerEvent?.Invoke(isPlaying);
+			this._isNotPlayingTriggerEvent?.Invoke(!isPlaying);
 		}
 
 	}
