@@ -38,9 +38,11 @@ namespace CDK {
 		[SerializeField] protected Animator _animator;
 
 		protected CBlockingEventsManager _blockingEventsManager;
-		protected Transform transform;
+#pragma warning disable CS0108, CS0114
+        protected Transform transform;
+#pragma warning restore CS0108, CS0114
 
-		public Vector3 Position {
+        public Vector3 Position {
 			get {
 				return transform.position;
 			}

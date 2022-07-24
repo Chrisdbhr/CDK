@@ -180,10 +180,6 @@ namespace CDK {
             this._isAimingRx.Value = this.InputAim;
         }
         
-        public Vector2 GetInputMovement2d() {
-            return new Vector2(this.InputMovement.x, this.InputMovement.z);
-        }
-
         #endregion <<---------- Input ---------->>
 
         
