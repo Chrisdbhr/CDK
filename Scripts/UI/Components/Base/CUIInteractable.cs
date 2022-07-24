@@ -11,7 +11,7 @@ using STOP_MODE = FMOD.Studio.STOP_MODE;
 
 namespace CDK.UI {
 	public class CUIInteractable : MonoBehaviour, ISelectHandler, ISubmitHandler, ICancelHandler,
-	                               IPointerEnterHandler, IPointerClickHandler {
+	                               IPointerEnterHandler, IPointerClickHandler, IDeselectHandler {
 
 		[SerializeField] private bool _debug;
         [SerializeField] private bool _playInteractionSound = true;
@@ -22,7 +22,7 @@ namespace CDK.UI {
         private CGameSettings _gameSettings;
         protected CUINavigationManager _navigationManager;
 
-		private void Awake() {
+		protected virtual void Awake() {
 			this._gameSettings = CDependencyResolver.Get<CGameSettings>();
             this._navigationManager = CDependencyResolver.Get<CUINavigationManager>();
         }
@@ -78,13 +78,17 @@ namespace CDK.UI {
         }
 
 		// Pointer
-		public void OnPointerEnter(PointerEventData eventData) {
+		public virtual void OnPointerEnter(PointerEventData eventData) {
 			if (!this.gameObject.activeInHierarchy) return;
 			var selectable = this.GetComponent<Selectable>();
 			if (selectable == null) return;
 			selectable.Select();
 			this.Selected(false);
 		}
+        
+        public virtual void OnDeselect(BaseEventData eventData) {
+            
+        }
 		
 		public void OnPointerClick(PointerEventData eventData) {
 			if (!this.gameObject.activeInHierarchy) return;
@@ -93,8 +97,6 @@ namespace CDK.UI {
 		}
 		
 		#endregion <<---------- IHandlers ---------->>
-
-		
-
-	}
+        
+    }
 }

@@ -140,47 +140,42 @@ namespace CDK {
 		#region <<---------- Character Creation and Exclusion ---------->>
 		
 		#if UnityAddressables
-		public CCharacterBase InstantiateAndAssignCharacter(AssetReference key) {
-			if (key == null || !key.RuntimeKeyIsValid()) {
-				Debug.LogWarning($"Cant instantiate character from null or empty Addressable key '{key}'.");
-				return null;
-			}
-
-			return this.InstantiateAndAssignCharacter(key.RuntimeKey.ToString());
-		}
 		
 		public CCharacterBase InstantiateAndAssignCharacter(string key) {
-			
 			if (key.CIsNullOrEmpty()) {
-				Debug.LogWarning($"Created player {this.PlayerNumber} with no controlling character because '{nameof(key)}' is null or its RuntimeKey is invalid.");
+				Debug.LogWarning($"Created player {this.PlayerNumber} with no controlling character because '{nameof(key)}' is null!");
 				return null;
 			}
 
-            var character = CAssets.LoadAndInstantiate<CCharacterBase>(key);
+            var character = CAssets.LoadResourceAndInstantiate<CCharacterBase>(key);
 
             if (character == null) {
                 Debug.LogError($"Asset key '{key}' gameobject doesnt have a {nameof(CCharacterBase)} component on it! could not create player!");
                 return null;
             }
 
+            return this.AssignInstantiatedCharacter(character);
+		}
+
+        public CCharacterBase AssignInstantiatedCharacter(CCharacterBase instantiatedCharacter) {
             var entryPoint = CSceneEntryPoint.GetSceneEntryPointTransform(0);
             if (entryPoint != null) {
-                Debug.Log($"Setting '{character.name}' to entryPoint number'{0}'", entryPoint.gameObject);
-                character.TeleportToLocation(entryPoint.transform.position, entryPoint.transform.rotation);
+                Debug.Log($"Setting '{instantiatedCharacter.name}' to entryPoint number'{0}'", entryPoint.gameObject);
+                instantiatedCharacter.TeleportToLocation(entryPoint.transform.position, entryPoint.transform.rotation);
                 Physics.SyncTransforms();
             }
-            character.gameObject.SetActive(false);
-            character.name = $"[Character] {character.name}";
+            instantiatedCharacter.gameObject.SetActive(false);
+            instantiatedCharacter.name = $"[Character] {instantiatedCharacter.name}";
 			
-            this.AddControllingCharacter(character);
-            character.gameObject.SetActive(true);
+            this.AddControllingCharacter(instantiatedCharacter);
+            instantiatedCharacter.gameObject.SetActive(true);
 			
             this.CheckIfNeedToCreateCamera();
 
-            Debug.Log($"Created player {this.PlayerNumber} controlling character '{character.name}'.", character);
-
-            return character;
-		}
+            Debug.Log($"Created player {this.PlayerNumber} controlling character '{instantiatedCharacter.name}'.", instantiatedCharacter);
+            return instantiatedCharacter;
+        }
+        
 		#endif
 
 		#endregion <<---------- Character Creation and Exclusion ---------->>
@@ -237,7 +232,7 @@ namespace CDK {
 			if (mainChar == null) return;
 			
 			#if UnityAddressables
-			this._playerCamera = CAssets.LoadAndInstantiate<CPlayerCamera>("PlayerCamera");
+			this._playerCamera = CAssets.LoadResourceAndInstantiate<CPlayerCamera>("PlayerCamera");
             this._playerCamera.name = $"[CAM] {mainChar.name}";
            
             Debug.Log($"Created {mainChar.name} Camera", this._playerCamera);

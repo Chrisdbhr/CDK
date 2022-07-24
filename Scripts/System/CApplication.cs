@@ -84,7 +84,6 @@ namespace CDK {
 		#region <<---------- Dependencies ---------->>
 
 		private static void InitializeDependencyContainerAndBinds() {
-			
 			CDependencyResolver.Bind<CGameSettings>(() => Resources.Load<CGameSettings>("GameSettings"));
             CDependencyResolver.Bind<CBlockingEventsManager>(() => new CBlockingEventsManager());
             CDependencyResolver.Bind<CUINavigationManager>(() => new CUINavigationManager());
@@ -93,9 +92,9 @@ namespace CDK {
 			CDependencyResolver.Bind<CCursorManager>(() => new CCursorManager());
 			CDependencyResolver.Get<CCursorManager>(); // force create instance
 			
-			CDependencyResolver.Bind<CFader>(()=> new CFader());
+			CDependencyResolver.Bind<CFader>(() => new CFader());
 			
-			CDependencyResolver.Bind<CSceneManager>(()=> new CSceneManager());
+			CDependencyResolver.Bind<CSceneManager>(() => new CSceneManager());
 		}
 
 		#endregion <<---------- Dependencies ---------->>
@@ -112,7 +111,7 @@ namespace CDK {
                 Debug.Log("Will not Instantiate a new <b>Rewired Input Manager</b> because one is already in the scene.");
                 return;
             }
-            var rw = CAssets.LoadAndInstantiateGameObject("Rewired Input Manager"); 
+            var rw = CAssets.LoadResourceAndInstantiate<InputManager_Base>("Rewired Input Manager"); 
             if (!rw) {
                 Debug.LogError("<b>Rewired Input Manager</b> could not be Instantiated.");
                 return;

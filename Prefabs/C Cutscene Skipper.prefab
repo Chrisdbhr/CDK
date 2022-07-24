@@ -70,7 +70,8 @@ MonoBehaviour:
   m_text: Hold to skip
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 4f9cc72c0791c544abea51001c118248, type: 2}
-  m_sharedMaterial: {fileID: 8381961905607553344, guid: 4f9cc72c0791c544abea51001c118248, type: 2}
+  m_sharedMaterial: {fileID: 8381961905607553344, guid: 4f9cc72c0791c544abea51001c118248,
+    type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -431,8 +432,8 @@ MonoBehaviour:
   _progressImage: {fileID: 1746275858868196662}
   _soundOnSkip:
     Guid:
-      Data1: -1616219828
-      Data2: 1080809623
-      Data3: -1936456820
-      Data4: 1967889190
+      Data1: -921927785
+      Data2: 1157568907
+      Data3: 1821744047
+      Data4: 1623307996
     Path: event:/SFX/UI/skip-cutscene

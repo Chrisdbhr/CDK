@@ -51,7 +51,6 @@ namespace CDK.Interaction {
 		[SerializeField] private UnityEvent LockEvent;
 		[SerializeField] private UnityEvent UnlockEvent;
 		[SerializeField] private CUnityEventTransform InteractedWhenLocked;
-		[NonSerialized] private CBlockingEventsManager _blockingEventsManager;
 
 		#endregion <<---------- Properties and Fields ---------->>
 
@@ -59,10 +58,6 @@ namespace CDK.Interaction {
 		
 
 		#region <<---------- MonoBehaviour ---------->>
-		
-		private void Awake() {
-			this._blockingEventsManager = CDependencyResolver.Get<CBlockingEventsManager>();
-		}
 
 		private void Start() {
 			if(this.triggerOnStart) this.NewStateEvent?.Invoke(this.On);
