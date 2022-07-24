@@ -33,7 +33,7 @@ namespace CDK {
 				this._currentHealth = value;
 			}
 		}
-		private float _currentHealth;
+		private float _currentHealth = 1f;
 		private float _delayToStartMoving = 2f;
 		
 		private Coroutine _routineDelayedBar;
