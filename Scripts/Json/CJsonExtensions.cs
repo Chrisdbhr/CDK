@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.UnityConverters;
 using Newtonsoft.Json.UnityConverters.Math;
+using UnityEngine;
 
 namespace CDK {
 	public static class CJsonExtensions {
@@ -10,6 +11,10 @@ namespace CDK {
 		public static readonly JsonSerializerSettings DefaultSettings = new JsonSerializerSettings {
 			NullValueHandling = NullValueHandling.Ignore,
 			MissingMemberHandling = MissingMemberHandling.Ignore,
+            Error = (sender, e) => {
+                Debug.LogError(e);
+                e.ErrorContext.Handled = true;
+            },
 			Formatting = Formatting.Indented,
 			Converters = new JsonConverter[] {
 				new StringEnumConverter(),
