@@ -156,7 +156,7 @@ namespace CDK {
             this._fader.FadeToTransparent(fadeInTime, true);
             
             this._blockingEventsManager.IsPlayingCutscene = false;
-		}
+        }
 
         public static void SetTransformToSceneEntryPoint(Transform transformToMove, int entryPointNumber = 0) {
             if (transformToMove == null) {

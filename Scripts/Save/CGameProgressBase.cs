@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using UnityEngine;
 
 #if Newtonsoft_Json_for_Unity
@@ -21,6 +20,8 @@ namespace CDK {
 
         #endregion <<---------- Initializers ---------->>
 
+        
+        
         
         #region <<---------- Properties and Fields ---------->>
 
@@ -130,7 +131,6 @@ namespace CDK {
                         Debug.LogError($"Error reading file from path '{filePath}'" + e);
                     }
                 }
-                saves = saves.OrderByDescending(s => s.SaveDate).ToList();
             }
             catch (Exception e) {
                 Debug.LogError("Could not load all save files: " + e);

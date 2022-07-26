@@ -29,7 +29,7 @@ namespace CDK {
 			// canvas
 			var goCanvas = parentGo.AddComponent<Canvas>();
 			goCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
-			goCanvas.sortingOrder = 9999;
+			goCanvas.sortingOrder = -1;
 			try {
 				goCanvas.sortingLayerID++;
 			} catch (Exception e) {

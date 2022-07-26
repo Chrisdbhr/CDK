@@ -3,6 +3,7 @@ using System.Collections;
 using UniRx;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Random = UnityEngine.Random;
 
 #if FMOD
 using FMODUnity;
@@ -34,7 +35,7 @@ namespace CDK {
         }
 
         private void OnEnable() {
-            Observable.Timer(TimeSpan.FromSeconds(2f)).TakeUntilDisable(this).Subscribe(_ => {
+            Observable.Timer(TimeSpan.FromSeconds(1f)).TakeUntilDisable(this).Subscribe(_ => {
                 if(this._loadingCanvas) this._loadingCanvas.alpha = 1f;
             });
         }
