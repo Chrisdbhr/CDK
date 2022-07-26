@@ -13,7 +13,7 @@ namespace CDK {
         
         public static CPlayerPrefs Current {
             get {
-                return _current ?? new CPlayerPrefs();
+                return _current ??= new CPlayerPrefs();
             }
             set {
                 if (value == null) {
@@ -32,31 +32,22 @@ namespace CDK {
         #region <<---------- Properties and Fields ---------->>
 
         #region <<---------- Camera ---------->>
-
-        #if Newtonsoft_Json_for_Unity
-        [JsonProperty("cameraSensitivity")]
-		#endif
-        public Vector2 CameraSensitivity {
-            get => this._cameraSensitivity;
-            set {
-                if (value.x == this._cameraSensitivity.x && value.y == this._cameraSensitivity.y) return;
-                this._cameraSensitivity = value;
-            }
-        }
+        
         [JsonIgnore]
-        private Vector2 _cameraSensitivity = DefaultMaxCameraSensitivity * 0.5f;
+        public Vector2 CameraSensitivityMultiplier {
+            get => this._cameraSensitivityMultiplier;
+        }
+        #if Newtonsoft_Json_for_Unity
+        [JsonProperty("cameraSensitivityMultiplier")]
+		#endif
+        private Vector2 _cameraSensitivityMultiplier = Vector3.one * 0.5f;
 
         public void SetCameraSensitivityX(float value) {
-            this._cameraSensitivity = new Vector2(this._cameraSensitivity.x, value);
+            this._cameraSensitivityMultiplier = new Vector2(value.CClamp(0.01f,1f), this._cameraSensitivityMultiplier.y);
         }
         public void SetCameraSensitivityY(float value) {
-            this._cameraSensitivity = new Vector2(value, this._cameraSensitivity.y);
+            this._cameraSensitivityMultiplier = new Vector2(this._cameraSensitivityMultiplier.x, value.CClamp(0.01f,1f));
         }
-        
-		#if Newtonsoft_Json_for_Unity
-        [JsonIgnore]
-		#endif
-        public static readonly Vector2 DefaultMaxCameraSensitivity = new Vector2(64f * 2f, 0.56f * 2f);
 
         #endregion <<---------- Camera ---------->>
 

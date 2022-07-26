@@ -1,10 +1,8 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using UniRx;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityEngine.UI;
 
 #if Cinemachine
 using Cinemachine;
@@ -73,6 +71,8 @@ namespace CDK {
 		
 		#region <<---------- Properties and Fields ---------->>
 		
+        private readonly Vector2 DefaultMaxCameraSensitivity = new Vector2(64f * 2f, 0.56f * 2f);
+        
 		// Rotation
 		public float RotationX { get; private set; }
 		public float RotationY { get; private set; }
@@ -189,11 +189,27 @@ namespace CDK {
 				}
 			});
 			
-			this.SubscribeToEvents();
+			#if Cinemachine
+
+            // camera sensitivity changed
+            Observable.EveryGameObjectUpdate().TakeUntilDisable(this).Subscribe(_ => {
+                SetCameraSensitivity(CPlayerPrefs.Current.CameraSensitivityMultiplier);
+            });
+			
+            // active camera changed
+            this._cinemachineBrain.m_CameraActivatedEvent.AddListener(this.ActiveCameraChanged);
+			#endif
+
+            CTime.OnTimeScaleChanged += this.TimeScaleChanged;
+            
+            SceneManager.activeSceneChanged += ActiveSceneChanged;
         }
 
 		private void OnDisable() {
-			this.UnsubscribeToEvents();
+			#if Cinemachine
+            this._cinemachineBrain.m_CameraActivatedEvent.RemoveListener(this.ActiveCameraChanged);
+			#endif
+            SceneManager.activeSceneChanged -= ActiveSceneChanged;
 		}
 
 		#if UNITY_EDITOR
@@ -248,30 +264,6 @@ namespace CDK {
 
 		#region <<---------- Events ---------->>
 
-		private void SubscribeToEvents() {
-			#if Cinemachine
-
-			// camera sensitivity changed
-            Observable.EveryGameObjectUpdate().TakeUntilDisable(this).Subscribe(_ => {
-                SetCameraSensitivity(CPlayerPrefs.Current.CameraSensitivity);
-            });
-			
-			// active camera changed
-			this._cinemachineBrain.m_CameraActivatedEvent.AddListener(this.ActiveCameraChanged);
-			#endif
-
-            CTime.OnTimeScaleChanged += this.TimeScaleChanged;
-            
-			SceneManager.activeSceneChanged += ActiveSceneChanged;
-		}
-		
-		private void UnsubscribeToEvents() {
-			#if Cinemachine
-			this._cinemachineBrain.m_CameraActivatedEvent.RemoveListener(this.ActiveCameraChanged);
-			#endif
-			SceneManager.activeSceneChanged -= ActiveSceneChanged;
-		}
-		
 		#if Cinemachine
 		private void ActiveCameraChanged(ICinemachineCamera newCamera, ICinemachineCamera oldCamera) {
 			if (newCamera == null) return;
@@ -284,16 +276,19 @@ namespace CDK {
 		}
 		#endif
 
-        private void SetCameraSensitivity(Vector2 value) {
+        private void SetCameraSensitivity(Vector2 multiplier) {
             var activeCamera = this._cinemachineBrain.ActiveVirtualCamera;
             if (activeCamera == null) return;
             
             if (!this._cinemachineCameras.Contains(activeCamera)) return;
+
+            float x = multiplier.x * this.DefaultMaxCameraSensitivity.x;
+            float y = multiplier.y * this.DefaultMaxCameraSensitivity.y;
             
             // freelook camera
             if (this._cinemachineBrain.ActiveVirtualCamera is CinemachineFreeLook freeLookCamera) {
-                freeLookCamera.m_XAxis.m_MaxSpeed = value.x;
-                freeLookCamera.m_YAxis.m_MaxSpeed = value.y;
+                freeLookCamera.m_XAxis.m_MaxSpeed = x;
+                freeLookCamera.m_YAxis.m_MaxSpeed = y;
                 return;
             }
 
@@ -301,12 +296,12 @@ namespace CDK {
             if (this._cinemachineBrain.ActiveVirtualCamera is CinemachineVirtualCamera virtualCamera) {
                 var pov = virtualCamera.GetCinemachineComponent<CinemachinePOV>();
                 if (pov == null) return;
-                pov.m_HorizontalAxis.m_MaxSpeed = value.x;
-                pov.m_VerticalAxis.m_MaxSpeed = value.y;
+                pov.m_HorizontalAxis.m_MaxSpeed = x;
+                pov.m_VerticalAxis.m_MaxSpeed = y;
                 return;
             }
         }
-
+        
 		#endregion <<---------- Events ---------->>
 		
 		
