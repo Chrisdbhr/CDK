@@ -81,7 +81,8 @@ namespace CDK {
 		#region <<---------- Movement Properties ---------->>
 		public Vector3 Velocity { get; private set; }
         protected Vector3 _previousPosition { get; private set; }
-        
+
+        [SerializeField] protected float _rootMotionMultiplier = 1f;
 		[HideInInspector] public Vector3 MovementMomentumXZ = Vector3.zero;
         [HideInInspector] public Vector3 RootMotionDeltaPosition = Vector3.zero;
         [HideInInspector] public Vector3 AdditionalMovementFromAnimator = Vector3.zero;

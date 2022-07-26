@@ -322,7 +322,7 @@ namespace CDK {
             additionalMovement.y = 0f;
             
 			// root motion
-			var rootMotionDeltaPos = this.RootMotionDeltaPosition;
+			var rootMotionDeltaPos = this.RootMotionDeltaPosition * this._rootMotionMultiplier;
 			rootMotionDeltaPos.y = 0f;
             
 			// move character
@@ -336,7 +336,7 @@ namespace CDK {
         protected float ProcessVerticalMovement(float deltaTime) {
 
             var verticalDelta = this.Velocity.y > 0f ? 0f : this.Velocity.y; // consider only fall velocity
-			verticalDelta += this.RootMotionDeltaPosition.y;
+			verticalDelta += this.RootMotionDeltaPosition.y * this._rootMotionMultiplier;
             verticalDelta += this.AdditionalMovementFromAnimator.y * deltaTime;
 			verticalDelta += (Physics.gravity.y * this._gravityMultiplier) * deltaTime;
             
