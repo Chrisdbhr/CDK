@@ -79,7 +79,21 @@ namespace CDK {
 		#endregion <<---------- Time ---------->>
 
 		#region <<---------- Movement Properties ---------->>
-		public Vector3 Velocity { get; private set; }
+        public Vector3 Velocity {
+            get => this._velocity;
+            private set {
+                this._velocity = value;
+                this.VelocityMagnitude = this._velocity.magnitude;
+            }
+        }
+        private Vector3 _velocity;
+
+        public float VelocityMagnitude {
+            get => this._velocityMagnitude;
+            private set => this._velocityMagnitude = value;
+        }
+        private float _velocityMagnitude;
+
         protected Vector3 _previousPosition { get; private set; }
 
         [SerializeField] protected float _rootMotionMultiplier = 1f;
@@ -248,7 +262,8 @@ namespace CDK {
         }
 
         protected virtual void LateUpdate() {
-            if(!CSceneManager.LoadedSceneThisFrame) this.Velocity = this.Position - this._previousPosition;
+            if (CSceneManager.LoadedSceneThisFrame) return;
+            this.Velocity = this.Position - this._previousPosition;
         }
 
         protected virtual void FixedUpdate() {

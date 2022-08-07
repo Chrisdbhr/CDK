@@ -1,3 +1,4 @@
+using System;
 using UniRx;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -25,6 +26,7 @@ namespace CDK {
         private const float HEIGHT_PERCENTAGE_TO_CONSIDER_FREE_FALL = 0.25f;
         protected Vector3 _groundNormal;
         private float _lastYPositionCharWasNotFalling;
+        public ReadOnlyReactiveProperty<bool> IsTouchingTheGroundRx => this._isTouchingTheGroundRx.ToReadOnlyReactiveProperty();
         protected BoolReactiveProperty _isTouchingTheGroundRx;
         protected BoolReactiveProperty _isOnFreeFall;
         protected FloatReactiveProperty _distanceOnFreeFall;
@@ -112,7 +114,7 @@ namespace CDK {
                     }
                     this._animator.SetInteger(ANIM_FALL_LANDING_ANIM_INDEX, fallAnimIndex);
                 }
-                this.MovementMomentumXZ = isTouchingTheGround ? Vector3.zero : this.GetMyVelocityXZ();
+                this.MovementMomentumXZ = isTouchingTheGround ? Vector3.zero : this.GetMomentumValueBasedOnMovementSpeed();
             });
 			
             this._isOnFreeFall.TakeUntilDisable(this).DistinctUntilChanged().Subscribe(isFallingNow => {
@@ -206,6 +208,18 @@ namespace CDK {
             this._isOnFreeFall.Value = true;
             this._distanceOnFreeFall.Value = (this._lastYPositionCharWasNotFalling - this.Position.y).CAbs();
         }
+
+        protected Vector3 GetMomentumValueBasedOnMovementSpeed() {
+            return this.GetMyVelocityXZ() * 2f;
+            switch (this._currentMovState) {
+                case CMovState.Walking:
+                    return this.GetMyVelocityXZ().normalized * 3f;
+                case CMovState.Running:
+                    return this.GetMyVelocityXZ().normalized * 6f;
+                case CMovState.Sprint:
+                    return this.GetMyVelocityXZ().normalized * 10f;
+            }
+        }
 		
         #endregion <<---------- Aerial and Falling ---------->>
 
@@ -251,17 +265,17 @@ namespace CDK {
             var deltaTime = CTime.DeltaTimeScaled * this.TimelineTimescale;
 			
 			// horizontal movement
-			var targetMotion = this.ProcessHorizontalMovement(deltaTime);
+			var targetMotion = this.GetHorizontalNextMovementDelta(deltaTime);
 			
 			// vertical movement
-			targetMotion.y = this.ProcessVerticalMovement(deltaTime);
+			targetMotion.y = this.GetVerticalNextMovementDelta(deltaTime);
 			
 			if (targetMotion == Vector3.zero) return;
 			
 			this._charController.Move(targetMotion);
 		}
 
-		protected Vector3 ProcessHorizontalMovement(float deltaTime) {
+		protected virtual Vector3 GetHorizontalNextMovementDelta(float deltaTime) {
 			Vector3 targetMotion = this.CanMoveRx.Value ? this.InputMovement : Vector3.zero;
 			float movSpeedMultiplier = 1f;
 
@@ -325,7 +339,7 @@ namespace CDK {
 			var rootMotionDeltaPos = this.RootMotionDeltaPosition * this._rootMotionMultiplier;
 			rootMotionDeltaPos.y = 0f;
             
-			// move character
+			// get move delta
 			return (targetMotion * (movSpeedMultiplier * deltaTime))
                 + (this.MovementMomentumXZ * deltaTime)
                 + rootMotionDeltaPos 
@@ -333,7 +347,7 @@ namespace CDK {
             ;
 		}
 
-        protected float ProcessVerticalMovement(float deltaTime) {
+        protected virtual float GetVerticalNextMovementDelta(float deltaTime) {
 
             var verticalDelta = this.Velocity.y > 0f ? 0f : this.Velocity.y; // consider only fall velocity
 			verticalDelta += this.RootMotionDeltaPosition.y * this._rootMotionMultiplier;
@@ -416,19 +430,20 @@ namespace CDK {
         protected void RotateTowardsDirection(Vector3 dir) {
             dir.y = 0f;
             if (dir == Vector3.zero) return;
+            var deltaTime = CTime.DeltaTimeScaled * this.TimelineTimescale;
             this._targetLookRotation = Quaternion.LookRotation(dir);
 
-            var rotateSpeed = this._curveRotationRateOverSpeed.Evaluate(this.Velocity.magnitude);
+            var currentRotateSpeed = this._curveRotationRateOverSpeed.Evaluate(this.VelocityMagnitude * deltaTime);
 
             if (!this._isTouchingTheGroundRx.Value) {
-                rotateSpeed *= this._airControl;
+                currentRotateSpeed *= this._airControl;
             }
             
             // lerp rotation
             this.transform.rotation = Quaternion.RotateTowards(
                 this.transform.rotation,
                 this._targetLookRotation,
-                rotateSpeed * CTime.DeltaTimeScaled * this.TimelineTimescale);
+                currentRotateSpeed * deltaTime);
         }
         
         #endregion <<---------- Rotation ---------->>

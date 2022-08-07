@@ -4,12 +4,26 @@ using UnityEngine;
 namespace CDK.Water {
     public class CWaterReceiverCharacter : CMonoBehaviourUpdateExecutionLoopTime, ICWaterInteraction {
 
+        #region <<---------- Initializers ---------->>
+
+        public void Initialize(Animator animator, CharacterController charController, CPlayerCharacter3D ownerCharacter) {
+            this.TargetAnimator = animator;
+            this.TargetCharacterController = charController;
+            this.OwnerCharacter = ownerCharacter;
+        }
+
+        #endregion <<---------- Initializers ---------->>
+
+        
+        
+        
         #region <<---------- Properties and Fields ---------->>
 
         protected readonly int ANIM_CHAR_IS_SWIMMING = Animator.StringToHash("is swimming");
 
         public Animator TargetAnimator;
         public CharacterController TargetCharacterController;
+        public CPlayerCharacter3D OwnerCharacter;
 
         [Range(0f,1f)]
         public float PercentageToBeginSwim = 0.2f;
@@ -42,6 +56,7 @@ namespace CDK.Water {
         public void OnExitWater(Transform waterTransform) {
             this._isTouchingWater = false;
             this._waterTransformCenter = waterTransform;
+            this.IsSwimming = false;
         }
 
         #endregion <<---------- ICWaterInteraction ---------->>
@@ -54,13 +69,13 @@ namespace CDK.Water {
         protected override void Execute(float deltaTime) {
             if (!this._isTouchingWater) return;
             if (TargetCharacterController == null || this._waterTransformCenter == null) return;
-            this.IsSwimming = (this.GetCharYPoint()) <= this._waterTransformCenter.position.y;
+            this.IsSwimming = !OwnerCharacter.IsTouchingTheGroundRx.Value || (this.GetCharYPositionToSwim()) <= this._waterTransformCenter.position.y;
         }
 
         private void OnDrawGizmosSelected() {
             if (TargetCharacterController == null || this._waterTransformCenter == null) return;
             var point = this.transform.position;
-            point.y = this.GetCharYPoint();
+            point.y = this.GetCharYPositionToSwim();
             Gizmos.color = Color.cyan;
             Gizmos.DrawLine(point, point + Vector3.right);
         }
@@ -72,11 +87,16 @@ namespace CDK.Water {
         
         #region <<---------- General ---------->>
 
-        protected float GetCharYPoint() {
+        protected float GetCharYPositionToSwim() {
             float charPoint = TargetCharacterController.transform.position.y;
             charPoint += TargetCharacterController.center.y * 2f;
             charPoint -= (TargetCharacterController.height * this.PercentageToBeginSwim);
             return charPoint;
+        }
+
+        public float GetWaterYLevel() {
+            if (this._waterTransformCenter == null) return this.GetCharYPositionToSwim();
+            return this._waterTransformCenter.position.y;
         }
 
         #endregion <<---------- General ---------->>
