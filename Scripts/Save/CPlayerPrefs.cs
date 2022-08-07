@@ -13,7 +13,7 @@ namespace CDK {
         
         public static CPlayerPrefs Current {
             get {
-                return _current ??= new CPlayerPrefs();
+                return _current ??= LoadOrGetNewPlayerPrefs();
             }
             set {
                 if (value == null) {
@@ -63,13 +63,13 @@ namespace CDK {
 
         #region <<---------- Load and Save ---------->>
 
-        public static CPlayerPrefs LoadPlayerPrefs() {
+        private static CPlayerPrefs LoadOrGetNewPlayerPrefs() {
             try {
                 var filePath = GetPlayerPrefsFilePath();
             
                 if (!File.Exists(filePath)) {
                     Debug.LogWarning($"PlayerPrefs file at path '{filePath}' doesn't exist!");
-                    return default;
+                    return new CPlayerPrefs();
                 }
             
                 var fileContent = File.ReadAllText(filePath);
@@ -83,7 +83,7 @@ namespace CDK {
                 
                 if (prefs == null) {
                     Debug.LogError($"Could not deserialize PlayerPrefs at path '{filePath}'!");
-                    return default;
+                    return new CPlayerPrefs();
                 }
 
                 Debug.Log($"PlayerPrefs Loaded.");
@@ -94,7 +94,7 @@ namespace CDK {
                 Debug.LogError(e);
             }
 
-            return default;
+            return new CPlayerPrefs();
         }
 
        
