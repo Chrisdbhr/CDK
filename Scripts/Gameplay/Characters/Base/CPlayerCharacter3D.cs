@@ -26,8 +26,8 @@ namespace CDK {
         private const float HEIGHT_PERCENTAGE_TO_CONSIDER_FREE_FALL = 0.25f;
         protected Vector3 _groundNormal;
         private float _lastYPositionCharWasNotFalling;
-        public ReadOnlyReactiveProperty<bool> IsTouchingTheGroundRx => this._isTouchingTheGroundRx.ToReadOnlyReactiveProperty();
-        protected BoolReactiveProperty _isTouchingTheGroundRx;
+        public ReadOnlyReactiveProperty<bool> IsTouchingTheGroundRx => this._isGroundedRx.ToReadOnlyReactiveProperty();
+        protected BoolReactiveProperty _isGroundedRx;
         protected BoolReactiveProperty _isOnFreeFall;
         protected FloatReactiveProperty _distanceOnFreeFall;
 
@@ -35,7 +35,7 @@ namespace CDK {
         
         #region <<---------- Rotation ---------->>
         [Header("Rotation")]
-        [SerializeField] private AnimationCurve _curveRotationRateOverSpeed = AnimationCurve.Linear(0f,900f,0.15f,90f);
+        [SerializeField] private float _rotationSpeed = 1000f;
         protected Quaternion _targetLookRotation;
         #endregion <<---------- Rotation ---------->>
 
@@ -88,7 +88,7 @@ namespace CDK {
             base.OnEnable();
             
             this._enableSlideRx = new ReactiveProperty<bool>(true);
-            this._isTouchingTheGroundRx = new BoolReactiveProperty(true);
+            this._isGroundedRx = new BoolReactiveProperty(true);
             this._isOnFreeFall = new BoolReactiveProperty(false);
             this._distanceOnFreeFall = new FloatReactiveProperty();
 
@@ -103,7 +103,7 @@ namespace CDK {
             
             #region <<---------- Fall ---------->>
 
-            this._isTouchingTheGroundRx.TakeUntilDisable(this).DistinctUntilChanged().Subscribe(isTouchingTheGround => {
+            this._isGroundedRx.TakeUntilDisable(this).DistinctUntilChanged().Subscribe(isTouchingTheGround => {
                 if (isTouchingTheGround && this._animator != null) {
                     if(this._debug) Debug.Log($"<color={"#D76787"}>{this.name}</color> touched the ground, velocityY: '{this.Velocity.y}', {nameof(this._distanceOnFreeFall)}: '{this._distanceOnFreeFall.Value}', {nameof(this._lastYPositionCharWasNotFalling)}: '{this._lastYPositionCharWasNotFalling}'");
                     int fallAnimIndex = 0;
@@ -194,7 +194,7 @@ namespace CDK {
         }
 		
         protected void ProcessAerialAndFallMovement() {
-            if (this._isTouchingTheGroundRx.Value || this.Velocity.y >= 0f
+            if (this._isGroundedRx.Value || this.Velocity.y >= 0f
                 || this._blockingEventsManager.IsPlayingCutscene // check if is playing cutscene so char dont die when teleport or during cutscene
                ) {
                 
@@ -279,7 +279,7 @@ namespace CDK {
 			Vector3 targetMotion = this.CanMoveRx.Value ? this.InputMovement : Vector3.zero;
 			float movSpeedMultiplier = 1f;
 
-            bool isTouchingTheGround = this._isTouchingTheGroundRx.Value;
+            bool isTouchingTheGround = this._isGroundedRx.Value;
             
             // air control
             if (!isTouchingTheGround) {
@@ -376,7 +376,7 @@ namespace CDK {
             else {
                 this._groundNormal = Vector3.up;
             }
-            this._isTouchingTheGroundRx.Value = isGrounded;
+            this._isGroundedRx.Value = isGrounded;
         }
         
         protected (Vector3 origin, Vector3 direction) GetGroundCheckRay(float heightFraction) {
@@ -391,7 +391,7 @@ namespace CDK {
             var angleFromGround = Vector3.SignedAngle(Vector3.up, this._groundNormal, transform.right);
 
             this.CanSlide = this._enableSlideRx.Value
-            && this._isTouchingTheGroundRx.Value
+            && this._isGroundedRx.Value
             && this.CurrentMovState >= CMovState.Running
             && angleFromGround >= this._charController.slopeLimit * SLIDE_FROM_CHAR_SLOPE_LIMIT_MULTIPLIER;
 
@@ -433,9 +433,15 @@ namespace CDK {
             var deltaTime = CTime.DeltaTimeScaled * this.TimelineTimescale;
             this._targetLookRotation = Quaternion.LookRotation(dir);
 
-            var currentRotateSpeed = this._curveRotationRateOverSpeed.Evaluate(this.VelocityMagnitude * deltaTime);
+            var currentRotateSpeed = this._rotationSpeed;
+            if (this.CurrentMovState.IsMovingFast()) {
+                currentRotateSpeed *= 0.5f;
+                if (this.CurrentMovState == CMovState.Sprint) {
+                    currentRotateSpeed *= 0.33f;
+                }
+            }
 
-            if (!this._isTouchingTheGroundRx.Value) {
+            if (!this._isGroundedRx.Value) {
                 currentRotateSpeed *= this._airControl;
             }
             

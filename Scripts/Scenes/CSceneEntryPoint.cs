@@ -1,4 +1,3 @@
-using System;
 using System.Linq;
 using UnityEngine;
 
@@ -37,22 +36,21 @@ namespace CDK {
 		
 		#if UNITY_EDITOR
 		private void OnDrawGizmos() {
-			var color = Color.cyan;
 			var tranf = this.transform;
 			var fwd = tranf.forward;
 			var pos = tranf.position;
 			pos += Vector3.up * this._editorRadius;
 			
 			// gizmo
-			Gizmos.color = color;
-			Gizmos.DrawWireSphere(pos, this._editorRadius);
-			Gizmos.DrawLine(pos, pos + fwd * _editorRadius * 2f);
+			Gizmos.color = Color.cyan;
+			Gizmos.DrawSphere(pos, this._editorRadius * 2f);
+			Gizmos.DrawLine(pos, pos + (fwd * _editorRadius * 2f));
 
-			Handles.color = color;
-			Handles.Slider(pos + fwd * _editorRadius * 2f, fwd, (_editorRadius * .5f), Handles.ConeHandleCap, 0f);
+			Handles.color = new Color(0.9f, 0.1f,0.6f);
+			Handles.Slider(pos + (fwd * _editorRadius * 2f), fwd, (_editorRadius * .5f), Handles.ConeHandleCap, 0f);
 			
 			// text
-			Handles.Label(pos, $"Entry point {this._number}");
+			Handles.Label(pos - (Vector3.up*0.5f), $"Entry point {this._number}");
 		}
 
 		private void Reset() {

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UniRx;
@@ -144,43 +145,7 @@ namespace CDK {
 			this.RotationX = angles.x;
 			
 			// is close to the character?
-			#if Cinemachine
-			Observable.EveryUpdate().TakeUntilDisable(this).Subscribe(_ => {
-				if (CApplication.IsQuitting) return;
-				if (this._cinemachineBrain == null || this._cinemachineBrain.ActiveVirtualCamera == null || this._cinemachineBrain.ActiveVirtualCamera.Follow == null) return;
-				
-				// camera shake intensity
-				if (this._ownerCharacter && this._cinemachineBrain.ActiveVirtualCamera is CinemachineFreeLook cam) {
-					var velocity = this._ownerCharacter.Velocity;
-					if(velocity.y < 0) velocity.y *= _fallShakeMultiplier;
-					var magnitude = velocity.magnitude;
-					float amplitude = 0f;
-					float frequency = 0f;
-					if (magnitude <= _cameraShakeMinimumSpeedToApply) {
-						amplitude = 0f;
-						frequency = 0f;
-					}
-					else {
-						amplitude = magnitude * this._cameraShakeAmplitude;
-						frequency = magnitude * this._cameraShakeFrequency;
-					}
-					for (int i = 0; i < 3; i++) {
-						var rig = cam.GetRig(i);
-						if (rig) {
-							var noise = rig.GetCinemachineComponent<CinemachineBasicMultiChannelPerlin>();
-							if (noise) {
-								noise.m_AmplitudeGain = noise.m_AmplitudeGain.CLerp(amplitude, this._shakeLerpAmount * CTime.DeltaTimeScaled);
-								noise.m_FrequencyGain = noise.m_FrequencyGain.CLerp(frequency, this._shakeLerpAmount * CTime.DeltaTimeScaled);
-							}
-						}
-					}
-				}
-				
-				this._currentDistanceFromTarget = Vector3.Distance(this._cinemachineBrain.ActiveVirtualCamera.Follow.position, this._unityCamera.transform.position); 
-				this._isCloseToTheCharacterRx.Value = this._currentDistanceFromTarget <= this._distanceToConsiderCloseForCharacter;
-			});
-			#endif
-			this._isCloseToTheCharacterRx.TakeUntilDisable(this).Subscribe(isClose => {
+            this._isCloseToTheCharacterRx.TakeUntilDisable(this).Subscribe(isClose => {
 				if (this._renderToHideWhenCameraIsClose.Length <= 0) return;
 				// disable renderers
 				foreach (var objToDisable in this._renderToHideWhenCameraIsClose) {
@@ -205,7 +170,42 @@ namespace CDK {
             SceneManager.activeSceneChanged += ActiveSceneChanged;
         }
 
-		private void OnDisable() {
+        private void LateUpdate() {
+            if (CApplication.IsQuitting) return;
+            if (this._cinemachineBrain == null || this._cinemachineBrain.ActiveVirtualCamera == null || this._cinemachineBrain.ActiveVirtualCamera.Follow == null) return;
+				
+            // camera shake intensity
+            if (this._ownerCharacter && this._cinemachineBrain.ActiveVirtualCamera is CinemachineFreeLook cam) {
+                var velocity = this._ownerCharacter.Velocity;
+                if(velocity.y < 0) velocity.y *= _fallShakeMultiplier;
+                var magnitude = velocity.magnitude;
+                float amplitude = 0f;
+                float frequency = 0f;
+                if (magnitude <= _cameraShakeMinimumSpeedToApply) {
+                    amplitude = 0f;
+                    frequency = 0f;
+                }
+                else {
+                    amplitude = magnitude * this._cameraShakeAmplitude;
+                    frequency = magnitude * this._cameraShakeFrequency;
+                }
+                for (int i = 0; i < 3; i++) {
+                    var rig = cam.GetRig(i);
+                    if (rig) {
+                        var noise = rig.GetCinemachineComponent<CinemachineBasicMultiChannelPerlin>();
+                        if (noise) {
+                            noise.m_AmplitudeGain = noise.m_AmplitudeGain.CLerp(amplitude, this._shakeLerpAmount * CTime.DeltaTimeScaled);
+                            noise.m_FrequencyGain = noise.m_FrequencyGain.CLerp(frequency, this._shakeLerpAmount * CTime.DeltaTimeScaled);
+                        }
+                    }
+                }
+            }
+				
+            this._currentDistanceFromTarget = Vector3.Distance(this._cinemachineBrain.ActiveVirtualCamera.Follow.position, this._unityCamera.transform.position); 
+            this._isCloseToTheCharacterRx.Value = this._currentDistanceFromTarget <= this._distanceToConsiderCloseForCharacter;
+        }
+
+        private void OnDisable() {
 			#if Cinemachine
             this._cinemachineBrain.m_CameraActivatedEvent.RemoveListener(this.ActiveCameraChanged);
 			#endif
@@ -220,20 +220,8 @@ namespace CDK {
 			}
 		}
 		#endif
-		
-		private void OnTriggerEnter(Collider other) {
-			var cameraArea = other.GetComponent<CCameraProfileVolume>();
-			if (cameraArea == null) return;
-			this.EnteredCameraArea(cameraArea);
-		}
 
-		private void OnTriggerExit(Collider other) {
-			var cameraArea = other.GetComponent<CCameraProfileVolume>();
-			if (cameraArea == null) return;
-			this.ExitedCameraArea(cameraArea);
-		}
-		
-		#endregion <<---------- MonoBehaviour ---------->>
+        #endregion <<---------- MonoBehaviour ---------->>
 		
 		
 		
@@ -410,30 +398,7 @@ namespace CDK {
 
 		#region <<---------- Camera Area and Profiles ---------->>
 
-		private void SearchForGlobalVolume() {
-			var globalVolume = FindObjectsOfType<CCameraProfileVolume>().FirstOrDefault(s => s.IsGlobal);
-			if (globalVolume != null) {
-				this.ActiveCameraProfiles.Insert(0, globalVolume);
-			}
-		}
-		
-		public void EnteredCameraArea(CCameraProfileVolume cameraProfile) {
-			ActiveCameraProfiles.Add(cameraProfile);
-			this.ApplyLastOrDefaultCameraProfile();
-		}
-
-		public void ExitedCameraArea(CCameraProfileVolume cameraProfile) {
-			ActiveCameraProfiles.Remove(cameraProfile);
-			this.ApplyLastOrDefaultCameraProfile();
-		}
-
-		private void ApplyLastOrDefaultCameraProfile() {
-			this.ActiveCameraProfiles.RemoveAll(i => i == null);
-			var lastOrDefaultProfile = this.ActiveCameraProfiles.LastOrDefault();
-			EnableCameraFromType(lastOrDefaultProfile != null ? lastOrDefaultProfile.CameraType : CameraType.@default);
-		}
-
-		private void EnableCameraFromType(CameraType cameraType) {
+		public void EnableCameraFromType(CameraType cameraType) {
 			#if Cinemachine
 			int typeIndex = cameraType.CToInt();
 			for (int i = 0; i < this._cinemachineCameras.Length; i++) {
@@ -441,7 +406,30 @@ namespace CDK {
 			}
 			#endif
 		}
-		
+        
+        private void ApplyLastOrDefaultCameraProfile() {
+            this.ActiveCameraProfiles.RemoveAll(i => i == null);
+            var lastOrDefaultProfile = this.ActiveCameraProfiles.LastOrDefault();
+            this.EnableCameraFromType(lastOrDefaultProfile != null ? lastOrDefaultProfile.CameraType : CPlayerCamera.CameraType.@default);
+        }
+        
+        private void SearchForGlobalVolume() {
+            var globalVolume = FindObjectsOfType<CCameraProfileVolume>().FirstOrDefault(s => s.IsGlobal);
+            if (globalVolume != null) {
+                this.ActiveCameraProfiles.Insert(0, globalVolume);
+            }
+        }
+        
+        public void EnteredCameraArea(CCameraProfileVolume cameraProfile) {
+            ActiveCameraProfiles.Add(cameraProfile);
+            this.ApplyLastOrDefaultCameraProfile();
+        }
+
+        public void ExitedCameraArea(CCameraProfileVolume cameraProfile) {
+            ActiveCameraProfiles.Remove(cameraProfile);
+            this.ApplyLastOrDefaultCameraProfile();
+        }
+
 		#endregion <<---------- Camera Area and Profiles ---------->>
 		
 	}
