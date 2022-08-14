@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Cysharp.Threading.Tasks;
 using UniRx;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -136,7 +135,7 @@ namespace CDK {
 			}
             Physics.SyncTransforms();
 
-			await SceneManager.UnloadSceneAsync(tempHolderScene);
+			await SceneManager.UnloadSceneAsync(tempHolderScene).AsObservable();
             
 			Debug.Log($"TODO remove loading screen");
 			
