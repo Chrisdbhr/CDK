@@ -3,8 +3,9 @@ using UnityEngine.Events;
 
 namespace CDK {
 	public class CRandomTrigger : CAutoTriggerCompBase {
-		
-		[Tooltip("Chance in % to trigger event")]
+
+        [Tooltip("Chance in % to trigger event")]
+        public float ChanceToTrigger => this._chanceToTrigger;
 		[SerializeField] [Range(1f, 99f)]private float _chanceToTrigger = 50f;
 		[SerializeField] private bool _triggerAffectsSelfActiveState = true;
 
@@ -15,7 +16,7 @@ namespace CDK {
 		
 		
 		protected override void TriggerEvent() {
-			var chance = 100f * Random.value;
+            var chance = GetChance();
 			bool willTrigger = (chance <= this._chanceToTrigger);
 
 			if (this._triggerAffectsSelfActiveState) {
@@ -31,5 +32,9 @@ namespace CDK {
 				this._randomNegativeEvent?.Invoke();
 			}
 		}
+
+        protected virtual float GetChance() {
+            return 100f * Random.value;
+        }
 	}
 }
