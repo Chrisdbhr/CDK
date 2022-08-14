@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using System.Runtime.InteropServices;
 using UnityEngine;
 
 #if UNITY_EDITOR
@@ -9,6 +8,10 @@ using UnityEditor;
 
 #if Newtonsoft_Json_for_Unity
 using Newtonsoft.Json;
+#endif
+
+#if UNITY_WEBGL
+using System.Runtime.InteropServices;
 #endif
 
 namespace CDK {
@@ -47,10 +50,10 @@ namespace CDK {
         
         
         #region <<---------- JS External Invocation ---------->>
-
+#if UNITY_WEBGL
         [DllImport("__Internal")]
         protected static extern void WebglSyncFiles();
-
+#endif
         #endregion <<---------- JS External Invocation ---------->>
 
 
