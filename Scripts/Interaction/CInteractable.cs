@@ -1,6 +1,9 @@
 using CDK.UI;
-using DG.Tweening;
 using UnityEngine;
+
+#if DOTween
+using DG.Tweening;
+#endif
 
 namespace CDK.Interaction {
 	public class CInteractable : MonoBehaviour, ICInteractable {
@@ -12,7 +15,9 @@ namespace CDK.Interaction {
         [SerializeField] private string _animationToTrigger = "doorInteract";
         protected CBlockingEventsManager _blockingEventsManager;
         protected CUINavigationManager _navigationManager;
+		#if DOTween
         private Tween _rotateTween;
+		#endif
 
 		#endregion <<---------- Properties and Fields ---------->>
 
@@ -31,7 +36,9 @@ namespace CDK.Interaction {
 		}
 
         protected virtual void OnDisable() {
+      		#if DOTween
             this._rotateTween?.Kill(false);
+     		#endif
         }
         
 		#endregion <<---------- MonoBehaviour ---------->>
@@ -67,9 +74,11 @@ namespace CDK.Interaction {
         #region <<---------- General ---------->>
 
         protected void RotateAndAnimateCharacter(Transform rootTransform) {
+            #if DOTween
             this._rotateTween = rootTransform.transform.DOLookAt(this.transform.position, 0.5f, AxisConstraint.Y);
             this._rotateTween.Play();
-			
+			#endif
+
             var anim = rootTransform.GetComponentInChildren<Animator>();
             if (anim == null) return;
             if(!this._animationToTrigger.CIsNullOrEmpty()) anim.CSetTriggerSafe(Animator.StringToHash(this._animationToTrigger));
