@@ -4,15 +4,15 @@ using System.Threading;
 using System.Threading.Tasks;
 using CDK.UI;
 using UnityEngine;
-using UnityEngine.AddressableAssets.ResourceLocators;
-using UnityEngine.Localization;
 using ThreadPriority = UnityEngine.ThreadPriority;
 
 #if UnityAddressables
 using UnityEngine.AddressableAssets;
+using UnityEngine.AddressableAssets.ResourceLocators;
 #endif
 
 #if UnityLocalization
+using UnityEngine.Localization;
 using UnityEngine.Localization.Settings;
 #endif
 
@@ -167,7 +167,6 @@ namespace CDK {
             }
         }
 
-		#endif
 
         private static void AutoSetLanguage() {
             var systemCulture = System.Globalization.CultureInfo.CurrentCulture;
@@ -183,6 +182,7 @@ namespace CDK {
 
             Debug.Log($"Could not auto select language for {systemCulture}");
         }
+        
 
         private static bool SetLocaleByString(string localeStr) {
             var locale = LocalizationSettings.AvailableLocales.GetLocale(new LocaleIdentifier(localeStr));
@@ -194,6 +194,8 @@ namespace CDK {
             LocalizationSettings.SelectedLocale = locale;
             return true;
         }
+        
+		#endif
 
         #endregion <<---------- Language ---------->>
         
