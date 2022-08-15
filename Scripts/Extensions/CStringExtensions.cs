@@ -1,7 +1,11 @@
+using System.Text;
 using UnityEngine;
 
 namespace CDK {
 	public static class CStringExtensions {
+
+		private static StringBuilder sb = new StringBuilder();
+		
 		public static Vector3 ToVector3(this string sVector)
 		{
 			// Remove the parentheses
@@ -47,6 +51,25 @@ namespace CDK {
 			char[] a = s.ToCharArray();
 			a[0] = char.ToUpper(a[0]);
 			return new string(a);
+		}
+		
+		/// <summary>
+		/// Remove special characters from string.
+		/// </summary>
+		/// <param name="text"></param>
+		/// <returns>Return normalized string.</returns>
+		public static string CRemoveDiacritics(this string s) {
+			var normalizedString = s.Normalize(NormalizationForm.FormD);
+			sb.Clear();
+
+			foreach (var c in normalizedString) {
+				var unicodeCategory = System.Globalization.CharUnicodeInfo.GetUnicodeCategory(c);
+				if (unicodeCategory != System.Globalization.UnicodeCategory.NonSpacingMark) {
+					sb.Append(c);
+				}
+			}
+
+			return sb.ToString().Normalize(NormalizationForm.FormC);
 		}
 	}
 }
