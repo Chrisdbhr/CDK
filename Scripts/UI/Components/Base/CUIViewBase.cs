@@ -9,10 +9,6 @@ using UnityEngine.UI;
 using FMODUnity;
 #endif
 
-#if UnityAddressables
-using UnityEngine.AddressableAssets;
-#endif
-
 namespace CDK.UI {
 	public abstract class CUIViewBase : MonoBehaviour {
 
@@ -21,7 +17,10 @@ namespace CDK.UI {
 		public GameObject FirstSelectedObject => this._eventSystem.firstSelectedGameObject;
 		
 		[Header("Setup")]
-		[SerializeField] protected EventSystem _eventSystem;
+		[SerializeField] 
+        protected EventSystem _eventSystem;
+        [SerializeField]
+        CUIButton _buttonReturn;
 
         public bool ShouldPauseTheGame = true;
         protected bool _shouldPlayOpenAndCloseMenuSound;
@@ -91,6 +90,10 @@ namespace CDK.UI {
                 }
                 Debug.Log($"Auto selecting item '{toSelect.name}' on menu '{this.name}'", toSelect);
                 this._eventSystem.SetSelectedGameObject(toSelect.gameObject);
+            });
+
+            if(this._buttonReturn != null) this._buttonReturn.Button.OnClickAsObservable().TakeUntilDisable(this).Subscribe(_ => {
+                this._navigationManager.CloseCurrentMenu();
             });
         }
 
