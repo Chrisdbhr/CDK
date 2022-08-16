@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2265805937603825671}
   - component: {fileID: 4337616079804313057}
-  m_Layer: 13
+  m_Layer: 1
   m_Name: Character Fake Shadow
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -44,7 +44,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0777d029ed3dffa4692f417d4aba19ca, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Material: {fileID: 2100000, guid: 6a4e50e06b42cc447b0a16acd86b1459, type: 2}
+  m_Material: {fileID: 2100000, guid: 932989e69aae811489ee3707364e7b59, type: 2}
   m_DrawDistance: 300
   m_FadeScale: 0.9
   m_StartAngleFade: 180
