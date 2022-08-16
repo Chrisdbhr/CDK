@@ -53,5 +53,5 @@ MonoBehaviour:
   m_UVBias: {x: 0, y: 0}
   m_ScaleMode: 0
   m_Offset: {x: 0, y: 0, z: 3}
-  m_Size: {x: 0.9, y: 0.3, z: 6}
+  m_Size: {x: 1, y: 1, z: 6}
   m_FadeFactor: 0.7
