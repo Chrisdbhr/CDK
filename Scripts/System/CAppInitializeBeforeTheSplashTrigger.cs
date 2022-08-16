@@ -66,7 +66,7 @@ namespace CDK {
             #endif
 
             #if UnityLocalization
-            yield return LocalizationSettings.InitializationOperation.Task;
+            yield return LocalizationSettings.InitializationOperation;
             #endif
 
             yield return null;
