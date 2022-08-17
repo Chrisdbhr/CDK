@@ -104,7 +104,7 @@ namespace CDK {
 		/// Do a footstep
 		/// </summary>
 		public void Footstep(FootstepFeet feet) {
-			var originTransform = this.transform.root;
+			var originTransform = this.transform;
 			
 			var rayOrigin = feet == FootstepFeet.left ? (this.FootL ? this.FootL : originTransform) : (this.FootR ? this.FootR : originTransform);
 
@@ -127,7 +127,7 @@ namespace CDK {
 			// check for smashable object
 			var smashableObj = raycastHit.collider.GetComponent<CICanBeSmashedWhenStepping>();
 			if (smashableObj != null) {
-				smashableObj.Smash(this.transform.root, feet);
+				smashableObj.Smash(originTransform, feet);
 				return;
 			}
 
@@ -143,9 +143,9 @@ namespace CDK {
 				if (createdPartSystem != null) {
 					createdPartSystem.transform.position = raycastHit.point;
 					
-					var rot = Quaternion.FromToRotation(this.transform.up, raycastHit.normal);
+					var rot = Quaternion.FromToRotation(originTransform.up, raycastHit.normal);
 					var euler = rot.eulerAngles;
-					euler.y = this.transform.rotation.eulerAngles.y;
+					euler.y = originTransform.rotation.eulerAngles.y;
 					createdPartSystem.transform.rotation = Quaternion.Euler(euler);
 					createdPartSystem.Play(true);
 				}
