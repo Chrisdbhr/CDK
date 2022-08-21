@@ -36,6 +36,16 @@ namespace CDK {
         /// <summary>
         /// Check if self is null and if was the parameter.
         /// </summary>
+        public static void CSetIntegerSafe(this Animator self, int id, int value) {
+            if (!CheckIfIsAvailable(self)) return;
+            if (self.parameters.All(p => p.nameHash != id)) return;
+            self.SetInteger(id, value);
+        }
+
+        
+        /// <summary>
+        /// Check if self is null and if was the parameter.
+        /// </summary>
         public static void CSetTriggerSafe(this Animator self, int id) {
             if (!CheckIfIsAvailable(self)) return;
 			if (self.parameters.All(p => p.nameHash != id)) return;

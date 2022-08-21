@@ -40,6 +40,15 @@ namespace CDK {
 
 			_rootMotionDeltaPositionChanged(this._targetAnimator.deltaPosition);
 		}
+        
+                
+        #region <<---------- Animations State Machine Behaviours ---------->>
+		
+        public void SetAnimationRootMotion(bool state) {
+            if(this._targetAnimator) this._targetAnimator.applyRootMotion = state;
+        }
+		
+        #endregion <<---------- Animations State Machine Behaviours ---------->>
 		
 	}
 }
