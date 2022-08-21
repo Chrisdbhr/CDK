@@ -25,11 +25,19 @@ namespace CDK {
 			return result;
 		}
 
-		public static bool CIsNullOrEmpty(this string str) {
+        public static bool CIsNotNullOrEmpty(this string str) {
+            return !CIsNullOrEmpty(str);
+        }
+
+        public static bool CIsNullOrEmpty(this string str) {
 			return string.IsNullOrEmpty(str);
 		}
 		
-		public static bool CIsNullOrWhitespace(this string str) {
+        public static bool CIsNotNullOrWhitespace(this string str) {
+            return !CIsNullOrWhitespace(str);
+        }
+
+        public static bool CIsNullOrWhitespace(this string str) {
 			return string.IsNullOrWhiteSpace(str);
 		}
 
