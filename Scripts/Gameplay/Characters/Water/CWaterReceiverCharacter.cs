@@ -69,7 +69,7 @@ namespace CDK.Water {
         protected override void Execute(float deltaTime) {
             if (!this._isTouchingWater) return;
             if (TargetCharacterController == null || this._waterTransformCenter == null) return;
-            this.IsSwimming = !OwnerCharacter.IsTouchingTheGroundRx.Value || (this.GetCharYPositionToSwim()) <= this._waterTransformCenter.position.y;
+            this.IsSwimming = !OwnerCharacter.IsOnGround || (this.GetCharYPositionToSwim()) <= this._waterTransformCenter.position.y;
         }
 
         private void OnDrawGizmosSelected() {

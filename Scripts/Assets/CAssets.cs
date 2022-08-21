@@ -41,7 +41,7 @@ namespace CDK {
             return Resources.Load<T>(address);
         }
 
-        public static T LoadResourceAndInstantiate<T>(string address) where T : UnityEngine.Component {
+        public static T LoadResourceAndInstantiate<T>(string address, Transform parent = null) where T : UnityEngine.Component {
             if (!Application.isPlaying) {
                 Debug.LogError($"Will not load from resources because application is not playing.");
                 return null;
@@ -53,7 +53,7 @@ namespace CDK {
                 return null;
             }
 
-            return GameObject.Instantiate(resource).GetComponent<T>();
+            return GameObject.Instantiate(resource, parent).GetComponent<T>();
         }
 
         #endregion <<---------- Load From Resources ---------->>

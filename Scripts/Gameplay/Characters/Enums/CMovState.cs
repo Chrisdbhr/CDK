@@ -1,6 +1,9 @@
 namespace CDK {
 	public enum CMovState {
-		Idle, Walking, Running, Sprint, Sliding
+		Idle, 
+        Walking,
+        Running,
+        Sprint
 	}
 	
 	public static class CMovStateExtensions {

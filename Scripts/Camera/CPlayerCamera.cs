@@ -61,7 +61,6 @@ namespace CDK {
 		public enum CameraType {
 			@default,
 			smallAreaCloseLimitedVision,
-			bigOpenArea,
             twoDCamera
         }
 

@@ -63,7 +63,7 @@ namespace CDK {
 	
 		#if UNITY_EDITOR
 
-		[MenuItem("Game/Open root save folder")]
+		[MenuItem("Tools/Open root save folder")]
 		public static void OpenSaveFolder() {
 			EditorUtility.RevealInFinder(GetRootSaveFolder());
 		}

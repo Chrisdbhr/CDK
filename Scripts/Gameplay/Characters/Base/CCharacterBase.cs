@@ -19,13 +19,11 @@ using Chronos;
 #endif
 
 namespace CDK {
-	[SelectionBase] 
-	public abstract class CCharacterBase : MonoBehaviour, ICStunnable {
+	[SelectionBase][RequireComponent(typeof(Rigidbody))]
+    public abstract class CCharacterBase : MonoBehaviour, ICStunnable {
 
 		#region <<---------- Properties ---------->>
 
-        [SerializeField] private CMonobehaviourExecutionLoop _updateTime = CMonobehaviourExecutionLoop.Update;
-		
         #region <<---------- Debug ---------->>
 
 		[SerializeField] protected bool _debug;
@@ -36,6 +34,7 @@ namespace CDK {
 
 		[Header("Cache and References")]
 		[SerializeField] protected Animator _animator;
+        protected Rigidbody body;
 
 		protected CBlockingEventsManager _blockingEventsManager;
 #pragma warning disable CS0108, CS0114
@@ -44,10 +43,11 @@ namespace CDK {
 
         public Vector3 Position {
 			get {
-				return transform.position;
+				return this.transform.position;
 			}
 			protected set {
-				transform.position = value;
+                this.transform.position = value;
+                Physics.SyncTransforms();
 			}
 		}
 
@@ -57,6 +57,7 @@ namespace CDK {
         public Vector3 InputMovement { get; set; }
         public bool InputWalk { get; set; }
         public bool InputRun { get; set; }
+        public bool InputJump { get; set; }
 		public bool InputAim { get; set; }
 		#endregion <<---------- Input ---------->>
 
@@ -80,24 +81,10 @@ namespace CDK {
 
 		#region <<---------- Movement Properties ---------->>
         public Vector3 Velocity {
-            get => this._velocity;
-            private set {
-                this._velocity = value;
-                this.VelocityMagnitude = this._velocity.magnitude;
-            }
+            get => this.body.velocity;
         }
-        private Vector3 _velocity;
-
-        public float VelocityMagnitude {
-            get => this._velocityMagnitude;
-            private set => this._velocityMagnitude = value;
-        }
-        private float _velocityMagnitude;
-
-        protected Vector3 _previousPosition { get; private set; }
 
         [SerializeField] protected float _rootMotionMultiplier = 1f;
-		[HideInInspector] public Vector3 MovementMomentumXZ = Vector3.zero;
         [HideInInspector] public Vector3 RootMotionDeltaPosition = Vector3.zero;
         [HideInInspector] public Vector3 AdditionalMovementFromAnimator = Vector3.zero;
 		
@@ -108,26 +95,18 @@ namespace CDK {
         [SerializeField] protected CMovState _currentMovState;
 		public CMovState CurrentMovState {
 			get { return this._currentMovState; }
-		}
-
-        /// <summary>
-        /// Set Movement State Enum.
-        /// </summary>
-        /// <returns>Returns if the movement enum was set.</returns>
-        protected virtual bool SetMovementState(CMovState value) {
-            if (this._currentMovState == value) return false;
-            this._currentMovState = value;
+            set {
+                if (this._currentMovState == value) return;
+                this._currentMovState = value;
             
-            // set animators
-            if (this._animator) {
-                this._animator.CSetBoolSafe(this.ANIM_CHAR_IS_WALKING, value == CMovState.Walking);
-                this._animator.CSetBoolSafe(this.ANIM_CHAR_IS_RUNNING, value == CMovState.Running);
-                this._animator.CSetBoolSafe(this.ANIM_CHAR_IS_SPRINTING, value == CMovState.Sprint);
-                this._animator.CSetBoolSafe(this.ANIM_CHAR_IS_SLIDING, value == CMovState.Sliding);
+                // set animators
+                if (this._animator) {
+                    this._animator.CSetBoolSafe(this.ANIM_CHAR_IS_WALKING, value == CMovState.Walking);
+                    this._animator.CSetBoolSafe(this.ANIM_CHAR_IS_RUNNING, value == CMovState.Running);
+                    this._animator.CSetBoolSafe(this.ANIM_CHAR_IS_SPRINTING, value == CMovState.Sprint);
+                }
             }
-
-            return true;
-        }
+		}
 
 		public float WalkSpeed {
 			get { return this._walkSpeed; }
@@ -171,19 +150,15 @@ namespace CDK {
 		protected readonly int ANIM_CHAR_MOV_SPEED_XZ = Animator.StringToHash("speedXZ");
         protected readonly int ANIM_CHAR_MOV_SPEED_X = Animator.StringToHash("speedX");
         protected readonly int ANIM_CHAR_MOV_SPEED_Y = Animator.StringToHash("speedY");
-		protected readonly int ANIM_DISTANCE_ON_FREE_FALL = Animator.StringToHash("distanceOnFreeFall");
-		protected readonly int ANIM_FALL_LANDING_ANIM_INDEX = Animator.StringToHash("fallLandingAnim");
 
 		// actions
         protected readonly int ANIM_CHAR_STUMBLE = Animator.StringToHash("stumble");
 
 		// condition states
 		protected readonly int ANIM_CHAR_IS_STRAFING = Animator.StringToHash("isStrafing");
-		protected readonly int ANIM_CHAR_IS_SLIDING = Animator.StringToHash("isSliding");
 		protected readonly int ANIM_CHAR_IS_WALKING = Animator.StringToHash("isWalking");
         protected readonly int ANIM_CHAR_IS_RUNNING = Animator.StringToHash("isRunning");
         protected readonly int ANIM_CHAR_IS_SPRINTING = Animator.StringToHash("isSprinting");
-		protected readonly int ANIM_CHAR_IS_FALLING = Animator.StringToHash("isFalling");
 
 		// Stun
 		protected readonly int ANIM_CHAR_IS_STUNNED_LIGHT = Animator.StringToHash("stunL");
@@ -218,6 +193,7 @@ namespace CDK {
 		protected virtual void Awake() {
 			this.transform = base.transform;
             this._blockingEventsManager = CDependencyResolver.Get<CBlockingEventsManager>();
+            if (body == null) body = this.GetComponent<Rigidbody>();
         }
 
 		protected virtual void OnEnable() {
@@ -243,7 +219,7 @@ namespace CDK {
             // can mov
             this.CanMoveRx.TakeUntilDisable(this).DistinctUntilChanged().Subscribe(canMove => {
                 if (!canMove && this.CurrentMovState > CMovState.Idle) {
-                    this.SetMovementState(CMovState.Idle);
+                    this.CurrentMovState = CMovState.Idle;
                 }
             });
 
@@ -257,18 +233,15 @@ namespace CDK {
 		protected virtual void Start() { }
 
 		protected virtual void Update() {
-            if (this._updateTime != CMonobehaviourExecutionLoop.Update) return;
-            UpdateCharacter();
+            
         }
 
         protected virtual void LateUpdate() {
-            if (CSceneManager.LoadedSceneThisFrame) return;
-            this.Velocity = this.Position - this._previousPosition;
+            
         }
 
         protected virtual void FixedUpdate() {
-            if (this._updateTime != CMonobehaviourExecutionLoop.FixedUpdate) return;
-            UpdateCharacter();
+            
         }
         
 		protected virtual void OnDisable() {
@@ -292,21 +265,9 @@ namespace CDK {
             if (this._mounthVoiceEmitter == null) this._mounthVoiceEmitter = this.GetComponentInChildren<StudioEventEmitter>();
             #endif
         }
-        
-		#endregion <<---------- MonoBehaviour ---------->>
 
+        #endregion <<---------- MonoBehaviour ---------->>
 
-
-
-        #region <<---------- Update ---------->>
-
-        protected virtual void UpdateCharacter() {
-            this._previousPosition = this.Position;
-            this.ProcessMovement();
-        }
-        
-        #endregion <<---------- Update ---------->>
-        
 
 
         
@@ -340,8 +301,6 @@ namespace CDK {
 
 
 		#region <<---------- Movement ---------->>
-
-        protected abstract void ProcessMovement();
 
         public Vector2 GetInputMovement2d() {
             return new Vector2(this.InputMovement.x, this.InputMovement.z);
@@ -483,7 +442,7 @@ namespace CDK {
 		
 		#region <<---------- Voice ---------->>
 
-		protected virtual void StopTalking() {
+		public virtual void StopTalking() {
 			
 			#if FMOD
 			if (this._mounthVoiceEmitter == null) return;
@@ -507,22 +466,10 @@ namespace CDK {
 			if (targetRotation != default) {
                 transform.rotation = targetRotation;
 			}
-			this._previousPosition = targetPos;
 			this.Position = targetPos;
 		}
 		
 		#endregion <<---------- Transform ---------->>
-		
-		
 
-        
-		#region <<---------- Animations State Machine Behaviours ---------->>
-		
-		public void SetAnimationRootMotion(bool state) {
-			if(this._animator) this._animator.applyRootMotion = state;
-		}
-		
-		#endregion <<---------- Animations State Machine Behaviours ---------->>
-        
     }
 }

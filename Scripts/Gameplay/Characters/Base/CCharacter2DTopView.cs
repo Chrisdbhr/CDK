@@ -18,24 +18,17 @@ namespace CDK {
             if (this._rb == null) _rb = this.GetComponent<Rigidbody2D>();
         }
 
-        #endregion <<---------- MonoBehaviour ---------->>
-
-        
-        
-        
-        #region <<---------- CCharacterBase ---------->>
-
-        protected override void UpdateCharacter() {
-            base.UpdateCharacter();
+        protected override void Update() {
+            base.Update();           
             this.UpdateAnimator();
         }
 
-        protected override void ProcessMovement() {
+        protected override void FixedUpdate() {
+            base.FixedUpdate();
             if (!this.CanMoveRx.Value) return;
             this._rb.velocity = this.GetInputMovement2d() * (WalkSpeed * CTime.DeltaTimeScaled);
         }
-
-        #endregion <<---------- CCharacterBase ---------->>
+        #endregion <<---------- MonoBehaviour ---------->>
 
 
 
