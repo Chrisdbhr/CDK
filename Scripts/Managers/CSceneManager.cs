@@ -16,24 +16,29 @@ namespace CDK {
 
 		#region <<---------- Initializers ---------->>
 		
-		/// <summary>
-		/// ANTES da scene load.
-		/// </summary>
-		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-		private static void InitializeBeforeSceneLoad() {
-			//DebugLogConsole.AddCommandStatic( "load", "Load scene Single.", nameof(CSceneManager.LoadSceneSingle), typeof(CSceneManager));
-		}
+		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+		private static void InitializeAfterSceneLoad() {
+            
+        }
 
 		public CSceneManager() {
 			this._fader = CDependencyResolver.Get<CFader>();
 			this._blockingEventsManager = CDependencyResolver.Get<CBlockingEventsManager>();
             LoadedSceneThisFrame = false;
             SceneManager.activeSceneChanged += ActiveSceneChanged;
+            SceneManager.sceneLoaded += OnSceneLoaded;
+            SceneManager.sceneUnloaded += OnSceneUnloaded;
+            
+            LightProbes.needsRetetrahedralization += OnLightProbesNeedsRetetrahedralization;
         }
         
         ~CSceneManager() {
             this._boolSceneLoadedDisposable?.Dispose();
             SceneManager.activeSceneChanged -= ActiveSceneChanged;
+            SceneManager.sceneLoaded -= OnSceneLoaded;
+            SceneManager.sceneUnloaded -= OnSceneUnloaded;
+           
+            LightProbes.needsRetetrahedralization -= OnLightProbesNeedsRetetrahedralization;
         }
 
 		#endregion <<---------- Initializers ---------->>
@@ -141,8 +146,6 @@ namespace CDK {
 			
             await Observable.NextFrame();
 			await this.WaitUntilMinimumTimeToReturnFromLoading(minimumTimeToReturnFromLoading);
-
-            LightProbes.TetrahedralizeAsync();
             
             await Observable.NextFrame();
             
@@ -206,6 +209,18 @@ namespace CDK {
 
         private void ActiveSceneChanged(Scene oldScene, Scene newScene) {
             CheckToRetainSceneChangedBool();
+        }
+
+        private void OnSceneLoaded(Scene scene, LoadSceneMode mode) {
+            
+        }
+        
+        private void OnSceneUnloaded(Scene scene) {    
+            
+        }
+        
+        private void OnLightProbesNeedsRetetrahedralization() {
+            LightProbes.TetrahedralizeAsync();
         }
 
         #endregion <<---------- Callbacks ---------->>
