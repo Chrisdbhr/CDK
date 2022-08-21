@@ -106,7 +106,7 @@ namespace CDK {
 				
 				var (camF, camR) = this.GetCameraVectors();
 				
-				character.InputMovement = ((camF * inputMovement2d.y) + (camR * inputMovement2d.x)).normalized;
+				character.InputMovement = Vector3.ClampMagnitude(((camF * inputMovement2d.y) + (camR * inputMovement2d.x)), 1f);
 				#else
 				Debug.LogError("'GamePlayer movement handling not implemented without Rewired'");
 				#endif
@@ -115,6 +115,7 @@ namespace CDK {
 			#if Rewired
 			this._rePlayer.AddInputEventDelegate(this.InputInteract, UpdateLoopType.Update, InputActionEventType.ButtonJustPressed, CInputKeys.INTERACT);
             this._rePlayer.AddInputEventDelegate(this.InputRun, UpdateLoopType.Update, CInputKeys.RUN);
+            this._rePlayer.AddInputEventDelegate(this.InputJump, UpdateLoopType.Update, CInputKeys.JUMP);
             this._rePlayer.AddInputEventDelegate(this.InputWalk, UpdateLoopType.Update, CInputKeys.WALK);
 			this._rePlayer.AddInputEventDelegate(this.InputResetCameraRotation, UpdateLoopType.Update, CInputKeys.RESET_CAM_ROTATION);
 			this._rePlayer.AddInputEventDelegate(this.InputPause, UpdateLoopType.Update, InputActionEventType.ButtonJustPressed, CInputKeys.MENU_PAUSE);
@@ -300,17 +301,22 @@ namespace CDK {
             if (this._blockingEventsManager.IsAnyBlockingEventHappening) return;
             var character = this.GetControllingCharacter();
             if (character == null) return;
-            var inputWalk = data.GetButton();
-            character.InputWalk = inputWalk;
+            character.InputWalk = data.GetButton();
         }
         
 		private void InputRun(InputActionEventData data) {
 			if (this._blockingEventsManager.IsAnyBlockingEventHappening) return;
 			var character = this.GetControllingCharacter();
 			if (character == null) return;
-			var inputRun = data.GetButton();
-			character.InputRun = inputRun;
+			character.InputRun = data.GetButton();
 		}
+
+        private void InputJump(InputActionEventData data) {
+            if (this._blockingEventsManager.IsAnyBlockingEventHappening) return;
+            var character = this.GetControllingCharacter();
+            if (character == null) return;
+            character.InputJump |= data.GetButton();
+        }
 		
 		private void InputInteract(InputActionEventData data) {
 			if (this._blockingEventsManager.IsAnyBlockingEventHappening) return;
