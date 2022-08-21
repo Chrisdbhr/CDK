@@ -63,7 +63,7 @@ namespace CDK {
 		
 		#if UNITY_EDITOR
 
-		[MenuItem("Game/Open GameSettings")]
+		[MenuItem("Tools/Open GameSettings")]
 		public static void EditorOpenGameSettingsData() {
 			var gameSettings = EditorTryLoadingGameSettings();
 			if (!gameSettings) EditorCreateGameSettingsResourceIfNeeded();

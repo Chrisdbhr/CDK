@@ -91,8 +91,23 @@ namespace CDK {
 			if (currentAlpha > this.TargetAlpha) step *= -1f;
 			this._fadeCanvasGroup.alpha = currentAlpha + step;
 		}
-		
-		#endregion <<---------- General ---------->>
+        
+        #endregion <<---------- General ---------->>
+
+
+
+
+        #region <<---------- Debug ---------->>
+
+        public void DebugEnableFader() {
+            this._fadeCanvasGroup.enabled = true;
+        }
+        
+        public void DebugDisableFader() {
+            this._fadeCanvasGroup.enabled = false;
+        }
+
+        #endregion <<---------- Debug ---------->>
 
 		
 	}
