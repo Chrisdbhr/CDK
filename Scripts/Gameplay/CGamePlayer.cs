@@ -73,7 +73,7 @@ namespace CDK {
 		public CPlayerCamera GetCamera => this._playerCamera;
 		private CPlayerCamera _playerCamera;
 
-		private readonly List<CCharacterBase> _characters = new List<CCharacterBase>();
+		private readonly List<CCharacter_Base> _characters = new List<CCharacter_Base>();
 
 		private readonly CompositeDisposable _compositeDisposable;
 		private readonly CGameSettings _gameSettings;
@@ -97,7 +97,7 @@ namespace CDK {
 				if (character == null) return;
 
 				if (this._blockingEventsManager.IsAnyBlockingEventHappening) {
-					character.InputMovement = Vector3.zero;
+					character.Input.Movement = Vector3.zero;
 					return;
 				}
 				
@@ -106,7 +106,7 @@ namespace CDK {
 				
 				var (camF, camR) = this.GetCameraVectors();
 				
-				character.InputMovement = Vector3.ClampMagnitude(((camF * inputMovement2d.y) + (camR * inputMovement2d.x)), 1f);
+				character.Input.Movement = Vector3.ClampMagnitude(((camF * inputMovement2d.y) + (camR * inputMovement2d.x)), 1f);
 				#else
 				Debug.LogError("'GamePlayer movement handling not implemented without Rewired'");
 				#endif
@@ -142,23 +142,23 @@ namespace CDK {
 		
 		#if UnityAddressables
 		
-		public CCharacterBase InstantiateAndAssignCharacter(string key) {
+		public CCharacter_Base InstantiateAndAssignCharacter(string key) {
 			if (key.CIsNullOrEmpty()) {
 				Debug.LogWarning($"Created player {this.PlayerNumber} with no controlling character because '{nameof(key)}' is null!");
 				return null;
 			}
 
-            var character = CAssets.LoadResourceAndInstantiate<CCharacterBase>(key);
+            var character = CAssets.LoadResourceAndInstantiate<CCharacter_Base>(key);
 
             if (character == null) {
-                Debug.LogError($"Asset key '{key}' gameobject doesnt have a {nameof(CCharacterBase)} component on it! could not create player!");
+                Debug.LogError($"Asset key '{key}' gameobject doesnt have a {nameof(CCharacter_Base)} component on it! could not create player!");
                 return null;
             }
 
             return this.AssignInstantiatedCharacter(character);
 		}
 
-        public CCharacterBase AssignInstantiatedCharacter(CCharacterBase instantiatedCharacter) {
+        public CCharacter_Base AssignInstantiatedCharacter(CCharacter_Base instantiatedCharacter) {
             var entryPoint = CSceneEntryPoint.GetSceneEntryPointTransform(0);
             if (entryPoint != null) {
                 Debug.Log($"Setting '{instantiatedCharacter.name}' to entryPoint number'{0}'", entryPoint.gameObject);
@@ -186,7 +186,7 @@ namespace CDK {
 		
 		#region <<---------- Character Control ---------->>
 
-		public void AddControllingCharacter(CCharacterBase character) {
+		public void AddControllingCharacter(CCharacter_Base character) {
 			if (this._characters.Contains(character)) {
 				Debug.LogError($"Will not add {character.name} to player {this.PlayerNumber} control because it is already controlling it!");
 				return;
@@ -202,7 +202,7 @@ namespace CDK {
             this._characters.Clear();
 		}
 		
-		public CCharacterBase GetControllingCharacter() {
+		public CCharacter_Base GetControllingCharacter() {
 			return this._characters.FirstOrDefault(c => c != null);
 		}
 
@@ -212,7 +212,7 @@ namespace CDK {
 			return list;
 		}
 
-		public bool IsControllingCharacter(CCharacterBase characterBase) {
+		public bool IsControllingCharacter(CCharacter_Base characterBase) {
 			return this._characters.Contains(characterBase);
 		}
         
@@ -259,7 +259,7 @@ namespace CDK {
 			return (camF, camR);
 		}
 
-		private (Vector3 camF, Vector3 camR) GetCameraVectorsRelativeToCharacter(CCharacterBase relativeTo) {
+		private (Vector3 camF, Vector3 camR) GetCameraVectorsRelativeToCharacter(CCharacter_Base relativeTo) {
 			if (this._cameraTransform == null) return (Vector3.forward, Vector3.right);
 			
 			var camF = relativeTo.Position - this._cameraTransform.position;
@@ -301,21 +301,21 @@ namespace CDK {
             if (this._blockingEventsManager.IsAnyBlockingEventHappening) return;
             var character = this.GetControllingCharacter();
             if (character == null) return;
-            character.InputWalk = data.GetButton();
+            character.Input.Walk = data.GetButton();
         }
         
 		private void InputRun(InputActionEventData data) {
 			if (this._blockingEventsManager.IsAnyBlockingEventHappening) return;
 			var character = this.GetControllingCharacter();
 			if (character == null) return;
-			character.InputRun = data.GetButton();
+			character.Input.Run = data.GetButton();
 		}
 
         private void InputJump(InputActionEventData data) {
             if (this._blockingEventsManager.IsAnyBlockingEventHappening) return;
             var character = this.GetControllingCharacter();
             if (character == null) return;
-            character.InputJump |= data.GetButton();
+            character.Input.Jump = data.GetButton();
         }
 		
 		private void InputInteract(InputActionEventData data) {

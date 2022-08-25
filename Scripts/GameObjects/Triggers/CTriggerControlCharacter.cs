@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace CDK {
 	public class CTriggerControlCharacter : MonoBehaviour {
-		[SerializeField] private CCharacterBase _characterToControl;
+		[SerializeField] private CCharacter_Base _characterToControl;
 		private CGamePlayerManager _gamePlayerManager;
 		
 		

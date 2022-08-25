@@ -176,7 +176,7 @@ namespace CDK {
                 targetRotation = targetEntryPointTransform.rotation;
             }
 
-            var character = transformToMove.GetComponent<CCharacterBase>();
+            var character = transformToMove.GetComponent<CCharacter_Base>();
             if (character != null) {
                 character.TeleportToLocation(targetPos, targetRotation);					
             }

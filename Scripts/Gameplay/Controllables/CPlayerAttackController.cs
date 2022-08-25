@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace CDK.Weapons {
 	public class CPlayerAttackController : MonoBehaviour {
-		[SerializeField] private CCharacterBase _characterBase;
+		[SerializeField] private CCharacter_Base _characterBase;
 		[SerializeField] private CInventory _inventory;
 		[SerializeField] private CAim _aim;
 		[SerializeField] private Animator _characterAnimator;
@@ -58,7 +58,7 @@ namespace CDK.Weapons {
 								if (hitSomething) {
 									
 									// prevent self damage
-									var rootHitCharacter = hitInfo.transform.root.GetComponent<CCharacterBase>();
+									var rootHitCharacter = hitInfo.transform.root.GetComponent<CCharacter_Base>();
 									if (rootHitCharacter != null && rootHitCharacter == this._characterBase) {
 										Debug.Log($"Will not apply damage to character itself.");
 										return;

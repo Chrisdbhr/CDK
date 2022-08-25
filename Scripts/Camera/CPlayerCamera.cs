@@ -108,7 +108,7 @@ namespace CDK {
 		// Cache
 		private CGamePlayer _ownerPlayer;
 		private Transform _transform;
-		private CCharacterBase _ownerCharacter;
+		private CCharacter_Base _ownerCharacter;
 		
 		#if DOTween
 		private Tweener _tween;

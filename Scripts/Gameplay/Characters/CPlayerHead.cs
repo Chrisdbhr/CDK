@@ -5,7 +5,7 @@ using UnityEngine;
 namespace CDK {
 	public class CPlayerHead : MonoBehaviour {
 
-		[SerializeField] private CCharacterBase _characterBase;
+		[SerializeField] private CCharacter_Base _characterBase;
 		[NonSerialized] private Transform _transform;
 		[NonSerialized] private float _initialY;
 		[NonSerialized] private Coroutine _lerpCoroutine;

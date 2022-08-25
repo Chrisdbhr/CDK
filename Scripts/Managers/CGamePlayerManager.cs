@@ -45,7 +45,7 @@ namespace CDK {
 
 		#region <<---------- Characters Managment ---------->>
 		
-		public List<GameObject> GetAllGameObjectsRelatedToCharacter(CCharacterBase characterBase) {
+		public List<GameObject> GetAllGameObjectsRelatedToCharacter(CCharacter_Base characterBase) {
 			foreach (var player in this._gamePlayers) {
 				if (!player.IsControllingCharacter(characterBase)) continue;
 				return player.GetAllRelatedGameObjects();
@@ -53,7 +53,7 @@ namespace CDK {
 			return new List<GameObject>();
 		}
 
-		public CGamePlayer GetPlayerControllingCharacter(CCharacterBase characterBase) {
+		public CGamePlayer GetPlayerControllingCharacter(CCharacter_Base characterBase) {
 			return this._gamePlayers.FirstOrDefault(player => player.IsControllingCharacter(characterBase));
 		}
         

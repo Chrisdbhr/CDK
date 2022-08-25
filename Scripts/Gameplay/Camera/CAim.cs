@@ -53,7 +53,7 @@ namespace CDK {
 		
 
 		// Cache
-		[SerializeField] private CCharacterBase _ownerCharacter;
+		[SerializeField] private CCharacter_Base _ownerCharacter;
 		[SerializeField] private Camera _camera;
 		[NonSerialized] private RaycastHit _hitInfo; 
 		[NonSerialized] private Transform _myTransform;

@@ -1,7 +1,6 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using CDK.Characters.Enums;
-using CDK.Characters.Interfaces;
 using UniRx;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -19,24 +18,20 @@ using Chronos;
 #endif
 
 namespace CDK {
-	[SelectionBase][RequireComponent(typeof(Rigidbody))]
-    public abstract class CCharacterBase : MonoBehaviour, ICStunnable {
+	[SelectionBase]
+    [RequireComponent(typeof(Rigidbody), typeof(CapsuleCollider))]
+    public abstract class CCharacter_Base : MonoBehaviour {
 
 		#region <<---------- Properties ---------->>
 
-        #region <<---------- Debug ---------->>
-
-		[SerializeField] protected bool _debug;
-
-		#endregion <<---------- Debug ---------->>
-
+        public CPlayerInputValues Input;
+        
 		#region <<---------- Cache and References ---------->>
 
-		[Header("Cache and References")]
-		[SerializeField] protected Animator _animator;
-        protected Rigidbody body;
+        public Rigidbody Body { get; private set; }
+        public CapsuleCollider CapsuleCollider { get; private set; }
 
-		protected CBlockingEventsManager _blockingEventsManager;
+        protected CBlockingEventsManager _blockingEventsManager;
 #pragma warning disable CS0108, CS0114
         protected Transform transform;
 #pragma warning restore CS0108, CS0114
@@ -52,15 +47,7 @@ namespace CDK {
 		}
 
 		#endregion <<---------- References ---------->>
-
-		#region <<---------- Input ---------->>
-        public Vector3 InputMovement { get; set; }
-        public bool InputWalk { get; set; }
-        public bool InputRun { get; set; }
-        public bool InputJump { get; set; }
-		public bool InputAim { get; set; }
-		#endregion <<---------- Input ---------->>
-
+        
 		#region <<---------- Time ---------->>
 
 		protected float TimelineTimescale {
@@ -81,32 +68,36 @@ namespace CDK {
 
 		#region <<---------- Movement Properties ---------->>
         public Vector3 Velocity {
-            get => this.body.velocity;
+            get => this.Body.velocity;
         }
 
         [SerializeField] protected float _rootMotionMultiplier = 1f;
         [HideInInspector] public Vector3 RootMotionDeltaPosition = Vector3.zero;
-        [HideInInspector] public Vector3 AdditionalMovementFromAnimator = Vector3.zero;
 		
-        private readonly List<CSceneArea> _activeSceneAreas = new List<CSceneArea>();
 
 		#region <<---------- Run and Walk ---------->>
         [Header("Movement")]
-        [SerializeField] protected CMovState _currentMovState;
-		public CMovState CurrentMovState {
-			get { return this._currentMovState; }
-            set {
-                if (this._currentMovState == value) return;
-                this._currentMovState = value;
-            
-                // set animators
-                if (this._animator) {
-                    this._animator.CSetBoolSafe(this.ANIM_CHAR_IS_WALKING, value == CMovState.Walking);
-                    this._animator.CSetBoolSafe(this.ANIM_CHAR_IS_RUNNING, value == CMovState.Running);
-                    this._animator.CSetBoolSafe(this.ANIM_CHAR_IS_SPRINTING, value == CMovState.Sprint);
-                }
+        [SerializeField] private CMovementSpeed _currentMovementSpeed;
+		public CMovementSpeed CurrentMovementSpeed {
+			get { return this._currentMovementSpeed; }
+            protected set {
+                if (this._currentMovementSpeed == value) return;
+                this.CurrentMovementStateChanged?.Invoke(this._currentMovementSpeed, value);
+                this._currentMovementSpeed = value;
             }
 		}
+        public event Action<CMovementSpeed, CMovementSpeed> CurrentMovementStateChanged;
+        public CMovementSpeed MaxMovementSpeed;
+        
+        protected float GetSpeedForCurrentMovementSpeed() {
+            switch (this.MaxMovementSpeed) {
+                case CMovementSpeed.Sprint:
+                    return this.SprintSpeed;
+                case CMovementSpeed.Running:
+                    return this.RunSpeed;
+            }
+            return this.WalkSpeed;
+        }
 
 		public float WalkSpeed {
 			get { return this._walkSpeed; }
@@ -129,10 +120,6 @@ namespace CDK {
         
 		#endregion <<---------- Movement Properties ---------->>
 
-		#region <<---------- Strafe ---------->>
-		protected ReactiveProperty<bool> IsStrafingRx = new ReactiveProperty<bool>();
-		#endregion <<---------- Strafe ---------->>
-
 		#region <<---------- Aim ---------->>
 		public bool IsAiming {
 			get { return this._isAimingRx.Value; }
@@ -142,33 +129,7 @@ namespace CDK {
 		protected Vector3 _aimTargetPos;
 		protected Vector3 _aimTargetDirection;
 		#endregion <<---------- Aim ---------->>
-
-		#region <<---------- Animation ---------->>
-		public const float ANIMATION_BLENDTREE_LERP = 15f;
-
-		#region <<---------- Animation Parameters ---------->>
-		protected readonly int ANIM_CHAR_MOV_SPEED_XZ = Animator.StringToHash("speedXZ");
-        protected readonly int ANIM_CHAR_MOV_SPEED_X = Animator.StringToHash("speedX");
-        protected readonly int ANIM_CHAR_MOV_SPEED_Y = Animator.StringToHash("speedY");
-
-		// actions
-        protected readonly int ANIM_CHAR_STUMBLE = Animator.StringToHash("stumble");
-
-		// condition states
-		protected readonly int ANIM_CHAR_IS_STRAFING = Animator.StringToHash("isStrafing");
-		protected readonly int ANIM_CHAR_IS_WALKING = Animator.StringToHash("isWalking");
-        protected readonly int ANIM_CHAR_IS_RUNNING = Animator.StringToHash("isRunning");
-        protected readonly int ANIM_CHAR_IS_SPRINTING = Animator.StringToHash("isSprinting");
-
-		// Stun
-		protected readonly int ANIM_CHAR_IS_STUNNED_LIGHT = Animator.StringToHash("stunL");
-		protected readonly int ANIM_CHAR_IS_STUNNED_MEDIUM = Animator.StringToHash("stunM");
-        protected readonly int ANIM_CHAR_IS_STUNNED_HEAVY = Animator.StringToHash("stunH");
         
-        #endregion <<---------- Animation Parameters ---------->>
-
-		#endregion <<---------- Animation ---------->>
-
 		#region <<---------- Sound ---------->>
 
 		#if FMOD
@@ -193,7 +154,8 @@ namespace CDK {
 		protected virtual void Awake() {
 			this.transform = base.transform;
             this._blockingEventsManager = CDependencyResolver.Get<CBlockingEventsManager>();
-            if (body == null) body = this.GetComponent<Rigidbody>();
+            if (this.Body == null) this.Body = this.GetComponent<Rigidbody>();
+            if (this.CapsuleCollider == null) this.CapsuleCollider = this.GetComponent<CapsuleCollider>();
         }
 
 		protected virtual void OnEnable() {
@@ -205,21 +167,15 @@ namespace CDK {
             this.CanMoveRx = new ReactiveProperty<bool>(true);
 			
             this._isAimingRx = new ReactiveProperty<bool>();
-            this.IsStrafingRx = new ReactiveProperty<bool>();
 
             #endregion <<---------- RX Creations ---------->>
 
             #region <<---------- Movement ---------->>
 
-            // strafe
-            this.IsStrafingRx.TakeUntilDisable(this).DistinctUntilChanged().Subscribe(isStrafing => {
-                if (this._animator) this._animator.SetBool(this.ANIM_CHAR_IS_STRAFING, isStrafing);
-            });
-
             // can mov
             this.CanMoveRx.TakeUntilDisable(this).DistinctUntilChanged().Subscribe(canMove => {
-                if (!canMove && this.CurrentMovState > CMovState.Idle) {
-                    this.CurrentMovState = CMovState.Idle;
+                if (!canMove && this.CurrentMovementSpeed > CMovementSpeed.Idle) {
+                    this.CurrentMovementSpeed = CMovementSpeed.Idle;
                 }
             });
 
@@ -232,17 +188,11 @@ namespace CDK {
 
 		protected virtual void Start() { }
 
-		protected virtual void Update() {
-            
-        }
+		protected virtual void Update() { }
 
-        protected virtual void LateUpdate() {
-            
-        }
+        protected virtual void LateUpdate() { }
 
-        protected virtual void FixedUpdate() {
-            
-        }
+        protected virtual void FixedUpdate() { }
         
 		protected virtual void OnDisable() {
             this._disposables?.Dispose();
@@ -257,7 +207,6 @@ namespace CDK {
 		}
 
         protected virtual void Reset() {
-            if (this._animator == null) this._animator = this.GetComponentInChildren<Animator>();
             #if LUDIQ_CHRONOS
             if (this._timeline == null) this._timeline = this.GetComponentInChildren<Timeline>();
             #endif
@@ -282,64 +231,13 @@ namespace CDK {
             this.StopTalking();
 
             this.RootMotionDeltaPosition = Vector3.zero;
-            this.AdditionalMovementFromAnimator = Vector3.zero;
 
-            this._animator.CDoIfNotNull(a => {
-                a.Rebind();
-                a.Update(0f);
-            });
             this._blockingEventsManager.ReleaseFromUnityObject(this);
-
-            if (this._activeSceneAreas.RemoveAll(a => a == null) > 0) {
-                Debug.Log($"Removed null scene areas when scene changed for character '{this.name}'");
-            }
         }
 
 		#endregion <<---------- Events ---------->>
 
-
-
-
-		#region <<---------- Movement ---------->>
-
-        public Vector2 GetInputMovement2d() {
-            return new Vector2(this.InputMovement.x, this.InputMovement.z);
-        }
         
-		#endregion <<---------- Movement ---------->>
-
-
-        
-
-        #region <<---------- Scene Areas ---------->>
-        
-        public void AddSceneArea(CSceneArea area) {
-            this._activeSceneAreas.Add(area);
-        }
-		
-        public void RemoveSceneArea(CSceneArea area) {
-            this._activeSceneAreas.Remove(area);
-        }
-
-        protected CMovState GetMaxMovementSpeed() {
-            return this._activeSceneAreas.Count > 0 
-                ? this._activeSceneAreas.Min(a => a.MaximumMovementState) 
-                : CMovState.Sprint;
-        }
-
-        protected float GetSpeedForCurrentMovementState() {
-            switch (this.CurrentMovState) {
-                case CMovState.Sprint:
-                    return this.SprintSpeed;
-                case CMovState.Running:
-                    return this.RunSpeed;
-            }
-            return this.WalkSpeed;
-        }
-        
-        #endregion <<---------- Scene Areas ---------->>
-
-     
         
 
 		#region <<---------- Aim ---------->>
@@ -406,38 +304,6 @@ namespace CDK {
 		#endregion <<---------- Crouch ---------->>
 
 		
-		
-
-		#region <<---------- Stumble ---------->>
-
-		public void Stumble() {
-			this._animator.CSetTriggerSafe(this.ANIM_CHAR_STUMBLE);
-		}
-		
-		#endregion <<---------- Stumble ---------->>
-		
-		
-
-
-		#region <<---------- ICStunnable ---------->>
-		
-		public void Stun(CEnumStunType stunType) {
-			switch (stunType) {
-				case CEnumStunType.medium:
-					this._animator.CSetTriggerSafe(this.ANIM_CHAR_IS_STUNNED_MEDIUM);
-					break;
-				case CEnumStunType.heavy:
-					this._animator.CSetTriggerSafe(this.ANIM_CHAR_IS_STUNNED_HEAVY);
-					break;
-				default:
-					this._animator.CSetTriggerSafe(this.ANIM_CHAR_IS_STUNNED_LIGHT);
-					break;
-			}
-		}
-		
-		#endregion <<---------- ICStunnable ---------->>
-
-
 		
 		
 		#region <<---------- Voice ---------->>

@@ -7,7 +7,7 @@ namespace CDK.Interaction {
 
 		#region <<---------- Properties and Fields ---------->>
 
-		[SerializeField] private CCharacterBase _characterBase;
+		[SerializeField] private CCharacter_Base _characterBase;
 		[SerializeField] private LayerMask _interactionLayerMask;
 		[SerializeField] private float _interactionMaxDistance = 1.0f;
 		[SerializeField] private Transform _rayOriginTransform;
@@ -39,7 +39,7 @@ namespace CDK.Interaction {
 			this._blockingEventsManager = CDependencyResolver.Get<CBlockingEventsManager>();
 			this._transform = this.transform;
 			
-			this._characterBase = this.GetComponent<CCharacterBase>();
+			this._characterBase = this.GetComponent<CCharacter_Base>();
 			if (this._characterBase == null) {
 				Debug.LogError($"Cant find any Character on {this.name}, removing component, character cannot interact with anything!");
 				Destroy(this);
