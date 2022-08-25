@@ -14,5 +14,19 @@ namespace CDK {
             return go;
         }
         
+        public static T CGetComponentInChildrenOrInParent<T>(this GameObject go, bool includeInactive = false) {
+            if (go == null) return default;
+            var target = go.GetComponentInChildren<T>(includeInactive);
+            if (target != null) return target;
+            return go.GetComponentInParent<T>(includeInactive);
+        }
+        
+        public static T CGetComponentInParentOrInChildren<T>(this GameObject go, bool includeInactive = false) {
+            if (go == null) return default;
+            var target = go.GetComponentInParent<T>(includeInactive);
+            if (target != null) return target;
+            return go.GetComponentInChildren<T>(includeInactive);
+        }
+        
     }
 }

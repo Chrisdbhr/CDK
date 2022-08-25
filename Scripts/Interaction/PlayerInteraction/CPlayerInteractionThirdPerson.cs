@@ -3,6 +3,7 @@ using System.Linq;
 using UnityEngine;
 
 namespace CDK.Interaction {
+    [AddComponentMenu(CDKStrings.PrefixScripts + "Interaction/Player Interaction - Third Person")]
 	public class CPlayerInteractionThirdPerson : CPlayerInteractionBase {
 
 		#region <<---------- Properties and Fields ---------->>

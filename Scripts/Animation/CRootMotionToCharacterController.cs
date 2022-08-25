@@ -30,13 +30,11 @@ namespace CDK {
 		}
 
 		private void OnAnimatorMove() {
-			if (_rootMotionDeltaPositionChanged == null) return;
-			if (CTime.TimeScale == 0f) {
+			if (_rootMotionDeltaPositionChanged == null || this._targetAnimator) return;
+			if (_targetAnimator.updateMode != AnimatorUpdateMode.UnscaledTime && CTime.TimeScale == 0f) {
 				_rootMotionDeltaPositionChanged(Vector3.zero);
 				return;
 			}
-
-			if (this._targetAnimator == null) return;
 
 			_rootMotionDeltaPositionChanged(this._targetAnimator.deltaPosition);
 		}
