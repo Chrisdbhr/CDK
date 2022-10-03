@@ -16,7 +16,7 @@ namespace CDK {
 
 
 
-		public static Transform GetSceneEntryPointTransform(int entryPointNumber) {
+		public static Transform GetSceneEntryPointTransformByNumber(int entryPointNumber) {
 			var sceneEntryPoints = GameObject.FindObjectsOfType<CSceneEntryPoint>();
 			if (!sceneEntryPoints.Any() || entryPointNumber >= sceneEntryPoints.Length) {
 				Debug.LogWarning($"Cant find any level entry point {entryPointNumber} OR it is invalid.");
@@ -43,7 +43,7 @@ namespace CDK {
 			
 			// gizmo
 			Gizmos.color = Color.cyan;
-			Gizmos.DrawSphere(pos, this._editorRadius * 2f);
+			Gizmos.DrawWireSphere(pos, this._editorRadius * 2f);
 			Gizmos.DrawLine(pos, pos + (fwd * _editorRadius * 2f));
 
 			Handles.color = new Color(0.9f, 0.1f,0.6f);

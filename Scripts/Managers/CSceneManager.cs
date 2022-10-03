@@ -166,7 +166,7 @@ namespace CDK {
                 return;
             }
             
-            var targetEntryPointTransform = CSceneEntryPoint.GetSceneEntryPointTransform(entryPointNumber);
+            var targetEntryPointTransform = CSceneEntryPoint.GetSceneEntryPointTransformByNumber(entryPointNumber);
             var offset = new Vector3(0f, 0.001f, 0f);
             var targetPos = Vector3.zero + offset;
             var targetRotation = Quaternion.identity;

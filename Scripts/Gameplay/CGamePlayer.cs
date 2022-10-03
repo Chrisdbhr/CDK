@@ -159,7 +159,7 @@ namespace CDK {
 		}
 
         public CCharacter_Base AssignInstantiatedCharacter(CCharacter_Base instantiatedCharacter) {
-            var entryPoint = CSceneEntryPoint.GetSceneEntryPointTransform(0);
+            var entryPoint = CSceneEntryPoint.GetSceneEntryPointTransformByNumber(0);
             if (entryPoint != null) {
                 Debug.Log($"Setting '{instantiatedCharacter.name}' to entryPoint number'{0}'", entryPoint.gameObject);
                 instantiatedCharacter.TeleportToLocation(entryPoint.transform.position, entryPoint.transform.rotation);
