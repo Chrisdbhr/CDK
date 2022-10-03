@@ -7,6 +7,19 @@ using UnityEditor;
 namespace CDK {
 	public static class CTransformExtensions {
 
+        public static void RotateTowardsDirection(this Transform t, Vector3 dir, float maxDegreesDelta, float timeScale = 1f) {
+            if (timeScale == 0f) return;
+            dir.y = 0f;
+            if (dir == Vector3.zero) return;
+
+            // lerp rotation
+            t.rotation = Quaternion.RotateTowards(
+                t.rotation,
+                Quaternion.LookRotation(dir),
+                maxDegreesDelta * timeScale
+            );
+        }
+        
 		public static void DeleteAllChildren(this Transform parentGameObject) {
 			var allChild = parentGameObject.GetComponentsInChildren<Transform>();
             #if UNITY_EDITOR
