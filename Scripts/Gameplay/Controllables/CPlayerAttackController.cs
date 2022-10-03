@@ -3,10 +3,11 @@ using CDK.Damage;
 using UnityEngine;
 
 namespace CDK.Weapons {
+    [Obsolete]
 	public class CPlayerAttackController : MonoBehaviour {
 		[SerializeField] private CCharacter_Base _characterBase;
 		[SerializeField] private CInventory _inventory;
-		[SerializeField] private CAim _aim;
+		[SerializeField] private CFpsAim _fpsAim;
 		[SerializeField] private Animator _characterAnimator;
 		[NonSerialized] private CBlockingEventsManager _blockingEventsManager;
 
@@ -23,7 +24,7 @@ namespace CDK.Weapons {
 
 		private void Update() {
 			if (Input.GetButtonDown(CInputKeys.PRIMARY_ACTION) && 
-				this._characterBase.IsAiming &&
+				//this._characterBase.IsAiming &&
 				this._inventory.EquippedWeapon != null &&
 				!this._blockingEventsManager.IsAnyBlockingEventHappening
 			   ) {
@@ -48,8 +49,8 @@ namespace CDK.Weapons {
 						switch (ammo.CProjectileType) {
 							case CProjectileType.raycast:
 								bool hitSomething = Physics.Raycast(
-									this._aim.transform.position,
-									this._aim.transform.forward,
+									this._fpsAim.transform.position,
+									this._fpsAim.transform.forward,
 									out var hitInfo,
 									Mathf.Infinity,
 									1,
@@ -74,7 +75,7 @@ namespace CDK.Weapons {
 									var rigidbody = hitInfo.collider.GetComponent<Rigidbody>();
 									if (rigidbody != null) {
 										rigidbody.AddForceAtPosition(
-											this._aim.transform.forward * damage,
+											this._fpsAim.transform.forward * damage,
 											hitInfo.point,
 											ForceMode.Impulse
 										);
