@@ -172,36 +172,7 @@ namespace CDK {
         private void LateUpdate() {
             if (CApplication.IsQuitting) return;
             if (this._cinemachineBrain == null || this._cinemachineBrain.ActiveVirtualCamera == null || this._cinemachineBrain.ActiveVirtualCamera.Follow == null) return;
-				
-            // camera shake intensity
-            if (this._ownerCharacter && this._cinemachineBrain.ActiveVirtualCamera is CinemachineFreeLook cam) {
-                var velocity = this._ownerCharacter.Velocity;
-                if(velocity.y < 0) velocity.y *= _fallShakeMultiplier;
-                var magnitude = velocity.magnitude;
-                float amplitude = 0f;
-                float frequency = 0f;
-                if (magnitude <= _cameraShakeMinimumSpeedToApply) {
-                    amplitude = 0f;
-                    frequency = 0f;
-                }
-                else {
-                    amplitude = magnitude * this._cameraShakeAmplitude;
-                    frequency = magnitude * this._cameraShakeFrequency;
-                }
-                for (int i = 0; i < 3; i++) {
-                    var rig = cam.GetRig(i);
-                    if (rig) {
-                        var noise = rig.GetCinemachineComponent<CinemachineBasicMultiChannelPerlin>();
-                        if (noise) {
-                            noise.m_AmplitudeGain = noise.m_AmplitudeGain.CLerp(amplitude, this._shakeLerpAmount * CTime.DeltaTimeScaled);
-                            noise.m_FrequencyGain = noise.m_FrequencyGain.CLerp(frequency, this._shakeLerpAmount * CTime.DeltaTimeScaled);
-                        }
-                    }
-                }
-            }
-				
-            this._currentDistanceFromTarget = Vector3.Distance(this._cinemachineBrain.ActiveVirtualCamera.Follow.position, this._unityCamera.transform.position); 
-            this._isCloseToTheCharacterRx.Value = this._currentDistanceFromTarget <= this._distanceToConsiderCloseForCharacter;
+            this.UpdateDistanceFromTarget();
         }
 
         private void OnDisable() {
@@ -227,6 +198,11 @@ namespace CDK {
 
 		#region <<---------- General ---------->>
 
+        private void UpdateDistanceFromTarget() {
+            this._currentDistanceFromTarget = Vector3.Distance(this._cinemachineBrain.ActiveVirtualCamera.Follow.position, this._unityCamera.transform.position); 
+            this._isCloseToTheCharacterRx.Value = this._currentDistanceFromTarget <= this._distanceToConsiderCloseForCharacter;
+        }
+        
 		public Transform GetCameraTransform() {
 			return this._unityCamera.transform;
 		}
