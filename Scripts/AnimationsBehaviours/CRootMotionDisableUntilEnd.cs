@@ -5,8 +5,8 @@ namespace CDK {
     {
         // OnStateEnter is called when a transition starts and the state machine starts to evaluate this state
         public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex) {
-            if (animator.TryGetComponent<CRootMotionToCharacterController>(out var c)) {
-                c.SetAnimationRootMotion(false);
+            if (animator.TryGetComponent<CRootMotionReceiver>(out var c)) {
+                c.SetAnimationRootMotionEnabledState(false);
             }
         }
 
@@ -18,8 +18,8 @@ namespace CDK {
 
         // OnStateExit is called when a transition ends and the state machine finishes evaluating this state
         public override void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex) {
-            if (animator.TryGetComponent<CRootMotionToCharacterController>(out var c)) {
-                c.SetAnimationRootMotion(true);
+            if (animator.TryGetComponent<CRootMotionReceiver>(out var c)) {
+                c.SetAnimationRootMotionEnabledState(true);
             }
         }
 
