@@ -42,11 +42,15 @@ namespace CDK {
 		#endif
         private Vector2 _cameraSensitivityMultiplier = Vector3.one * 0.5f;
 
+        public void SetCameraSensitivity(float value) {
+            this._cameraSensitivityMultiplier.x = value;
+            this._cameraSensitivityMultiplier.y = value;
+        }
         public void SetCameraSensitivityX(float value) {
-            this._cameraSensitivityMultiplier = new Vector2(value.CClamp(0.01f,1f), this._cameraSensitivityMultiplier.y);
+            this._cameraSensitivityMultiplier = new Vector2(value, this._cameraSensitivityMultiplier.y);
         }
         public void SetCameraSensitivityY(float value) {
-            this._cameraSensitivityMultiplier = new Vector2(this._cameraSensitivityMultiplier.x, value.CClamp(0.01f,1f));
+            this._cameraSensitivityMultiplier = new Vector2(this._cameraSensitivityMultiplier.x, value);
         }
 
         #endregion <<---------- Camera ---------->>
