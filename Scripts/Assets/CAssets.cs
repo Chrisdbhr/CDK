@@ -12,16 +12,7 @@ using Cysharp.Threading.Tasks;
 #endif
 
 namespace CDK {
-    public class CAssets {
-
-        #region <<---------- Properties ---------->>
-
-        private CanvasGroup _loadingCanvas;
-        private IDisposable _loadingCanvasTimer;
-
-        #endregion <<---------- Properties ---------->>
-
-
+    public static class CAssets {
 
         #region <<---------- Instantiation ---------->>
 
