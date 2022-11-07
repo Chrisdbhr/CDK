@@ -10,11 +10,17 @@ namespace CDK {
 		[SerializeField] private bool _onlyUpdateWhenVisible = true;
 		[SerializeField] private bool _ignoreTimescale;
 		
-		[NonSerialized] private bool _isVisible;
-		
+        private bool _isVisible;
+        private RectTransform _rectTransform;
+        private bool _useRectTransform;
+        
 		#endregion <<---------- Properties and Fields ---------->>
 
-		private void OnBecameVisible() {
+        private void Awake() {
+            this._useRectTransform = (this._rectTransform = this.GetComponent<RectTransform>());
+        }
+
+        private void OnBecameVisible() {
 			this._isVisible = true;
 		}
 
@@ -24,7 +30,13 @@ namespace CDK {
 
 		protected override void Execute(float deltaTime) {
 			if (this._onlyUpdateWhenVisible && !this._isVisible) return;
-			this.transform.Rotate(this._rotateDirectionAndSpeed * (_ignoreTimescale ? Time.deltaTime : CTime.DeltaTimeScaled));
+            
+			if (this._useRectTransform) this._rectTransform.Rotate(GetRotation());
+            else this.transform.Rotate(GetRotation());
 		}
+
+        private Vector3 GetRotation() {
+            return this._rotateDirectionAndSpeed * (_ignoreTimescale ? Time.unscaledDeltaTime : CTime.DeltaTimeScaled);
+        }
 	}
 }
