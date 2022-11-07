@@ -124,6 +124,11 @@ namespace CDK {
         }
 
         public static void UnloadAsset(Object obj) {
+            if (obj == null) {
+                Debug.LogError($"Will not unload a null asset.");
+                return;
+            }
+            Debug.Log($"Unloading obj {obj.name}");
             Resources.UnloadAsset(obj);
         }
 
