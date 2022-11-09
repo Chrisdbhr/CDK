@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UniRx;
@@ -76,9 +77,8 @@ namespace CDK {
 		// Rotation
 		public float RotationX { get; private set; }
 		public float RotationY { get; private set; }
-		#if DOTween
-		private Tween _recenterRotationTween;
-		#endif
+        private Coroutine _recenterRotationRoutine;
+        private float _recenterRotationSpeed = 0.15f;
 		
 		// Camera 
 		[SerializeField] private UnityEngine.Camera _unityCamera;
@@ -225,7 +225,7 @@ namespace CDK {
 
 		
 
-		#region <<---------- Events ---------->>
+        #region <<---------- Callbacks ---------->>
 
 		#if Cinemachine
 		private void ActiveCameraChanged(ICinemachineCamera newCamera, ICinemachineCamera oldCamera) {
@@ -234,7 +234,13 @@ namespace CDK {
 			this.ApplyLastOrDefaultCameraProfile();
 			if (this._cinemachineBrain.ActiveVirtualCamera is CinemachineFreeLook freeLookCamera) {
 				freeLookCamera.m_YAxis.Value = 0.5f;
-			}
+                freeLookCamera.m_RecenterToTargetHeading.m_enabled = false;
+                freeLookCamera.m_YAxisRecentering.m_enabled = false;
+                
+                float recenterRotationDuration = this._recenterRotationSpeed * 0.5f;
+                freeLookCamera.m_RecenterToTargetHeading.m_RecenteringTime = freeLookCamera.m_YAxisRecentering.m_RecenteringTime = recenterRotationDuration;
+                freeLookCamera.m_RecenterToTargetHeading.m_WaitTime = freeLookCamera.m_YAxisRecentering.m_WaitTime = 0f;
+            }
 			Debug.Log($"Player Cinemachine Active Camera Changed to '{newCamera.Name}'", newCamera.VirtualCameraGameObject);
 		}
 		#endif
@@ -265,13 +271,6 @@ namespace CDK {
             }
         }
         
-		#endregion <<---------- Events ---------->>
-		
-		
-		
-		
-		#region <<---------- Callbacks ---------->>
-
 		private void ActiveSceneChanged(Scene oldScene, Scene newScene) {
 			this.SearchForGlobalVolume();
 			this.ApplyLastOrDefaultCameraProfile();
@@ -291,38 +290,29 @@ namespace CDK {
 
 		#region <<---------- Input ---------->>
 
-		public void ResetRotation(float duration = 0.3f) {
-			#if Cinemachine && DOTween
-			if (this._recenterRotationTween != null ) return;
-			this._recenterRotationTween?.Kill();
+		public void ResetRotation() {
+            this.CStopCoroutine(this._recenterRotationRoutine);
+            this._recenterRotationRoutine = this.CStartCoroutine(this.ResetRotationRoutine());
+        }
 
-			if (this._cinemachineBrain.ActiveVirtualCamera is CinemachineFreeLook freeLookCamera) {
-				var finalTimes = new Vector2(freeLookCamera.m_RecenterToTargetHeading.m_RecenteringTime, freeLookCamera.m_YAxisRecentering.m_RecenteringTime);
-				
-				this._recenterRotationTween = DOTween.To(
-					()=>new Vector2(freeLookCamera.m_RecenterToTargetHeading.m_RecenteringTime * 0.01f, freeLookCamera.m_YAxisRecentering.m_RecenteringTime * 0.01f),
-					x=> {
-						freeLookCamera.m_RecenterToTargetHeading.m_RecenteringTime = x.x;
-						freeLookCamera.m_YAxisRecentering.m_RecenteringTime = x.y;
-						
-						freeLookCamera.m_RecenterToTargetHeading.RecenterNow();
-						freeLookCamera.m_YAxisRecentering.RecenterNow();
-					},
-					finalTimes,
-					duration
-				);
+        private IEnumerator ResetRotationRoutine() {
+            #if Cinemachine
+            if (this._cinemachineBrain.ActiveVirtualCamera is CinemachineFreeLook freeLookCamera) {
+                freeLookCamera.m_RecenterToTargetHeading.m_enabled = true;
+                freeLookCamera.m_YAxisRecentering.m_enabled = true;
 
-				this._recenterRotationTween.onComplete += () => {
-					this._recenterRotationTween?.Kill();
-					this._recenterRotationTween = null;
-				};
-				this._recenterRotationTween.Play();
-			}
+                yield return new WaitForSeconds(this._recenterRotationSpeed);
+                
+                freeLookCamera.m_RecenterToTargetHeading.m_enabled = false;
+                freeLookCamera.m_YAxisRecentering.m_enabled = false;
+            }
 			#else
-			Debug.LogError("'Camera ResetRotation' Not implemented without Cinemachine and Dotween");
+			Debug.LogError("'Camera ResetRotation' Not implemented without Cinemachine");
 			#endif
-		}
-		
+            
+            yield break;
+        }
+
 		#endregion <<---------- Input ---------->>
 
 
