@@ -11,10 +11,12 @@ namespace CDK.Interaction {
 		private float _interactionSphereCheckRadius = 0.4f;
 		private float _yCheckOffset = 0.5f;
 
-		#endregion <<---------- Properties and Fields ---------->>
+        #endregion <<---------- Properties and Fields ---------->>
 
 
+        
 
+        #region <<---------- Mono Behaviour ---------->>
 
 		#if UNITY_EDITOR
 		private void OnDrawGizmosSelected() {
@@ -25,10 +27,33 @@ namespace CDK.Interaction {
 		}
 		#endif
 
-		public override void TryToInteract() {
-			if (this._blockingEventsManager.IsAnyBlockingEventHappening) return;
+        private void OnEnable() {
+            this._blockingEventsManager.OnAnyBlockingEventHappening += OnOnAnyBlockingEventHappening;
+        }
 
-			var originPos = this.GetCenterSphereCheckPosition();
+        private void OnDisable() {
+            this._blockingEventsManager.OnAnyBlockingEventHappening -= OnOnAnyBlockingEventHappening;
+        }
+
+        private void Update() {
+            if (this._blockingEventsManager.IsAnyBlockingEventHappening) return;
+            this.TargetInteractable = this.UpdateInteractable();
+        }
+        
+        #endregion <<---------- Mono Behaviour ---------->>
+
+
+
+        
+        #region <<---------- Interaction ---------->>
+
+        public override void TryToInteract() {
+            if (TargetInteractable == null) return;
+            this.TargetInteractable.OnInteract(this.transform);
+        }
+
+        private ICInteractable UpdateInteractable() {
+            var originPos = this.GetCenterSphereCheckPosition();
 
 			var colliders = Physics.OverlapSphere(
 				originPos,
@@ -37,17 +62,18 @@ namespace CDK.Interaction {
 				QueryTriggerInteraction.Collide
 			);
 
-			if (colliders == null || colliders.Length <= 0) return;
+			if (colliders == null || colliders.Length <= 0) return null;
 
-			// get list of interactables
-			var interactableColliders = colliders.Where(c => c != null && c.GetComponent<ICInteractable>() != null).ToArray();
-			if (interactableColliders.Length <= 0) return;
-            
-			originPos.x = this.transform.position.x;
-			originPos.z = this.transform.position.z;
+            originPos.x = this.transform.position.x;
+            originPos.z = this.transform.position.z;
+			
+			var interactableColliders = colliders
+            // get list of interactables
+            .Where(c => c != null && c.GetComponent<ICInteractable>() != null)
+            // get closest one
+            .OrderBy(c => (originPos - this.GetScaledColliderCenterPosition(c)).sqrMagnitude).ToArray();
 
-            // get closer interaction point
-            interactableColliders = interactableColliders.OrderBy(c => (originPos - this.GetScaledColliderCenterPosition(c)).sqrMagnitude).ToArray();
+            if (interactableColliders.Length <= 0) return null;
             
 			// get target interactable to try to interact
             bool foundValidInteractable = false;
@@ -93,11 +119,23 @@ namespace CDK.Interaction {
                 break;
             }
 
-            if (!foundValidInteractable) return;
+            if (!foundValidInteractable || chosenInteractable == null) return null;
             
-            chosenInteractable.GetComponent<ICInteractable>().OnInteract(this.transform);
-		}
+            return chosenInteractable.GetComponent<ICInteractable>();
+        }
 
+        private void OnOnAnyBlockingEventHappening(bool isBlocking) {
+            if (!isBlocking) return;
+            this.TargetInteractable = null;
+        }
+
+        #endregion <<---------- Interaction ---------->>
+
+        
+        
+		
+        #region <<---------- Interactable Check ---------->>
+        
 		private Vector3 GetCheckHeight() {
 			return this.transform.position + (this.transform.up * this._yCheckOffset);
 		}
@@ -141,5 +179,8 @@ namespace CDK.Interaction {
             // Debug.LogWarning($"{nameof(IsPointInsideCollider)} using Collider '{c.name}' bounds to check if contains point, this can be imprecise. IsInside: {isInside}", c);
             // return isInside;
         }
+      
+        #endregion <<---------- Interactable Check ---------->>
+        
 	}
 }

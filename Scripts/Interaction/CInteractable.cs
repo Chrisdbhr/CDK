@@ -12,7 +12,6 @@ namespace CDK.Interaction {
 		
 		[SerializeField] private bool onlyWorkOneTimePerSceneLoad;
 		[SerializeField] private CUnityEventTransform InteractEvent;
-        [SerializeField] private string _animationToTrigger = "doorInteract";
         protected CBlockingEventsManager _blockingEventsManager;
         protected CUINavigationManager _navigationManager;
 		#if DOTween
@@ -57,35 +56,31 @@ namespace CDK.Interaction {
 			if (this.onlyWorkOneTimePerSceneLoad) {
 				Destroy(this);
 			}
-            this.RotateAndAnimateCharacter(interactingTransform);
+            this.RotateTowardsInteraction(interactingTransform);
             return true;
         }
 		
-		public virtual void OnLookTo(Transform lookingTransform) {
-			if (!this.enabled || !this.gameObject.activeInHierarchy || this._blockingEventsManager.IsAnyBlockingEventHappening) return;
-			if (lookingTransform == null) return;
-			Debug.Log($"{lookingTransform.name} looked to {this.name} in its interactable range.");	
-		}
+		public virtual void OnBecameInteractionTarget(Transform lookingTransform) { }
 
-		#endregion <<---------- CIInteractable ---------->>
+        public virtual void OnStoppedBeingInteractionTarget(Transform lookingTransform) { }
+        
+        #endregion <<---------- CIInteractable ---------->>
 
 
 
+        
         #region <<---------- General ---------->>
 
-        protected void RotateAndAnimateCharacter(Transform rootTransform) {
+        protected void RotateTowardsInteraction(Transform t) {
             #if DOTween
-            this._rotateTween = rootTransform.transform.DOLookAt(this.transform.position, 0.5f, AxisConstraint.Y);
+            this._rotateTween = t.DOLookAt(this.transform.position, 0.5f, AxisConstraint.Y);
             this._rotateTween.Play();
+            #else
+			t.LookAt(this.transform.position);
 			#endif
-
-            var anim = rootTransform.GetComponentInChildren<Animator>();
-            if (anim == null) return;
-            if(!this._animationToTrigger.CIsNullOrEmpty()) anim.CSetTriggerSafe(Animator.StringToHash(this._animationToTrigger));
         }
 
         #endregion <<---------- General ---------->>
 
-
-	}
+    }
 }

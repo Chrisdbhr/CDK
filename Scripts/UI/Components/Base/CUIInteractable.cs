@@ -72,7 +72,7 @@ namespace CDK.UI {
 		
 		public void OnCancel(BaseEventData eventData) {
 			if (!this.gameObject.activeInHierarchy) return;
-            if (this._navigationManager.CloseCurrentMenu(true)) {
+            if (this._navigationManager.CloseLastMenu(true)) {
                 this.Canceled();
             }
         }

@@ -51,7 +51,7 @@ namespace CDK.Interaction {
 			this._currentInteractable = new ReactiveProperty<CInteractable>();
 			this._currentInteractable.TakeUntilDisable(this).Subscribe(newInteractable => {
 				if (newInteractable != null) {
-					newInteractable.OnLookTo(this._transform);
+					newInteractable.OnBecameInteractionTarget(this._transform);
 				}
 				this.OnInteractableChanged?.Invoke(newInteractable);
 			});

@@ -78,7 +78,7 @@ namespace CDK.Interaction {
 
 		
 		#region <<---------- CInteractable ---------->>
-		public override void OnLookTo(Transform lookingTransform) {
+		public override void OnBecameInteractionTarget(Transform lookingTransform) {
 			
 		}
 

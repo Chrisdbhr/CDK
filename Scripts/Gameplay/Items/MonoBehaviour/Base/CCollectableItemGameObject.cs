@@ -35,8 +35,8 @@ namespace CDK {
 		
 
 		#region <<---------- CIInteractable ---------->>
-		public override void OnLookTo(Transform lookingTransform) {
-			base.OnLookTo(lookingTransform);
+		public override void OnBecameInteractionTarget(Transform lookingTransform) {
+			base.OnBecameInteractionTarget(lookingTransform);
 		}
 
 		public override bool OnInteract(Transform interactingTransform) {
