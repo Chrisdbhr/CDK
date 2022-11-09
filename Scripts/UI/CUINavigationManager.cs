@@ -112,7 +112,7 @@ namespace CDK.UI {
 		/// Closes active menu selecting previous button.
 		/// </summary>
 		/// <returns>returns TRUE if the menu closed.</returns>
-		public bool CloseCurrentMenu(bool closeRequestedByReturnButton = false) {
+		public bool CloseLastMenu(bool closeRequestedByReturnButton = false) {
             this.RemoveNullFromNavigationHistory();
 			if (this._navigationHistory.Count <= 0) {
 				Debug.LogError("No menu to close");

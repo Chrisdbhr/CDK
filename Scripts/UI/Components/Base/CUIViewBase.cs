@@ -71,16 +71,16 @@ namespace CDK.UI {
 			this._canvas = this.GetComponent<Canvas>();
 			this._fader = CDependencyResolver.Get<CFader>();
             this._navigationManager = CDependencyResolver.Get<CUINavigationManager>();
-		}
+        }
 
 		protected virtual void Start() {
 			
 		}
 		
 		protected virtual void OnEnable() {
-			this.UpdateEventSystemAndCheckForObjectSelection(this._eventSystem.firstSelectedGameObject);
+            this.UpdateEventSystemAndCheckForObjectSelection(this._eventSystem.firstSelectedGameObject);
 
-            Observable.EveryUpdate().TakeUntilDisable(this).Subscribe(_ => {
+            Observable.EveryLateUpdate().TakeUntilDisable(this).Subscribe(_ => {
                 if (this == null) return;
                 if (this._eventSystem == null || (this._eventSystem.currentSelectedGameObject != null && this._eventSystem.currentSelectedGameObject.GetComponent<CUIInteractable>() != null)) return;
                 var toSelect = this.GetComponentInChildren<CUIInteractable>();
@@ -93,7 +93,7 @@ namespace CDK.UI {
             });
 
             if(this._buttonReturn != null) this._buttonReturn.Button.OnClickAsObservable().TakeUntilDisable(this).Subscribe(_ => {
-                this._navigationManager.CloseCurrentMenu();
+                this._navigationManager.CloseLastMenu();
             });
         }
 
@@ -175,45 +175,30 @@ namespace CDK.UI {
 
 		#region <<---------- Visibility ---------->>
 
-		private void UpdateEventSystemAndCheckForObjectSelection(GameObject gameObjectToSelect) {
-			EventSystem.current = this._eventSystem;
+        private void UpdateEventSystemAndCheckForObjectSelection(GameObject gameObjectToSelect) {
+            if (gameObjectToSelect == null) return;
+            UpdateEventSystemAndCheckForObjectSelection(gameObjectToSelect.GetComponent<CUIInteractable>());
+        }
 
-			if (CInputManager.ActiveInputType != CInputManager.InputType.JoystickController) return;
-			
-			// get interactable to auto select
-			GameObject toSelect = null;
-			if (gameObjectToSelect != null && gameObjectToSelect.activeInHierarchy) {
-				toSelect = gameObjectToSelect;
-			}
-			else if (this.FirstSelectedObject != null && this.FirstSelectedObject.activeInHierarchy) {
-				toSelect = this.FirstSelectedObject;
-			}else {
-				Debug.LogWarning($"Could not select default object on event system, will try to find a CUIInteractable.");
-				var interactable = FindObjectOfType<CUIInteractable>();
-				toSelect = interactable.gameObject;
-			}
-			this._eventSystem.SetSelectedGameObject(null);
-			
-			SelectGameObjectAsync(toSelect).CAwait();
+
+        private void UpdateEventSystemAndCheckForObjectSelection(CUIInteractable interactableToSelect) {
+            if (interactableToSelect == null) {
+                Debug.LogError("Requested to select a null interactable! No object will be selected.");
+                return;
+            }
+            
+            EventSystem.current = this._eventSystem;
+
+            this._eventSystem.SetSelectedGameObject(interactableToSelect.gameObject);
 		}
 		
-		public async Task SelectGameObjectAsync(GameObject toSelect) {
-			if (toSelect == null) return;
-			await Observable.NextFrame();
-            if (toSelect == null) return;
-            var selectable = toSelect.GetComponent<Selectable>();
-			if (selectable != null) selectable.Select();
-			await Observable.TimerFrame(1);
-			if (this._eventSystem != null && toSelect != null) this._eventSystem.SetSelectedGameObject(toSelect);
-		}
-
 		public void HideIfSet() {
 			this.gameObject.SetActive(false);
 		}
 
 		public void ShowIfHidden(CUIInteractable buttonToSelect) {
 			this.gameObject.SetActive(true);
-			if(buttonToSelect) this.UpdateEventSystemAndCheckForObjectSelection(buttonToSelect.gameObject);
+			if(buttonToSelect) this.UpdateEventSystemAndCheckForObjectSelection(buttonToSelect);
 			UpdateCTime();
 		}
 		

@@ -16,7 +16,7 @@ namespace CDK.UI {
 			this._buttonConfirm.Button.OnClickAsObservable().Subscribe(_ => {
 				onConfirm?.Invoke();
 				Debug.Log($"SUBMIT: Confirm Popup '{this.gameObject.name}'", this);
-				this._navigationManager.CloseCurrentMenu();
+				this._navigationManager.CloseLastMenu();
 			});
 					
 			this._eventSystem.SetSelectedGameObject(this._buttonConfirm.gameObject);
