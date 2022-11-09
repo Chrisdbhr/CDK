@@ -166,7 +166,7 @@ namespace CDK {
                 Physics.SyncTransforms();
             }
             instantiatedCharacter.gameObject.SetActive(false);
-            instantiatedCharacter.name = $"[Character] {instantiatedCharacter.name}";
+            instantiatedCharacter.name = $"CHARACTER - {instantiatedCharacter.name}";
 			
             this.AddControllingCharacter(instantiatedCharacter);
             instantiatedCharacter.gameObject.SetActive(true);
@@ -234,7 +234,7 @@ namespace CDK {
 			
 			#if UnityAddressables
 			this._playerCamera = CAssets.LoadResourceAndInstantiate<CPlayerCamera>("PlayerCamera");
-            this._playerCamera.name = $"[CAM] {mainChar.name}";
+            this._playerCamera.name = $"CAM - {mainChar.name}";
            
             Debug.Log($"Created {mainChar.name} Camera", this._playerCamera);
 
@@ -377,7 +377,7 @@ namespace CDK {
 			this._blockingEventsManager.IsOnMenu = true;
 			try {
 				#if UnityAddressables
-				this._navigationManager.OpenMenu(this._gameSettings.AssetRef_PauseMenu, null, null);
+				this._navigationManager.OpenMenu(CGameSettings.AssetRef_PauseMenu, null, null);
 				#else
 				Debug.LogError("'GamePlayer OpenMenu' not implemented without UnityAddressables");
 				#endif
