@@ -27,8 +27,8 @@ namespace CDK {
 		
 		#region <<---------- Properties ---------->>
 
-		public string AssetRef_PauseMenu => "Prefabs/UI/menus/ui-pausemenu";
-		public string AssetRef_ConfirmationPopup => "Prefabs/UI/menus/ui-confirm popup";
+        public const string AssetRef_PauseMenu = "Prefabs/UI/menus/ui-pausemenu";
+		public const string AssetRef_ConfirmationPopup = "Prefabs/UI/menus/ui-confirm popup";
 		
 		public bool CursorStartsHidden => this._cursorStartsHidden;
 		[SerializeField] protected bool _cursorStartsHidden;
