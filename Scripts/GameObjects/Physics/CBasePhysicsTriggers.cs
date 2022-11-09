@@ -20,7 +20,7 @@ namespace CDK {
 			return !this._tag.CIsNullOrEmpty() && !col.CompareTag(this._tag);
 		}
 
-        protected void Reset() {
+        protected virtual void Reset() {
             var col = this.GetComponent<Collider>();
             if (col) col.isTrigger = this._isTrigger;
         }

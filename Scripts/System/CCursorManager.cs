@@ -1,4 +1,5 @@
 using System;
+using CDK.UI;
 using UnityEngine;
 
 namespace CDK {
@@ -14,17 +15,23 @@ namespace CDK {
 			this._gameSettings = CDependencyResolver.Get<CGameSettings>();
 			this._blockingEventsManager = CDependencyResolver.Get<CBlockingEventsManager>();
 
-			SetCursorState(!this._gameSettings.CursorStartsHidden);
-			this._blockingEventsManager.OnMenu += SetCursorState;
-			CInputManager.InputTypeChanged += OnInputTypeChanged;
+            SetCursorState(!this._gameSettings.CursorStartsHidden);
+			this._blockingEventsManager.OnMenu += onMenu => {
+                if (!onMenu) {
+                    SetCursorState(false);
+                    return;
+                }
+                ShowMouseIfNeeded();
+            };
+            CInputManager.InputTypeChanged += OnInputTypeChanged;
 		}
 
 		private void OnInputTypeChanged(CInputManager.InputType newType) {
-			SetCursorState(CInputManager.ActiveInputType == CInputManager.InputType.MouseAndKeyboard && this._blockingEventsManager.IsOnMenu);
+			SetCursorState(CInputManager.ActiveInputType == CInputManager.InputType.Mouse && this._blockingEventsManager.IsOnMenu);
 		}
 
 		public static void SetCursorState(bool visible) {
-			Debug.Log($"Setting cursor visibility to {visible}");
+			if(Cursor.visible != visible) Debug.Log($"Setting cursor visibility to {visible}");
 			Cursor.visible = visible;
 			
 			if (visible) {
@@ -34,6 +41,11 @@ namespace CDK {
 				Cursor.lockState = CursorLockMode.Locked;
 			}
 		}
+
+        public static void ShowMouseIfNeeded() {
+            if (CInputManager.ActiveInputType != CInputManager.InputType.Mouse) return;
+            SetCursorState(true);
+        }
 
 	}
 }

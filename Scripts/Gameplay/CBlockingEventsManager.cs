@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UniRx;
 using UnityEngine;
@@ -28,14 +29,14 @@ namespace CDK {
 		}
 		private BoolReactiveProperty _isOnMenuRx;
 
-		public CRetainable IsDoingBlockingAction {
-			get { return this._isDoingBlockingAction; }
-			set { this._isDoingBlockingAction = value; }
-		}
+		public bool IsDoingBlockingAction => this._isDoingBlockingAction.IsRetained();
 		private CRetainable _isDoingBlockingAction;
 
-		private HashSet<UnityEngine.Object> RetainedObjects;
-		
+        public IEnumerable RetainedObjects => this._retainedObjects;
+		private HashSet<UnityEngine.Object> _retainedObjects;
+
+        private CompositeDisposable _disposables;
+        
 		#endregion <<---------- Properties ---------->>
 
 		
@@ -96,7 +97,12 @@ namespace CDK {
 		
 		public CBlockingEventsManager() {
 
-			this.RetainedObjects = new HashSet<Object>();
+            if (!Application.isPlaying) return;
+            
+            this._disposables?.Dispose();
+            this._disposables = new CompositeDisposable();
+
+			this._retainedObjects = new HashSet<Object>();
 			
 			// on menu
 			this._isOnMenuRx?.Dispose();
@@ -115,7 +121,6 @@ namespace CDK {
 			});
 
 			// is doing blocking action
-            this._isDoingBlockingAction = null;
 			this._isDoingBlockingAction = new CRetainable();
             this._isDoingBlockingAction.IsRetainedRx.Subscribe(retained => {
                 this._onDoingBlockingAction?.Invoke(retained);
@@ -131,7 +136,27 @@ namespace CDK {
 				Debug.Log($"<color={"#b62a24"}>IsBlockingEventHappening changed to: {blockingEventHappening}</color>");
 				this._isAnyBlockingEventHappening = blockingEventHappening;
 				this._onAnyBlockingEventHappening?.Invoke(blockingEventHappening);
-			});
+			})
+            .AddTo(this._disposables);
+            
+            // check for null retainers
+            Observable.EveryUpdate().Subscribe(_ => {
+                bool anyWasNull = false;
+                foreach (var o in this._retainedObjects) {
+                    if (o != null) continue;
+                    anyWasNull = true;
+                    Debug.LogWarning("Releasing one Retainable because one object inside list was null!");
+                    this._isDoingBlockingAction.Release();
+                }
+
+                if (!anyWasNull) return;
+
+                int nullObjs = this._retainedObjects.RemoveWhere(i => i == null);
+                if (nullObjs > 0) {
+                    Debug.LogWarning($"Removed {nullObjs} null objects from Retainable List.");
+                }
+            })
+            .AddTo(this._disposables);
 		}
 
 		#endregion <<---------- Initializers ---------->>
@@ -146,9 +171,9 @@ namespace CDK {
 				Debug.LogError($"Will not retain a null object.");
 				return;
 			}
-			if (this.RetainedObjects.Add(unityObject)) {
+			if (this._retainedObjects.Add(unityObject)) {
 				Debug.Log($"Retaining BlockingEvents from '{unityObject.name}'");
-				this.IsDoingBlockingAction.Retain();
+				this._isDoingBlockingAction.Retain();
 				return;
 			}
 			Debug.LogError($"GameObject '{unityObject.name}' tried to Retain BlockingEvents when already retaining!", unityObject);
@@ -160,9 +185,9 @@ namespace CDK {
 				return;
 			}
 
-			if (this.RetainedObjects.Remove(unityObject)) {
+			if (this._retainedObjects.Remove(unityObject)) {
 				Debug.Log($"Releasing BlockingEvents from '{unityObject.name}'");
-				this.IsDoingBlockingAction.Release();
+                this._isDoingBlockingAction.Release();
 				return;
 			}
 			Debug.LogWarning($"GameObject '{unityObject.name}' tried to Release BlockingEvents when not on list of retained objects. This can lead to unpredicable behaviour.", unityObject);
