@@ -126,8 +126,9 @@ namespace CDK {
 		private void UnsignFromInputEvents() {
 			#if Rewired
 			this._rePlayer?.RemoveInputEventDelegate(this.InputInteract);
-            this._rePlayer?.RemoveInputEventDelegate(this.InputWalk);
             this._rePlayer?.RemoveInputEventDelegate(this.InputRun);
+            this._rePlayer?.RemoveInputEventDelegate(this.InputJump);
+            this._rePlayer?.RemoveInputEventDelegate(this.InputWalk);
 			this._rePlayer?.RemoveInputEventDelegate(this.InputResetCameraRotation);
 			this._rePlayer?.RemoveInputEventDelegate(this.InputPause);
 			#endif

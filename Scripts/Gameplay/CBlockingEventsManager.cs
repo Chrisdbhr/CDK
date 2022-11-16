@@ -133,7 +133,7 @@ namespace CDK {
 			this._isDoingBlockingAction.IsRetainedRx.AsObservable(),
 			(isOnMenu, isPlayingCutscene, isDoingBlockingAction) => isOnMenu || isPlayingCutscene || isDoingBlockingAction)
 			.Subscribe(blockingEventHappening => {
-				Debug.Log($"<color={"#b62a24"}>IsBlockingEventHappening changed to: {blockingEventHappening}</color>");
+				Debug.Log($"<color={"#f20000"}>{nameof(this.IsAnyBlockingEventHappening)}</color> changed to: {blockingEventHappening}");
 				this._isAnyBlockingEventHappening = blockingEventHappening;
 				this._onAnyBlockingEventHappening?.Invoke(blockingEventHappening);
 			})

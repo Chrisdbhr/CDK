@@ -125,7 +125,7 @@ namespace CDK {
             Debug.Log("<b>Rewired Input Manager</b> instantiated.");
             rw.name = rw.name.Replace("(Clone)", string.Empty) + " (Instantiated BeforeSplashScreen)";
             #else
-            Debug.Log("No input manager setup on initialization.");
+            Debug.LogError("No input manager setup on initialization.");
 			#endif
         }
 

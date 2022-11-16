@@ -372,7 +372,7 @@ namespace CDK {
 			#endif
 		}
         
-        private void ApplyLastOrDefaultCameraProfile() {
+        public void ApplyLastOrDefaultCameraProfile() {
             this.ActiveCameraProfiles.RemoveAll(i => i == null);
             var lastOrDefaultProfile = this.ActiveCameraProfiles.LastOrDefault();
             this.EnableCameraFromType(lastOrDefaultProfile != null ? lastOrDefaultProfile.CameraType : CPlayerCamera.CameraType.@default);

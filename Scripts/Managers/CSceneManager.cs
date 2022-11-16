@@ -82,9 +82,12 @@ namespace CDK {
 			
 			this._blockingEventsManager.IsPlayingCutscene = true;
 
+            var allLoadedScenes = GetAllLoadedScenes();
+
+            // background load scene async
 			Debug.Log($"Loading scene '{sceneToLoadName}'");
-			
-			var allLoadedScenes = GetAllLoadedScenes();
+            var loadAsyncOp = SceneManager.LoadSceneAsync(sceneToLoadName, LoadSceneMode.Additive);
+            loadAsyncOp.allowSceneActivation = false;
 			
 			// fade out
 			float fadeOutTime = 0.5f;
@@ -111,10 +114,7 @@ namespace CDK {
 					await Observable.NextFrame();
 				} while (unloadAsyncOp.progress < 1f);
 			}
-
-			// background load scene async
-			var loadAsyncOp = SceneManager.LoadSceneAsync(sceneToLoadName, LoadSceneMode.Additive);
-			
+            
 			// Activate loaded scenes
 			loadAsyncOp.allowSceneActivation = true;
 			do {
