@@ -17,7 +17,11 @@ namespace CDK {
         #region <<---------- Instantiation ---------->>
 
         public static T InstantiateAndGetComponent<T>(GameObject prefab, Transform parent = null) {
-            var createdGo = GameObject.Instantiate(prefab, parent);
+            return InstantiateAndGetComponent<T>(prefab, Vector3.zero, Quaternion.identity, parent);
+        }
+        
+        public static T InstantiateAndGetComponent<T>(GameObject prefab, Vector3 position, Quaternion rotation, Transform parent = null) {
+            var createdGo = GameObject.Instantiate(prefab, position, rotation, parent);
             return createdGo == null ? default : createdGo.GetComponent<T>();
         }
 
@@ -43,7 +47,7 @@ namespace CDK {
                 Debug.LogError($"Could not {nameof(LoadResourceAndInstantiate)} from key '{address}'");
                 return null;
             }
-
+            
             return GameObject.Instantiate(resource, parent).GetComponent<T>();
         }
 
