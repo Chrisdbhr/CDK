@@ -39,9 +39,9 @@ namespace CDK {
 
 		#region <<---------- Path ---------->>
 
-        protected static string GetRootSaveFolder() {
+        public static string GetPersistentDataFolder() {
             if(Debug.isDebugBuild) Debug.Log($"Application.persistentDataPath: '{Application.persistentDataPath}'");
-            return Application.persistentDataPath; //Path.Combine(Application.persistentDataPath, "idbfs");
+            return Application.persistentDataPath; //Path.Combine(Application.persistentDataPath, "idbfs"); // Only on WebGL
         }
 
         #endregion <<---------- Path ---------->>
@@ -65,7 +65,7 @@ namespace CDK {
 
 		[MenuItem("Tools/Open root save folder")]
 		public static void OpenSaveFolder() {
-			EditorUtility.RevealInFinder(GetRootSaveFolder());
+			EditorUtility.RevealInFinder(GetPersistentDataFolder());
 		}
 		
 		#endif

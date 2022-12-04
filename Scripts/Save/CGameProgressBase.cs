@@ -25,6 +25,9 @@ namespace CDK {
         
         #region <<---------- Properties and Fields ---------->>
 
+        [JsonIgnore]
+        public const string SavesDirectoryName = "SavesDir";  
+        
         #if Newtonsoft_Json_for_Unity
         [JsonProperty("_saveIdentifier")]
         #endif
@@ -145,16 +148,16 @@ namespace CDK {
         
         #region <<---------- Paths ---------->>
 
-        protected static string GetGameProgressFolder() {
-            var folderPath = Path.Combine(GetRootSaveFolder(), "GameProgress").Replace('\\', '/');
+        public static string GetGameProgressFolder() {
+            var folderPath = Path.Combine(GetPersistentDataFolder(), SavesDirectoryName).Replace('\\', '/');
             if (!Directory.Exists(folderPath)) {
                 Directory.CreateDirectory(folderPath);
             }
             Debug.Log($"{nameof(GetGameProgressFolder)} returned: '{folderPath}'");
             return folderPath;
         }
-        protected static string GetGameProgressFilePath(string fileName) {
-            return GetGameProgressFolder() + $"/{fileName}.json";
+        public static string GetGameProgressFilePath(string fileName) {
+            return Path.Combine(GetGameProgressFolder(), $"{fileName}.json");
         }
 
         #endregion <<---------- Paths ---------->>
