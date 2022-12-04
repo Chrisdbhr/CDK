@@ -10,6 +10,7 @@ namespace CDK.Interaction {
 
 		#region <<---------- Properties and Fields ---------->>
 		
+        [SerializeField] protected bool _debug;
 		[SerializeField] private bool onlyWorkOneTimePerSceneLoad;
 		[SerializeField] private CUnityEventTransform InteractEvent;
         protected CBlockingEventsManager _blockingEventsManager;
@@ -51,7 +52,7 @@ namespace CDK.Interaction {
         /// Returns TRUE if interacted sucesfull.
         /// </summary>
 		public virtual bool OnInteract(Transform interactingTransform) {
-			if (!this.enabled || !this.gameObject || !this.gameObject.activeInHierarchy || this._blockingEventsManager.IsAnyBlockingEventHappening) return false;
+			if (!this.enabled || !this.gameObject || !this.gameObject.activeInHierarchy || this._blockingEventsManager.IsAnyHappening) return false;
 			this.InteractEvent?.Invoke(interactingTransform);
 			if (this.onlyWorkOneTimePerSceneLoad) {
 				Destroy(this);

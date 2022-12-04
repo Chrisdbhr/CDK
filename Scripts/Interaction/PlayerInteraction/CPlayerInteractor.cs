@@ -59,8 +59,7 @@ namespace CDK.Interaction {
 		}
 		
 		private void Update() {
-
-			if (this._blockingEventsManager.IsAnyBlockingEventHappening) {
+			if (this._blockingEventsManager.IsAnyHappening) {
 				this._jumpNextFrame = true;
 				return;
 			}
@@ -118,7 +117,7 @@ namespace CDK.Interaction {
 		
 		private void TryToInteract() {
 			if (!this._currentInteractable.Value) return;
-			if (this._blockingEventsManager.IsAnyBlockingEventHappening) return;
+			if (this._blockingEventsManager.IsAnyHappening) return;
 			this._currentInteractable.Value.OnInteract(this._characterBase.transform);
 		}
 		

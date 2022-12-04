@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using UniRx;
 using UnityEngine;
 
 namespace CDK.Interaction {
@@ -28,15 +29,11 @@ namespace CDK.Interaction {
 		#endif
 
         private void OnEnable() {
-            this._blockingEventsManager.OnAnyBlockingEventHappening += OnOnAnyBlockingEventHappening;
-        }
-
-        private void OnDisable() {
-            this._blockingEventsManager.OnAnyBlockingEventHappening -= OnOnAnyBlockingEventHappening;
+            this._blockingEventsManager.IsAnyHappeningRx.TakeUntilDisable(this).Subscribe(OnOnAnyBlockingEventHappening);
         }
 
         private void Update() {
-            if (this._blockingEventsManager.IsAnyBlockingEventHappening) return;
+            if (this._blockingEventsManager.IsAnyHappening) return;
             this.TargetInteractable = this.UpdateInteractable();
         }
         
@@ -81,7 +78,7 @@ namespace CDK.Interaction {
             foreach (var c in interactableColliders) {
                 bool isInsideInteractableCollider = IsPointInsideCollider(originPos, c);
                 if (isInsideInteractableCollider) {
-                    Debug.Log($"OriginPos is inside interaction collider '{c.name}', interacting with it.");
+                    if(_debug) Debug.Log($"OriginPos is inside interaction collider '{c.name}', interacting with it.");
                     foundValidInteractable = true;
                     chosenInteractable = c;
                     break;

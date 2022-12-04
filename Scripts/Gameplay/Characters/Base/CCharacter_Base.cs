@@ -117,7 +117,6 @@ namespace CDK {
         protected virtual void OnActiveSceneChanged(Scene oldScene, Scene newScene) {
             if (this == null) return;
             this.StopTalking();
-            this._blockingEventsManager.ReleaseFromUnityObject(this);
         }
 
 		#endregion <<---------- Events ---------->>

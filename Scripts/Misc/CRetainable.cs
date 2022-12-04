@@ -1,76 +1,21 @@
-using System;
+using System.Collections.Generic;
 using UniRx;
+using UniRx.Triggers;
 using UnityEngine;
 
 namespace CDK {
 	public class CRetainable {
 
 		#region <<---------- Properties and Fields ---------->>
-
-		private int RetainCount {
-			get { return this._retainCount; }
-			set {
-				if (this._retainCount == 0) {
-					if (value > 0) {
-						this._onRetain?.Invoke();
-						this._onIsRetained?.Invoke(true);
-						this._isRetainedRx.Value = true;
-					}else if (value < 0) {
-						Debug.LogError("Retain count reached a < 0 value! This should not happen! Will Release retainable to reduce errors.");
-						Release();
-						this._retainCount = 0;
-						return;
-					}
-				}else if (this._retainCount > 0 && value == 0) {
-					Release();
-				}
-
-				void Release() {
-					this._onRelease?.Invoke();
-					this._onIsRetained?.Invoke(false);
-					this._isRetainedRx.Value = false;
-				}
-
-				this._retainCount = value;
-			}
-		}
-		private int _retainCount = 0;
-
-		public event Action OnRetain{
-			add {
-				this._onRetain -= value;
-				this._onRetain += value;
-			}
-			remove {
-				this._onRetain -= value;
-			}
-		}
-		private event Action _onRetain;
-
-		public event Action OnRelease{
-			add {
-				this._onRelease -= value;
-				this._onRelease += value;
-			}
-			remove {
-				this._onRelease -= value;
-			}
-		}
-		private event Action _onRelease;
-		
-		public event Action<bool> OnIsRetained{
-			add {
-				this._onIsRetained -= value;
-				this._onIsRetained += value;
-			}
-			remove {
-				this._onIsRetained -= value;
-			}
-		}
-		private event Action<bool> _onIsRetained;
-
+        
+        public bool IsRetained => this._retainedObjectsRx.Count > 0;
 		public ReadOnlyReactiveProperty<bool> IsRetainedRx => this._isRetainedRx.ToReadOnlyReactiveProperty();
 		private ReactiveProperty<bool> _isRetainedRx;
+
+        public IReadOnlyCollection<object> RetainedObjectsCollection => _retainedObjectsRx;
+        private ReactiveCollection<object> _retainedObjectsRx;
+
+        private CompositeDisposable _disposables;
 
 		#endregion <<---------- Properties and Fields ---------->>
 
@@ -80,8 +25,28 @@ namespace CDK {
 		#region <<---------- Initializers ---------->>
 
 		public CRetainable() {
+            this._disposables?.Dispose();
+            this._disposables = new CompositeDisposable();
+            this._retainedObjectsRx = new ReactiveCollection<object>();
 			this._isRetainedRx = new ReactiveProperty<bool>();
-		}
+
+            this._retainedObjectsRx.ObserveCountChanged(true)
+            .Subscribe(count => {
+                this._isRetainedRx.Value = count > 0;
+            }).AddTo(this._disposables);
+
+            Object uObject;
+            Observable.EveryLateUpdate().Subscribe(_ => {
+                int count = this._retainedObjectsRx.Count;
+                for (int i = count - 1; i >= 0; i--) {
+                    uObject = this._retainedObjectsRx[i] as Object;
+                    if (uObject != null || this._retainedObjectsRx[i] != default) continue;
+                    Debug.LogWarning($"Removing null retainable at index {i}/{count}.");
+                    this._retainedObjectsRx.RemoveAt(i);
+                }
+            })
+            .AddTo(this._disposables);
+        }
 		
 		#endregion <<---------- Initializers ---------->>
 		
@@ -90,19 +55,23 @@ namespace CDK {
 		
 		#region <<---------- General ---------->>
 		
-		public void Retain() {
-			this.RetainCount += 1;
+		public void Retain(object source) {
+            if (source is UnityEngine.Component uComp) {
+                uComp.OnDestroyAsObservable().Subscribe(_ => {
+                    if (CApplication.IsQuitting) return;
+                    this._retainedObjectsRx.Remove(uComp);
+                });
+            }
+            if (this._retainedObjectsRx.Contains(source)) return;
+            this._retainedObjectsRx.Add(source);
 		}
 
-		public void Release() {
-			this.RetainCount -= 1;
-		}
-
-		public bool IsRetained() {
-			return this._retainCount > 0;
-		}
-		
-		#endregion <<---------- General ---------->>
+		public void Release(object source) {
+           if (this._retainedObjectsRx.Remove(source)) return;
+           Debug.LogWarning($"Tried to remove a Release source that was not in retainedObjects list.");
+        }
+        
+        #endregion <<---------- General ---------->>
 
 	}
 }

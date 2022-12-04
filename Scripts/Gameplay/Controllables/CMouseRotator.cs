@@ -25,8 +25,7 @@ namespace CDK {
 		}
 
 		private void Update() {
-
-			if (this._blockingEventsManager.IsAnyBlockingEventHappening) return;
+			if (this._blockingEventsManager.IsAnyHappening) return;
 			
 			this._inputLook = new Vector2(Input.GetAxisRaw(CInputKeys.LOOK_X), Input.GetAxisRaw(CInputKeys.LOOK_Y));
 

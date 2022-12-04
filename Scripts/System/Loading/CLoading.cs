@@ -35,11 +35,11 @@ namespace CDK {
 		
 		
 		public void LoadingCanvasRetain() {
-			_loadingUIRetainable.Retain();
+			_loadingUIRetainable.Retain(this);
 		}
 
 		public void LoadingCanvasRelease() {
-			_loadingUIRetainable.Release();
+			_loadingUIRetainable.Release(this);
 		}
 	}
 }

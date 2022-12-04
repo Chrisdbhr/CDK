@@ -24,7 +24,7 @@ namespace CDK.Interaction {
 		#endif
 
 		public override void TryToInteract() {
-			if (this._blockingEventsManager.IsAnyBlockingEventHappening) return;
+			if (this._blockingEventsManager.IsAnyHappening) return;
 			var interactable = this.GetCollisionInteractable();
 			if (interactable == null) return;
 			interactable.OnInteract(this.transform.root);

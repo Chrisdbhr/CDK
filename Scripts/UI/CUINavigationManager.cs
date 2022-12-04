@@ -8,7 +8,7 @@ using Object = UnityEngine.Object;
 
 namespace CDK.UI {
 	public class CUINavigationManager {
-
+        
         #region <<---------- Initializers ---------->>
 
 		public CUINavigationManager() {
@@ -107,7 +107,7 @@ namespace CDK.UI {
         }
 		
 		#endif
-
+        
 		/// <summary>
 		/// Closes active menu selecting previous button.
 		/// </summary>
@@ -141,24 +141,23 @@ namespace CDK.UI {
 
             Debug.Log($"Closing Menu '{lastInHistory.name}'", lastInHistory);
             this.LastFrameAMenuClosed = Time.frameCount;
-            return lastInHistory.Close();
+            return lastInHistory.NavigationRequestedClose();
         }
-
+        
 		public void EndNavigation() {
 			Debug.Log($"Requested EndNavigation of {this._navigationHistory.Count} Menus in history.");
             RemoveNullFromNavigationHistory();
 			foreach (var ui in this._navigationHistory) {
-				ui.Close();
+				ui.NavigationRequestedClose();
 			}
             this._disposableIsNavigating?.Dispose();
 			this._navigationHistory.Clear();
-			this._blockingEventsManager.IsOnMenu = false;
             CTime.TimeScale = 1f;
 		}
 		
 		#endregion <<---------- Open / Close ---------->>
-
-
+        
+        
 		
 		
 		#region <<---------- Navigation ---------->>
@@ -175,8 +174,6 @@ namespace CDK.UI {
 		private bool CheckIfIsFirstMenu() {
             this.RemoveNullFromNavigationHistory();
 			if (this._navigationHistory.Count > 0) return false;
-
-            this._blockingEventsManager.IsOnMenu = true;
 
 			this._disposableIsNavigating?.Dispose();
             this._disposableIsNavigating = Observable.EveryUpdate().Subscribe(_ => {
@@ -218,6 +215,6 @@ namespace CDK.UI {
 		}
 		
 		#endregion <<---------- Navigation ---------->>
-
+        
 	}
 }

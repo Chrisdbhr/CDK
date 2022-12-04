@@ -129,6 +129,8 @@ namespace CDK.UI {
 
 			this._canvas.sortingOrder = sortOrder;
 
+            this._blockingEventsManager.OnMenuRetainable.Retain(this);
+
             if (this._shouldPlayOpenAndCloseMenuSound) {
 			    #if FMOD
                 RuntimeManager.PlayOneShot(this._gameSettings.SoundOpenMenu);
@@ -144,7 +146,7 @@ namespace CDK.UI {
         /// Close the menu.
         /// </summary>
         /// <returns>Returns TRUE if the menu closed without errors.</returns>
-        public bool Close() {
+        public bool NavigationRequestedClose() {
 			Debug.Log($"Closing UI {this.gameObject.name}", this);
 			this._onClose?.Invoke(this);
 
@@ -158,6 +160,8 @@ namespace CDK.UI {
 			    #endif
             }
             
+            this._blockingEventsManager.OnMenuRetainable.Release(this);
+  
 			#if UnityAddressables
 			if (!CAssets.UnloadAsset(this.gameObject)) {
 				Debug.LogError($"Error releasing instance of object '{this.gameObject.name}'", this);

@@ -1,4 +1,4 @@
-﻿using System;
+﻿using UniRx;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -16,11 +16,7 @@ namespace CDK {
 		}
 
 		private void OnEnable() {
-			this._blockingEventsManager.OnPlayCutscene += this.PlayingStateChanged;
-		}
-
-		private void OnDisable() {
-			this._blockingEventsManager.OnPlayCutscene -= this.PlayingStateChanged;
+			this._blockingEventsManager.PlayingCutsceneRetainable.IsRetainedRx.DistinctUntilChanged().TakeUntilDisable(this).Subscribe(this.PlayingStateChanged);
 		}
 
 		void PlayingStateChanged(bool isPlaying) {

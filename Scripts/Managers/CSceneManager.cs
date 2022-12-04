@@ -80,16 +80,11 @@ namespace CDK {
 				return;
 			}
 			
-			this._blockingEventsManager.IsPlayingCutscene = true;
+			this._blockingEventsManager.PlayingCutsceneRetainable.Retain(this);
 
             var allLoadedScenes = GetAllLoadedScenes();
 
-            // background load scene async
-			Debug.Log($"Loading scene '{sceneToLoadName}'");
-            var loadAsyncOp = SceneManager.LoadSceneAsync(sceneToLoadName, LoadSceneMode.Additive);
-            loadAsyncOp.allowSceneActivation = false;
-			
-			// fade out
+            // fade out
 			float fadeOutTime = 0.5f;
 			this._fader.FadeToBlack(fadeOutTime, false);
             await Task.Delay(TimeSpan.FromSeconds(fadeOutTime));
@@ -107,19 +102,14 @@ namespace CDK {
 			}
 			SceneManager.SetActiveScene(tempHolderScene);
 
-			// unload scenes
+            // unload scenes
 			foreach (var sceneToUnload in allLoadedScenes) {
-				var unloadAsyncOp = SceneManager.UnloadSceneAsync(sceneToUnload, UnloadSceneOptions.None);
-				do {
-					await Observable.NextFrame();
-				} while (unloadAsyncOp.progress < 1f);
+                await SceneManager.UnloadSceneAsync(sceneToUnload, UnloadSceneOptions.None).AsObservable();
 			}
-            
-			// Activate loaded scenes
-			loadAsyncOp.allowSceneActivation = true;
-			do {
-				await Observable.NextFrame();
-			} while (loadAsyncOp.progress < 1f);
+
+            // ONLY load scene after the previous one is fully unloaded because UnityBug.
+            Debug.Log($"Loading scene '{sceneToLoadName}'");
+            await SceneManager.LoadSceneAsync(sceneToLoadName, LoadSceneMode.Additive).AsObservable();
 			
 			// teleport to target scene
 			var sceneToTeleport = SceneManager.GetSceneByName(sceneToLoadName);
@@ -157,7 +147,7 @@ namespace CDK {
             float fadeInTime = 1f;
             this._fader.FadeToTransparent(fadeInTime, true);
             
-            this._blockingEventsManager.IsPlayingCutscene = false;
+            this._blockingEventsManager.PlayingCutsceneRetainable.Release(this);
         }
 
         public static void SetTransformToSceneEntryPoint(Transform transformToMove, int entryPointNumber = 0) {
@@ -167,12 +157,21 @@ namespace CDK {
             }
             
             var targetEntryPointTransform = CSceneEntryPoint.GetSceneEntryPointTransformByNumber(entryPointNumber);
-            var offset = new Vector3(0f, 0.001f, 0f);
+            var offset = new Vector3(0f, 0.01f, 0f);
             var targetPos = Vector3.zero + offset;
             var targetRotation = Quaternion.identity;
+            float snapDistance = 1f;
 
             if (targetEntryPointTransform != null) {
-                targetPos = targetEntryPointTransform.position + offset;
+                bool hitGround = Physics.Raycast(
+                    targetEntryPointTransform.position + (Vector3.up * snapDistance),
+                    Vector3.down,
+                    out var hitInfo,
+                    snapDistance * 2f,
+                    1,
+                    QueryTriggerInteraction.Ignore
+                );
+                targetPos = (hitGround ? hitInfo.point : targetEntryPointTransform.position);
                 targetRotation = targetEntryPointTransform.rotation;
             }
 

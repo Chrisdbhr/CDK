@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using CDK.Interaction;
 using CDK.UI;
 using UniRx;
@@ -30,8 +29,8 @@ namespace CDK {
 			this._blockingEventsManager = CDependencyResolver.Get<CBlockingEventsManager>();
             this._navigationManager = CDependencyResolver.Get<CUINavigationManager>();
 
-			this._compositeDisposable?.Dispose();
-			this._compositeDisposable = new CompositeDisposable();
+			this._disposables?.Dispose();
+			this._disposables = new CompositeDisposable();
 
 			this.PlayerNumber = playerNumber;
 			
@@ -43,14 +42,17 @@ namespace CDK {
 			
 			#if Rewired
 			SetInputLayout(this._rePlayer, false);
-			this._blockingEventsManager.OnMenu += this.SetInputLayout;
+			this._blockingEventsManager.OnMenuRetainable.IsRetainedRx.Subscribe(this.SetInputLayout)
+            .AddTo(this._disposables);
 			#endif
 
+            // application lost focus
 			if (!Application.isEditor) {
-				Application.focusChanged += focused => {
-					if(!focused) this.OpenMenu();
-				};
-			}
+                Application.focusChanged += this.OnApplicationFocusChanged;
+            }
+            
+            // Steam
+            CSteamManager.OnSteamOverlayOpen += this.TryPauseGame;
 			
 			Debug.Log($"Instantiating a new game player number {playerNumber}");
 		}
@@ -75,9 +77,10 @@ namespace CDK {
 
 		private readonly List<CCharacter_Base> _characters = new List<CCharacter_Base>();
 
-		private readonly CompositeDisposable _compositeDisposable;
+		private readonly CompositeDisposable _disposables;
 		private readonly CGameSettings _gameSettings;
-		private readonly CBlockingEventsManager _blockingEventsManager;
+        private readonly CBlockingEventsManager _blockingEventsManager;
+        private readonly CSteamManager _steamManager;
         private CUINavigationManager _navigationManager;
 
         #endregion <<---------- Properties and Fields ---------->>
@@ -95,11 +98,6 @@ namespace CDK {
 				
 				var character = this.GetControllingCharacter();
 				if (character == null) return;
-
-				if (this._blockingEventsManager.IsAnyBlockingEventHappening) {
-					character.Input.Movement = Vector3.zero;
-					return;
-				}
 				
 				#if Rewired
 				var inputMovement2d = this._rePlayer.GetAxis2D(CInputKeys.MOV_X, CInputKeys.MOV_Y);
@@ -110,8 +108,8 @@ namespace CDK {
 				#else
 				Debug.LogError("'GamePlayer movement handling not implemented without Rewired'");
 				#endif
-			}).AddTo(this._compositeDisposable);
-			
+			}).AddTo(this._disposables);
+            
 			#if Rewired
 			this._rePlayer.AddInputEventDelegate(this.InputInteract, UpdateLoopType.Update, InputActionEventType.ButtonJustPressed, CInputKeys.INTERACT);
             this._rePlayer.AddInputEventDelegate(this.InputRun, UpdateLoopType.Update, CInputKeys.RUN);
@@ -285,42 +283,39 @@ namespace CDK {
 		
 		private void InputPause(InputActionEventData data) {
 			if (!data.GetButtonDown()) return;
-			if (Time.timeScale <= 0) return;
-            if (this._blockingEventsManager.IsOnMenu) return; 
-            
-            this.OpenMenu();
+            this.TryPauseGame();
 		}
 
 		private void InputResetCameraRotation(InputActionEventData data) {
-			if (this._blockingEventsManager.IsAnyBlockingEventHappening) return;
+			if (this._blockingEventsManager.IsAnyHappening) return;
 			if (!data.GetButtonDown()) return;
 			if (this._playerCamera == null) return;
 			this._playerCamera.ResetRotation();
 		}
 		
         private void InputWalk(InputActionEventData data) {
-            if (this._blockingEventsManager.IsAnyBlockingEventHappening) return;
+            if (this._blockingEventsManager.IsAnyHappening) return;
             var character = this.GetControllingCharacter();
             if (character == null) return;
             character.Input.Walk = data.GetButton();
         }
         
 		private void InputRun(InputActionEventData data) {
-			if (this._blockingEventsManager.IsAnyBlockingEventHappening) return;
+			if (this._blockingEventsManager.IsAnyHappening) return;
 			var character = this.GetControllingCharacter();
 			if (character == null) return;
 			character.Input.Run = data.GetButton();
 		}
 
         private void InputJump(InputActionEventData data) {
-            if (this._blockingEventsManager.IsAnyBlockingEventHappening) return;
+            if (this._blockingEventsManager.IsAnyHappening) return;
             var character = this.GetControllingCharacter();
             if (character == null) return;
             character.Input.Jump = data.GetButton();
         }
 		
 		private void InputInteract(InputActionEventData data) {
-			if (this._blockingEventsManager.IsAnyBlockingEventHappening) return;
+			if (this._blockingEventsManager.IsAnyHappening) return;
 			var character = this.GetControllingCharacter();
 			if (character == null) {
 				Debug.LogError($"Character number '{this.PlayerNumber}' tried to interact but is not controlling any character.");
@@ -371,24 +366,20 @@ namespace CDK {
 		
 
 
-		#region <<---------- Pause Menu ---------->>
+		#region <<---------- Pause ---------->>
 		
-		private void OpenMenu() {
+		private void TryPauseGame() {
+            if (Time.timeScale <= 0) return;
 			if (this._blockingEventsManager.IsOnMenu) return;
-			this._blockingEventsManager.IsOnMenu = true;
-			try {
-				#if UnityAddressables
-				this._navigationManager.OpenMenu(CGameSettings.AssetRef_PauseMenu, null, null);
-				#else
-				Debug.LogError("'GamePlayer OpenMenu' not implemented without UnityAddressables");
-				#endif
-			} catch (Exception e) {
-				this._blockingEventsManager.IsOnMenu = false;
-				Debug.LogError("Exception trying to OpenMenu on GamePlayer: " + e);
-			}
+            this._navigationManager.OpenMenu(CGameSettings.AssetRef_PauseMenu, null, null);
 		}
-		
-		#endregion <<---------- Pause Menu ---------->>
+
+        private void OnApplicationFocusChanged(bool focused) {
+            if (focused) return;
+            this.TryPauseGame();
+        }
+        
+		#endregion <<---------- Pause ---------->>
 		
 
 		
@@ -396,12 +387,10 @@ namespace CDK {
 		#region <<---------- Disposable ---------->>
 		
 		public void Dispose() {
-			this._compositeDisposable?.Dispose();
-
+			this._disposables?.Dispose();
+            if(this._steamManager) CSteamManager.OnSteamOverlayOpen -= this.TryPauseGame;
+            Application.focusChanged -= this.OnApplicationFocusChanged;
 			this.UnsignFromInputEvents();
-			#if Rewired
-			this._blockingEventsManager.OnMenu -= this.SetInputLayout;
-			#endif
 		}
 		
 		#endregion <<---------- Disposable ---------->>

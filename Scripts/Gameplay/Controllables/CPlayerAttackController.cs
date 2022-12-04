@@ -26,7 +26,7 @@ namespace CDK.Weapons {
 			if (Input.GetButtonDown(CInputKeys.PRIMARY_ACTION) && 
 				//this._characterBase.IsAiming &&
 				this._inventory.EquippedWeapon != null &&
-				!this._blockingEventsManager.IsAnyBlockingEventHappening
+				!this._blockingEventsManager.IsAnyHappening
 			   ) {
 				if (this._inventory.EquippedWeapon is CWeaponData gun) {
 					if (!gun.HasAmmo()) {

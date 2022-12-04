@@ -16,16 +16,17 @@ namespace CDK {
 
 		private void OnEnable() {
 			if (!_setOnEnableDisable) return;
-			_blockingEventsManager.IsPlayingCutscene = true;
+            this._blockingEventsManager.PlayingCutsceneRetainable.Retain(this);
 		}
 
 		private void OnDisable() {
 			if (!_setOnEnableDisable) return;
-			_blockingEventsManager.IsPlayingCutscene = false;
+            this._blockingEventsManager.PlayingCutsceneRetainable.Release(this);
 		}
 
 		public void SetPlayingState(bool isPlaying) {
-			this._blockingEventsManager.IsPlayingCutscene = isPlaying;
+			if(isPlaying) this._blockingEventsManager.PlayingCutsceneRetainable.Retain(this);
+            else this._blockingEventsManager.PlayingCutsceneRetainable.Release(this);
 		}
 	}
 }

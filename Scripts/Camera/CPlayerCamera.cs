@@ -41,11 +41,6 @@ namespace CDK {
 			
 			// cinemachine
 			this.UpdateCameraTargets();
-
-			#if FMOD
-			// fmod listener
-			// this._studioListener. = this._ownerPlayer.PlayerNumber;
-			#endif
 		}
 		
 		#endregion <<---------- Initializers ---------->>
@@ -88,23 +83,12 @@ namespace CDK {
 		#endif
 		private int _currentGameFrame;
 
-		[Header("Shake")]
-		[SerializeField] private float _shakeLerpAmount = 0.7f;
-		[SerializeField] private float _fallShakeMultiplier = 3f;
-		[SerializeField] [Range(0f, 20f)] private float _cameraShakeMinimumSpeedToApply = 6f;
-		[SerializeField] [Range(0f, 1f)] private float _cameraShakeAmplitude;
-		[SerializeField] [Range(0f, 1f)] private float _cameraShakeFrequency;
 		[SerializeField] private SkinnedMeshRenderer[] _renderToHideWhenCameraIsClose;
 		private float _currentDistanceFromTarget = 10.0f;
 		private float _distanceToConsiderCloseForCharacter = 0.5f;
 		private ReactiveProperty<bool> _isCloseToTheCharacterRx;
 		private float _clampMaxDistanceSpeed = 3f;
 
-		// Audio
-		#if FMOD
-		[SerializeField] private StudioListener _studioListener;
-		#endif
-		
 		// Cache
 		private CGamePlayer _ownerPlayer;
 		private Transform _transform;
@@ -134,6 +118,8 @@ namespace CDK {
 			this.ActiveCameraProfiles = new List<CCameraProfileVolume>();
 			this._isCloseToTheCharacterRx = new ReactiveProperty<bool>(false);
 
+            this._cinemachineBrain.m_IgnoreTimeScale = false;
+            
 			this.SearchForGlobalVolume();
 			this.ApplyLastOrDefaultCameraProfile();
 		}
@@ -164,8 +150,6 @@ namespace CDK {
             this._cinemachineBrain.m_CameraActivatedEvent.AddListener(this.ActiveCameraChanged);
 			#endif
 
-            CTime.OnTimeScaleChanged += this.TimeScaleChanged;
-            
             SceneManager.activeSceneChanged += ActiveSceneChanged;
         }
 
@@ -276,12 +260,6 @@ namespace CDK {
 			this.ApplyLastOrDefaultCameraProfile();
 			this.UpdateCameraTargets();
 		}
-
-        private void TimeScaleChanged(float oldTime, float newTime) {
-			#if Cinemachine
-            if (this._cinemachineBrain != null) this._cinemachineBrain.enabled = newTime != 0f;
-			#endif
-        }
 		
 		#endregion <<---------- Callbacks ---------->>
 		
@@ -334,7 +312,6 @@ namespace CDK {
 			
 			}
 
-			this._blockingEventsManager.IsPlayingCutscene = true;
 			this._tween.Play();
 		}
 
@@ -350,7 +327,6 @@ namespace CDK {
 				
 			}
 
-			this._blockingEventsManager.IsPlayingCutscene = false;
 			this._tween.Play();
 		}
 
