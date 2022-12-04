@@ -6,13 +6,12 @@ using UniRx;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-#if UNITY_2020
-using UnityEditor.Experimental.SceneManagement;
-#endif
-
 #if UNITY_EDITOR
 using UnityEditor;
 using UnityEditor.SceneManagement;
+#if UNITY_2020
+using UnityEditor.Experimental.SceneManagement;
+#endif
 #endif
 
 namespace CDK {
