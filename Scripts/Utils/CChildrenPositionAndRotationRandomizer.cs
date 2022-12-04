@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using UnityEngine;
 using Unity.Linq;
 using Random = UnityEngine.Random;
@@ -12,11 +13,12 @@ namespace CDK {
 		
 		#region <<---------- Properties and Fields ---------->>
 
+        [SerializeField, Range(0, 1000)] private int _safeOverflowCount = 1000;
 		[SerializeField] private Vector2 _scaleRange = new Vector2(1f, 2f);
 		[SerializeField] private Vector3 _angleRange = Vector3.one * 30;
 		[SerializeField] private Vector3 _positionRange = Vector3.one * 10;
-		[SerializeField] private float _minimumSpaceBetweenObjs = 1f;
-		[NonSerialized] private GameObject[] _childObjs;
+        [NonSerialized] private GameObject[] _childObjs;
+        [SerializeField] private LayerMask _checkLayers = -1;
 
 		#endregion <<---------- Properties and Fields ---------->>
 
@@ -37,8 +39,8 @@ namespace CDK {
 		#if UNITY_EDITOR
 		public void RandomizePositionsEditor() {
 			this.DoForEachGameObject(target => {
-				var pos = this.GetValidPosition(200);
-				Undo.RecordObject(target, $"undo-{target.name}");
+				var pos = this.GetValidPosition(target, this._safeOverflowCount);
+				Undo.RecordObject(target, $"undo-position-{target.name}");
 				target.position = pos;
 			});
 		}
@@ -49,22 +51,22 @@ namespace CDK {
 					Random.Range(-this._angleRange.y, this._angleRange.y),
 					Random.Range(-this._angleRange.z, this._angleRange.z)
 				);
-				Undo.RecordObject(target, $"undo-{target.name}");
+				Undo.RecordObject(target, $"undo-rotation-{target.name}");
 				target.rotation = Quaternion.Euler(angle);
 			});
 		}
 		public void RandomizeScalesEditor() {
 			this.DoForEachGameObject(target => {
                 float scale = Random.Range(_scaleRange.x, _scaleRange.y);
-                Undo.RecordObject(target, $"undo-{target.name}");
+                Undo.RecordObject(target, $"undo-scale-{target.name}");
 				target.localScale = scale * Vector3.one;
 			});
 		}
 
         public void RandomizeAll() {
-            this.RandomizePositionsEditor();
-            this.RandomizeRotationsEditor();
             this.RandomizeScalesEditor();
+            this.RandomizeRotationsEditor();
+            this.RandomizePositionsEditor();
         }
         
 		#endif
@@ -75,8 +77,7 @@ namespace CDK {
 			string progressBarInfo = "";
 			EditorUtility.DisplayProgressBar(progressBarTitle, progressBarInfo, 0f); 
 			#endif
-
-
+            
 			this._childObjs = this.gameObject.Children().ToArray();
 			if (this._childObjs.Length <= 0) return;
 			int count = 0;
@@ -95,28 +96,55 @@ namespace CDK {
 			#endif
 		}
 
-		private Vector3 GetValidPosition(int safeOverflowCount) {
+		private Vector3 GetValidPosition(Transform t, int safeOverflowCount) {
 			var pos = new Vector3(
 				Random.Range(-this._positionRange.x, this._positionRange.x),
 				Random.Range(-this._positionRange.y, this._positionRange.y),
 				Random.Range(-this._positionRange.z, this._positionRange.z)
 			);
 			pos += this.transform.position;
-			
+            t.transform.position = pos;
+            Physics.SyncTransforms();
+            
 			if (safeOverflowCount <= 0) {
-				Debug.Log($"[CChildrenPositionAndRotationRandomizer] Safe overflow reached. Stopping loop to prevent stack overflow.");
+				Debug.Log($"{nameof(CChildrenPositionAndRotationRandomizer)}: Safe overflow reached on {t.name}. Stopping loop to prevent stack overflow.", t);
 				return pos;
 			}
 
+            var tChildCol = t.GetComponentsInChildren<Collider>();
+            var allOtherColliders = FindObjectsOfType<Collider>(false).Where(c => !tChildCol.Contains(c) && this._checkLayers.CContains(c.gameObject.layer)).ToArray();
+            
 			bool needToRecalculate = false;
-			foreach (var createdObj in this._childObjs) {
-				if (Vector3.Distance(createdObj.transform.position, pos) <= this._minimumSpaceBetweenObjs) {
-					needToRecalculate = true;
-					break;
-				}
-			}
+            MeshCollider startedNonConvexMesh = null;
+            foreach (var myCol in tChildCol) {
+                foreach (var otherCol in allOtherColliders) {
+                    startedNonConvexMesh = null;
+                    if (otherCol is MeshCollider m && !m.convex) {
+                        startedNonConvexMesh = m;
+                        startedNonConvexMesh.convex = true;
+                    }
 
-			return needToRecalculate ? this.GetValidPosition(safeOverflowCount - 1) : pos;
+                    if (Physics.ComputePenetration(myCol,
+                            myCol.transform.position,
+                            myCol.transform.rotation,
+                            otherCol, 
+                            otherCol.transform.position,
+                            otherCol.transform.rotation,
+                            out _, out _)
+                        ) {
+                        needToRecalculate = true;
+                    }
+                    
+                    if (startedNonConvexMesh != null) {
+                        startedNonConvexMesh.convex = false;
+                    }
+
+                    if (needToRecalculate) break;
+                }
+                if (needToRecalculate) break;
+            }
+
+			return needToRecalculate ? this.GetValidPosition(t, safeOverflowCount - 1) : pos;
 		}
 
 	}

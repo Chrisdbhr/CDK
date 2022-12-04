@@ -30,6 +30,9 @@ namespace CDK {
         #region <<---------- MonoBehaviour ---------->>
         
         private IEnumerator Start() {
+            var cursorManager = CDependencyResolver.Get<CCursorManager>();
+            cursorManager.ShowMouseIfNeeded();
+            
             this._playableDirector.Play();
             this._playableDirector.Pause();
             #if Rewired
