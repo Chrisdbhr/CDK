@@ -6,9 +6,8 @@ namespace CDK {
 
         #region <<---------- Properties and Fields ---------->>
 
-        [Tooltip("Chance in % to trigger event")]
         public float ChanceToTrigger => this._chanceToTrigger;
-        [SerializeField] [Range(1f, 99f)]private float _chanceToTrigger = 50f;
+        [SerializeField, Tooltip("Chance in % to trigger event"), Range(1f, 99f)] private float _chanceToTrigger = 50f;
         [SerializeField] protected bool _triggerValue;
         [SerializeField] private bool _triggerAffectsSelfActiveState = true;
         [SerializeField] private CUnityEventBool _randomResultEvent;
