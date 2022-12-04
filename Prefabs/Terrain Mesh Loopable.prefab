@@ -82,6 +82,16 @@ PrefabInstance:
       propertyPath: m_StaticEditorFlags
       value: 123
       objectReference: {fileID: 0}
+    - target: {fileID: -6701932629709213729, guid: 6dd913b917c223a4b8b3640fc9b47f0b,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -6701932629709213729, guid: 6dd913b917c223a4b8b3640fc9b47f0b,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 628686402518546753, guid: 6dd913b917c223a4b8b3640fc9b47f0b,
         type: 3}
       propertyPath: m_StaticEditorFlags
@@ -96,6 +106,16 @@ PrefabInstance:
         type: 3}
       propertyPath: m_StaticEditorFlags
       value: 123
+      objectReference: {fileID: 0}
+    - target: {fileID: 1716239004267795415, guid: 6dd913b917c223a4b8b3640fc9b47f0b,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1716239004267795415, guid: 6dd913b917c223a4b8b3640fc9b47f0b,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2544943377711152654, guid: 6dd913b917c223a4b8b3640fc9b47f0b,
         type: 3}
@@ -122,6 +142,16 @@ PrefabInstance:
       propertyPath: m_LODs.Array.data[1].screenRelativeHeight
       value: 0.4010641
       objectReference: {fileID: 0}
+    - target: {fileID: 5919091764114242089, guid: 6dd913b917c223a4b8b3640fc9b47f0b,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5919091764114242089, guid: 6dd913b917c223a4b8b3640fc9b47f0b,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 7752963742733210884, guid: 6dd913b917c223a4b8b3640fc9b47f0b,
         type: 3}
       propertyPath: m_ReceiveGI
@@ -145,7 +175,7 @@ GameObject:
     type: 3}
   m_PrefabInstance: {fileID: 4380126571058487074}
   m_PrefabAsset: {fileID: 0}
---- !u!64 &6894914356746774131
+--- !u!64 &6032338944129638383
 MeshCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
