@@ -35,9 +35,7 @@ namespace CDK {
 			// character object
 			this._ownerCharacter = this._ownerPlayer.GetControllingCharacter();
 			
-			// renderers to hide
-			this._renderToHideWhenCameraIsClose = this._ownerCharacter.GetComponentsInChildren<SkinnedMeshRenderer>()
-            .Where(s=> s.name == "Face" || s.name == "Body" || s.name ==  "Hair").ToArray(); 
+            this.UpdateRenderersToHideWhenCameraIsClose();
 			
 			// cinemachine
 			this.UpdateCameraTargets();
@@ -203,6 +201,12 @@ namespace CDK {
 			Debug.LogError("'PlayerCamera' will not work without Cinemachine");
 			#endif
 		}
+
+        public void UpdateRenderersToHideWhenCameraIsClose() {
+            if (!this._ownerCharacter) return;
+            this._renderToHideWhenCameraIsClose = this._ownerCharacter.GetComponentsInChildren<SkinnedMeshRenderer>()
+            .Where(s=> s.name == "Face" || s.name == "Body" || s.name ==  "Hair").ToArray(); 
+        }
 
 		#endregion <<---------- General ---------->>
 		
