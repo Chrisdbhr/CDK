@@ -5,6 +5,7 @@ using System.Linq;
 using UniRx;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.Serialization;
 
 #if Cinemachine
 using Cinemachine;
@@ -155,6 +156,7 @@ namespace CDK {
             if (CApplication.IsQuitting) return;
             if (this._cinemachineBrain == null || this._cinemachineBrain.ActiveVirtualCamera == null || this._cinemachineBrain.ActiveVirtualCamera.Follow == null) return;
             this.UpdateDistanceFromTarget();
+            this.UpdateUnityCameraParameters();
         }
 
         private void OnDisable() {
@@ -180,6 +182,13 @@ namespace CDK {
 
 		#region <<---------- General ---------->>
 
+        private void UpdateUnityCameraParameters() {
+            if (this._unityCamera == null) return;
+            if (this._cinemachineBrain.ActiveVirtualCamera is CinemachineFreeLook cCam) {
+                this._unityCamera.farClipPlane = cCam.m_Lens.FarClipPlane;
+            }
+        }
+        
         private void UpdateDistanceFromTarget() {
             this._currentDistanceFromTarget = Vector3.Distance(this._cinemachineBrain.ActiveVirtualCamera.Follow.position, this._unityCamera.transform.position); 
             this._isCloseToTheCharacterRx.Value = this._currentDistanceFromTarget <= this._distanceToConsiderCloseForCharacter;
