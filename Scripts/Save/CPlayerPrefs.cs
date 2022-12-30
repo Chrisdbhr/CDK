@@ -132,7 +132,7 @@ namespace CDK {
         #region <<---------- Paths ---------->>
 
         protected static string GetPlayerPrefsFilePath() {
-            return GetPersistentDataFolder() + "/playerPrefs.json";
+            return GetApplicationPersistentDataFolder() + "/playerPrefs.json";
         }
 
         #endregion <<---------- Paths ---------->>

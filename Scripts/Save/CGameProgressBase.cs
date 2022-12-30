@@ -149,7 +149,7 @@ namespace CDK {
         #region <<---------- Paths ---------->>
 
         public static string GetGameProgressFolder() {
-            var folderPath = Path.Combine(GetPersistentDataFolder(), SavesDirectoryName).Replace('\\', '/');
+            var folderPath = Path.Combine(GetApplicationPersistentDataFolder(), SavesDirectoryName).Replace('\\', '/');
             if (!Directory.Exists(folderPath)) {
                 Directory.CreateDirectory(folderPath);
             }
