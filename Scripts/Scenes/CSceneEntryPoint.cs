@@ -42,8 +42,8 @@ namespace CDK {
 			pos += Vector3.up * this._editorRadius;
 			
 			// gizmo
-			Gizmos.color = Color.cyan;
-			Gizmos.DrawWireSphere(pos, this._editorRadius * 2f);
+			Gizmos.color = new Color(0f,1f,1f,0.33f);
+			Gizmos.DrawSphere(pos, this._editorRadius * 2f);
 			Gizmos.DrawLine(pos, pos + (fwd * _editorRadius * 2f));
 
 			Handles.color = new Color(0.9f, 0.1f,0.6f);

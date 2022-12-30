@@ -87,12 +87,12 @@ namespace CDK {
 
             var allLoadedScenes = GetAllLoadedScenes();
 
-            // fade out
-			float fadeOutTime = 0.5f;
-			this._fader.FadeToBlack(fadeOutTime, false);
-            await Task.Delay(TimeSpan.FromSeconds(fadeOutTime));
-
             CTime.TimeScale = 0f;
+
+            // fade out
+			float fadeOutTime = 0.4f;
+			this._fader.FadeToBlack(fadeOutTime, true);
+            await Task.Delay(TimeSpan.FromSeconds(fadeOutTime));
             
 			var minimumTimeToReturnFromLoading = Time.realtimeSinceStartup + MINIMUM_LOADING_TIME;
 
@@ -144,10 +144,12 @@ namespace CDK {
             
             CTime.TimeScale = 1f;
 
-            await Task.Delay(TimeSpan.FromSeconds(1f));
+            await Observable.NextFrame();
+
+            float fadeInTime = 0.8f;
+            await Task.Delay(TimeSpan.FromSeconds(fadeInTime));
 
             // fade in
-            float fadeInTime = 1f;
             this._fader.FadeToTransparent(fadeInTime, true);
             
             this._blockingEventsManager.PlayingCutsceneRetainable.Release(this);

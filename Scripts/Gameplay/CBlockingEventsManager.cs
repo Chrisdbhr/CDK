@@ -8,7 +8,7 @@ namespace CDK {
 
         // --- start Blocking Events
 
-        public bool IsAnyIgnoringMenu => IsPlayingCutscene || IsLimitingPlayerActions;
+        public bool IsAnyExceptMenu => IsPlayingCutscene || IsLimitingPlayerActions;
         
         public bool IsPlayingCutscene => this.PlayingCutsceneRetainable.IsRetained;
         public CRetainable PlayingCutsceneRetainable { get; private set; }

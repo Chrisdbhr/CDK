@@ -33,6 +33,7 @@ namespace CDK {
 		
 		
 
+        
 		#region <<---------- Visibility ---------->>
 
 		public void Open(CIItemBase itemBase, int itemIndex, Vector2 position) {
