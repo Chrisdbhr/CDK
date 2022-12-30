@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using System.Linq;
+using System.Threading.Tasks;
+using UniRx;
 
 namespace CDK {
 	public class CFootstepsSource : MonoBehaviour {
@@ -19,11 +22,10 @@ namespace CDK {
 
         #region <<---------- Initializers ---------->>
 
-        public void Initialize(LayerMask footCollisionLayers, Transform footL = null, Transform footR = null) {
+        public void Initialize(LayerMask footCollisionLayers, Transform footL, Transform footR) {
             this.FootCollisionLayers = footCollisionLayers;
             this.FootL = footL;
             this.FootR = footR;
-            this.FindFootTransformsIfNeeded();
         }
         
         #endregion <<---------- Initializers ---------->>
@@ -38,7 +40,7 @@ namespace CDK {
 		public LayerMask FootCollisionLayers = 1;
 
 		private float _rayOffset = 0.25f;
-		private float _feetSizeForSphereCast = 0.1f;
+        [SerializeField] private float _feetSizeForSphereCast = 0.05f;
 		private Vector3 _lastValidHitPoint;
 
 		private Dictionary<ParticleSystem, ParticleSystem> _spawnedParticleInstances = new Dictionary<ParticleSystem, ParticleSystem>();
@@ -61,9 +63,6 @@ namespace CDK {
 		
 		
 		#region <<---------- MonoBehaviour ---------->>
-		private void Awake() {
-            this.FindFootTransformsIfNeeded();
-		}
 
 		private void OnEnable() {
 			this.DestroyAllParticleInstances();
@@ -99,28 +98,41 @@ namespace CDK {
 
 
 		#region <<---------- General ---------->>
-		
-		/// <summary>
-		/// Do a footstep
-		/// </summary>
-		public void Footstep(FootstepFeet feet) {
-			var originTransform = this.transform;
-			
-			var rayOrigin = feet == FootstepFeet.left ? (this.FootL ? this.FootL : originTransform) : (this.FootR ? this.FootR : originTransform);
 
-			var transformUp = originTransform.up;
-			bool feetHitSomething = Physics.SphereCast(
-				rayOrigin.position + (transformUp * this._rayOffset),
-				this._feetSizeForSphereCast,
-				(transformUp * -1).normalized, // down
+        /// <summary>
+        /// Do a footstep
+        /// </summary>
+        public void Footstep(FootstepFeet feet) {
+            this.CStartCoroutine(FootstepProcess(feet));
+        }
+
+        public IEnumerator FootstepProcess(FootstepFeet feet) {
+            yield return new WaitForFixedUpdate();
+			
+            var originTransform = this.transform;
+			
+			var rayOriginTransform = feet == FootstepFeet.left ? (this.FootL != null ? this.FootL : originTransform) : (this.FootR != null ? this.FootR : originTransform);
+            var transformUp = originTransform.up;
+            var rayOrigin = rayOriginTransform.position + (transformUp * this._rayOffset);
+            var rayDirectionNormalized = (transformUp * -1).normalized;
+            var rayDistance = 2f * this._rayOffset;
+            
+            bool feetHitSomething = Physics.Raycast(
+				rayOrigin,
+				//this._feetSizeForSphereCast,
+				rayDirectionNormalized, // down
 				out var raycastHit,
-				2f * this._rayOffset,
+				rayDistance,
 				this.FootCollisionLayers,
 				QueryTriggerInteraction.Ignore
 			);
-			if (!feetHitSomething) return;
+			if (!feetHitSomething) yield break;
 
-			this._lastValidHitPoint = raycastHit.point;
+            if (this._debugFootstep) {
+                Debug.DrawRay(rayOrigin, rayDirectionNormalized * rayDistance, Color.red, 3f, true);                
+            }
+
+            this._lastValidHitPoint = raycastHit.point;
 			
 			if(this._debugFootstep) Debug.Log($"Footstep {feet} on {raycastHit.collider.name}");
 
@@ -128,11 +140,11 @@ namespace CDK {
 			var smashableObj = raycastHit.collider.GetComponent<CICanBeSmashedWhenStepping>();
 			if (smashableObj != null) {
 				smashableObj.Smash(originTransform, feet);
-				return;
+				yield break;
 			}
 
             CFootstepInfo footstepInfo = GetFootstepInfo(raycastHit);
-            if(footstepInfo == null)return;
+            if(footstepInfo == null) yield break;
 
 			this._onFootstep?.Invoke(footstepInfo, feet, raycastHit.collider);
 
@@ -153,15 +165,15 @@ namespace CDK {
 
 			#if FMOD
 			// play random audio
-			if (footstepInfo.Audio.IsNull) return;
+            if (footstepInfo.Audio.IsNull) yield break;
 
 			FMODUnity.RuntimeManager.PlayOneShot(footstepInfo.Audio, raycastHit.point);
 			#endif
 		}
 
         public void FindFootTransformsIfNeeded() {
-            if(!this.FootL) this.FootL = this.GetComponentsInChildren<Transform>().FirstOrDefault(t => t.name.ToLower().Contains("foot") && t.name.ToLower().Contains('l'));
-            if(!this.FootR) this.FootR = this.GetComponentsInChildren<Transform>().FirstOrDefault(t => t.name.ToLower().Contains("foot") && t.name.ToLower().Contains('r'));
+            if(this.FootL == null) this.FootL = this.GetComponentsInChildren<Transform>().FirstOrDefault(t => t.name.ToLower().Contains("foot") && t.name.ToLower().Contains('l'));
+            if(this.FootR == null) this.FootR = this.GetComponentsInChildren<Transform>().FirstOrDefault(t => t.name.ToLower().Contains("foot") && t.name.ToLower().Contains('r'));
         }
 
         private CFootstepInfo GetFootstepInfo(RaycastHit hit) {
