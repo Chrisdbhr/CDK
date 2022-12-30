@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using UniRx;
 using UnityEngine;
 
@@ -28,7 +29,7 @@ namespace CDK {
 		public static InputType ActiveInputType {
 			get => _activeInputType;
 			private set {
-				if (value == _activeInputType) return;
+				if (_activeInputType == value) return;
                 if(!value.IsMouseOrKeyboard() && !_activeInputType.IsMouseOrKeyboard()) Debug.Log($"Input type changed to '{value.ToString()}'");
 				_activeInputType = value;
 				_inputTypeChanged?.Invoke(value);
@@ -74,17 +75,25 @@ namespace CDK {
 			Observable.EveryUpdate().Subscribe(_ => {
                 if (CApplication.IsQuitting || ReInput.controllers == null) return;
                 
-				if (ReInput.controllers.GetAnyButton(ControllerType.Keyboard)) {
+				if (ActiveInputType != InputType.Keyboard &&
+                    (ReInput.controllers.GetAnyButton(ControllerType.Keyboard))
+                    ) {
                     ActiveInputType = InputType.Keyboard;
                     return;
                 }
                 
-                if (ReInput.controllers.GetAnyButtonChanged(ControllerType.Mouse) || ReInput.controllers.Mouse.screenPositionDelta != default) {
+                if (ActiveInputType != InputType.Mouse &&
+                    (ReInput.controllers.GetAnyButtonChanged(ControllerType.Mouse) || ReInput.controllers.Mouse.screenPositionDelta.sqrMagnitude > 0.1f)
+                    ) {
                     ActiveInputType = InputType.Mouse;
                     return;
                 }
                 
-                if (ReInput.controllers.GetAnyButtonChanged(ControllerType.Joystick) || ReInput.controllers.GetAnyButton(ControllerType.Custom)) {
+                if (ActiveInputType != InputType.JoystickController &&
+                    (ReInput.controllers.GetAnyButtonChanged(ControllerType.Joystick) 
+                        || ReInput.controllers.GetAnyButton(ControllerType.Custom) 
+                        || ReInput.controllers.GetJoysticks().Any(j => j.PollForFirstAxis().success)
+                    )) {
 					ActiveInputType = InputType.JoystickController;
                     return;
                 }
