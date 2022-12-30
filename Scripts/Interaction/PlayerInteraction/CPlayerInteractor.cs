@@ -111,9 +111,14 @@ namespace CDK.Interaction {
 				this._currentInteractable.Value = null;
 				return;
 			}
-			
-			this._currentInteractable.Value = raycastHit.transform.GetComponent<CInteractable>();
-		}
+            
+            if(raycastHit.transform.TryGetComponent<CInteractable>(out var interactable) && interactable.isActiveAndEnabled) {
+                this._currentInteractable.Value = interactable;
+                return;
+            }
+
+            this._currentInteractable.Value = null;
+        }
 		
 		private void TryToInteract() {
 			if (!this._currentInteractable.Value) return;

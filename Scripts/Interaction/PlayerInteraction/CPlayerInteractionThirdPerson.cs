@@ -66,7 +66,11 @@ namespace CDK.Interaction {
 			
 			var interactableColliders = colliders
             // get list of interactables
-            .Where(c => c != null && c.GetComponent<ICInteractable>() != null)
+            .Where(c => c != null 
+                    && c.TryGetComponent<ICInteractable>(out var iinteractable) 
+                    && iinteractable is MonoBehaviour iinteractableMono 
+                    && iinteractableMono.isActiveAndEnabled
+                    )
             // get closest one
             .OrderBy(c => (originPos - this.GetScaledColliderCenterPosition(c)).sqrMagnitude).ToArray();
 
