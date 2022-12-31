@@ -17,10 +17,8 @@ namespace CDK.UI {
 		public GameObject FirstSelectedObject => this._eventSystem.firstSelectedGameObject;
 		
 		[Header("Setup")]
-		[SerializeField] 
-        protected EventSystem _eventSystem;
-        [SerializeField]
-        CUIButton _buttonReturn;
+		[SerializeField] protected EventSystem _eventSystem;
+        [SerializeField] CUIButton _buttonReturn;
 
         public bool ShouldPauseTheGame = true;
         protected bool _shouldPlayOpenAndCloseMenuSound;
