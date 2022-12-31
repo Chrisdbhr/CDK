@@ -1,6 +1,8 @@
 using System;
+using UniRx;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
+using Object = UnityEngine.Object;
 
 #if FMOD
 using FMODUnity;
@@ -16,13 +18,18 @@ namespace CDK.Audio {
 		[NonSerialized] private FMOD.Studio.EventInstance _musicState;
 		#endif
 
+        private CRetainable PauseMusicRetainable;
+
 
 
 
 
 		#region <<---------- MonoBehaviour ---------->>
+        private void Awake() {
+            PauseMusicRetainable = new CRetainable();
+        }
 
-		private void OnEnable() {
+        private void OnEnable() {
 			#if FMOD
 			if (this._music.IsNull) {
 				Debug.LogWarning($"{this.name} is not referencing a valid Music (EventRef)!");
@@ -37,11 +44,14 @@ namespace CDK.Audio {
 			
 			if(this._musicState.isValid()) this._musicState.start();
 			#endif
-		}
+
+            PauseMusicRetainable.IsRetainedRx.DistinctUntilChanged().TakeUntilDisable(this).Subscribe(pause => {
+                if (this._musicState.isValid()) this._musicState.setPaused(pause);
+            });
+        }
 		
 		private void OnDisable() {
-			this.Stop();
-
+			this.Stop(true);
 		}
 		
 		#if UNITY_EDITOR
@@ -56,13 +66,24 @@ namespace CDK.Audio {
 
 		#region <<---------- Music ---------->>
 
-        public void Stop() {
+        public void Stop(bool allowFadeout) {
 			#if FMOD
-			this._musicState.stop(STOP_MODE.ALLOWFADEOUT);
+			this._musicState.stop(allowFadeout ? STOP_MODE.ALLOWFADEOUT : STOP_MODE.IMMEDIATE);
 			#else
 			throw new NotImplementedException();
 			#endif
 		}
+
+        public void PauseMusic(Object requester) {
+            PauseMusicRetainable.Retain(requester);
+        }
+
+        public void UnPauseMusic(Object requester) {
+            if (requester == null || this.enabled == false) {
+                this.Stop(false);
+            }
+            PauseMusicRetainable.Release(requester);
+        }
 		
 		#endregion <<---------- Music ---------->>
 	}
