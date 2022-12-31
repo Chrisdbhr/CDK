@@ -9,6 +9,7 @@ using UnityEditor;
 
 
 namespace CDK {
+    [Obsolete("Callbacks not working as expected.")]
 	public class CTimelineEventsTrigger : MonoBehaviour {
 
 		#region <<---------- Properties ---------->>
@@ -24,7 +25,7 @@ namespace CDK {
         }
         [SerializeField] private bool _isPlayingCutscene;
 		[SerializeField] protected PlayableDirector _playableDirector;
-		[SerializeField] protected bool _autoSetIsPlayingCutsceneOnBlockingEventsManager = true;
+		[SerializeField] [Obsolete("Not working as expected.")] protected bool _autoSetIsPlayingCutsceneOnBlockingEventsManager = true;
 		[SerializeField] protected UnityEvent _cutscenePlayed;
         [SerializeField] protected UnityEvent _cutsceneStopped;
         [SerializeField] protected CUnityEventBool _cutscenePlayingStateChanged;
