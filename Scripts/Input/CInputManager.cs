@@ -51,10 +51,7 @@ namespace CDK {
 
         
 
-		/// <summary>
-		/// ANTES da scene load.
-		/// </summary>
-		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSplashScreen)]
+		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
 		private static void InitializeBeforeSceneLoad() {
 			Debug.Log($"Initializing {nameof(CInputManager)}");
 
@@ -71,9 +68,16 @@ namespace CDK {
 			
 			ReInput.InitializedEvent -= Initialize;
 
+            AssignConnectedControllersToSystemPlayer();
+
+            ReInput.ControllerConnectedEvent += ControllerConnectedEvent;
+            
 			// wait one frame
 			Observable.EveryUpdate().Subscribe(_ => {
-                if (CApplication.IsQuitting || ReInput.controllers == null) return;
+                if (CApplication.IsQuitting || ReInput.controllers == null) {
+                    return;
+                }
+
                 
 				if (ActiveInputType != InputType.Keyboard &&
                     (ReInput.controllers.GetAnyButton(ControllerType.Keyboard))
@@ -102,6 +106,30 @@ namespace CDK {
                 
 			});
 		}
+
+        static void AssignConnectedControllersToSystemPlayer() {
+            
+            // Joysticks
+            foreach (var joystick in ReInput.controllers.Joysticks) {
+                if (joystick == null) continue;
+                Debug.Log($"Add joystick to SystemPlayer: {joystick.name}");
+                ReInput.players.SystemPlayer.controllers.AddController(joystick.type, joystick.id, false);
+            }
+            
+            // Custom Controllers
+            foreach (var cc in ReInput.controllers.CustomControllers) {
+                if (cc == null) continue;
+                Debug.Log($"Add custom controller to SystemPlayer: {cc.name}");
+                ReInput.players.SystemPlayer.controllers.AddController(cc.type, cc.id, false);
+            }
+        }
+
+        static void ControllerConnectedEvent(ControllerStatusChangedEventArgs c) {
+            if (ReInput.players.SystemPlayer.controllers.ContainsController(c.controller)) return;
+            Debug.Log($"New controller connected: {c.name}, assigning to System Player.");
+            ReInput.players.SystemPlayer.controllers.AddController(c.controllerType, c.controllerId, false);
+        }
+        
 		#endif
 
 		private static void SetControllerTypeBasedOnPlatform() {

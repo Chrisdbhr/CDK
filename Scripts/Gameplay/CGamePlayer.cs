@@ -41,7 +41,7 @@ namespace CDK {
 			this.SignToInputEvents();
 			
 			#if Rewired
-			SetInputLayout(this._rePlayer, false);
+			SetInputLayout(this._rePlayer, this._blockingEventsManager.IsOnMenu);
 			this._blockingEventsManager.OnMenuRetainable.IsRetainedRx.Subscribe(this.SetInputLayout)
             .AddTo(this._disposables);
 			#endif
@@ -348,13 +348,17 @@ namespace CDK {
 				Debug.LogError($"cannot set input for a null Rewired.Player");
 				return;
 			}
+            
+            if (rePlayer.controllers == null) {
+                Debug.LogError($"cannot set input for a Rewired.Player with null controllers");
+                return;
+            }
 
 			int joystickControllersCount = rePlayer.controllers.joystickCount;
 			int customControllersCount = rePlayer.controllers.customControllerCount;
 			#if Rewired
 			rePlayer.controllers.maps.SetMapsEnabled(!onMenu, "Default");
 			rePlayer.controllers.maps.SetMapsEnabled(onMenu, "UI"); 
-			//ReInput.players.GetSystemPlayer().controllers.maps.SetMapsEnabled(onMenu, "UI");
 			#endif
 			
 			Debug.Log($"Player ID '{rePlayer.id}' controllers maps onMenu changed to '{onMenu}'\nCustom Controllers: {customControllersCount}, JoystickControllers: {joystickControllersCount}");
