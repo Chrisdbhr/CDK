@@ -29,7 +29,7 @@ namespace CDK {
 		}
 
 		private void OnInputTypeChanged(CInputManager.InputType newType) {
-			SetCursorState(CInputManager.ActiveInputType == CInputManager.InputType.Mouse && this._blockingEventsManager.IsOnMenu);
+			SetCursorState(CInputManager.ActiveInputType.IsMouseOrKeyboard() && this._blockingEventsManager.IsOnMenu);
 		}
 
 		private void SetCursorState(bool visible) {
