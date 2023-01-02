@@ -194,10 +194,6 @@ namespace CDK {
             this._isCloseToTheCharacterRx.Value = this._currentDistanceFromTarget <= this._distanceToConsiderCloseForCharacter;
         }
         
-		public Transform GetCameraTransform() {
-			return this._unityCamera.transform;
-		}
-
 		public void UpdateCameraTargets() {
 			#if Cinemachine
 			var lookTarget = this._ownerCharacter.GetComponentInChildren<CCameraLookAndFollowTarget>();
@@ -218,7 +214,22 @@ namespace CDK {
         }
 
 		#endregion <<---------- General ---------->>
-		
+
+
+        
+
+        #region <<---------- Camera Getters ---------->>
+
+        public Transform GetCameraTransform() {
+            return this._unityCamera.transform;
+        }
+
+        public float GetCameraFieldOfView() {
+            return this._unityCamera.fieldOfView;
+        }
+
+        #endregion <<---------- Camera Getters ---------->>
+
 
 		
 
