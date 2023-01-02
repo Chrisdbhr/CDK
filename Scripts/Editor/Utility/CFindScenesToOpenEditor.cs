@@ -36,11 +36,11 @@ public class CFindScenesToOpenEditor : EditorWindow {
     [MenuItem( "Tools/Find scene to open... %q", false, 180 )]
     public static void OpenWindow() {
         if (window != null) {
-            CloseWindow();
+            window.Close();
             return;
         }
         redText.normal.textColor = Color.red;
-        window = EditorWindow.GetWindow( typeof( CFindScenesToOpenEditor ) );
+        window = EditorWindow.GetWindow( typeof( CFindScenesToOpenEditor ), true, "Find scene to open", true );
         window.position = new Rect(
             720 - windowWidth * .5f,
             540 - windowHeight * .5f,
@@ -56,11 +56,17 @@ public class CFindScenesToOpenEditor : EditorWindow {
         var filesInfos = info.GetFiles("*.unity", SearchOption.AllDirectories).OrderBy(p => p.LastAccessTimeUtc).ToArray();
         assetsScenesPaths = filesInfos.Select(fileInfo => fileInfo.FullName).ToArray();
         isSearchingScenes = false;
+        window.Show();
         window.Repaint();
     }
     
+    private void OnEnable()
+    {
+        window = this;
+    }
+    
     private void OnLostFocus() {
-        CloseWindow();
+        this.Close();
     }
 
     private void OnGUI() {
@@ -72,7 +78,7 @@ public class CFindScenesToOpenEditor : EditorWindow {
 
             // close window
             if (e.keyCode == KeyCode.Escape) {
-                CloseWindow();
+                this.Close();
                 return;
             }
             
@@ -86,7 +92,7 @@ public class CFindScenesToOpenEditor : EditorWindow {
                     }
                     else {
                         EditorSceneManager.OpenScene(this._filteredScenes[this.CurrentIndex], OpenSceneMode.Single);
-                        CloseWindow();
+                        this.Close();
                         return;
                     }
                 }
@@ -191,8 +197,4 @@ public class CFindScenesToOpenEditor : EditorWindow {
         return stringOne.ToLower().Contains(stringTwo.ToLower().Trim());
     }
 
-    private static void CloseWindow() {
-        if (window == null) return;
-        window?.Close();
-    }
 }
