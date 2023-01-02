@@ -5,10 +5,11 @@ using UnityEditor;
 #endif
 
 namespace CDK {
+    [DefaultExecutionOrder(350)]
 	public class CTransformFollower : MonoBehaviour {
 
 		#region <<---------- Properties and Fields ---------->>
-		
+        
 		[SerializeField] private CMonobehaviourExecutionLoop executionLoop = CMonobehaviourExecutionLoop.LateUpdate;
 		[Obsolete("OBSOLETE, use public property instead.")]
 		[SerializeField] private Transform _transformToFollow;
@@ -29,6 +30,8 @@ namespace CDK {
 		[SerializeField] private bool _ignoreXAxis;
 		[SerializeField] private bool _ignoreYAxis;
 		[SerializeField] private bool _ignoreZAxis;
+       
+        [SerializeField] private Vector3 _positionMultiplier = UnityEngine.Vector3.one;
 
 		#endregion <<---------- Properties and Fields ---------->>
 
@@ -106,7 +109,8 @@ namespace CDK {
 
 			if (this._ignoreXAxis && this._ignoreYAxis && this._ignoreZAxis) return;
 			
-			var targetPos = this._transformToFollow.position + this._followOffset;
+			var targetPos = Vector3.Scale(this._transformToFollow.position, this._positionMultiplier);
+            targetPos += this._followOffset;
 			if (this._ignoreXAxis) targetPos.x = this.transform.position.x;
 			if (this._ignoreYAxis) targetPos.y = this.transform.position.y;
 			if (this._ignoreZAxis) targetPos.z = this.transform.position.z;

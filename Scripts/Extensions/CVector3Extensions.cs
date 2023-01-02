@@ -36,5 +36,6 @@ namespace CDK {
             && a.y.CImprecise() == b.y.CImprecise()
             && a.z.CImprecise() == b.z.CImprecise();
         }
-	}
+
+    }
 }
