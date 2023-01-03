@@ -54,7 +54,6 @@ namespace CDK {
         public static bool LoadedSceneThisFrame { get; private set; }
         private IDisposable _boolSceneLoadedDisposable;
         
-		private const float MINIMUM_LOADING_TIME = 1f;
 		private readonly CFader _fader;
 		private readonly CBlockingEventsManager _blockingEventsManager;
 
@@ -76,12 +75,14 @@ namespace CDK {
 
         #region <<---------- General ---------->>
 
-        public async Task Teleport(string sceneToLoadName, int entryPointNumber, IReadOnlyList<GameObject> gameObjectsToTeleport) {
+        public async Task Teleport(string sceneToLoadName, int entryPointNumber, IReadOnlyList<GameObject> gameObjectsToTeleport, CCameraTransitionType cameraTransitionType) {
 
 			if (gameObjectsToTeleport == null || !gameObjectsToTeleport.Any()) {
 				Debug.LogError($"List of null objects tried to Teleport, canceling operation.");
 				return;
 			}
+
+            bool doTransition = cameraTransitionType != CCameraTransitionType.none;
 			
 			this._blockingEventsManager.PlayingCutsceneRetainable.Retain(this);
 
@@ -89,15 +90,12 @@ namespace CDK {
 
             CTime.TimeScale = 0f;
 
-            // fade out
-			float fadeOutTime = 0.4f;
-			this._fader.FadeToBlack(fadeOutTime, true);
-            await Task.Delay(TimeSpan.FromSeconds(fadeOutTime));
+            float fadeOutTime = doTransition ? 0.4f : 0f;
+            this._fader.FadeToBlack(fadeOutTime, true);
+            if (doTransition) {
+                await Task.Delay(TimeSpan.FromSeconds(fadeOutTime));
+            }
             
-			var minimumTimeToReturnFromLoading = Time.realtimeSinceStartup + MINIMUM_LOADING_TIME;
-
-			Debug.Log($"TODO implement loading screen");
-			
 			// move objects to temporary scene
 			var tempHolderScene = SceneManager.CreateScene("Temp Holder Scene"); 
 			foreach (var rootGo in gameObjectsToTeleport) {
@@ -118,40 +116,26 @@ namespace CDK {
 			var sceneToTeleport = SceneManager.GetSceneByName(sceneToLoadName);
 			SceneManager.SetActiveScene(sceneToTeleport);
 			
-			await Observable.NextFrame();
-			
             // move objects to loaded scene
 			foreach (var rootGo in gameObjectsToTeleport) {
 				SceneManager.MoveGameObjectToScene(rootGo, sceneToTeleport);
 			}
 			
-            await Observable.NextFrame();
-
 			// move transform to scene entry points
 			foreach (var rootGo in gameObjectsToTeleport) {
 				SetTransformToSceneEntryPoint(rootGo.transform, entryPointNumber);
 			}
+            
             Physics.SyncTransforms();
 
 			await SceneManager.UnloadSceneAsync(tempHolderScene).AsObservable();
             
-			Debug.Log($"TODO remove loading screen");
-			
-            await Observable.NextFrame();
-			await this.WaitUntilMinimumTimeToReturnFromLoading(minimumTimeToReturnFromLoading);
-            
-            await Observable.NextFrame();
-            
             CTime.TimeScale = 1f;
 
             await Observable.NextFrame();
-
-            float fadeInTime = 0.8f;
-            await Task.Delay(TimeSpan.FromSeconds(fadeInTime));
-
-            // fade in
-            this._fader.FadeToTransparent(fadeInTime, true);
             
+            this._fader.FadeToTransparent(doTransition ? 0.8f : 0f, true);
+
             this._blockingEventsManager.PlayingCutsceneRetainable.Release(this);
         }
 

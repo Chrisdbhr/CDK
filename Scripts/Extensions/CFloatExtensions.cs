@@ -3,6 +3,7 @@ using UnityEngine;
 namespace CDK
 {
     public static class CFloatExtensions {
+
         /// <summary>
         /// Returns clamped angle between -360 and 360.
         /// </summary>
@@ -28,10 +29,6 @@ namespace CDK
 
         public static bool CIsInRange(this float value, float a, float b) {
             return value >= a && value <= b;
-        }
-
-        public static int CAbs(this int value) {
-            return Mathf.Abs(value);
         }
 
         public static float CAbs(this float value) {
