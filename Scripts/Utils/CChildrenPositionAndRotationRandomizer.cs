@@ -14,9 +14,9 @@ namespace CDK {
 		#region <<---------- Properties and Fields ---------->>
 
         [SerializeField, Range(0, 1000)] private int _safeOverflowCount = 1000;
+        [SerializeField] private Vector3 _positionRange = Vector3.one * 10;
 		[SerializeField] private Vector2 _scaleRange = new Vector2(1f, 2f);
 		[SerializeField] private Vector3 _angleRange = Vector3.one * 30;
-		[SerializeField] private Vector3 _positionRange = Vector3.one * 10;
         [NonSerialized] private GameObject[] _childObjs;
         [SerializeField] private LayerMask _checkLayers = -1;
 

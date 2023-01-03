@@ -59,7 +59,7 @@ namespace CDK {
             // limit player actions
             this.LimitPlayerActionsRetainable = new CRetainable();
             this.LimitPlayerActionsRetainable.IsRetainedRx.Subscribe(isLimitingPlayerActions => {
-                Debug.Log($"<color={"#bb91ff"}>{nameof(isLimitingPlayerActions)}: {isLimitingPlayerActions}</color>");
+                //Debug.Log($"<color={"#bb91ff"}>{nameof(isLimitingPlayerActions)}: {isLimitingPlayerActions}</color>");
             })
             .AddTo(this._disposables);
             

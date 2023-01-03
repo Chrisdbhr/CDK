@@ -68,7 +68,7 @@ namespace CDK {
 
 		public void Release(object source) {
            if (this._retainedObjectsRx.Remove(source)) return;
-           Debug.LogWarning($"Tried to remove a Release source that was not in retainedObjects list.");
+           //Debug.LogWarning($"Tried to remove a Release source that was not in retainedObjects list.");
         }
         
         #endregion <<---------- General ---------->>
