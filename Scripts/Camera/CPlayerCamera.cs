@@ -295,7 +295,6 @@ namespace CDK {
                     var pov = cVirtual.GetCinemachineComponent<CinemachinePOV>();
                     if (pov) {
                         pov.m_VerticalAxis.Value = 0f;
-                        pov.m_HorizontalAxis.Value = -90f;
                         pov.m_VerticalRecentering.m_enabled = pov.m_HorizontalRecentering.m_enabled = false;
                         pov.m_VerticalRecentering.m_RecenteringTime = pov.m_HorizontalRecentering.m_RecenteringTime = recenterRotationDuration;
                         pov.m_VerticalRecentering.m_WaitTime = pov.m_HorizontalRecentering.m_WaitTime = 0f;
