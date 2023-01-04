@@ -4,6 +4,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UniRx;
+using UnityEngine.Rendering;
 
 #if Cinemachine
 using Cinemachine;
@@ -35,7 +36,8 @@ namespace CDK {
 			this._ownerCharacter = this._ownerPlayer.GetControllingCharacter();
 			
 			// cinemachine
-			this.UpdateCameraTargets();
+            var lookTarget = this._ownerCharacter.GetComponentInChildren<CCameraLookAndFollowTarget>();
+			this.SetCameraTargets(lookTarget != null ? lookTarget.transform : null);
 		}
 		
 		#endregion <<---------- Initializers ---------->>
@@ -72,7 +74,7 @@ namespace CDK {
         private float _recenterRotationSpeed = 0.15f;
 		
 		// Camera 
-		[SerializeField] private UnityEngine.Camera _unityCamera;
+        [SerializeField] private UnityEngine.Camera _unityCamera;
 		#if Cinemachine
 		[SerializeField] private CinemachineBrain _cinemachineBrain;
 		[SerializeField] private CinemachineVirtualCameraBase[] _cinemachineCameras;
@@ -109,7 +111,7 @@ namespace CDK {
 
 		#region <<---------- MonoBehaviour ---------->>
 
-		private void Awake() {
+		protected virtual void Awake() {
 			this._transform = this.transform;
 			this._fader = CDependencyResolver.Get<CFader>();
 			this._blockingEventsManager = CDependencyResolver.Get<CBlockingEventsManager>();
@@ -120,10 +122,12 @@ namespace CDK {
 			this.ApplyLastOrDefaultCameraProfile();
 		}
 
-		private void OnEnable() {
+        protected virtual void OnEnable() {
 			var angles = this._transform.eulerAngles;
 			this.RotationY = angles.y;
 			this.RotationX = angles.x;
+
+            this._cinemachineBrain.enabled = false;
 
             // Set Renderers Visibility 
             Observable.CombineLatest(
@@ -147,16 +151,22 @@ namespace CDK {
 			#endif
 
             SceneManager.activeSceneChanged += ActiveSceneChanged;
+            
+            // Next Frame
+            Observable.NextFrame().Subscribe(_ => {
+                if (this == null || this._cinemachineBrain == null) return;
+                this._cinemachineBrain.enabled = true;
+            });
         }
 
-        private void LateUpdate() {
+        protected virtual void LateUpdate() {
             if (CApplication.IsQuitting) return;
-            if (this._cinemachineBrain == null || this._cinemachineBrain.ActiveVirtualCamera == null || this._cinemachineBrain.ActiveVirtualCamera.Follow == null) return;
+            if (this._cinemachineBrain == null || this._cinemachineBrain.ActiveVirtualCamera == null) return;
             this.UpdateDistanceFromTarget();
             this.UpdateUnityCameraParameters();
         }
 
-        private void OnDisable() {
+        protected virtual void OnDisable() {
 			#if Cinemachine
             this._cinemachineBrain.m_CameraActivatedEvent.RemoveListener(this.ActiveCameraChanged);
 			#endif
@@ -164,7 +174,7 @@ namespace CDK {
 		}
 
 		#if UNITY_EDITOR
-		private void OnDrawGizmos() {
+        protected virtual void OnDrawGizmos() {
 			if (this._unityCamera) {
 				Gizmos.color = Color.cyan;
 				Gizmos.DrawWireSphere(this.transform.position, this._unityCamera.nearClipPlane);
@@ -194,11 +204,14 @@ namespace CDK {
                     break;
             }
         }
-        
-		public void UpdateCameraTargets() {
+
+        public void FindAndSetCameraTargets() {
+            this.SetCameraTargets(this.FindTarget());
+        }
+
+        public void SetCameraTargets(Transform lookAndFollowTarget) {
 			#if Cinemachine
-			var lookTarget = this._ownerCharacter.GetComponentInChildren<CCameraLookAndFollowTarget>();
-			var target = lookTarget != null ? lookTarget.transform : this._ownerCharacter.transform;
+			var target = lookAndFollowTarget != null ? lookAndFollowTarget : this._ownerCharacter.transform;
 			foreach (var cam in this._cinemachineCameras) {
 				cam.Follow = target;
 				cam.LookAt = target;
@@ -207,6 +220,12 @@ namespace CDK {
 			Debug.LogError("'PlayerCamera' will not work without Cinemachine");
 			#endif
 		}
+        
+        private Transform FindTarget() {
+            if (this._ownerCharacter == null) return null;
+            var target = this._ownerCharacter.GetComponentInChildren<CCameraLookAndFollowTarget>();
+            return (target != null ? target.transform : null);
+        }
 
         #endregion <<---------- General ---------->>
 
@@ -216,6 +235,7 @@ namespace CDK {
         #region <<---------- Camera Distance ---------->>
 
         private void UpdateDistanceFromTarget() {
+            if (this._cinemachineBrain.ActiveVirtualCamera.Follow == null) return;
             this._currentDistanceFromTarget = Vector3.Distance(this._cinemachineBrain.ActiveVirtualCamera.Follow.position, this._unityCamera.transform.position); 
             this._isCloseToPlayerRx.Value = this._currentDistanceFromTarget <= this._distanceToConsiderCloseForCharacter;
         }
@@ -230,7 +250,7 @@ namespace CDK {
         void SetRenderersVisibility(bool render) {
             foreach (var objToDisable in this._playerRenderersRx) {
                 if (objToDisable == null) continue;
-                objToDisable.enabled = render;
+                objToDisable.shadowCastingMode = render ? ShadowCastingMode.On : ShadowCastingMode.ShadowsOnly;
             }
         }
 
@@ -259,12 +279,13 @@ namespace CDK {
 		#if Cinemachine
 		private void ActiveCameraChanged(ICinemachineCamera newCamera, ICinemachineCamera oldCamera) {
 			if (newCamera == null) return;
-			this.UpdateCameraTargets();
+            this.FindAndSetCameraTargets();
 			this.ApplyLastOrDefaultCameraProfile();
             float recenterRotationDuration = this._recenterRotationSpeed * 0.5f;
             switch (this._cinemachineBrain.ActiveVirtualCamera) {
                 case CinemachineFreeLook cFreelook:
                     cFreelook.m_YAxis.Value = 0.5f;
+                    cFreelook.m_XAxis.Value = -90f;
                     cFreelook.m_RecenterToTargetHeading.m_enabled = cFreelook.m_YAxisRecentering.m_enabled = false;
                 
                     cFreelook.m_RecenterToTargetHeading.m_RecenteringTime = cFreelook.m_YAxisRecentering.m_RecenteringTime = recenterRotationDuration;
@@ -273,7 +294,8 @@ namespace CDK {
                 case CinemachineVirtualCamera cVirtual:
                     var pov = cVirtual.GetCinemachineComponent<CinemachinePOV>();
                     if (pov) {
-                        pov.m_VerticalAxis.Value = pov.m_HorizontalAxis.Value = 0f;
+                        pov.m_VerticalAxis.Value = 0f;
+                        pov.m_HorizontalAxis.Value = -90f;
                         pov.m_VerticalRecentering.m_enabled = pov.m_HorizontalRecentering.m_enabled = false;
                         pov.m_VerticalRecentering.m_RecenteringTime = pov.m_HorizontalRecentering.m_RecenteringTime = recenterRotationDuration;
                         pov.m_VerticalRecentering.m_WaitTime = pov.m_HorizontalRecentering.m_WaitTime = 0f;
@@ -313,7 +335,7 @@ namespace CDK {
         
 		private void ActiveSceneChanged(Scene oldScene, Scene newScene) {
 			this.ApplyLastOrDefaultCameraProfile();
-			this.UpdateCameraTargets();
+            this.FindAndSetCameraTargets();
 		}
 		
 		#endregion <<---------- Callbacks ---------->>

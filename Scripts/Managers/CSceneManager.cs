@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Cinemachine;
 using UniRx;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -96,6 +97,8 @@ namespace CDK {
                 await Task.Delay(TimeSpan.FromSeconds(fadeOutTime));
             }
             
+            await Observable.NextFrame(FrameCountType.EndOfFrame);
+
 			// move objects to temporary scene
 			var tempHolderScene = SceneManager.CreateScene("Temp Holder Scene"); 
 			foreach (var rootGo in gameObjectsToTeleport) {
@@ -132,8 +135,19 @@ namespace CDK {
             
             CTime.TimeScale = 1f;
 
-            await Observable.NextFrame();
+            var brains = GameObject.FindObjectsOfType<CinemachineBrain>(false);
+            foreach (var b in brains) {
+                b.enabled = false;
+            }
             
+            await Observable.NextFrame(FrameCountType.EndOfFrame);
+            
+            foreach (var b in brains) {
+                b.enabled = true;
+            }
+            
+            await Observable.NextFrame(FrameCountType.EndOfFrame);
+
             this._fader.FadeToTransparent(doTransition ? 0.8f : 0f, true);
 
             this._blockingEventsManager.PlayingCutsceneRetainable.Release(this);
@@ -145,7 +159,9 @@ namespace CDK {
                 return;
             }
             
-            var targetEntryPointTransform = CSceneEntryPoint.GetSceneEntryPointTransformByNumber(entryPointNumber);
+            var targetEntryPoint = CSceneEntryPoint.GetSceneEntryPointByNumber(entryPointNumber);
+            targetEntryPoint.SetIsSelected();
+            var targetEntryPointTransform = targetEntryPoint.transform;
             var offset = new Vector3(0f, 0.01f, 0f);
             var targetPos = Vector3.zero + offset;
             var targetRotation = Quaternion.identity;
@@ -213,22 +229,8 @@ namespace CDK {
 
         #endregion <<---------- Callbacks ---------->>
 
-        
 
         
-        #region <<---------- Loading ---------->>
-
-        private async Task WaitUntilMinimumTimeToReturnFromLoading(float timeToReturnFromLoading) {
-			Debug.Log($"Waiting until minimum time to return from loading is reached.");
-            while (Time.realtimeSinceStartup <= timeToReturnFromLoading) {
-                await Observable.NextFrame();
-            }
-		}
-
-        #endregion <<---------- Loading ---------->>
-
-        
-
 
 		#region <<---------- Extensions ---------->>
 
