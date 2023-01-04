@@ -82,6 +82,8 @@ namespace CDK {
         private readonly CBlockingEventsManager _blockingEventsManager;
         private readonly CSteamManager _steamManager;
         private CUINavigationManager _navigationManager;
+        private const string CharNamePrefix = "[Character]";
+        private const string CameraNamePrefix = "[Cam]";
 
         #endregion <<---------- Properties and Fields ---------->>
 
@@ -158,14 +160,14 @@ namespace CDK {
 		}
 
         public CCharacter_Base AssignInstantiatedCharacter(CCharacter_Base instantiatedCharacter) {
-            var entryPoint = CSceneEntryPoint.GetSceneEntryPointTransformByNumber(0);
+            var entryPoint = CSceneEntryPoint.GetSceneEntryPointByNumber(0);
             if (entryPoint != null) {
                 Debug.Log($"Setting '{instantiatedCharacter.name}' to entryPoint number'{0}'", entryPoint.gameObject);
                 instantiatedCharacter.TeleportToLocation(entryPoint.transform.position, entryPoint.transform.rotation);
                 Physics.SyncTransforms();
             }
             instantiatedCharacter.gameObject.SetActive(false);
-            instantiatedCharacter.name = $"CHARACTER - {instantiatedCharacter.name}";
+            instantiatedCharacter.name = $"{CharNamePrefix} {instantiatedCharacter.name}";
 			
             this.AddControllingCharacter(instantiatedCharacter);
             instantiatedCharacter.gameObject.SetActive(true);
@@ -233,9 +235,9 @@ namespace CDK {
 			
 			#if UnityAddressables
 			this._playerCamera = CAssets.LoadResourceAndInstantiate<CPlayerCamera>("PlayerCamera");
-            this._playerCamera.name = $"CAM - {mainChar.name}";
+            this._playerCamera.name = $"{CameraNamePrefix}{mainChar.name.Replace(CharNamePrefix, string.Empty)}";
            
-            Debug.Log($"Created {mainChar.name} Camera", this._playerCamera);
+            Debug.Log($"Created character camera: '{mainChar.name}'", this._playerCamera);
 
 			this._playerCamera.Initialize(this);
 			this._cameraTransform = this._playerCamera.GetCameraTransform();

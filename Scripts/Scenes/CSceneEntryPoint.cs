@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using UnityEngine;
 
@@ -9,14 +10,25 @@ namespace CDK {
 	public class CSceneEntryPoint : MonoBehaviour {
 		
 		[SerializeField] private int _number;
+        [SerializeField] private CUnityEventBool _chosenEntryPoint;
 		#if UNITY_EDITOR
 		private float _editorRadius = 0.2f;
 		#endif
-		
+        private bool _isSelectedEntryPoint;
 
 
+ 
 
-		public static Transform GetSceneEntryPointTransformByNumber(int entryPointNumber) {
+        private void OnEnable() {
+            this._chosenEntryPoint?.Invoke(this._isSelectedEntryPoint);
+        }
+        
+        public void SetIsSelected() {
+            this._isSelectedEntryPoint = true;
+            this._chosenEntryPoint?.Invoke(this._isSelectedEntryPoint);
+        }
+        
+        public static CSceneEntryPoint GetSceneEntryPointByNumber(int entryPointNumber) {
 			var sceneEntryPoints = GameObject.FindObjectsOfType<CSceneEntryPoint>();
 			if (!sceneEntryPoints.Any() || entryPointNumber >= sceneEntryPoints.Length) {
 				Debug.LogWarning($"Cant find any level entry point {entryPointNumber} OR it is invalid.");
@@ -28,7 +40,7 @@ namespace CDK {
 				if (selectedEntryPoint.Count > 1) {
 					Debug.LogWarning($"There was more than one scene entry point with the number '{entryPointNumber}', will select a random one. (selected '{selected.name}'", selected);
 				}
-				return selected.transform;
+				return selected;
 			}
 			return null;
 		}
