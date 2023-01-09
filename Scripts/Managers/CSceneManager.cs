@@ -9,9 +9,10 @@ using UnityEngine.SceneManagement;
 
 #if UNITY_EDITOR
 using UnityEditor;
-using UnityEditor.SceneManagement;
 #if UNITY_2020
 using UnityEditor.Experimental.SceneManagement;
+#else
+using UnityEditor.SceneManagement;
 #endif
 #endif
 
@@ -58,6 +59,11 @@ namespace CDK {
 		private readonly CFader _fader;
 		private readonly CBlockingEventsManager _blockingEventsManager;
 
+        public bool IsTeleporting => this._isTeleporting;
+        private bool _isTeleporting;
+
+        public const float ExtraSecondsAfterTeleport = 1f;
+        
 		#endregion <<---------- Properties and Fields ---------->>
 
 
@@ -76,81 +82,115 @@ namespace CDK {
 
         #region <<---------- General ---------->>
 
-        public async Task Teleport(string sceneToLoadName, int entryPointNumber, IReadOnlyList<GameObject> gameObjectsToTeleport, CCameraTransitionType cameraTransitionType) {
-
-			if (gameObjectsToTeleport == null || !gameObjectsToTeleport.Any()) {
-				Debug.LogError($"List of null objects tried to Teleport, canceling operation.");
+        public bool Teleport(string sceneToLoadName, int entryPointNumber, IReadOnlyList<GameObject> gameObjectsToTeleport, CCameraTransitionType cameraTransitionType) {
+            if (this._isTeleporting) {
+                Debug.LogError($"[Teleport] Some script tried to Teleport while already teleporting!");
+                return false;
+            }
+            TeleportAsync(sceneToLoadName, entryPointNumber, gameObjectsToTeleport, cameraTransitionType).CAwait();
+            return true;
+        }
+        
+        private async Task TeleportAsync(string sceneToLoadName, int entryPointNumber, IReadOnlyList<GameObject> gameObjectsToTeleport, CCameraTransitionType cameraTransitionType) {
+            if (gameObjectsToTeleport.CIsNullOrEmpty()) {
+				Debug.LogError($"[Teleport] Tried to Teleport a list of null objects, canceling operation.");
 				return;
 			}
 
-            bool doTransition = cameraTransitionType != CCameraTransitionType.none;
-			
-			this._blockingEventsManager.PlayingCutsceneRetainable.Retain(this);
+            this._isTeleporting = true;
 
-            var allLoadedScenes = GetAllLoadedScenes();
+            try {
+                Debug.Log($"[Teleport] Starting TeleportAsync");
+                bool doTransition = cameraTransitionType != CCameraTransitionType.none;
+			    
+			    this._blockingEventsManager.PlayingCutsceneRetainable.Retain(this);
 
-            CTime.TimeScale = 0f;
+                var allLoadedScenes = GetAllLoadedScenes();
 
-            float fadeOutTime = doTransition ? 0.4f : 0f;
-            this._fader.FadeToBlack(fadeOutTime, true);
-            if (doTransition) {
-                await Task.Delay(TimeSpan.FromSeconds(fadeOutTime));
+                CTime.TimeScale = 0f;
+
+                float fadeOutTime = doTransition ? 0.4f : 0f;
+                Debug.Log($"[Teleport] Will request fade to black");
+                this._fader.FadeToBlack(fadeOutTime, true);
+                if (doTransition) {
+                    await Task.Delay(TimeSpan.FromSeconds(fadeOutTime));
+                }
+                
+                Debug.Log($"[Teleport] Will wait next frame");
+                await Observable.NextFrame();
+
+			    // move objects to temporary scene
+                Debug.Log($"[Teleport] Creating temporary holder scene");
+			    var tempHolderScene = SceneManager.CreateScene("Temp Holder Scene"); 
+			    foreach (var rootGo in gameObjectsToTeleport) {
+				    SceneManager.MoveGameObjectToScene(rootGo, tempHolderScene);
+			    }
+			    SceneManager.SetActiveScene(tempHolderScene);
+
+                // unload scenes
+                Debug.Log($"[Teleport] Unloading all scenes");
+			    foreach (var sceneToUnload in allLoadedScenes) {
+                    await SceneManager.UnloadSceneAsync(sceneToUnload, UnloadSceneOptions.None).AsObservable();
+			    }
+
+                // ONLY load scene after the previous one is fully unloaded because UnityBug.
+                Debug.Log($"[Teleport] Loading scene '{sceneToLoadName}'");
+                await SceneManager.LoadSceneAsync(sceneToLoadName, LoadSceneMode.Additive).AsObservable();
+			    
+			    // teleport to target scene
+			    var sceneToTeleport = SceneManager.GetSceneByName(sceneToLoadName);
+			    SceneManager.SetActiveScene(sceneToTeleport);
+                
+                // move objects to loaded scene
+			    foreach (var rootGo in gameObjectsToTeleport) {
+				    SceneManager.MoveGameObjectToScene(rootGo, sceneToTeleport);
+			    }
+                
+                (new GameObject("--- Teleported Objects")).transform.SetAsLastSibling();
+
+			    // move transform to scene entry points
+			    foreach (var rootGo in gameObjectsToTeleport) {
+                    var t = rootGo.transform;
+				    SetTransformToSceneEntryPoint(t, entryPointNumber);
+                    t.SetAsLastSibling();
+			    }
+                
+                Debug.Log($"[Teleport] Calling Physics.SyncTransforms()");
+                Physics.SyncTransforms();
+
+			    await SceneManager.UnloadSceneAsync(tempHolderScene).AsObservable();
+                
+                CTime.TimeScale = 1f;
+
+                var brains = GameObject.FindObjectsOfType<CinemachineBrain>(false);
+                foreach (var b in brains) {
+                    b.enabled = false;
+                }
+                
+                Debug.Log($"[Teleport] Will wait next frame");
+                await Observable.NextFrame();
+
+                foreach (var b in brains) {
+                    b.enabled = true;
+                }
+                
+                // Debug.Log($"[Teleport] Will wait next frame");
+                // await Observable.NextFrame();
+                Debug.Log($"[Teleport] Will {ExtraSecondsAfterTeleport} seconds before fadein");
+                await Observable.Timer(TimeSpan.FromSeconds(ExtraSecondsAfterTeleport)); 
+                
+                Debug.Log($"[Teleport] Will request fade to transparent");
+                this._fader.FadeToTransparent(doTransition ? 0.8f : 0f, true);
+
+                this._blockingEventsManager.PlayingCutsceneRetainable.Release(this);
             }
-            
-            await Observable.NextFrame(FrameCountType.EndOfFrame);
-
-			// move objects to temporary scene
-			var tempHolderScene = SceneManager.CreateScene("Temp Holder Scene"); 
-			foreach (var rootGo in gameObjectsToTeleport) {
-				SceneManager.MoveGameObjectToScene(rootGo, tempHolderScene);
-			}
-			SceneManager.SetActiveScene(tempHolderScene);
-
-            // unload scenes
-			foreach (var sceneToUnload in allLoadedScenes) {
-                await SceneManager.UnloadSceneAsync(sceneToUnload, UnloadSceneOptions.None).AsObservable();
-			}
-
-            // ONLY load scene after the previous one is fully unloaded because UnityBug.
-            Debug.Log($"Loading scene '{sceneToLoadName}'");
-            await SceneManager.LoadSceneAsync(sceneToLoadName, LoadSceneMode.Additive).AsObservable();
-			
-			// teleport to target scene
-			var sceneToTeleport = SceneManager.GetSceneByName(sceneToLoadName);
-			SceneManager.SetActiveScene(sceneToTeleport);
-			
-            // move objects to loaded scene
-			foreach (var rootGo in gameObjectsToTeleport) {
-				SceneManager.MoveGameObjectToScene(rootGo, sceneToTeleport);
-			}
-			
-			// move transform to scene entry points
-			foreach (var rootGo in gameObjectsToTeleport) {
-				SetTransformToSceneEntryPoint(rootGo.transform, entryPointNumber);
-			}
-            
-            Physics.SyncTransforms();
-
-			await SceneManager.UnloadSceneAsync(tempHolderScene).AsObservable();
-            
-            CTime.TimeScale = 1f;
-
-            var brains = GameObject.FindObjectsOfType<CinemachineBrain>(false);
-            foreach (var b in brains) {
-                b.enabled = false;
+            catch (Exception e) {
+                Debug.LogException(e);
             }
-            
-            await Observable.NextFrame(FrameCountType.EndOfFrame);
-            
-            foreach (var b in brains) {
-                b.enabled = true;
+            finally {
+                this._isTeleporting = false;
             }
-            
-            await Observable.NextFrame(FrameCountType.EndOfFrame);
-
-            this._fader.FadeToTransparent(doTransition ? 0.8f : 0f, true);
-
-            this._blockingEventsManager.PlayingCutsceneRetainable.Release(this);
+            Debug.Log($"[Teleport] Ended teleport task");
         }
 
         public static void SetTransformToSceneEntryPoint(Transform transformToMove, int entryPointNumber = 0) {

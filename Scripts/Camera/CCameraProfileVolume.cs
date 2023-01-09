@@ -6,9 +6,11 @@ using UnityEditor;
 #endif
 
 namespace CDK {
-	public class CCameraProfileVolume : MonoBehaviour {
+	public class CCameraProfileVolume : CPhysicsTrigger {
 
-		[SerializeField] private bool _isGlobal;
+        #region <<---------- Properties and Fields ---------->>
+        
+        [SerializeField] private bool _isGlobal;
 		
 		public CPlayerCamera.CameraType CameraType => _cameraType;
 		[SerializeField] private CPlayerCamera.CameraType _cameraType;
@@ -16,7 +18,12 @@ namespace CDK {
         private CPlayerCamera _playerCamera;
         private Coroutine _waitingForCameraRoutine;
         
+        #endregion <<---------- Properties and Fields ---------->>
+
         
+        
+        
+        #region <<---------- Mono Behaviour ---------->>
         
         private void OnEnable() {
             this._waitingForCameraRoutine = this.CStartCoroutine(this.WaitForCameraRoutine());
@@ -28,6 +35,14 @@ namespace CDK {
             this._playerCamera.ExitedCameraArea(this);
         }
 
+        #if UNITY_EDITOR
+        protected override void Reset() {
+            base.Reset();
+            Undo.RecordObject(this.gameObject, "Renamed object");
+            this.name = "Camera Profile";
+        }
+		#endif
+        
         IEnumerator WaitForCameraRoutine() {
             if (!_isGlobal) yield break;
             while (_playerCamera == null) {
@@ -36,13 +51,35 @@ namespace CDK {
             }
             this._playerCamera.EnteredCameraArea(this);
         }
+        
+        #endregion <<---------- Mono Behaviour ---------->>
+        
+        
+        
+        
+        
+
+        
 
 
-		#if UNITY_EDITOR
-		void Reset() {
-			Undo.RecordObject(this.gameObject, "Renamed object");
-			this.name = "Camera Profile";
-		}
-		#endif
-	}
+        #region <<---------- CPhysicsTrigger ---------->>
+        protected override bool WillIgnoreTrigger(Component col) {
+            return base.WillIgnoreTrigger(col) || _isGlobal;
+        }
+
+        protected override void StartedCollisionOrTrigger(Transform other) {
+            base.StartedCollisionOrTrigger(other);
+            if (!other.TryGetComponent<CPlayerCamera>(out var playerCamera)) return;
+            playerCamera.EnteredCameraArea(this);
+        }
+
+        protected override void ExitedCollisionOrTrigger(Transform other) {
+            base.ExitedCollisionOrTrigger(other);
+            if (!other.TryGetComponent<CPlayerCamera>(out var playerCamera)) return;
+            playerCamera.ExitedCameraArea(this);
+        }
+        
+        #endregion <<---------- CPhysicsTrigger ---------->>
+        
+    }
 }

@@ -38,7 +38,7 @@ namespace CDK {
 			// cinemachine
             var lookTarget = this._ownerCharacter.GetComponentInChildren<CCameraLookAndFollowTarget>();
 			this.SetCameraTargets(lookTarget != null ? lookTarget.transform : null);
-		}
+        }
 		
 		#endregion <<---------- Initializers ---------->>
 		
@@ -71,7 +71,7 @@ namespace CDK {
 		public float RotationX { get; private set; }
 		public float RotationY { get; private set; }
         private Coroutine _recenterRotationRoutine;
-        private float _recenterRotationSpeed = 0.15f;
+        private float _recenterRotationSpeed = 0.075f;
 		
 		// Camera 
         [SerializeField] private UnityEngine.Camera _unityCamera;
@@ -103,7 +103,11 @@ namespace CDK {
 		
 		// Camera Profiles
 		private List<CCameraProfileVolume> ActiveCameraProfiles;
-		
+        [SerializeField] private float _parametersLerp = 10f;
+
+        [SerializeField] private bool _resetBrainOnEnable;
+        [SerializeField] private bool _recenterEnable;
+        
 		#endregion <<---------- Properties and Fields ---------->>
 
 		
@@ -118,16 +122,18 @@ namespace CDK {
 			this.ActiveCameraProfiles = new List<CCameraProfileVolume>();
 
             this._cinemachineBrain.m_IgnoreTimeScale = false;
+
+            this.SetCamerasRecenterDefaultValues();
             
 			this.ApplyLastOrDefaultCameraProfile();
-		}
+        }
 
         protected virtual void OnEnable() {
 			var angles = this._transform.eulerAngles;
 			this.RotationY = angles.y;
 			this.RotationX = angles.x;
 
-            this._cinemachineBrain.enabled = false;
+            if(_resetBrainOnEnable) this._cinemachineBrain.enabled = false;
 
             // Set Renderers Visibility 
             Observable.CombineLatest(
@@ -153,9 +159,12 @@ namespace CDK {
             SceneManager.activeSceneChanged += ActiveSceneChanged;
             
             // Next Frame
-            Observable.NextFrame().Subscribe(_ => {
-                if (this == null || this._cinemachineBrain == null) return;
-                this._cinemachineBrain.enabled = true;
+            Observable.NextFrame(FrameCountType.EndOfFrame).Subscribe(_ => {
+                if (this == null) return;
+                if(this._recenterEnable) this.RecenterCameraFast();
+                if (this._resetBrainOnEnable && this._cinemachineBrain != null) {
+                    this._cinemachineBrain.enabled = true;
+                }
             });
         }
 
@@ -193,14 +202,14 @@ namespace CDK {
             if (this._unityCamera == null) return;
             switch (this._cinemachineBrain.ActiveVirtualCamera) {
                 case CinemachineFreeLook cFreelook:
-                    this._unityCamera.nearClipPlane = cFreelook.m_Lens.NearClipPlane;
-                    this._unityCamera.farClipPlane = cFreelook.m_Lens.FarClipPlane;
-                    this._unityCamera.fieldOfView = cFreelook.m_Lens.FieldOfView;
+                    this._unityCamera.nearClipPlane = this._unityCamera.nearClipPlane.CLerp(cFreelook.m_Lens.NearClipPlane, CTime.DeltaTimeScaled * this._parametersLerp);
+                    this._unityCamera.farClipPlane = this._unityCamera.farClipPlane.CLerp(cFreelook.m_Lens.FarClipPlane, CTime.DeltaTimeScaled * this._parametersLerp);
+                    this._unityCamera.fieldOfView = this._unityCamera.fieldOfView.CLerp(cFreelook.m_Lens.FieldOfView, CTime.DeltaTimeScaled * this._parametersLerp);
                     break;
                 case CinemachineVirtualCamera cVirtual:
-                    this._unityCamera.nearClipPlane = cVirtual.m_Lens.NearClipPlane;
-                    this._unityCamera.farClipPlane = cVirtual.m_Lens.FarClipPlane;
-                    this._unityCamera.fieldOfView = cVirtual.m_Lens.FieldOfView;
+                    this._unityCamera.nearClipPlane = this._unityCamera.nearClipPlane.CLerp(cVirtual.m_Lens.NearClipPlane, CTime.DeltaTimeScaled * this._parametersLerp);
+                    this._unityCamera.farClipPlane = this._unityCamera.farClipPlane.CLerp(cVirtual.m_Lens.FarClipPlane, CTime.DeltaTimeScaled * this._parametersLerp);
+                    this._unityCamera.fieldOfView = this._unityCamera.fieldOfView.CLerp(cVirtual.m_Lens.FieldOfView, CTime.DeltaTimeScaled * this._parametersLerp);
                     break;
             }
         }
@@ -225,6 +234,11 @@ namespace CDK {
             if (this._ownerCharacter == null) return null;
             var target = this._ownerCharacter.GetComponentInChildren<CCameraLookAndFollowTarget>();
             return (target != null ? target.transform : null);
+        }
+
+        [EasyButtons.Button]
+        private void RecenterCameraFast() {
+            StartResetingRotation(true);
         }
 
         #endregion <<---------- General ---------->>
@@ -281,30 +295,33 @@ namespace CDK {
 			if (newCamera == null) return;
             this.FindAndSetCameraTargets();
 			this.ApplyLastOrDefaultCameraProfile();
-            float recenterRotationDuration = this._recenterRotationSpeed * 0.5f;
-            switch (this._cinemachineBrain.ActiveVirtualCamera) {
-                case CinemachineFreeLook cFreelook:
-                    cFreelook.m_YAxis.Value = 0.5f;
-                    cFreelook.m_XAxis.Value = -90f;
-                    cFreelook.m_RecenterToTargetHeading.m_enabled = cFreelook.m_YAxisRecentering.m_enabled = false;
-                
-                    cFreelook.m_RecenterToTargetHeading.m_RecenteringTime = cFreelook.m_YAxisRecentering.m_RecenteringTime = recenterRotationDuration;
-                    cFreelook.m_RecenterToTargetHeading.m_WaitTime = cFreelook.m_YAxisRecentering.m_WaitTime = 0f;
-                    break;
-                case CinemachineVirtualCamera cVirtual:
-                    var pov = cVirtual.GetCinemachineComponent<CinemachinePOV>();
-                    if (pov) {
-                        pov.m_VerticalAxis.Value = 0f;
-                        pov.m_VerticalRecentering.m_enabled = pov.m_HorizontalRecentering.m_enabled = false;
-                        pov.m_VerticalRecentering.m_RecenteringTime = pov.m_HorizontalRecentering.m_RecenteringTime = recenterRotationDuration;
-                        pov.m_VerticalRecentering.m_WaitTime = pov.m_HorizontalRecentering.m_WaitTime = 0f;
-                    }
-                    
-                    break;
-            }
-			Debug.Log($"Player Cinemachine Active Camera Changed to '{newCamera.Name}'", newCamera.VirtualCameraGameObject);
+            
+            if (this._cinemachineBrain.ActiveVirtualCamera == null) return;
+            
+            Debug.Log($"Player Cinemachine Active Camera Changed to '{newCamera.Name}'", newCamera.VirtualCameraGameObject);
 		}
 		#endif
+
+        private void SetCamerasRecenterDefaultValues() {
+            foreach (var cam in this._cinemachineCameras) {
+                switch (cam) {
+                    case CinemachineFreeLook cFreelook:
+                        cFreelook.m_RecenterToTargetHeading.m_enabled = cFreelook.m_YAxisRecentering.m_enabled = false;
+                
+                        cFreelook.m_RecenterToTargetHeading.m_RecenteringTime = cFreelook.m_YAxisRecentering.m_RecenteringTime = this._recenterRotationSpeed;
+                        cFreelook.m_RecenterToTargetHeading.m_WaitTime = cFreelook.m_YAxisRecentering.m_WaitTime = 0f;
+                        break;
+                    case CinemachineVirtualCamera cVirtual:
+                        var pov = cVirtual.GetCinemachineComponent<CinemachinePOV>();
+                        if (pov) {
+                            pov.m_VerticalRecentering.m_enabled = pov.m_HorizontalRecentering.m_enabled = false;
+                            pov.m_VerticalRecentering.m_RecenteringTime = pov.m_HorizontalRecentering.m_RecenteringTime = this._recenterRotationSpeed;
+                            pov.m_VerticalRecentering.m_WaitTime = pov.m_HorizontalRecentering.m_WaitTime = 0f;
+                        }
+                        break;
+                }
+            }
+        }
 
         private void SetCameraSensitivity(Vector2 multiplier) {
             var activeCamera = this._cinemachineBrain.ActiveVirtualCamera;
@@ -335,7 +352,8 @@ namespace CDK {
 		private void ActiveSceneChanged(Scene oldScene, Scene newScene) {
 			this.ApplyLastOrDefaultCameraProfile();
             this.FindAndSetCameraTargets();
-		}
+            this.RecenterCameraFast();
+        }
 		
 		#endregion <<---------- Callbacks ---------->>
 		
@@ -344,26 +362,48 @@ namespace CDK {
 
 		#region <<---------- Input ---------->>
 
-		public void ResetRotation() {
+		public void StartResetingRotation(bool resetInOneFrame) {
             this.CStopCoroutine(this._recenterRotationRoutine);
-            this._recenterRotationRoutine = this.CStartCoroutine(this.ResetRotationRoutine());
+            this._recenterRotationRoutine = this.CStartCoroutine(this.ResetRotationRoutine(resetInOneFrame));
         }
 
-        private IEnumerator ResetRotationRoutine() {
+        private IEnumerator ResetRotationRoutine(bool resetInOneFrame) {
             #if Cinemachine
-            if (this._cinemachineBrain.ActiveVirtualCamera is CinemachineFreeLook freeLookCamera) {
-                freeLookCamera.m_RecenterToTargetHeading.m_enabled = true;
-                freeLookCamera.m_YAxisRecentering.m_enabled = true;
 
-                yield return new WaitForSeconds(this._recenterRotationSpeed);
+            if (!resetInOneFrame) {
+                SetCamerasRecenterDefaultValues();
+            }
+            var resetWaitTime = (resetInOneFrame ? null : new WaitForSeconds(this._recenterRotationSpeed * 2f));
+            
+            switch (this._cinemachineBrain.ActiveVirtualCamera) {
+                case CinemachineFreeLook freeLookCamera:
+                    if (resetInOneFrame) {
+                        freeLookCamera.m_RecenterToTargetHeading.m_RecenteringTime = 0f;
+                    }
+                    freeLookCamera.m_RecenterToTargetHeading.m_enabled = true;
+                    freeLookCamera.m_YAxisRecentering.m_enabled = true;
+
+                    yield return resetWaitTime;
                 
-                freeLookCamera.m_RecenterToTargetHeading.m_enabled = false;
-                freeLookCamera.m_YAxisRecentering.m_enabled = false;
+                    freeLookCamera.m_RecenterToTargetHeading.m_enabled = false;
+                    freeLookCamera.m_YAxisRecentering.m_enabled = false;
+                    break;
+                case CinemachineVirtualCamera cVirtual:
+                    var pov = cVirtual.GetCinemachineComponent<CinemachinePOV>();
+                    if (pov) {
+                        if (resetInOneFrame) {
+                            pov.m_HorizontalRecentering.m_RecenteringTime = 0f;
+                            pov.m_VerticalRecentering.m_RecenteringTime = 0f;
+                        }
+                        pov.m_VerticalRecentering.m_enabled = pov.m_HorizontalRecentering.m_enabled = true;
+                        yield return resetWaitTime;
+                        pov.m_VerticalRecentering.m_enabled = pov.m_HorizontalRecentering.m_enabled = false;
+                    }
+                    break;
             }
 			#else
 			Debug.LogError("'Camera ResetRotation' Not implemented without Cinemachine");
 			#endif
-            
             yield break;
         }
 

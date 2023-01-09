@@ -233,7 +233,6 @@ namespace CDK {
 			var mainChar = this.GetControllingCharacter();
 			if (mainChar == null) return;
 			
-			#if UnityAddressables
 			this._playerCamera = CAssets.LoadResourceAndInstantiate<CPlayerCamera>("PlayerCamera");
             this._playerCamera.name = $"{CameraNamePrefix}{mainChar.name.Replace(CharNamePrefix, string.Empty)}";
            
@@ -241,10 +240,9 @@ namespace CDK {
 
 			this._playerCamera.Initialize(this);
 			this._cameraTransform = this._playerCamera.GetCameraTransform();
-			#else
-			Debug.LogError("Default player camera creation not implemented without UnityAddressables");
-			#endif
-		}
+
+            this._playerCamera.transform.rotation = mainChar.transform.rotation;
+        }
 
 		private (Vector3 camF, Vector3 camR) GetCameraVectors() {
 			if (this._cameraTransform == null) return (Vector3.forward, Vector3.right);
@@ -292,7 +290,7 @@ namespace CDK {
 			if (this._blockingEventsManager.IsAnyHappening) return;
 			if (!data.GetButtonDown()) return;
 			if (this._playerCamera == null) return;
-			this._playerCamera.ResetRotation();
+			this._playerCamera.StartResetingRotation(false);
 		}
 		
         private void InputWalk(InputActionEventData data) {

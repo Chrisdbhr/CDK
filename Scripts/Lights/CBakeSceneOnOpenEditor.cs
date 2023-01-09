@@ -1,5 +1,9 @@
-﻿using UnityEditor;
-using UnityEngine;
+﻿using UnityEngine;
+
+#if UNITY_EDITOR
+using UnityEditor;
+using UnityEditor.SceneManagement;
+#endif
 
 namespace CDK {
     [ExecuteInEditMode]
@@ -7,6 +11,10 @@ namespace CDK {
         private void Awake() {
             if (Application.isPlaying) return;
             #if UNITY_EDITOR
+            if (EditorSceneManager.sceneCount > 1) {
+                Debug.LogWarning("Canceling auto bake because there is more than one scene open.", this);
+                return;
+            }
             Debug.Log("Auto baking scene.", this);
             Lightmapping.BakeAsync();
             #endif
