@@ -13,16 +13,24 @@ namespace CDK {
 		[SerializeField] protected CUnityEventBool Entered;
 		[SerializeField] protected CUnityEventBool Exited;
 
-		
-		
-		
-		protected bool WillIgnoreTrigger(Component col) {
+
+
+        protected virtual void Awake() { }
+
+        protected virtual void Reset() {
+            if (this.TryGetComponent<Collider>(out var c)) {
+                this._isTrigger = c.isTrigger;
+            }
+        }
+
+        protected virtual bool WillIgnoreTrigger(Component col) {
 			return !this._tag.CIsNullOrEmpty() && !col.CompareTag(this._tag);
 		}
 
-        protected virtual void Reset() {
-            var col = this.GetComponent<Collider>();
-            if (col) col.isTrigger = this._isTrigger;
+        private void OnValidate() {
+            if (this.TryGetComponent<Collider>(out var c)) {
+                c.isTrigger = this._isTrigger;
+            }
         }
     }
 }
