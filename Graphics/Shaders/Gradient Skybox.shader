@@ -1,4 +1,4 @@
-Shader "Custom/Skybox/Gradient Skybox"
+Shader "CDK/Skybox/Gradient Skybox"
 {
 Properties
 {
