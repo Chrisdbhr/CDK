@@ -4,8 +4,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using System.Linq;
-using System.Threading.Tasks;
-using UniRx;
 
 namespace CDK {
 	public class CFootstepsSource : MonoBehaviour {
@@ -143,7 +141,7 @@ namespace CDK {
 				yield break;
 			}
 
-            CFootstepInfo footstepInfo = GetFootstepInfo(raycastHit);
+            CFootstepInfo footstepInfo = this.GetFootstepInfoFromRaycastHit(raycastHit);
             if(footstepInfo == null) yield break;
 
 			this._onFootstep?.Invoke(footstepInfo, feet, raycastHit.collider);
@@ -176,9 +174,13 @@ namespace CDK {
             if(this.FootR == null) this.FootR = this.GetComponentsInChildren<Transform>().FirstOrDefault(t => t.name.ToLower().Contains("foot") && t.name.ToLower().Contains('r'));
         }
 
-        private CFootstepInfo GetFootstepInfo(RaycastHit hit) {
-            if (hit.collider == null) return null;
-            var surface = hit.collider.GetComponent<CIFootstepSurfaceBase>();
+        private CFootstepInfo GetFootstepInfoFromRaycastHit(RaycastHit hit) {
+            var t = hit.transform;
+            if (t == null || t.parent == null) return null;
+            var surface = t.GetComponent<CIFootstepSurfaceBase>();
+            if (surface == null) {
+                surface = t.parent.GetComponent<CFootstepSurfaceParent>();
+            }
             return surface != null ? surface.GetFootstepInfoFromRaycastHit(hit) : null;
         }
 		

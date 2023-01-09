@@ -16,16 +16,6 @@ namespace CDK {
 		#endif
 		
         [SerializeField] private ParticleSystem[] _particleSystems;
-
-        
-        
-        
-        [Obsolete]
-		public Material[] Materials;
-		
-        [Obsolete]
-		public TerrainLayer[] TerrainLayers;
-		
 		
 		
         
