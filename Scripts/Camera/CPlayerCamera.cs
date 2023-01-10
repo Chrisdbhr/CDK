@@ -23,7 +23,7 @@ namespace CDK {
 
 		#region <<---------- Initializers ---------->>
 
-		public void Initialize(CGamePlayer ownerPlayer) {
+		public virtual void Initialize(CGamePlayer ownerPlayer) {
 			
 			// owner player
 			if (ownerPlayer == null) {
@@ -90,9 +90,9 @@ namespace CDK {
         private ReactiveCollection<Renderer> _playerRenderersRx = new ReactiveCollection<Renderer>();
 
 		// Cache
-		private CGamePlayer _ownerPlayer;
-		private Transform _transform;
-		private CCharacter_Base _ownerCharacter;
+        protected CGamePlayer _ownerPlayer;
+        protected Transform _transform;
+		protected CCharacter_Base _ownerCharacter;
 		
 		#if DOTween
 		private Tweener _tween;
