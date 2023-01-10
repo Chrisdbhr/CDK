@@ -63,6 +63,8 @@ namespace CDK {
         private bool _isTeleporting;
 
         public const float ExtraSecondsAfterTeleport = 1f;
+
+        public const string TemporarySceneName = "Temp Holder Scene";
         
 		#endregion <<---------- Properties and Fields ---------->>
 
@@ -121,7 +123,7 @@ namespace CDK {
 
 			    // move objects to temporary scene
                 Debug.Log($"[Teleport] Creating temporary holder scene");
-			    var tempHolderScene = SceneManager.CreateScene("Temp Holder Scene"); 
+			    var tempHolderScene = SceneManager.CreateScene(TemporarySceneName); 
 			    foreach (var rootGo in gameObjectsToTeleport) {
 				    SceneManager.MoveGameObjectToScene(rootGo, tempHolderScene);
 			    }
