@@ -132,7 +132,7 @@ namespace CDK {
 
             this._lastValidHitPoint = raycastHit.point;
 			
-			if(this._debugFootstep) Debug.Log($"Footstep {feet} on {raycastHit.collider.name}");
+			if(this._debugFootstep) Debug.Log($"Footstep {feet} on {raycastHit.collider.name}", raycastHit.collider);
 
 			// check for smashable object
 			var smashableObj = raycastHit.collider.GetComponent<CICanBeSmashedWhenStepping>();
@@ -176,12 +176,13 @@ namespace CDK {
 
         private CFootstepInfo GetFootstepInfoFromRaycastHit(RaycastHit hit) {
             var t = hit.transform;
-            if (t == null || t.parent == null) return null;
-            var surface = t.GetComponent<CIFootstepSurfaceBase>();
-            if (surface == null) {
-                surface = t.parent.GetComponent<CFootstepSurfaceParent>();
+            if (t.TryGetComponent<CIFootstepSurfaceBase>(out var sb)) {
+                return sb.GetFootstepInfoFromRaycastHit(hit);
             }
-            return surface != null ? surface.GetFootstepInfoFromRaycastHit(hit) : null;
+            if (t.root.TryGetComponent<CFootstepSurfaceParent>(out var sp)) {
+                return sp.GetFootstepInfoFromRaycastHit(hit);
+            }
+            return null;
         }
 		
 		#endregion <<---------- General ---------->>
