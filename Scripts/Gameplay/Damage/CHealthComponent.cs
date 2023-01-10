@@ -167,6 +167,9 @@ namespace CDK {
 			this.CurrentHealth = this._maxHealth;
 		}
 
+        public void Kill() {
+            CurrentHealth = 0f;
+        }
 
 		/// <summary>
 		/// Returns the amount of damage taken.
