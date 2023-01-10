@@ -104,9 +104,9 @@ namespace CDK {
 				#if Rewired
 				var inputMovement2d = this._rePlayer.GetAxis2D(CInputKeys.MOV_X, CInputKeys.MOV_Y);
 				
-				var (camF, camR) = this.GetCameraVectors();
+				var (camF, camR) = this.GetCameraVectorsRelativeToCharacter(character);
 				
-				character.Input.Movement = Vector3.ClampMagnitude(((camF * inputMovement2d.y) + (camR * inputMovement2d.x)), 1f);
+				character.Input.Movement = ((camF * inputMovement2d.y) + (camR * inputMovement2d.x)).normalized;
 				#else
 				Debug.LogError("'GamePlayer movement handling not implemented without Rewired'");
 				#endif
