@@ -6,14 +6,15 @@ Shader "C Triplanar Mapping"
 	{
 		_TopTexture("Top Texture", 2D) = "white" {}
 		_Tilling("Tilling", Vector) = (1,1,0,0)
+		_Specular("Specular", Float) = 0
+		_Gloss("Gloss", Float) = 0
 		[HideInInspector] __dirty( "", Int ) = 1
-	    [Enum(UnityEngine.Rendering.CullMode)] _Cull ("Cull", Float) = 0
 	}
 
 	SubShader
 	{
 		Tags{ "RenderType" = "Opaque"  "Queue" = "Geometry+0" }
-		Cull [_Cull]
+		Cull Off
 		CGINCLUDE
 		#include "UnityPBSLighting.cginc"
 		#include "Lighting.cginc"
@@ -35,6 +36,8 @@ Shader "C Triplanar Mapping"
 
 		sampler2D _TopTexture;
 		uniform float2 _Tilling;
+		uniform float _Specular;
+		uniform float _Gloss;
 
 
 		inline float4 TriplanarSampling1( sampler2D topTexMap, float3 worldPos, float3 worldNormal, float falloff, float2 tiling, float3 normalScale, float3 index )
@@ -57,6 +60,8 @@ Shader "C Triplanar Mapping"
 			float3 ase_worldNormal = WorldNormalVector( i, float3( 0, 0, 1 ) );
 			float4 triplanar1 = TriplanarSampling1( _TopTexture, ase_worldPos, ase_worldNormal, 1.0, _Tilling, 1.0, 0 );
 			o.Albedo = triplanar1.xyz;
+			o.Specular = _Specular;
+			o.Gloss = _Gloss;
 			o.Alpha = 1;
 		}
 
@@ -143,10 +148,14 @@ Shader "C Triplanar Mapping"
 }
 /*ASEBEGIN
 Version=19100
-Node;AmplifyShaderEditor.StandardSurfaceOutputNode;8;0,0;Float;False;True;-1;2;ASEMaterialInspector;0;0;Lambert;C Triplanar Mapping Double Sided;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;Off;0;False;;0;False;;False;0;False;;0;False;;False;0;Opaque;0.5;True;True;0;False;Opaque;;Geometry;All;12;all;True;True;True;True;0;False;;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;2;15;10;25;False;0.5;True;0;0;False;;0;False;;0;0;False;;0;False;;0;False;;0;False;;0;False;0;0,0,0,0;VertexOffset;True;False;Cylindrical;False;True;Relative;0;;-1;-1;-1;-1;0;False;0;0;False;;-1;0;False;;0;0;0;False;0.1;False;;0;False;;False;15;0;FLOAT3;0,0,0;False;1;FLOAT3;0,0,0;False;2;FLOAT3;0,0,0;False;3;FLOAT;0;False;4;FLOAT;0;False;6;FLOAT3;0,0,0;False;7;FLOAT3;0,0,0;False;8;FLOAT;0;False;9;FLOAT;0;False;10;FLOAT;0;False;13;FLOAT3;0,0,0;False;11;FLOAT3;0,0,0;False;12;FLOAT3;0,0,0;False;14;FLOAT4;0,0,0,0;False;15;FLOAT3;0,0,0;False;0
-Node;AmplifyShaderEditor.Vector2Node;10;-992.6854,-56.88753;Inherit;False;Property;_Tilling;Tilling;1;0;Create;True;0;0;0;False;0;False;1,1;0.1,0.1;0;3;FLOAT2;0;FLOAT;1;FLOAT;2
+Node;AmplifyShaderEditor.Vector2Node;10;-992.6854,-56.88753;Inherit;False;Property;_Tilling;Tilling;1;0;Create;True;0;0;0;False;0;False;1,1;1,1;0;3;FLOAT2;0;FLOAT;1;FLOAT;2
 Node;AmplifyShaderEditor.TriplanarNode;1;-684.6744,-53.78521;Inherit;True;Spherical;World;False;Top Texture;_TopTexture;white;0;None;Mid Texture 0;_MidTexture0;white;-1;None;Bot Texture 0;_BotTexture0;white;-1;None;Triplanar Sampler;Tangent;10;0;SAMPLER2D;;False;5;FLOAT;1;False;1;SAMPLER2D;;False;6;FLOAT;0;False;2;SAMPLER2D;;False;7;FLOAT;0;False;9;FLOAT3;0,0,0;False;8;FLOAT;1;False;3;FLOAT2;1,1;False;4;FLOAT;1;False;5;FLOAT4;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
-WireConnection;8;0;1;0
+Node;AmplifyShaderEditor.StandardSurfaceOutputNode;8;0,0;Float;False;True;-1;2;ASEMaterialInspector;0;0;Lambert;C Triplanar Mapping;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;Off;0;False;;0;False;;False;0;False;;0;False;;False;0;Opaque;0.5;True;True;0;False;Opaque;;Geometry;All;12;all;True;True;True;True;0;False;;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;2;15;10;25;False;0.5;True;0;0;False;;0;False;;0;0;False;;0;False;;0;False;;0;False;;0;False;0;0,0,0,0;VertexOffset;True;False;Cylindrical;False;True;Relative;0;;-1;-1;-1;-1;0;False;0;0;False;;-1;0;False;;0;0;0;False;0.1;False;;0;False;;False;15;0;FLOAT3;0,0,0;False;1;FLOAT3;0,0,0;False;2;FLOAT3;0,0,0;False;3;FLOAT;0;False;4;FLOAT;0;False;6;FLOAT3;0,0,0;False;7;FLOAT3;0,0,0;False;8;FLOAT;0;False;9;FLOAT;0;False;10;FLOAT;0;False;13;FLOAT3;0,0,0;False;11;FLOAT3;0,0,0;False;12;FLOAT3;0,0,0;False;14;FLOAT4;0,0,0,0;False;15;FLOAT3;0,0,0;False;0
+Node;AmplifyShaderEditor.RangedFloatNode;12;-355.1411,282.319;Inherit;False;Property;_Gloss;Gloss;3;0;Create;True;0;0;0;False;0;False;0;0;0;0;0;1;FLOAT;0
+Node;AmplifyShaderEditor.RangedFloatNode;11;-361.6411,186.1189;Inherit;False;Property;_Specular;Specular;2;0;Create;True;0;0;0;False;0;False;0;0;0;0;0;1;FLOAT;0
 WireConnection;1;3;10;0
+WireConnection;8;0;1;0
+WireConnection;8;3;11;0
+WireConnection;8;4;12;0
 ASEEND*/
-//CHKSM=A7068CE8EB83D15DCEC32CF4A219D4CA912C6765
+//CHKSM=44B30A5B8C43299D20D1DCAEB4031A8713B3F7B0
