@@ -5,9 +5,9 @@ using UnityEngine.SceneManagement;
 using Object = UnityEngine.Object;
 
 namespace CDK {
-    public class CTransformPositionOutOfBoundsDestroyer : MonoBehaviour {
+    public class COutOfBoundsDestroyer : MonoBehaviour {
 
-        private static CTransformPositionOutOfBoundsDestroyer _instance;
+        private static COutOfBoundsDestroyer _instance;
         
         private CompositeDisposable _disposables;
         private const float ValueLimit = 100000f;
@@ -64,12 +64,12 @@ namespace CDK {
                         yield return null;
                         continue;
                     }
-                    if (IsPositionInvalid(allTransforms[i].transform.position)) {
-                        Debug.LogWarning($"Destroying GameObject '{allTransforms[i].name}' that is out of bounds! Position: {allTransforms[i].position}");
+                    if (IsPositionInvalid(allTransforms[i].transform.localPosition)) {
+                        Debug.LogWarning($"Disabling GameObject '{allTransforms[i].name}' that is out of bounds! Position: {allTransforms[i].localPosition}");
                         if(allTransforms[i].TryGetComponent<CHealthComponent>(out var h)) {
                             h.Kill();
                         }
-                        allTransforms[i].gameObject.CDestroy();
+                        allTransforms[i].gameObject.SetActive(false);
                     }
                     yield return null;
                 }
@@ -81,7 +81,7 @@ namespace CDK {
                 Debug.LogError("Will not StartMonitoring because a monitor object is already created!");
                 return;
             }
-            _instance = new GameObject("Out of Bounds Monitor").AddComponent<CTransformPositionOutOfBoundsDestroyer>();
+            _instance = new GameObject("Out of Bounds Monitor").AddComponent<COutOfBoundsDestroyer>();
         }
 
         bool IsPositionInvalid(Vector3 v) {
