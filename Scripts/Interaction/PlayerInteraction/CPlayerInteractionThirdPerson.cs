@@ -21,6 +21,7 @@ namespace CDK.Interaction {
 
 		#if UNITY_EDITOR
 		private void OnDrawGizmosSelected() {
+            if (!this._debug) return;
 			Gizmos.color = Color.cyan;
 			Gizmos.DrawWireSphere(
 				this.GetCenterSphereCheckPosition(),

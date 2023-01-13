@@ -48,7 +48,7 @@ namespace CDK {
 
             InitializeApplicationAsync().CAwait();
 
-            CTransformPositionOutOfBoundsDestroyer.CreateMonitor();
+            COutOfBoundsDestroyer.CreateMonitor();
         }
 
         private static async Task InitializeApplicationAsync() {

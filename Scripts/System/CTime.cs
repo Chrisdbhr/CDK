@@ -30,11 +30,13 @@ namespace CDK {
 			set {
 				var oldTimeScale = Time.timeScale;
 				if (value == oldTimeScale) return;
-
-				Time.timeScale = value;
+                _onTimePaused?.Invoke(value == 0f);
+                Time.timeScale = value;
 				_onTimeScaleChanged?.Invoke(oldTimeScale, value);
 			}
 		}
+
+        public static bool IsPaused => Time.timeScale == 0f;
 
 		/// <summary>
 		/// Notify time scaled changed (oldTimeScale, newTimeScale)
@@ -49,5 +51,16 @@ namespace CDK {
 			}
 		}
 		private static Action<float, float> _onTimeScaleChanged;
+        
+        public static event Action<bool> OnTimePaused {
+            add {
+                _onTimePaused -= value;
+                _onTimePaused += value;
+            }
+            remove {
+                _onTimePaused -= value;
+            }
+        }
+        private static Action<bool> _onTimePaused;
 	}
 }

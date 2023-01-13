@@ -220,7 +220,7 @@ namespace CDK {
 
         public void SetCameraTargets(Transform lookAndFollowTarget) {
 			#if Cinemachine
-			var target = lookAndFollowTarget != null ? lookAndFollowTarget : this._ownerCharacter.transform;
+            var target = lookAndFollowTarget != null ? lookAndFollowTarget : (this._ownerCharacter != null ? this._ownerCharacter.transform : null);
 			foreach (var cam in this._cinemachineCameras) {
 				cam.Follow = target;
 				cam.LookAt = target;
