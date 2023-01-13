@@ -16,12 +16,10 @@ namespace CDK {
         
 
         protected override void Awake() {
-            base.Awake();
-
             this._rb = this.GetComponent<Rigidbody>();
-            
             this._initialInterpolateMode = this._rb.interpolation;
             this._initialCollisionDetectionMode = this._rb.collisionDetectionMode;
+            base.Awake();
         }
 
         protected override void StartedCollisionOrTrigger(Transform other) {

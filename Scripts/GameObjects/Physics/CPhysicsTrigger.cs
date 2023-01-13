@@ -6,25 +6,21 @@ namespace CDK {
 		#region <<---------- Triggers ---------->>
 		
 		protected virtual void OnTriggerEnter(Collider other) {
-			if (!this._isTrigger) return;
 			if (this.WillIgnoreTrigger(other.transform)) return;
 			this.StartedCollisionOrTrigger(other.transform);
 		}
 
 		protected virtual void OnTriggerEnter2D(Collider2D other) {
-			if (!this._isTrigger) return;
 			if (this.WillIgnoreTrigger(other.transform)) return;
 			this.StartedCollisionOrTrigger(other.transform);
 		}
 
 		protected virtual void OnTriggerExit(Collider other) {
-			if (!this._isTrigger) return;
 			if (this.WillIgnoreTrigger(other.transform)) return;
 			this.ExitedCollisionOrTrigger(other.transform);
 		}
 
 		protected virtual void OnTriggerExit2D(Collider2D other) {
-			if (!this._isTrigger) return;
 			if (this.WillIgnoreTrigger(other.transform)) return;
 			this.ExitedCollisionOrTrigger(other.transform);
 		}
@@ -37,25 +33,21 @@ namespace CDK {
 		#region <<---------- Collision ---------->>
 		
 		protected virtual void OnCollisionEnter(Collision other) {
-			if (this._isTrigger) return;
 			if (this.WillIgnoreTrigger(other.transform)) return;
 			this.StartedCollisionOrTrigger(other.transform);
 		}
 
 		protected virtual void OnCollisionExit(Collision other) {
-			if (this._isTrigger) return;
 			if (this.WillIgnoreTrigger(other.transform)) return;
 			this.StartedCollisionOrTrigger(other.transform);
 		}
 
 		protected virtual void OnCollisionEnter2D(Collision2D other) {
-			if (this._isTrigger) return;
 			if (this.WillIgnoreTrigger(other.transform)) return;
 			this.ExitedCollisionOrTrigger(other.transform);
 		}
 
 		protected virtual void OnCollisionExit2D(Collision2D other) {
-			if (this._isTrigger) return;
 			if (this.WillIgnoreTrigger(other.transform)) return;
 			this.ExitedCollisionOrTrigger(other.transform);
 		}
