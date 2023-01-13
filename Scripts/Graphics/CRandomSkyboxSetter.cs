@@ -6,6 +6,7 @@ using UnityEngine;
 namespace CDK.Graphics {
     public class CRandomSkyboxSetter : MonoBehaviour {
 
+        [SerializeField] private bool _updateGiToo = true;
         [SerializeField] private Material[] _skyboxes;
         
         
@@ -20,7 +21,7 @@ namespace CDK.Graphics {
         #endif
         public void ChooseSkybox() {
             RenderSettings.skybox = this._skyboxes.CRandomElement();
-            DynamicGI.UpdateEnvironment();
+            if(_updateGiToo) DynamicGI.UpdateEnvironment();
         }
     }
 }
