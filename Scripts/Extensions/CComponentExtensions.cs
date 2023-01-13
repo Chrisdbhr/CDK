@@ -12,6 +12,12 @@ namespace CDK {
 
         }
      
+        public static T CGetComponentInChildrenFromRoot<T>(this Component go, bool includeInactive = false) {
+            if (go == null) return default;
+            var root = go.transform.root;
+            return root.GetComponentInChildren<T>(includeInactive);
+        }
+        
         public static void CDestroyGameObject(this Component value, float time = 0f) {
             if (value == null || value.gameObject == null) return;
             if (Application.isPlaying) {

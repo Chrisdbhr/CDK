@@ -20,7 +20,7 @@ namespace CDK {
             if (target != null) return target;
             return go.GetComponentInParent<T>(includeInactive);
         }
-        
+
         public static T CGetComponentInParentOrInChildren<T>(this GameObject go, bool includeInactive = false) {
             if (go == null) return default;
             var target = go.GetComponentInParent<T>(includeInactive);

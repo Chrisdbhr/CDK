@@ -35,6 +35,12 @@ namespace CDK {
             var target = t.parent;
             return target != null ? target : t;
         }
+        
+        public static void CSetRotationToInverseNormal(this Transform t, Vector3 checkDirection, float checkDistance, LayerMask layerMask) {
+            if (t == null) return;
+            if (!Physics.Raycast(t.position, checkDirection, out var hit, checkDistance, layerMask)) return;
+            t.rotation = Quaternion.FromToRotation(t.up, hit.normal);
+        }
 
 	}
 }
