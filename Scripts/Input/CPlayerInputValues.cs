@@ -1,13 +1,22 @@
 ﻿using UnityEngine;
 
 namespace CDK {
-    public struct CPlayerInputValues {
+    [System.Serializable]
+    public class CPlayerInputValues {
         /// <summary>
-        /// Relative to camera position.
+        /// Can be relative to camera position. 
         /// </summary>
-        public Vector3 Movement;
+        public Vector2 Movement2D => new Vector2(Movement3D.x, Movement3D.z);
+        /// <summary>
+        /// Can be relative to camera position. 
+        /// </summary>
+        public Vector3 Movement3D;
+        public float MovementSqrMagnitude => this.Movement3D.sqrMagnitude;
+        public bool IsDoingMovementInput => MovementSqrMagnitude > 0f;
+        
         public bool    Walk;
         public bool    Run;
+        
         public bool    Jump;
         public bool    Aim;
     }

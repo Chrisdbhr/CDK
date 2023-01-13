@@ -21,7 +21,7 @@ namespace CDK {
 
 		#region <<---------- Properties ---------->>
 
-        public CPlayerInputValues Input;
+        public CPlayerInputValues Input = new CPlayerInputValues();
 
         protected CBlockingEventsManager _blockingEventsManager;
 #pragma warning disable CS0108, CS0114
