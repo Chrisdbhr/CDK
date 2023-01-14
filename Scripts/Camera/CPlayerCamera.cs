@@ -214,7 +214,7 @@ namespace CDK {
             }
         }
 
-        public void FindAndSetCameraTargets() {
+        public void FindAndSetDefaultCameraTargets() {
             this.SetCameraTargets(this.FindTarget());
         }
 
@@ -293,7 +293,7 @@ namespace CDK {
 		#if Cinemachine
 		private void ActiveCameraChanged(ICinemachineCamera newCamera, ICinemachineCamera oldCamera) {
 			if (newCamera == null) return;
-            this.FindAndSetCameraTargets();
+            this.FindAndSetDefaultCameraTargets();
 			this.ApplyLastOrDefaultCameraProfile();
             
             if (this._cinemachineBrain.ActiveVirtualCamera == null) return;
@@ -351,7 +351,7 @@ namespace CDK {
         
 		private void ActiveSceneChanged(Scene oldScene, Scene newScene) {
 			this.ApplyLastOrDefaultCameraProfile();
-            this.FindAndSetCameraTargets();
+            this.FindAndSetDefaultCameraTargets();
             this.RecenterCameraFast();
         }
 		
