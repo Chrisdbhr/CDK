@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 
 using System;
 using System.IO;
+using UniRx;
 using UnityEngine;
 
 namespace CDK {
@@ -52,6 +53,27 @@ namespace CDK {
         public void SetCameraSensitivityY(float value) {
             this._cameraSensitivityMultiplier = new Vector2(this._cameraSensitivityMultiplier.x, value);
         }
+
+        #if Newtonsoft_Json_for_Unity
+        [JsonProperty("resolutionScale")]
+		#endif
+        public float ResolutionScale {
+            get {
+                return this._resolutionScaleRx.Value;
+            }
+            set {
+                if (value == this._resolutionScaleRx.Value) return;
+                this._resolutionScaleRx.Value = value;
+            }
+        }
+        #if Newtonsoft_Json_for_Unity
+        [JsonIgnore]
+		#endif
+        private FloatReactiveProperty _resolutionScaleRx = new FloatReactiveProperty(1f);
+        #if Newtonsoft_Json_for_Unity
+        [JsonIgnore]
+		#endif
+        public IReadOnlyReactiveProperty<float> ResolutionScaleRx => this._resolutionScaleRx.ToReadOnlyReactiveProperty();
 
         #endregion <<---------- Camera ---------->>
 
