@@ -1,16 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
+#if STEAMWORKS_WIN
 using Steamworks;
+#endif
 using UnityEngine;
 
 namespace CDK {
     public class CSteamManager
-    #if STEAMWORKS_NET
+    #if STEAMWORKS_WIN
     : SteamManager 
     #endif
     {
-        
+        #if STEAMWORKS_WIN
         protected Callback<GameOverlayActivated_t> m_GameOverlayActivated;
+        #endif
         
         public static event Action OnSteamOverlayOpen {
             add {
@@ -34,7 +37,7 @@ namespace CDK {
         }
         private static Action _onSteamOverlayClosed;
 
-        #if STEAMWORKS_NET
+        #if STEAMWORKS_WIN
         protected override void Awake() {
             base.Awake();
 
@@ -50,7 +53,7 @@ namespace CDK {
         #endif
 
         public static void DoIfInitialized(Action action) {
-            #if !STEAMWORKS_NET
+            #if !STEAMWORKS_WIN
             return;
             #else
             if (action == null) return;
@@ -61,6 +64,7 @@ namespace CDK {
             #endif
         }
         
+        #if STEAMWORKS_WIN
         private void OnGameOverlayActivated(GameOverlayActivated_t pCallback) {
             if(pCallback.m_bActive != 0) {
                 Debug.Log("Steam Overlay has been activated");
@@ -71,6 +75,7 @@ namespace CDK {
                 _onSteamOverlayClosed?.Invoke();
             }
         }
+        #endif
         
     }
 }

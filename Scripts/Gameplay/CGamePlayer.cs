@@ -397,7 +397,7 @@ namespace CDK {
 		
 		public void Dispose() {
 			this._disposables?.Dispose();
-            if(this._steamManager) CSteamManager.OnSteamOverlayOpen -= this.TryPauseGame;
+            if(this._steamManager != null) CSteamManager.OnSteamOverlayOpen -= this.TryPauseGame;
             Application.focusChanged -= this.OnApplicationFocusChanged;
 			this.UnsignFromInputEvents();
 		}
