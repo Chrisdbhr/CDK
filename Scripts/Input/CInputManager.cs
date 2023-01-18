@@ -77,7 +77,6 @@ namespace CDK {
                 if (CApplication.IsQuitting || ReInput.controllers == null) {
                     return;
                 }
-
                 
 				if (ActiveInputType != InputType.Keyboard &&
                     (ReInput.controllers.GetAnyButton(ControllerType.Keyboard))
@@ -125,9 +124,16 @@ namespace CDK {
         }
 
         static void ControllerConnectedEvent(ControllerStatusChangedEventArgs c) {
-            if (ReInput.players.SystemPlayer.controllers.ContainsController(c.controller)) return;
-            Debug.Log($"New controller connected: {c.name}, assigning to System Player.");
-            ReInput.players.SystemPlayer.controllers.AddController(c.controllerType, c.controllerId, false);
+            if (!ReInput.players.SystemPlayer.controllers.ContainsController(c.controller)) {
+                Debug.Log($"New controller connected: {c.name}, assigning to System Player.");
+                ReInput.players.SystemPlayer.controllers.AddController(c.controllerType, c.controllerId, false);
+            }
+
+            var player = ReInput.players.GetPlayer(0); 
+            if (player != null && !player.controllers.ContainsController(c.controller)) {
+                Debug.Log($"New controller connected: {c.name}, assigning to Player {player.id} ({player.name}).");
+                player.controllers.AddController(c.controllerType, c.controllerId, false);
+            }
         }
         
 		#endif
