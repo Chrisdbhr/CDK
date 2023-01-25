@@ -180,6 +180,7 @@ namespace CDK {
             this.CheckIfNeedToCreateCamera();
 
             Debug.Log($"Created player {this.PlayerNumber} controlling character '{instantiatedCharacter.name}'.", instantiatedCharacter);
+            instantiatedCharacter.transform.SetAsFirstSibling();
             return instantiatedCharacter;
         }
         
@@ -246,7 +247,9 @@ namespace CDK {
 			this._playerCamera.Initialize(this);
 			this._cameraTransform = this._playerCamera.GetCameraTransform();
 
-            this._playerCamera.transform.rotation = mainChar.transform.rotation;
+            var t = this._playerCamera.transform;
+            t.SetAsFirstSibling();
+            t.rotation = mainChar.transform.rotation;
         }
 
 		private (Vector3 camF, Vector3 camR) GetCameraVectors() {
