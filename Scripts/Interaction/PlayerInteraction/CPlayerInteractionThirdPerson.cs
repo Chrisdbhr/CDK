@@ -30,7 +30,7 @@ namespace CDK.Interaction {
 		#endif
 
         private void OnEnable() {
-            this._blockingEventsManager.IsAnyHappeningRx.TakeUntilDisable(this).Subscribe(OnOnAnyBlockingEventHappening);
+            this._blockingEventsManager.IsAnyHappeningAsObservable().TakeUntilDisable(this).Subscribe(OnOnAnyBlockingEventHappening);
         }
 
         private void Update() {

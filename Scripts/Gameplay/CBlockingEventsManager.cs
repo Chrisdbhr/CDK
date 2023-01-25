@@ -1,3 +1,4 @@
+using System;
 using UniRx;
 using UnityEngine;
 
@@ -23,7 +24,6 @@ namespace CDK {
 
 
         public bool IsAnyHappening => this._isAnyHappeningRx.Value;
-        public IReadOnlyReactiveProperty<bool> IsAnyHappeningRx => this._isAnyHappeningRx.ToReadOnlyReactiveProperty();
         private BoolReactiveProperty _isAnyHappeningRx;
         
         private CompositeDisposable _disposables;
@@ -77,6 +77,17 @@ namespace CDK {
 		}
 
 		#endregion <<---------- Initializers ---------->>
+
+
+
+
+        #region <<---------- Observables ---------->>
+
+        public IObservable<bool> IsAnyHappeningAsObservable() {
+            return this._isAnyHappeningRx.DistinctUntilChanged().AsObservable();
+        }
+
+        #endregion <<---------- Observables ---------->>
 		
 	}
 }
