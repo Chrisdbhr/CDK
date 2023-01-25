@@ -48,9 +48,9 @@ namespace CDK {
 		
 		#if UNITY_EDITOR
 		private void OnDrawGizmos() {
-			var tranf = this.transform;
-			var fwd = tranf.forward;
-			var pos = tranf.position;
+			var transf = this.transform;
+			var fwd = transf.forward;
+			var pos = transf.position;
 			pos += Vector3.up * this._editorRadius;
 			
 			// gizmo
@@ -63,6 +63,13 @@ namespace CDK {
 			
 			// text
 			Handles.Label(pos - (Vector3.up*0.5f), $"Entry point {this._number}");
+            
+            // Ground Check Distance
+            pos = this.transform.position;
+            var maxDistance = 11.20f;
+            var hit = Physics.Raycast(pos, Vector3.down, out var hitInfo,maxDistance, 1);
+            Debug.DrawLine(pos, pos + (Vector3.down * maxDistance), Color.red);
+            if(hit) Debug.DrawLine(pos, hitInfo.point, Color.cyan);
 		}
 
 		private void Reset() {
