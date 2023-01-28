@@ -54,13 +54,22 @@ namespace CDK {
 
 		// UI
         /// <summary>
-        /// Keyboard: E | Xbox: X
+        /// Keyboard: ENTER | Xbox: X
         /// </summary>
 		public const string UI_SUBMIT = "UISubmit";
         /// <summary>
-        /// Keyboard: Q | Xbox: B
+        /// Keyboard: ESC | Xbox: B
         /// </summary>
 		public const string UI_CANCEL = "UICancel";
+        
+        /// <summary>
+        /// Keyboard: Q | Xbox: LB
+        /// </summary>
+        public const string UI_PREVIOUS = "UIPrevious";
+        /// <summary>
+        /// Keyboard: E | Xbox: RB
+        /// </summary>
+        public const string UI_NEXT = "UINext";
 
-	}
+    }
 }
