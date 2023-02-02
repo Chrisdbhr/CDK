@@ -42,7 +42,7 @@ namespace CDK {
 			
 			#if Rewired
 			SetInputLayout(this._rePlayer, this._blockingEventsManager.IsOnMenu);
-			this._blockingEventsManager.OnMenuRetainable.IsRetainedRx.Subscribe(this.SetInputLayout)
+			this._blockingEventsManager.OnMenuRetainable.IsRetainedAsObservable().Subscribe(this.SetInputLayout)
             .AddTo(this._disposables);
 			#endif
 

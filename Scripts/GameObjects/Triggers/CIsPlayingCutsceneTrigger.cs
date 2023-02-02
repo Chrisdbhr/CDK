@@ -16,7 +16,7 @@ namespace CDK {
 		}
 
 		private void OnEnable() {
-			this._blockingEventsManager.PlayingCutsceneRetainable.IsRetainedRx.DistinctUntilChanged().TakeUntilDisable(this).Subscribe(this.PlayingStateChanged);
+			this._blockingEventsManager.PlayingCutsceneRetainable.IsRetainedAsObservable().TakeUntilDisable(this).Subscribe(this.PlayingStateChanged);
 		}
 
 		void PlayingStateChanged(bool isPlaying) {

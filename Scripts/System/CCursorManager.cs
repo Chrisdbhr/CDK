@@ -15,7 +15,7 @@ namespace CDK {
 			this._gameSettings = CDependencyResolver.Get<CGameSettings>();
 			this._blockingEventsManager = CDependencyResolver.Get<CBlockingEventsManager>();
             
-            this._blockingEventsManager.OnMenuRetainable.IsRetainedRx.Subscribe(onMenu => {
+            this._blockingEventsManager.OnMenuRetainable.IsRetainedAsObservable().Subscribe(onMenu => {
                 if (!onMenu) {
                     SetCursorState(false);
                     return;

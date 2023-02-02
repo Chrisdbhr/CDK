@@ -1,7 +1,9 @@
+using System;
 using System.Collections.Generic;
 using UniRx;
 using UniRx.Triggers;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace CDK {
 	public class CRetainable {
@@ -9,7 +11,6 @@ namespace CDK {
 		#region <<---------- Properties and Fields ---------->>
         
         public bool IsRetained => this._retainedObjectsRx.Count > 0;
-		public ReadOnlyReactiveProperty<bool> IsRetainedRx => this._isRetainedRx.ToReadOnlyReactiveProperty();
 		private ReactiveProperty<bool> _isRetainedRx;
 
         public IReadOnlyCollection<object> RetainedObjectsCollection => _retainedObjectsRx;
@@ -73,5 +74,16 @@ namespace CDK {
         
         #endregion <<---------- General ---------->>
 
-	}
+
+
+
+        #region <<---------- Observables ---------->>
+
+        public IObservable<bool> IsRetainedAsObservable() {
+            return this._isRetainedRx.DistinctUntilChanged().AsObservable();
+        }
+
+        #endregion <<---------- Observables ---------->>
+
+    }
 }

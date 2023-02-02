@@ -20,7 +20,7 @@ namespace CDK {
 			
 			this._loadingUIRetainable = new CRetainable();
 
-			this._loadingUIRetainable.IsRetainedRx.Subscribe(retained => {
+			this._loadingUIRetainable.IsRetainedAsObservable().Subscribe(retained => {
 				if (retained) this._loadingCanvas.ShowLoadingUI();
 				else this._loadingCanvas.HideLoadingUI();
 			})

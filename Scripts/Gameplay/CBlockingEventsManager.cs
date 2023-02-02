@@ -44,21 +44,21 @@ namespace CDK {
 
 			// on menu
 			this.OnMenuRetainable = new CRetainable();
-			this.OnMenuRetainable.IsRetainedRx.Subscribe(onMenu => {
+			this.OnMenuRetainable.IsRetainedAsObservable().Subscribe(onMenu => {
 				Debug.Log($"<color={"#4fafb6"}>{nameof(onMenu)}: {onMenu}</color>");
 			})
             .AddTo(this._disposables);
 			
 			// playing cutscene
 			this.PlayingCutsceneRetainable = new CRetainable();
-			this.PlayingCutsceneRetainable.IsRetainedRx.Subscribe(isPlayingCutscene => {
+			this.PlayingCutsceneRetainable.IsRetainedAsObservable().Subscribe(isPlayingCutscene => {
 				Debug.Log($"<color={"#cc5636"}>{nameof(isPlayingCutscene)}: {isPlayingCutscene}</color>");
 			})
             .AddTo(this._disposables);
 
             // limit player actions
             this.LimitPlayerActionsRetainable = new CRetainable();
-            this.LimitPlayerActionsRetainable.IsRetainedRx.Subscribe(isLimitingPlayerActions => {
+            this.LimitPlayerActionsRetainable.IsRetainedAsObservable().Subscribe(isLimitingPlayerActions => {
                 //Debug.Log($"<color={"#bb91ff"}>{nameof(isLimitingPlayerActions)}: {isLimitingPlayerActions}</color>");
             })
             .AddTo(this._disposables);
@@ -66,9 +66,9 @@ namespace CDK {
 			// blocking Event Happening
             this._isAnyHappeningRx = new BoolReactiveProperty();
 			Observable.CombineLatest(
-			this.OnMenuRetainable.IsRetainedRx, 
-			this.PlayingCutsceneRetainable.IsRetainedRx,
-            this.LimitPlayerActionsRetainable.IsRetainedRx,
+			this.OnMenuRetainable.IsRetainedAsObservable(), 
+			this.PlayingCutsceneRetainable.IsRetainedAsObservable(),
+            this.LimitPlayerActionsRetainable.IsRetainedAsObservable(),
 			(isOnMenu, isPlayingCutscene, limitPlayerActions) => isOnMenu || isPlayingCutscene || limitPlayerActions)
 			.Subscribe(blockingEventHappening => {
 				this._isAnyHappeningRx.Value = blockingEventHappening;
