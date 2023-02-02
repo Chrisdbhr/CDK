@@ -364,10 +364,9 @@ namespace CDK {
 
 			int joystickControllersCount = rePlayer.controllers.joystickCount;
 			int customControllersCount = rePlayer.controllers.customControllerCount;
-			#if Rewired
-			rePlayer.controllers.maps.SetMapsEnabled(!onMenu, "Default");
+            
+            rePlayer.controllers.maps.SetMapsEnabled(!onMenu, "Default");
 			rePlayer.controllers.maps.SetMapsEnabled(onMenu, "UI"); 
-			#endif
 			
 			Debug.Log($"Player ID '{rePlayer.id}' controllers maps onMenu changed to '{onMenu}'\nCustom Controllers: {customControllersCount}, JoystickControllers: {joystickControllersCount}");
 		}
