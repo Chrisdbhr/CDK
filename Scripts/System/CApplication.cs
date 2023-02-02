@@ -29,7 +29,9 @@ namespace CDK {
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSplashScreen)]
         private static void InitializeBeforeSceneLoad() {
             Debug.Log($"[{nameof(CApplication)}] Initializing Application.");
-            
+
+            Screen.sleepTimeout = SleepTimeout.NeverSleep;
+
             CreatePersistentDataPath();
 
             // app quit
@@ -41,6 +43,8 @@ namespace CDK {
                 IsQuitting = true;
                 QuittingCancellationTokenSource?.Cancel();
             };
+            
+            CSteamManager.Initialize();
 
             InitializeInputManager();
 
@@ -66,7 +70,11 @@ namespace CDK {
 
             ApplicationInitialized?.Invoke();
 
-            Application.targetFrameRate = 60;
+            var isMobile = CPlayerPlatformTrigger.IsMobilePlatform();
+            if (isMobile) {
+                ScalableBufferManager.ResizeBuffers(0.7f, 0.7f);
+            }
+            Application.targetFrameRate = isMobile ? 30 : 60;
             Application.backgroundLoadingPriority = ThreadPriority.Low;
         }
 
