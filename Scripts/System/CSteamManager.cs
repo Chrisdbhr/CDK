@@ -37,6 +37,12 @@ namespace CDK {
         }
         private static Action _onSteamOverlayClosed;
 
+        public static void Initialize() {
+            #if !DISABLESTEAMWORKS
+            var s = SteamManager.Instance; // Initialize instance
+            #endif
+        }
+        
         #if STEAMWORKS_WIN
         protected override void Awake() {
             base.Awake();
