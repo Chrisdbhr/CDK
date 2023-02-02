@@ -18,10 +18,16 @@ namespace CDK {
 
 		#region <<---------- Properties and Fields ---------->>
 
-		[SerializeField] private LayerMask _triggerLayer;
+        enum CheckType {
+            bounds, distance
+        }
+        
+		[SerializeField] private LayerMask _triggerLayer = 1;
 		[SerializeField] private CSceneField _scene;
 		[SerializeField][TagSelector] private string _tag = "Player";
-		
+        [SerializeField] private CheckType _checkType = CheckType.distance;
+
+        private const string SceneNamePrefix = "A - ";
 
 		private bool AnyTriggerObjectInside {
 			get { return this._anyTriggerObjectInside; }
@@ -39,6 +45,7 @@ namespace CDK {
 
 		[NonSerialized] private bool _editorSceneIsDirty;
 		private int _updateFrameSkips = 5;
+        private Collider[] _overlapResults = new Collider[128]; 
 		
 		#endregion <<---------- Properties and Fields ---------->>
 
@@ -52,10 +59,11 @@ namespace CDK {
 			this._loadAsyncOperation = null;
 			this._unloadAsyncOperation = null;
 			#if UNITY_EDITOR
-			if (!Application.isPlaying) {
+			if (!Application.isPlaying && this._scene != null && this._scene.sceneAsset != null) {
 				EditorSceneManager.OpenScene(AssetDatabase.GetAssetOrScenePath(this._scene.sceneAsset), OpenSceneMode.AdditiveWithoutLoading);
 			}
 			#endif
+            this.CheckForObject();
 		}
 
 		private void OnEnable() {
@@ -96,13 +104,25 @@ namespace CDK {
 			if (this._editorSceneIsDirty) {
 				Gizmos.color = Color.yellow;
 			}
-			
-			if (this._anyTriggerObjectInside) {
-				Gizmos.DrawWireCube(tPos, t.localScale);
-			}
-			else {
-				Gizmos.DrawCube(tPos, t.localScale);
-			}
+
+            switch (this._checkType) {
+                case CheckType.bounds:
+                    if (this._anyTriggerObjectInside) {
+                        Gizmos.DrawWireCube(tPos, t.localScale);
+                    }
+                    else {
+                        Gizmos.DrawCube(tPos, t.localScale);
+                    }
+                    break;
+                case CheckType.distance:
+                    if (this._anyTriggerObjectInside) {
+                        Gizmos.DrawWireSphere(tPos, t.localScale.x);
+                    }
+                    else {
+                        Gizmos.DrawSphere(tPos, t.localScale.x);
+                    }
+                    break;
+            }
 			
 		}
 		#endif
@@ -118,23 +138,26 @@ namespace CDK {
 			var t = this.transform;
 				
 			#if UNITY_EDITOR
-			if (!Application.isPlaying && !PrefabStageUtility.GetCurrentPrefabStage()) {
-				var bounds = new Bounds(t.position, t.localScale);
+			if (!Application.isPlaying && !PrefabStageUtility.GetCurrentPrefabStage() && SceneView.lastActiveSceneView != null && SceneView.lastActiveSceneView.camera != null) {
 				var editorCameraTransform = SceneView.lastActiveSceneView.camera.transform;
+                var bounds = new Bounds(t.position, t.localScale);
 				this.AnyTriggerObjectInside = bounds.Contains(editorCameraTransform.position);
 				return;
 			}
 			#endif
 
-			var tRotation = t.rotation;
-			
-			var colliders = Physics.OverlapBox(
-			t.position, 
-			t.localScale*0.5f,
-			tRotation, 
-			this._triggerLayer);
-
-			this.AnyTriggerObjectInside = colliders.Any(c => c.CompareTag(_tag));
+            int overlapResultsSize = 0;
+            switch (this._checkType) {
+                case CheckType.bounds:
+                    var tRotation = t.rotation;
+                    overlapResultsSize = Physics.OverlapBoxNonAlloc(t.position, t.localScale*0.5f, this._overlapResults, tRotation, this._triggerLayer);                    
+                    break;
+                case CheckType.distance:
+                    overlapResultsSize = Physics.OverlapSphereNonAlloc(t.position, t.localScale.x, this._overlapResults, this._triggerLayer);
+                    break;
+            }
+            
+            this.AnyTriggerObjectInside = overlapResultsSize > 0 && this._overlapResults.Any(c => c != null && c.CompareTag(_tag));
 		}
 
 		void OnObjectInsideChanged(bool isInside) {
@@ -186,7 +209,44 @@ namespace CDK {
 				this._unloadAsyncOperation = null;
 			};
 		}
-		
+
+        #if UNITY_EDITOR
+        [EasyButtons.Button]
+        void CreateSceneAsset() {
+            var activeScene = EditorSceneManager.GetActiveScene();
+            var scenePrefix = SceneNamePrefix + activeScene.name;
+            var sceneName = this.gameObject.name;
+            if (!sceneName.StartsWith(scenePrefix)) {
+                this.gameObject.name = scenePrefix + " - " + this.gameObject.name;
+                EditorUtility.SetDirty(this.gameObject);
+            }
+            var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Additive);
+            try {
+                scene.name = sceneName;
+                var scenePath = this.gameObject.scene.path.Replace(this.gameObject.scene.name + ".unity", "");
+                var scenePathAndName = scenePath + sceneName + ".unity";
+                if (!EditorSceneManager.SaveScene(scene, scenePathAndName)) return;
+                this._scene.sceneAsset = AssetDatabase.LoadAssetAtPath<SceneAsset>(scenePathAndName);
+                if (this._scene.sceneAsset == null) return;
+                Selection.activeObject = this._scene.sceneAsset;
+                var list = EditorBuildSettings.scenes.ToList();
+                list.Add(new EditorBuildSettingsScene {
+                    path = scenePathAndName.Replace(".unity", ""), enabled = true, guid = AssetDatabase.GUIDFromAssetPath(scenePathAndName)
+                });
+                EditorUtility.SetDirty(this);
+                AssetDatabase.Refresh();
+            }
+            catch (Exception e) {
+                Debug.LogException(e);
+                EditorSceneManager.CloseScene(scene, true);
+            }
+            finally {
+                EditorSceneManager.SetActiveScene(activeScene);
+            }
+            
+        }
+        #endif
+        
 		#endregion <<---------- General ---------->>
 
 	}
