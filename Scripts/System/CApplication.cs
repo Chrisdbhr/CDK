@@ -64,10 +64,6 @@ namespace CDK {
             Debug.Log($"Resource Locator Id: '{(resourceLocator != null ? resourceLocator.LocatorId : "null")}'");
 			#endif
 
-			#if UnityLocalization
-            await LocalizationInitializeAsync();
-			#endif
-
             ApplicationInitialized?.Invoke();
 
             var isMobile = CPlayerPlatformTrigger.IsMobilePlatform();
@@ -159,56 +155,6 @@ namespace CDK {
 
         #endregion <<---------- Addressables ---------->>
 
-
-
-
-        #region <<---------- Language ---------->>
-
-		#if UnityLocalization
-
-        private static async Task LocalizationInitializeAsync() {
-            Debug.Log("Initializing Localization System.");
-            await LocalizationSettings.InitializationOperation.Task;
-            var prefs = CPlayerPrefs.Current;
-            if (prefs.Language.CIsNullOrEmpty()) AutoSetLanguage();
-            else if (!SetLocaleByString(prefs.Language)) {
-                prefs.Language = null;
-                CPlayerPrefs.SaveCurrent();
-            }
-        }
-
-
-        private static void AutoSetLanguage() {
-            var systemCulture = System.Globalization.CultureInfo.CurrentCulture;
-            foreach (var locale in LocalizationSettings.AvailableLocales.Locales) {
-                var currentCulture = locale.Identifier.CultureInfo;
-                if (Equals(currentCulture, systemCulture) ||
-                    Equals(currentCulture, systemCulture.Parent)) {
-                    Debug.Log($"Detected {systemCulture} and auto selected language {currentCulture}");
-                    LocalizationSettings.SelectedLocale = locale;
-                    return;
-                }
-            }
-
-            Debug.Log($"Could not auto select language for {systemCulture}");
-        }
-        
-
-        private static bool SetLocaleByString(string localeStr) {
-            var locale = LocalizationSettings.AvailableLocales.GetLocale(new LocaleIdentifier(localeStr));
-            if (locale == null) {
-                Debug.LogError($"Could not set locale from string '{localeStr}'");
-                return false;
-            }
-            Debug.Log($"Setting Locale to '{localeStr}'.");
-            LocalizationSettings.SelectedLocale = locale;
-            return true;
-        }
-        
-		#endif
-
-        #endregion <<---------- Language ---------->>
-        
         
         
         
