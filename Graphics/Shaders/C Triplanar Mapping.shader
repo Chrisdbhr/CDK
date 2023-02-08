@@ -8,16 +8,17 @@ Shader "C Triplanar Mapping"
 		_Specular("Specular", Float) = 0
 		_Gloss("Gloss", Float) = 0
 		_Tint("Tint", Color) = (1,1,1,1)
-		[Toggle]_UseStochastic("Use Stochastic", Float) = 0
+		[Toggle]_UseStochastic("Use Stochastic", Float) = 1
 		_Texture("Texture", 2D) = "gray" {}
 		[HideInInspector] __dirty( "", Int ) = 1
+        [Enum(UnityEngine.Rendering.CullMode)] _Cull ("Cull", Float) = 2
 	}
 
 	SubShader
 	{
 		Tags{ "RenderType" = "Opaque"  "Queue" = "Geometry+0" }
-		Cull Off
-		CGINCLUDE
+		Cull [_Cull]
+        CGINCLUDE
 		#include "UnityPBSLighting.cginc"
 		#include "Lighting.cginc"
 		#pragma target 3.0
@@ -250,11 +251,11 @@ Node;AmplifyShaderEditor.RangedFloatNode;12;-355.1411,282.319;Inherit;False;Prop
 Node;AmplifyShaderEditor.RangedFloatNode;11;-361.6411,186.1189;Inherit;False;Property;_Specular;Specular;1;0;Create;True;0;0;0;False;0;False;0;0;0;0;0;1;FLOAT;0
 Node;AmplifyShaderEditor.TriplanarNode;1;-1569.697,-298.4382;Inherit;True;Spherical;World;False;Top Texture;_TopTexture;white;0;None;Mid Texture 0;_MidTexture0;white;-1;None;Bot Texture 0;_BotTexture0;white;-1;None;Triplanar Sampler;Tangent;10;0;SAMPLER2D;;False;5;FLOAT;1;False;1;SAMPLER2D;;False;6;FLOAT;0;False;2;SAMPLER2D;;False;7;FLOAT;0;False;9;FLOAT3;0,0,0;False;8;FLOAT;1;False;3;FLOAT2;1,1;False;4;FLOAT;1;False;5;FLOAT4;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
 Node;AmplifyShaderEditor.FunctionNode;16;-1548.7,42.93499;Inherit;False;Procedural Sample;-1;;1;f5379ff72769e2b4495e5ce2f004d8d4;2,157,2,315,2;7;82;SAMPLER2D;0;False;158;SAMPLER2DARRAY;0;False;183;FLOAT;0;False;5;FLOAT2;0,0;False;80;FLOAT3;0,0,0;False;104;FLOAT2;1,1;False;74;SAMPLERSTATE;0;False;5;COLOR;0;FLOAT;32;FLOAT;33;FLOAT;34;FLOAT;35
-Node;AmplifyShaderEditor.Vector2Node;10;-1798.111,-96.04721;Inherit;False;Property;_Tilling;Tilling;0;0;Create;True;0;0;0;False;0;False;1,1;1,1;0;3;FLOAT2;0;FLOAT;1;FLOAT;2
-Node;AmplifyShaderEditor.TexturePropertyNode;21;-2225.788,-41.7213;Inherit;True;Property;_Texture;Texture;5;0;Create;True;0;0;0;False;0;False;None;58b6422504be0f3458860655315bd776;False;gray;Auto;Texture2D;-1;0;2;SAMPLER2D;0;SAMPLERSTATE;1
-Node;AmplifyShaderEditor.ToggleSwitchNode;31;-1100.086,-136.6216;Inherit;False;Property;_UseStochastic;Use Stochastic;4;0;Create;True;0;0;0;False;0;False;0;True;2;0;COLOR;0,0,0,0;False;1;COLOR;0,0,0,0;False;1;COLOR;0
+Node;AmplifyShaderEditor.Vector2Node;10;-1798.111,-96.04721;Inherit;False;Property;_Tilling;Tilling;0;0;Create;True;0;0;0;False;0;False;1,1;0.2,0.2;0;3;FLOAT2;0;FLOAT;1;FLOAT;2
+Node;AmplifyShaderEditor.TexturePropertyNode;21;-2225.788,-41.7213;Inherit;True;Property;_Texture;Texture;5;0;Create;True;0;0;0;False;0;False;None;6fc376689d040e04fa05d049bd102a48;False;gray;Auto;Texture2D;-1;0;2;SAMPLER2D;0;SAMPLERSTATE;1
+Node;AmplifyShaderEditor.ToggleSwitchNode;31;-1100.086,-136.6216;Inherit;False;Property;_UseStochastic;Use Stochastic;4;0;Create;True;0;0;0;False;0;False;1;True;2;0;COLOR;0,0,0,0;False;1;COLOR;0,0,0,0;False;1;COLOR;0
 Node;AmplifyShaderEditor.SimpleMultiplyOpNode;13;-405.7031,-123.4888;Inherit;False;2;2;0;COLOR;0,0,0,0;False;1;COLOR;0,0,0,0;False;1;COLOR;0
-Node;AmplifyShaderEditor.ColorNode;15;-707.2907,-37.49837;Inherit;False;Property;_Tint;Tint;3;0;Create;True;0;0;0;False;0;False;1,1,1,1;1,1,1,0;True;0;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
+Node;AmplifyShaderEditor.ColorNode;15;-707.2907,-37.49837;Inherit;False;Property;_Tint;Tint;3;0;Create;True;0;0;0;False;0;False;1,1,1,1;1,1,1,1;True;0;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
 WireConnection;8;0;13;0
 WireConnection;8;3;11;0
 WireConnection;8;4;12;0
@@ -267,4 +268,4 @@ WireConnection;31;1;16;0
 WireConnection;13;0;31;0
 WireConnection;13;1;15;0
 ASEEND*/
-//CHKSM=BB25F83F21E610BDE8B4A012DFF19A3B8BCAE6E6
+//CHKSM=6E7B5989AD3277BCD3E1B5D5657ACC45363A6435

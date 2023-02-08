@@ -1,6 +1,8 @@
 using System;
 using System.Threading.Tasks;
+using UniRx;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using Object = UnityEngine.Object;
 
 #if UnityAddressables
@@ -32,10 +34,12 @@ namespace CDK {
 
         #region <<---------- Load From Resources ---------->>
 
+        [Obsolete("Try to not use Resources!")]
         public static T LoadResource<T>(string address) where T : UnityEngine.Object {
             return Resources.Load<T>(address);
         }
 
+        [Obsolete("Try to not use Resources!")]
         public static T LoadResourceAndInstantiate<T>(string address, Transform parent = null) where T : UnityEngine.Component {
             if (!Application.isPlaying) {
                 Debug.LogError($"Will not load from resources because application is not playing.");
@@ -52,6 +56,40 @@ namespace CDK {
         }
 
         #endregion <<---------- Load From Resources ---------->>
+
+
+        
+
+        #region <<---------- Load From Holder Scene ---------->>
+
+        public static async Task<T> LoadFromHolderSceneAsync<T>(string sceneName, bool setObjectAsDontDestroy = true) where T : UnityEngine.Object {
+            var asyncOp = SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive);
+            await asyncOp.AsObservable();
+            var loadedScene = SceneManager.GetSceneByName(sceneName);
+            var rootGameObjects = loadedScene.GetRootGameObjects();
+            if (rootGameObjects == null || rootGameObjects.Length <= 0) {
+                Debug.LogError($"No objects inside scene: '{sceneName}'");
+                return default;
+            }
+            if (rootGameObjects.Length > 1) {
+                Debug.LogError($"A holder scene should not have more than 1 root object ({sceneName})");
+            }
+
+            var go = rootGameObjects[0];
+
+            if (!go.TryGetComponent<T>(out var comp)) {
+                Debug.LogError($"Could not find Object '{nameof(T)}' from scene '{sceneName}'");
+                return default;
+            }
+            
+            if (setObjectAsDontDestroy) {
+                Object.DontDestroyOnLoad(go);
+            }
+            
+            return comp;
+        } 
+
+        #endregion <<---------- Load From Holder Scene ---------->>
 
 
 

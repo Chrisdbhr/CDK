@@ -6,6 +6,7 @@ using Cinemachine;
 using UniRx;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Object = UnityEngine.Object;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -29,7 +30,10 @@ namespace CDK {
 		public CSceneManager() {
 			this._fader = CDependencyResolver.Get<CFader>();
 			this._blockingEventsManager = CDependencyResolver.Get<CBlockingEventsManager>();
+            this._loading = CDependencyResolver.Get<CLoadingCanvas>();
+          
             LoadedSceneThisFrame = false;
+            
             SceneManager.activeSceneChanged += ActiveSceneChanged;
             SceneManager.sceneLoaded += OnSceneLoaded;
             SceneManager.sceneUnloaded += OnSceneUnloaded;
@@ -57,7 +61,8 @@ namespace CDK {
         private IDisposable _boolSceneLoadedDisposable;
         
 		private readonly CFader _fader;
-		private readonly CBlockingEventsManager _blockingEventsManager;
+        private readonly CBlockingEventsManager _blockingEventsManager;
+        private readonly CLoadingCanvas _loading;
 
         public bool IsTeleporting => this._isTeleporting;
         private bool _isTeleporting;
@@ -65,6 +70,8 @@ namespace CDK {
         public const float ExtraSecondsAfterTeleport = 1f;
 
         public const string TemporarySceneName = "Temp Holder Scene";
+
+        private static GameObject _dontDestroyOnLoadHelperObject;
         
 		#endregion <<---------- Properties and Fields ---------->>
 
@@ -135,9 +142,12 @@ namespace CDK {
                     await SceneManager.UnloadSceneAsync(sceneToUnload, UnloadSceneOptions.None).AsObservable();
 			    }
 
-                // ONLY load scene after the previous one is fully unloaded because UnityBug.
+                // IMPORTANT: Only load scene after the previous one is fully unloaded because UnityBug.
+                
                 Debug.Log($"[Teleport] Loading scene '{sceneToLoadName}'");
-                await SceneManager.LoadSceneAsync(sceneToLoadName, LoadSceneMode.Additive).AsObservable();
+
+                // Load scene
+                await this._loading.MonitorAsyncOperation(SceneManager.LoadSceneAsync(sceneToLoadName, LoadSceneMode.Additive)).AsObservable();
 			    
 			    // teleport to target scene
 			    var sceneToTeleport = SceneManager.GetSceneByName(sceneToLoadName);
@@ -276,6 +286,7 @@ namespace CDK {
 
 		#region <<---------- Extensions ---------->>
 
+        [Obsolete("Not implemented", true)]
 		public static bool IsSceneValid(string sceneName) {
 			Debug.Log("TODO implement method to save scenes on build in a file and check using this file with list from BuildSettings.scenes");
 			return true;
@@ -287,6 +298,18 @@ namespace CDK {
 			return false;
 		}
 
+        public static Scene GetDontDestroyOnLoadScene() {
+            if (_dontDestroyOnLoadHelperObject != null) {
+                return _dontDestroyOnLoadHelperObject.scene;
+            }
+            if (CApplication.IsQuitting) {
+                return default;
+            }
+            _dontDestroyOnLoadHelperObject = (new GameObject("Dont Destroy On Load - Helper"));
+            Object.DontDestroyOnLoad(_dontDestroyOnLoadHelperObject);
+            return _dontDestroyOnLoadHelperObject.scene;
+        }
+        
 		#endregion <<---------- Extensions ---------->>
 
 

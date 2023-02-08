@@ -8,6 +8,7 @@ namespace CDK.UI {
 	public class CUISlider : CUIInteractable, IMoveHandler {
 
 		public Slider Slider;
+        [SerializeField, Min(0.001f)] private float _inputMovementMultiplier = 0.5f;
 		[SerializeField] private TextMeshProUGUI _valueTmp;
 		[SerializeField] private string _toStringParams = "0";
 
@@ -24,7 +25,7 @@ namespace CDK.UI {
 		}
 
 		public void OnMove(AxisEventData eventData) {
-			this.Slider.value += eventData.moveVector.x * Time.deltaTime;
+			this.Slider.value += (eventData.moveVector.x * this._inputMovementMultiplier) * Time.deltaTime;
 			this.Selected();
 		}
 	}

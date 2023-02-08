@@ -45,9 +45,7 @@ namespace CDK {
             };
             
             CSteamManager.Initialize();
-
-            InitializeInputManager();
-
+            
             InitializeDependencyContainerAndBinds();
 
             InitializeApplicationAsync().CAwait();
@@ -63,6 +61,8 @@ namespace CDK {
             var resourceLocator = await AddressablesInitializeAsync();
             Debug.Log($"Resource Locator Id: '{(resourceLocator != null ? resourceLocator.LocatorId : "null")}'");
 			#endif
+
+            await InitializeInputManagerAsync();
 
             ApplicationInitialized?.Invoke();
 
@@ -98,6 +98,7 @@ namespace CDK {
             CDependencyResolver.Bind<CBlockingEventsManager>(() => new CBlockingEventsManager());
             CDependencyResolver.Bind<CUINavigationManager>(() => new CUINavigationManager());
             CDependencyResolver.Bind<CGamePlayerManager>(() => new CGamePlayerManager());
+            CDependencyResolver.Bind<CLoadingCanvas>(() => CAssets.LoadResourceAndInstantiate<CLoadingCanvas>("System/Loading Canvas"));
 
             CDependencyResolver.Bind<CCursorManager>(() => new CCursorManager());
             CDependencyResolver.Get<CCursorManager>(); // force create instance
@@ -114,7 +115,7 @@ namespace CDK {
 
         #region <<---------- Input ---------->>
 
-        private static void InitializeInputManager() {
+        private static async Task InitializeInputManagerAsync() {
             #if Rewired
             var rInputManager = GameObject.FindObjectOfType<InputManager_Base>();
             if (rInputManager) {
@@ -122,7 +123,7 @@ namespace CDK {
                 return;
             }
 
-            var rw = CAssets.LoadResourceAndInstantiate<InputManager_Base>("Rewired Input Manager");
+            var rw = CAssets.LoadResourceAndInstantiate<InputManager_Base>("System/Input Manager");
             if (!rw) {
                 Debug.LogError("<b>Rewired Input Manager</b> could not be Instantiated.");
                 return;

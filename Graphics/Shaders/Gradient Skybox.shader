@@ -2,8 +2,8 @@ Shader "CDK/Skybox/Gradient Skybox"
 {
 Properties
 {
-_Color1 ("Color 1", Color) = (1, 1, 1, 0)
-_Color2 ("Color 2", Color) = (1, 1, 1, 0)
+_Color2 ("Color Top", Color) = (1, 1, 1, 0)
+_Color1 ("Color Bottom", Color) = (1, 1, 1, 0)
 _UpVector ("Up Vector", Vector) = (0, 1, 0, 0)
 _Intensity ("Intensity", Float) = 1.0
 _Exponent ("Exponent", Float) = 1.0
