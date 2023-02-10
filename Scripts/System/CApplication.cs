@@ -55,7 +55,8 @@ namespace CDK {
 
         private static async Task InitializeApplicationAsync() {
             Application.backgroundLoadingPriority = ThreadPriority.High; // high to load fast first assets.
-            Application.targetFrameRate = 15;
+            QualitySettings.vSyncCount = 0;
+            Application.targetFrameRate = 18;
 
             #if UnityAddressables
             var resourceLocator = await AddressablesInitializeAsync();
@@ -70,6 +71,7 @@ namespace CDK {
             if (isMobile) {
                 ScalableBufferManager.ResizeBuffers(0.7f, 0.7f);
             }
+            QualitySettings.vSyncCount = 1;
             Application.targetFrameRate = isMobile ? 30 : 60;
             Application.backgroundLoadingPriority = ThreadPriority.Low;
         }
