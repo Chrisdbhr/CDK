@@ -6,7 +6,6 @@ namespace CDK {
 		[SerializeField] private CMonobehaviourExecutionTime executionTime = CMonobehaviourExecutionTime.OnEnable;
 
 		protected virtual void Awake() {
-			if (!this.enabled) return;
 			if (this.executionTime != CMonobehaviourExecutionTime.Awake) return;
 			this.TriggerEvent();
 		}
