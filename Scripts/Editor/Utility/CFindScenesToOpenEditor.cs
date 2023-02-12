@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using CDK;
 using UnityEditor;
 using UnityEngine;
 using UnityEditor.SceneManagement;
@@ -52,9 +53,7 @@ public class CFindScenesToOpenEditor : EditorWindow {
         searchDirectory = Application.dataPath;
         isSearchingScenes = true;
         
-        var info = new DirectoryInfo(searchDirectory);
-        var filesInfos = info.GetFiles("*.unity", SearchOption.AllDirectories).OrderBy(p => p.LastAccessTimeUtc).ToArray();
-        assetsScenesPaths = filesInfos.Select(fileInfo => fileInfo.FullName).ToArray();
+        assetsScenesPaths = EditorBuildSettings.scenes.Select(b => b.path.Replace('\\', '/')).ToArray();
         isSearchingScenes = false;
         window.Show();
         window.Repaint();
@@ -116,7 +115,7 @@ public class CFindScenesToOpenEditor : EditorWindow {
         if (this.HasSceneOnAssetsFolder()) {
 
             EditorGUILayout.BeginHorizontal();
-            EditorGUILayout.LabelField($"{assetsScenesPaths.Length} scenes found in project", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField($"{assetsScenesPaths.Length} scenes included in Build Settings", EditorStyles.boldLabel);
             if(isSearchingScenes) EditorGUILayout.LabelField("Updating scenes search...");
             EditorGUILayout.EndHorizontal();
             
@@ -162,7 +161,7 @@ public class CFindScenesToOpenEditor : EditorWindow {
         }
         else {
             if (!isSearchingScenes) {
-                EditorGUILayout.LabelField("Can't find any scene on project!", redText);
+                EditorGUILayout.LabelField("Can't find any scene! Check if there is any included in BuildSettings", redText);
             }
             else {
                 EditorGUILayout.LabelField("Searching scenes...");
@@ -190,11 +189,17 @@ public class CFindScenesToOpenEditor : EditorWindow {
     }
 
     private static string TrimScenePath(string fullPath) {
-        return fullPath.Split('\\').Last().Replace(".unity", string.Empty).Trim();
+        return fullPath.Split('/').Last().Replace(".unity", string.Empty).Trim();
     }
 
     private static bool IsEquivalentStrings(string stringOne, string stringTwo ) {
         return stringOne.ToLower().Contains(stringTwo.ToLower().Trim());
+    }
+
+    private static string[] GetAllScenesInProject() {
+        var info = new DirectoryInfo(searchDirectory);
+        var filesInfos = info.GetFiles("*.unity", SearchOption.AllDirectories).OrderBy(p => p.LastAccessTimeUtc).ToArray();
+        return filesInfos.Select(fileInfo => fileInfo.FullName).ToArray();
     }
 
 }
