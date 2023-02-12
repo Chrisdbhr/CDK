@@ -37,12 +37,16 @@ namespace CDK {
         public Transform FootR;
 		public LayerMask FootCollisionLayers = 1;
 
-		private float _rayOffset = 0.50f;
+        [SerializeField, Min(0f)] private float _rayOffset = 0.50f;
         [SerializeField] private float _feetSizeForSphereCast = 0.05f;
+        [SerializeField] private bool _overrideFootstepData;
+        [SerializeField] private CFootstepInfo _infoOverride;
+        
 		private Vector3 _lastValidHitPoint;
 
 		private Dictionary<ParticleSystem, ParticleSystem> _spawnedParticleInstances = new Dictionary<ParticleSystem, ParticleSystem>();
-		
+
+        private CSoundManager _soundManager;
 		
 		public event Action<CFootstepInfo, FootstepFeet, Collider> OnFootstep {
 			add {
@@ -61,8 +65,12 @@ namespace CDK {
 		
 		
 		#region <<---------- MonoBehaviour ---------->>
+        
+        private void Awake() {
+            this._soundManager = CDependencyResolver.Get<CSoundManager>();
+        }
 
-		private void OnEnable() {
+        private void OnEnable() {
 			this.DestroyAllParticleInstances();
 			SceneManager.activeSceneChanged += this.OnActiveSceneChanged;
 		}
@@ -141,8 +149,14 @@ namespace CDK {
 				yield break;
 			}
 
-            CFootstepInfo footstepInfo = this.GetFootstepInfoFromRaycastHit(raycastHit);
-            if(footstepInfo == null) yield break;
+            CFootstepInfo footstepInfo = null;
+            if (_overrideFootstepData) {
+                footstepInfo = _infoOverride;
+            }
+            else {
+                footstepInfo = this.GetFootstepInfoFromRaycastHit(raycastHit);
+                if(footstepInfo == null) yield break;
+            }
 
 			this._onFootstep?.Invoke(footstepInfo, feet, raycastHit.collider);
 
@@ -165,7 +179,8 @@ namespace CDK {
 			// play random audio
             if (footstepInfo.Audio.IsNull) yield break;
 
-			FMODUnity.RuntimeManager.PlayOneShot(footstepInfo.Audio, raycastHit.point);
+            this._soundManager.StartAndPlay(footstepInfo.Audio, rayOriginTransform);
+            
 			#endif
 		}
 
@@ -184,8 +199,8 @@ namespace CDK {
             }
             return null;
         }
-		
-		#endregion <<---------- General ---------->>
+
+        #endregion <<---------- General ---------->>
 
 
 		
