@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -82,7 +83,7 @@ namespace CDK {
 		private int _currentGameFrame;
 
 		private float _currentDistanceFromTarget = 10.0f;
-		private float _distanceToConsiderCloseForCharacter = 0.75f;
+		private float _distanceToConsiderCloseForCharacter = 0.50f;
         private float _clampMaxDistanceSpeed = 3f;
 		
         private ReactiveProperty<bool> _isCloseToPlayerRx = new ReactiveProperty<bool>(false);
@@ -107,6 +108,8 @@ namespace CDK {
 
         [SerializeField] private bool _resetBrainOnEnable;
         [SerializeField] private bool _recenterEnable;
+
+        private Tween _tweenCameraXOffset;
         
 		#endregion <<---------- Properties and Fields ---------->>
 
@@ -181,6 +184,10 @@ namespace CDK {
 			#endif
             SceneManager.activeSceneChanged -= ActiveSceneChanged;
 		}
+
+        protected virtual void OnDestroy() {
+            this._tweenCameraXOffset?.Kill();
+        }
 
 		#if UNITY_EDITOR
         protected virtual void OnDrawGizmos() {
@@ -389,6 +396,18 @@ namespace CDK {
                     freeLookCamera.m_YAxisRecentering.m_enabled = false;
                     break;
                 case CinemachineVirtualCamera cVirtual:
+                    var ft = cVirtual.GetCinemachineComponent<CinemachineFramingTransposer>();
+                    if (ft != null && ft.m_ScreenX != 0.5f) {
+                        if (this._tweenCameraXOffset != null && this._tweenCameraXOffset.IsPlaying()) break;
+                        this._tweenCameraXOffset?.Kill();
+                        this._tweenCameraXOffset = DOVirtual.Float(ft.m_ScreenX, (ft.m_ScreenX - 1f).CAbs(), 0.25f, newValue => {
+                            if (ft == null) return;
+                            ft.m_ScreenX = newValue;
+                        })
+                        .SetAutoKill(true).Play();
+                        break;
+                    }
+
                     var pov = cVirtual.GetCinemachineComponent<CinemachinePOV>();
                     if (pov) {
                         if (resetInOneFrame) {
