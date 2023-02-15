@@ -139,18 +139,15 @@ public class CFindScenesToOpenEditor : EditorWindow {
                 
                     EditorGUILayout.BeginHorizontal();
 
-                    if (GUILayout.Button("Open", EditorStyles.miniButton, GUILayout.Width(44))) {
-                        EditorSceneManager.OpenScene(this._filteredScenes[i], OpenSceneMode.Single);
-                    }
+                    bool isSelected = (this.CurrentIndex == i);
                     if (GUILayout.Button("Additive", EditorStyles.miniButton, GUILayout.Width(60))) {
                         EditorSceneManager.OpenScene(this._filteredScenes[i], OpenSceneMode.Additive);
                     }
 
-                    if (this.CurrentIndex == i) {
-                        EditorGUILayout.LabelField(TrimScenePath(this._filteredScenes[i]), EditorStyles.boldLabel);
-                    }
-                    else {
-                        EditorGUILayout.LabelField(TrimScenePath(this._filteredScenes[i]));
+                    string buttonLabel = TrimScenePath(this._filteredScenes[i]);
+
+                    if (GUILayout.Button((isSelected ? ("> " + buttonLabel + " <") : buttonLabel), EditorStyles.miniButton)) {
+                        EditorSceneManager.OpenScene(this._filteredScenes[i], OpenSceneMode.Single);
                     }
 
                     EditorGUILayout.EndHorizontal();
