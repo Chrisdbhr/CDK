@@ -19,6 +19,7 @@ namespace CDK {
 		[SerializeField] private Vector3 _angleRange = Vector3.one * 30;
         [NonSerialized] private GameObject[] _childObjs;
         [SerializeField] private LayerMask _checkLayers = -1;
+        [SerializeField, TagSelector] private string[] _ignoreTag = new []{ "NoCameraCollision" };
 
 		#endregion <<---------- Properties and Fields ---------->>
 
@@ -132,7 +133,11 @@ namespace CDK {
                             otherCol.transform.rotation,
                             out _, out _)
                         ) {
-                        needToRecalculate = true;
+                        foreach (var tagToIgnore in _ignoreTag) {
+                            if (!otherCol.CompareTag(tagToIgnore)) {
+                                needToRecalculate = true;
+                            }
+                        }
                     }
                     
                     if (startedNonConvexMesh != null) {
@@ -161,14 +166,14 @@ namespace CDK {
 			if(GUILayout.Button(nameof(CTransformExtensions.DeleteAllChildren))) {
 				myScript.transform.DeleteAllChildren();
 			}
+            if(GUILayout.Button(nameof(CChildrenPositionAndRotationRandomizer.RandomizeScalesEditor))) {
+                myScript.RandomizeScalesEditor();
+            }
+            if(GUILayout.Button(nameof(CChildrenPositionAndRotationRandomizer.RandomizeRotationsEditor))) {
+                myScript.RandomizeRotationsEditor();
+            }
 			if(GUILayout.Button(nameof(CChildrenPositionAndRotationRandomizer.RandomizePositionsEditor))) {
 				myScript.RandomizePositionsEditor();
-			}
-			if(GUILayout.Button(nameof(CChildrenPositionAndRotationRandomizer.RandomizeRotationsEditor))) {
-				myScript.RandomizeRotationsEditor();
-			}
-			if(GUILayout.Button(nameof(CChildrenPositionAndRotationRandomizer.RandomizeScalesEditor))) {
-				myScript.RandomizeScalesEditor();
 			}
             if(GUILayout.Button(nameof(CChildrenPositionAndRotationRandomizer.RandomizeAll))) {
                 myScript.RandomizeAll();
