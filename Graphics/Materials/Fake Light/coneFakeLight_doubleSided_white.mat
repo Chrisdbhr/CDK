@@ -8,18 +8,21 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: coneFakeLight_doubleSided_white
-  m_Shader: {fileID: -6465566751694194690, guid: 40e0785c6665d3345a00157a833b9c94,
-    type: 3}
-  m_ValidKeywords: []
+  m_Shader: {fileID: 211, guid: 0000000000000000f000000000000000, type: 0}
+  m_ValidKeywords:
+  - _ALPHABLEND_ON
+  - _FADING_ON
   m_InvalidKeywords: []
   m_LightmapFlags: 0
   m_EnableInstancingVariants: 1
   m_DoubleSidedGI: 1
-  m_CustomRenderQueue: -1
-  stringTagMap: {}
+  m_CustomRenderQueue: 3000
+  stringTagMap:
+    RenderType: Transparent
   disabledShaderPasses:
   - DepthOnly
   - SHADOWCASTER
+  - GRABPASS
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
@@ -161,10 +164,10 @@ Material:
     - _BlendOp: 0
     - _BumpScale: 1
     - _CameraFadingEnabled: 1
-    - _CameraFarFadeDistance: 2
+    - _CameraFarFadeDistance: 5
     - _CameraNearFadeDistance: 0.1
     - _ColorMask: 15
-    - _ColorMode: 1
+    - _ColorMode: 0
     - _Compa: 4
     - _Cull: 0
     - _CustomLightDirectionFollowObjectRotation: 0
@@ -193,6 +196,7 @@ Material:
     - _GlossinessSource: 0
     - _GlossyReflections: 1
     - _HighlightColorPower: 1
+    - _InvFade: 1
     - _L_F_CLD: 0
     - _L_F_FR: 0
     - _L_F_GLO: 0
@@ -256,7 +260,7 @@ Material:
     - _SmoothnessSource: 0
     - _SmoothnessTextureChannel: 0
     - _SoftParticlesEnabled: 1
-    - _SoftParticlesFarFadeDistance: 1
+    - _SoftParticlesFarFadeDistance: 7
     - _SoftParticlesNearFadeDistance: 0
     - _SpecSource: 0
     - _Specular: 0
@@ -287,7 +291,7 @@ Material:
     m_Colors:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 0.015686275}
     - _BaseColorAddSubDiff: {r: 1, g: 0, b: 0, a: 0}
-    - _CameraFadeParams: {r: 0.1, g: 0.5263158, b: 0, a: 0}
+    - _CameraFadeParams: {r: 0.1, g: 0.20408164, b: 0, a: 0}
     - _Color: {r: 1, g: 1, b: 1, a: 0.011764706}
     - _Color0: {r: 0, g: 0, b: 0, a: 0}
     - _ColorAddSubDiff: {r: 1, g: 0, b: 0, a: 0}
@@ -301,10 +305,11 @@ Material:
     - _SelfLitColor: {r: 1, g: 1, b: 1, a: 1}
     - _SelfShadowColor: {r: 1, g: 1, b: 1, a: 1}
     - _ShadowTColor: {r: 1, g: 1, b: 1, a: 1}
-    - _SoftParticleFadeParams: {r: 0, g: 1, b: 0, a: 0}
+    - _SoftParticleFadeParams: {r: 0, g: 0.14285715, b: 0, a: 0}
     - _SpecColor: {r: 0.5, g: 0.5, b: 0.5, a: 0.5}
     - _Specular: {r: 0, g: 0, b: 0, a: 0}
     - _Tint: {r: 0, g: 0, b: 0, a: 0}
+    - _TintColor: {r: 0.5, g: 0.5, b: 0.5, a: 0.5}
     - _XYZPosition: {r: 0, g: 0, b: 0, a: 0}
   m_BuildTextureStacks: []
 --- !u!114 &5108323769884632575
