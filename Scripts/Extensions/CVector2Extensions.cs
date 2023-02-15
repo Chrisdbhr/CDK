@@ -16,5 +16,11 @@ namespace CDK {
             return a.x.CImprecise() == b.x.CImprecise()
             && a.y.CImprecise() == b.y.CImprecise();
         }
+        
+        public static Vector2 CCastValuesToInt(this Vector2 a) {
+            a.x = (int)a.x;
+            a.y = (int)a.y;
+            return a;
+        }
 	}
 }

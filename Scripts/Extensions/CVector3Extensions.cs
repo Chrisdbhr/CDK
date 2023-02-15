@@ -37,5 +37,19 @@ namespace CDK {
             && a.z.CImprecise() == b.z.CImprecise();
         }
 
+        public static Vector3 CCastValuesToInt(this Vector3 v) {
+            v.x = (int)v.x;
+            v.y = (int)v.y;
+            v.z = (int)v.z;
+            return v;
+        }
+        
+        public static Vector3 CAbs(this Vector3 v) {
+            v.x = Mathf.Abs(v.x);
+            v.y = Mathf.Abs(v.y);
+            v.z = Mathf.Abs(v.z);
+            return v;
+        }
+
     }
 }
