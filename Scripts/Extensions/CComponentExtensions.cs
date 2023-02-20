@@ -12,9 +12,9 @@ namespace CDK {
 
         }
      
-        public static T CGetComponentInChildrenFromRoot<T>(this Component go, bool includeInactive = false) {
-            if (go == null) return default;
-            var root = go.transform.root;
+        public static T CGetComponentInChildrenFromRoot<T>(this Component comp, bool includeInactive = false) {
+            if (comp == null) return default;
+            var root = comp.transform.root;
             return root.GetComponentInChildren<T>(includeInactive);
         }
         

@@ -28,5 +28,11 @@ namespace CDK {
             return go.GetComponentInChildren<T>(includeInactive);
         }
         
+        public static T CGetComponentInChildrenFromRoot<T>(this GameObject go, bool includeInactive = false) {
+            if (go == null) return default;
+            var root = go.transform.root;
+            return root.GetComponentInChildren<T>(includeInactive);
+        }
+        
     }
 }
