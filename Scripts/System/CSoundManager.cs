@@ -278,9 +278,9 @@ namespace CDK {
             var distance = Vector3.Distance(point, MainListener.transform.position);
             var factor = (float)(SoundSpeedInKm * 0.000001d);
 
-            var delaySeconds = distance * factor;
+            var delaySeconds = (distance * factor).CImprecise();
 
-            if (delaySeconds.CImprecise() <= 0f) {
+            if (delaySeconds <= 0f) {
                 this.StartEventInstance(eventInstance);
                 yield break;
             }
