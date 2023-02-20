@@ -30,8 +30,20 @@ MonoBehaviour:
   - {fileID: 11400000, guid: c98b7bb9046f42445aed9956eb65f4fc, type: 2}
   - {fileID: 11400000, guid: 86f483d854cfd434787b9e1a79dd3507, type: 2}
   - {fileID: 11400000, guid: 1283da52ee120fc46938a3a9125160c0, type: 2}
-  m_Extensions: []
+  m_Extensions:
+  - rid: 204994346449371158
   m_Group: C UI Texts
   references:
     version: 2
-    RefIds: []
+    RefIds:
+    - rid: 204994346449371158
+      type: {class: GoogleSheetsExtension, ns: UnityEditor.Localization.Plugins.Google,
+        asm: Unity.Localization.Editor}
+      data:
+        m_Collection: {fileID: 11400000}
+        m_SheetsServiceProvider: {fileID: 11400000, guid: bf673ddf7ffa8ed469a60cd13bb9b735,
+          type: 2}
+        m_SpreadsheetId: 
+        m_SheetId: 0
+        m_Columns: []
+        m_RemoveMissingPulledKeys: 1
