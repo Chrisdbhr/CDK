@@ -50,6 +50,14 @@ namespace CDK {
             v.z = Mathf.Abs(v.z);
             return v;
         }
+        
+        public static bool CIsZero(this Vector3 v) {
+            return v.x == 0f && v.y == 0f && v.z == 0f;
+        }
+        
+        public static bool CIsOne(this Vector3 v) {
+            return v.x == 1f && v.y == 1 && v.z == 1f;
+        }
 
     }
 }

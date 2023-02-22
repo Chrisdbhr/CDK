@@ -22,5 +22,14 @@ namespace CDK {
             a.y = (int)a.y;
             return a;
         }
+        
+        public static bool CIsZero(this Vector2 v) {
+            return v.x == 0f && v.y == 0f;
+        }
+        
+        public static bool CIsOne(this Vector2 v) {
+            return v.x == 1f && v.y == 1f;
+        }
+
 	}
 }

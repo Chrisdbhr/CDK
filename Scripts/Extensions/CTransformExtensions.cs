@@ -7,7 +7,7 @@ using UnityEditor;
 namespace CDK {
 	public static class CTransformExtensions {
 
-        public static void RotateTowardsDirection(this Transform t, Vector3 dir, float maxDegreesDelta, float timeScale = 1f) {
+        public static void CRotateTowardsDirection(this Transform t, Vector3 dir, float maxDegreesDelta, float timeScale = 1f) {
             if (timeScale == 0f) return;
             dir.y = 0f;
             if (dir == Vector3.zero) return;
@@ -20,7 +20,7 @@ namespace CDK {
             );
         }
         
-		public static void DeleteAllChildren(this Transform parentGameObject) {
+		public static void CDeleteAllChildren(this Transform parentGameObject) {
 			var allChild = parentGameObject.GetComponentsInChildren<Transform>();
             #if UNITY_EDITOR
             Undo.RecordObjects(allChild, parentGameObject.name + "_child");
@@ -31,7 +31,7 @@ namespace CDK {
 			}
 		}
 
-        public static Transform GetParentOrSelf(this Transform t) {
+        public static Transform CGetParentOrSelf(this Transform t) {
             var target = t.parent;
             return target != null ? target : t;
         }
@@ -42,5 +42,10 @@ namespace CDK {
             t.rotation = Quaternion.FromToRotation(t.up, hit.normal);
         }
 
-	}
+        public static void CAssertIfScaleIsNotOne(this Transform t) {
+            if (t.localScale.CIsOne()) return;
+            Debug.LogError($"Transform '{t.name}' is not one!");
+        }
+        
+    }
 }
