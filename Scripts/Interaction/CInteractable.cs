@@ -1,7 +1,7 @@
 using CDK.UI;
 using UnityEngine;
 
-#if DOTween
+#if DOTWEEN
 using DG.Tweening;
 #endif
 
@@ -15,7 +15,7 @@ namespace CDK.Interaction {
 		[SerializeField] private CUnityEventTransform InteractEvent;
         protected CBlockingEventsManager _blockingEventsManager;
         protected CUINavigationManager _navigationManager;
-		#if DOTween
+		#if DOTWEEN
         private Tween _rotateTween;
 		#endif
 
@@ -36,7 +36,7 @@ namespace CDK.Interaction {
 		}
 
         protected virtual void OnDisable() {
-      		#if DOTween
+      		#if DOTWEEN
             this._rotateTween?.Kill(false);
      		#endif
         }
@@ -73,7 +73,7 @@ namespace CDK.Interaction {
         #region <<---------- General ---------->>
 
         protected void RotateTowardsInteraction(Transform t) {
-            #if DOTween
+            #if DOTWEEN
             this._rotateTween = t.DOLookAt(this.transform.position, 0.5f, AxisConstraint.Y);
             this._rotateTween.Play();
             #else

@@ -11,7 +11,7 @@ using UnityEngine.Rendering;
 using Cinemachine;
 #endif
 
-#if DOTween
+#if DOTWEEN
 using DG.Tweening;
 #endif
 
@@ -95,7 +95,7 @@ namespace CDK {
         protected Transform _transform;
 		protected CCharacter_Base _ownerCharacter;
 		
-		#if DOTween
+		#if DOTWEEN
 		private Tweener _tween;
 		#endif
 		
@@ -433,7 +433,7 @@ namespace CDK {
 		
 		#region <<---------- Camera Transition ---------->>
 
-		#if DOTween
+		#if DOTWEEN
 		
 		public void StartTransition(float duration, CameraTransitionType transitionType) {
 			this._tween?.Complete();
