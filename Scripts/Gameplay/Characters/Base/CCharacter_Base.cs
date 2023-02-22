@@ -57,6 +57,17 @@ namespace CDK {
         [Header("Sound")]
         [SerializeField] protected StudioEventEmitter _mounthVoiceEmitter;
 		#endif
+
+        public event Action OnTeleport {
+            add {
+                this._onTeleport -= value;
+                this._onTeleport += value;
+            }
+            remove {
+                this._onTeleport -= value;
+            }
+        }
+        private Action _onTeleport;
         
         private CompositeDisposable _disposables;
         
@@ -113,7 +124,7 @@ namespace CDK {
 
         
 		#region <<---------- Events ---------->>
-
+        
         protected virtual void OnActiveSceneChanged(Scene oldScene, Scene newScene) {
             if (this == null) return;
             this.StopTalking();
@@ -151,6 +162,7 @@ namespace CDK {
                 transform.rotation = targetRotation;
 			}
 			this.Position = targetPos;
+            this._onTeleport?.Invoke();
 		}
 		
 		#endregion <<---------- Transform ---------->>
