@@ -8,7 +8,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Prototype Grid
-  m_Shader: {fileID: 4800000, guid: accb77fec74c7374f8dde8977ab9eca0, type: 3}
+  m_Shader: {fileID: 4800000, guid: 9630a95d775354042b835d9eeee659d9, type: 3}
   m_ValidKeywords: []
   m_InvalidKeywords: []
   m_LightmapFlags: 4
@@ -26,10 +26,6 @@ Material:
         m_Offset: {x: 0, y: 0}
     - _Albedo:
         m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _BaseMap:
-        m_Texture: {fileID: 2800000, guid: 44f75193ab488fd4891bb3529c2195a6, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _BumpMap:
@@ -110,11 +106,9 @@ Material:
     - _BumpScale: 1
     - _CoverageAmount: 0
     - _CoverageFalloff: 0.5
-    - _Cull: 2
     - _Cutoff: 0.5
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
-    - _Gloss: 0
     - _GlossMapScale: 1
     - _Glossiness: 0.5
     - _GlossyReflections: 1
@@ -131,7 +125,6 @@ Material:
     - _SrcBlend: 1
     - _Thickness: 0.5
     - _UVSec: 0
-    - _UseStochastic: 0
     - _WorldtoObjectSwitch: 0
     - _ZWrite: 1
     - __dirty: 0
@@ -139,8 +132,6 @@ Material:
     - Color_41ba0769a052457fb67c8f35f77a576e: {r: 1, g: 1, b: 1, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
-    - _Tilling: {r: 0.1, g: 0.1, b: 0, a: 0}
-    - _Tint: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []
 --- !u!114 &2787956325248898365
 MonoBehaviour:
