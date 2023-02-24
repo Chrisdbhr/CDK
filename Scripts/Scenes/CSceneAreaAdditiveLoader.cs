@@ -45,7 +45,7 @@ namespace CDK {
 
 		[NonSerialized] private bool _editorSceneIsDirty;
 		private int _updateFrameSkips = 5;
-        private Collider[] _overlapResults = new Collider[128]; 
+        private Collider[] _overlapResults; 
 		
 		#endregion <<---------- Properties and Fields ---------->>
 
@@ -150,14 +150,14 @@ namespace CDK {
             switch (this._checkType) {
                 case CheckType.bounds:
                     var tRotation = t.rotation;
-                    overlapResultsSize = Physics.OverlapBoxNonAlloc(t.position, t.localScale*0.5f, this._overlapResults, tRotation, this._triggerLayer);                    
+					this._overlapResults = Physics.OverlapBox(t.position, t.localScale*0.5f, tRotation, this._triggerLayer);                    
                     break;
                 case CheckType.distance:
-                    overlapResultsSize = Physics.OverlapSphereNonAlloc(t.position, t.localScale.x, this._overlapResults, this._triggerLayer);
+					this._overlapResults = Physics.OverlapSphere(t.position, t.localScale.x, this._triggerLayer);
                     break;
             }
             
-            this.AnyTriggerObjectInside = overlapResultsSize > 0 && this._overlapResults.Any(c => c != null && c.CompareTag(_tag));
+            this.AnyTriggerObjectInside = this._overlapResults.Length > 0 && this._overlapResults.Any(c => c != null && c.CompareTag(_tag));
 		}
 
 		void OnObjectInsideChanged(bool isInside) {
