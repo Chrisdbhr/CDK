@@ -2,12 +2,10 @@ using System.Text;
 using UnityEditor;
 using UnityEngine;
 
-namespace CDK
-{
-    public class RenameSelectedComponent {
+namespace CDK.Editor {
+    public class CRenameSelectedComponent {
         [MenuItem("CONTEXT/Component/Rename GameObject with this component name")]
-        private static void RenameGameObjectWithThisComponentName(MenuCommand data)
-        {
+        private static void RenameGameObjectWithThisComponentName(MenuCommand data) {
             Object context = data.context;
         
             if (!context) return;
@@ -24,8 +22,7 @@ namespace CDK
             comp.gameObject.name = newName;
         }
     
-        public static string AddSpacesToCamelCaseSentence(string text)
-        {
+        public static string AddSpacesToCamelCaseSentence(string text) {
             if (string.IsNullOrEmpty(text))
                 return "";
             StringBuilder newText = new StringBuilder(text.Length * 2);
@@ -40,7 +37,6 @@ namespace CDK
         }
 
         public static string RemovePrefixes(string text, string[] prefixesToRemove) {
-
             foreach (var prefix in prefixesToRemove) {
                 if (
                     text.StartsWith(prefix) && prefix.Length-1 >= 0 && char.IsUpper(text[prefix.Length-1]) 
@@ -48,7 +44,6 @@ namespace CDK
                     return text.Substring(prefix.Length);
                 }            
             }
-
             return text;
         }
     

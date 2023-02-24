@@ -5,26 +5,24 @@ using UnityEditor.SceneManagement;
 using UnityEditor;
 using System.Linq;
 
-namespace CDK
-{
-  [CustomEditor(typeof(MultiSceneSetup))]
-    public class ObjectBuilderEditor : UnityEditor.Editor
+namespace CDK.Editor {
+    [CustomEditor(typeof(CMultiSceneSetup))]
+    public class CCMultiSceneSetupEditor : UnityEditor.Editor
     {
         public override void OnInspectorGUI()
         {
             this.DrawDefaultInspector();
         
-            MultiSceneSetup myScript = (MultiSceneSetup)target;
+            var myScript = (CMultiSceneSetup)target;
             if(GUILayout.Button("Load"))
             {
-                MultiSceneSetup.RestoreSceneSetup();
+                CMultiSceneSetup.RestoreSceneSetup();
             }
         }
     }
     
     
-    public class MultiSceneSetup : ScriptableObject
-    {
+    public class CMultiSceneSetup : ScriptableObject {
         public SceneSetup[] Setups;
 
         [MenuItem("Tools/Multi Scene Setup/Create")]
@@ -55,7 +53,7 @@ namespace CDK
 
         static void SaveCurrentSceneSetup(string assetPath)
         {
-            var loader = ScriptableObject.CreateInstance<MultiSceneSetup>();
+            var loader = ScriptableObject.CreateInstance<CMultiSceneSetup>();
 
             loader.Setups = EditorSceneManager.GetSceneManagerSetup();
 
@@ -73,7 +71,7 @@ namespace CDK
             var assetPath = ConvertFullAbsolutePathToAssetPath(
                 TryGetSelectedFilePathInProjectsTab());
 
-            var loader = AssetDatabase.LoadAssetAtPath<MultiSceneSetup>(assetPath);
+            var loader = AssetDatabase.LoadAssetAtPath<CMultiSceneSetup>(assetPath);
 
             EditorSceneManager.RestoreSceneManagerSetup(loader.Setups);
 

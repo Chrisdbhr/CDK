@@ -6,7 +6,7 @@ namespace CDK {
 
 		[SerializeField] private Transform _lookAtTarget;
 		[SerializeField] private float _speed = 1f;
-		[SerializeField] [TagSelector] private string _targetTag = "Player";
+		[SerializeField] [CTagSelector] private string _targetTag = "Player";
 		
 		private Transform _transform;
 		

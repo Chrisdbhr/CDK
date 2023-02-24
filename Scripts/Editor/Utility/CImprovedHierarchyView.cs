@@ -5,7 +5,7 @@ using TMPro;
 using UnityEditor;
 using UnityEngine;
 
-namespace CDK{
+namespace CDK.Editor {
     
     [InitializeOnLoad]
     public class CImprovedHierarchyView  {

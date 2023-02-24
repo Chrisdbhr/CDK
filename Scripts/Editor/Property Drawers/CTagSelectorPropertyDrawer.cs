@@ -5,16 +5,16 @@ using UnityEditorInternal;
 
 //Original by DYLAN ENGELMAN http://jupiterlighthousestudio.com/custom-inspectors-unity/
 //Altered by Brecht Lecluyse http://www.brechtos.com/tagselectorattribute/
-namespace CDK {
+namespace CDK.Editor {
     
-    [CustomPropertyDrawer(typeof(TagSelectorAttribute))]
-    public class TagSelectorPropertyDrawer : PropertyDrawer {
+    [CustomPropertyDrawer(typeof(CTagSelectorAttribute))]
+    public class CTagSelectorPropertyDrawer : PropertyDrawer {
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label) {
             if (property.propertyType == SerializedPropertyType.String) {
                 EditorGUI.BeginProperty(position, label, property);
 
-                var attrib = this.attribute as TagSelectorAttribute;
+                var attrib = this.attribute as CTagSelectorAttribute;
 
                 if (attrib.UseDefaultTagFieldDrawer) {
                     property.stringValue = EditorGUI.TagField(position, label, property.stringValue);

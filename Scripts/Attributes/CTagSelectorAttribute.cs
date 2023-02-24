@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 
 namespace CDK {
-	public class TagSelectorAttribute : PropertyAttribute {
+	public class CTagSelectorAttribute : PropertyAttribute {
 		public bool UseDefaultTagFieldDrawer = false;
 	}
 }

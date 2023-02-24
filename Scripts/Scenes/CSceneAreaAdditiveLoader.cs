@@ -24,7 +24,7 @@ namespace CDK {
         
 		[SerializeField] private LayerMask _triggerLayer = 1;
 		[SerializeField] private CSceneField _scene;
-		[SerializeField][TagSelector] private string _tag = "Player";
+		[SerializeField][CTagSelector] private string _tag = "Player";
         [SerializeField] private CheckType _checkType = CheckType.distance;
 
         private const string SceneNamePrefix = "A - ";

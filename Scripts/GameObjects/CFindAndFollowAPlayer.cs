@@ -5,7 +5,7 @@ namespace CDK {
     /// Find and follow a Player by Tag.
     /// </summary>
     public class CFindAndFollowAPlayer : CTransformFollower {
-        [SerializeField] [TagSelector] private string _playerTag = "Player";
+        [SerializeField] [CTagSelector] private string _playerTag = "Player";
 
         protected override void Execute(float deltaTime) {
             if (this.TransformToFollow == null) {

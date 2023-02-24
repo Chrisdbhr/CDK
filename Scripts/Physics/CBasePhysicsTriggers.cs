@@ -4,7 +4,7 @@ using UnityEngine;
 namespace CDK {
 	public abstract class CBasePhysicsTriggers : MonoBehaviour {
 	
-		[SerializeField] [TagSelector] protected string _tag = "Player";
+		[SerializeField] [CTagSelector] protected string _tag = "Player";
 		
 		[SerializeField] protected CUnityEventTransform Enter;
 		[SerializeField] protected CUnityEventTransform Exit;
