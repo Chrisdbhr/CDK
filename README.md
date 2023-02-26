@@ -2,7 +2,7 @@
 
 CDK (Chris Development Kit) is a useful set of tools to speedup development of core Unity games mechanics. 
 
-It's being used in my main current game project "[resultarias](https://gamejolt.com/games/resultarias/472865)", a surrealist game about dream exploration.
+It's being used in my main current game project "[resultarias](https://chrisjogos.com/resultarias)", a surrealist game about dream exploration.
 Check more information about my other projects on [my website](https://chrisjogos.com)!
 
 ### What is this repository for? ###
