@@ -280,7 +280,7 @@ namespace CDK {
 
             var delaySeconds = (distance * factor).CImprecise();
 
-            if (delaySeconds <= 0f) {
+            if (delaySeconds < 0.01f) {
                 this.StartEventInstance(eventInstance);
                 yield break;
             }
