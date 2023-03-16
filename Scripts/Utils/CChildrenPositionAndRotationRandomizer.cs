@@ -53,14 +53,18 @@ namespace CDK {
 					Random.Range(-this._angleRange.y, this._angleRange.y),
 					Random.Range(-this._angleRange.z, this._angleRange.z)
 				);
+				#if UNITY_EDITOR
 				Undo.RecordObject(target, $"undo-rotation-{target.name}");
+				#endif
 				target.rotation = Quaternion.Euler(angle);
 			});
 		}
 		public void RandomizeScalesEditor() {
 			this.DoForEachGameObject(target => {
                 float scale = Random.Range(_scaleRange.x, _scaleRange.y);
+                #if UNITY_EDITOR
                 Undo.RecordObject(target, $"undo-scale-{target.name}");
+				#endif
 				target.localScale = scale * Vector3.one;
 			});
 		}
