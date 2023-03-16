@@ -13,7 +13,6 @@ Shader "CDK/C Triplanar Mapping"
 		_TexturePower("Texture Power", Range( 0.01 , 3)) = 1
 		[HideInInspector] __dirty( "", Int ) = 1
 	    [Enum(UnityEngine.Rendering.CullMode)] _Cull ("Cull", Float) = 2
-    }
 	}
 
 	SubShader
