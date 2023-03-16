@@ -110,6 +110,8 @@ namespace CDK {
         [SerializeField] private bool _recenterEnable;
 
         private Tween _tweenCameraXOffset;
+
+        protected CompositeDisposable _disposablesOnDisable = new CompositeDisposable();
         
 		#endregion <<---------- Properties and Fields ---------->>
 
@@ -145,15 +147,17 @@ namespace CDK {
                 this._playerRenderersRx.ObserveCountChanged(),
                 (isCloseToPlayer, cameraType, _) => (!isCloseToPlayer && cameraType != CameraType.FPS)
             )
-            .TakeUntilDisable(this)
-            .Subscribe(SetRenderersVisibility);
+            .Subscribe(SetRenderersVisibility)
+            .AddTo(this._disposablesOnDisable);
 
 			#if Cinemachine
 
             // camera sensitivity changed
-            Observable.EveryGameObjectUpdate().TakeUntilDisable(this).Subscribe(_ => {
+            Observable.EveryGameObjectUpdate()
+            .Subscribe(_ => {
                 SetCameraSensitivity(CPlayerPrefs.Current.CameraSensitivityMultiplier);
-            });
+            })
+            .AddTo(this._disposablesOnDisable);
 			
             // active camera changed
             this._cinemachineBrain.m_CameraActivatedEvent.AddListener(this.ActiveCameraChanged);
@@ -162,13 +166,16 @@ namespace CDK {
             SceneManager.activeSceneChanged += ActiveSceneChanged;
             
             // Next Frame
-            Observable.NextFrame(FrameCountType.EndOfFrame).Subscribe(_ => {
-                if (this == null) return;
-                if(this._recenterEnable) this.RecenterCameraFast();
+            Observable.NextFrame(FrameCountType.EndOfFrame)
+            .Subscribe(_ => {
+                if (this._recenterEnable) {
+                    this.RecenterCameraFast();
+                }
                 if (this._resetBrainOnEnable && this._cinemachineBrain != null) {
                     this._cinemachineBrain.enabled = true;
                 }
-            });
+            })
+            .AddTo(this._disposablesOnDisable);
         }
 
         protected virtual void LateUpdate() {
@@ -179,6 +186,7 @@ namespace CDK {
         }
 
         protected virtual void OnDisable() {
+            this._disposablesOnDisable?.Dispose();
 			#if Cinemachine
             this._cinemachineBrain.m_CameraActivatedEvent.RemoveListener(this.ActiveCameraChanged);
 			#endif

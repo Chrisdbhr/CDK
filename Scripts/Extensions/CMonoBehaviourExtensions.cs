@@ -14,6 +14,16 @@ namespace CDK {
 			if (coroutine == null) return;
 			monoBehaviour.StopCoroutine(coroutine);
 		}
-		
-	}
+        
+        public static void CResolveComponentFromChildrenIfNull<T>(this MonoBehaviour m, ref T c) where T : Component {
+            if (c != null) return;
+            c = m.GetComponentInChildren<T>();
+        }
+        
+        public static void CResolveComponentFromChildrenOrParentIfNull<T>(this MonoBehaviour m, ref T c) where T : Component {
+            if (c != null) return;
+            c = m.CGetComponentInChildrenOrInParent<T>();
+        }
+        
+    }
 }

@@ -47,5 +47,13 @@ namespace CDK {
             Debug.LogError($"Transform '{t.name}' is not one!");
         }
         
+        public static bool CAssertIfNotRoot(this Transform t, string message = null) {
+            var isRoot = t.parent == null;
+            if (!isRoot) {
+                Debug.LogAssertion($"Transform is not root ({message})");
+            }
+            return !isRoot;
+        }
+        
     }
 }

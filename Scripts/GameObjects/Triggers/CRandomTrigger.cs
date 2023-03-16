@@ -16,30 +16,45 @@ namespace CDK {
         [SerializeField] private UnityEvent _randomNegativeEvent;
 
         #endregion <<---------- Properties and Fields ---------->>
-        
-        
-		
-		
-		protected override void TriggerEvent() {
-            var chance = GetChance();
-            this._triggerValue = (chance <= this._chanceToTrigger);
 
-			if (this._triggerAffectsSelfActiveState) {
-				this.gameObject.SetActive(this._triggerValue);
-			}
+
+        
+
+        #region <<---------- CAutoTriggerCompBase ---------->>
+
+        protected override void TriggerEvent() {
+            this._triggerValue = GetRandomResult(GetChance());
+
+            if (this._triggerAffectsSelfActiveState) {
+                this.gameObject.SetActive(this._triggerValue);
+            }
 			
             this._randomResultEvent?.Invoke(this._triggerValue);
             this._randomResultInvertedEvent?.Invoke(!this._triggerValue);
-			if (this._triggerValue) {
-				this._randomPositiveEvent?.Invoke();
-			}
-			else {
-				this._randomNegativeEvent?.Invoke();
-			}
-		}
+            if (this._triggerValue) {
+                this._randomPositiveEvent?.Invoke();
+            }
+            else {
+                this._randomNegativeEvent?.Invoke();
+            }
+        }
+
+        #endregion <<---------- CAutoTriggerCompBase ---------->>
+
+        
+
+
+        #region <<---------- Random ---------->>
+
+        protected virtual bool GetRandomResult(float chance) {
+            return (chance <= this._chanceToTrigger);
+        }
 
         protected virtual float GetChance() {
             return 100f * Random.value;
         }
-	}
+        
+        #endregion <<---------- Random ---------->>
+        
+    }
 }

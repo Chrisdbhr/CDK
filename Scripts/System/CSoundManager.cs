@@ -14,6 +14,8 @@ namespace CDK {
 
         #region <<---------- Properties and Fields ---------->>
 
+        [SerializeField] private bool _debug;
+        
         #if FMOD 
         public static StudioListener MainListener;
         #endif
@@ -63,8 +65,8 @@ namespace CDK {
         public EventInstance StartAndPlay(EventReference soundRef, Transform connectedTransform) {
             try{
                 #if UNITY_EDITOR
-                if (this._playingSounds.ContainsKey(soundRef)) {
-                    Debug.LogWarning($"Replacing already created sound.");
+                if (this._debug && this._playingSounds.ContainsKey(soundRef)) {
+                    Debug.LogWarning($"Replacing already created sound '{soundRef}'");
                 }
                 #endif
                 
@@ -285,7 +287,7 @@ namespace CDK {
                 yield break;
             }
             
-            Debug.Log($"Distance from listener: '{distance}', delay will be '{delaySeconds}' seconds", this);
+            if(this._debug) Debug.Log($"Distance from listener: '{distance}', delay will be '{delaySeconds}' seconds", this);
             
             yield return new WaitForSeconds(delaySeconds);
 

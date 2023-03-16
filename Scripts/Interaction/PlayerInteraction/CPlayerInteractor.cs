@@ -20,6 +20,8 @@ namespace CDK.Interaction {
 		[NonSerialized] private bool _jumpNextFrame;
 		[NonSerialized] private CBlockingEventsManager _blockingEventsManager;
 
+        protected IDisposable _disposeOnDisable;
+
 		#endregion <<---------- Properties and Fields ---------->>
 
 
@@ -49,7 +51,9 @@ namespace CDK.Interaction {
 		private void OnEnable() {
 			this._currentInteractable?.Dispose();
 			this._currentInteractable = new ReactiveProperty<CInteractable>();
-			this._currentInteractable.TakeUntilDisable(this).Subscribe(newInteractable => {
+			
+            this._disposeOnDisable = this._currentInteractable
+            .Subscribe(newInteractable => {
 				if (newInteractable != null) {
 					newInteractable.OnBecameInteractionTarget(this._transform);
 				}
@@ -77,6 +81,10 @@ namespace CDK.Interaction {
 				this.TryToInteract();	
 			}
 		}
+
+        private void OnDisable() {
+            this._disposeOnDisable?.Dispose();
+        }
 
 		#if UNITY_EDITOR
 		private void OnDrawGizmosSelected() {

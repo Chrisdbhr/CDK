@@ -23,7 +23,7 @@ namespace CDK {
         [SerializeField] private CanvasGroup _loadingCanvas;
         [SerializeField] private CSceneField _nextScene;
         private Coroutine _initializationRoutine;
-
+        private IDisposable _disposeOnDisable;
 
 
 
@@ -35,12 +35,16 @@ namespace CDK {
         }
 
         private void OnEnable() {
-            Observable.Timer(TimeSpan.FromSeconds(1f)).TakeUntilDisable(this).Subscribe(_ => {
-                if(this._loadingCanvas) this._loadingCanvas.alpha = 1f;
+            this._disposeOnDisable = Observable.Timer(TimeSpan.FromSeconds(1f))
+            .Subscribe(_ => {
+                if (this._loadingCanvas) {
+                    this._loadingCanvas.alpha = 1f;
+                }
             });
         }
 
         private void OnDisable() {
+            this._disposeOnDisable?.Dispose();
             this.CStopCoroutine(this._initializationRoutine);
         }
         

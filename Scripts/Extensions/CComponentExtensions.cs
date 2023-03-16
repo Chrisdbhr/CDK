@@ -41,10 +41,10 @@ namespace CDK {
         public static T CAssertIfNull<T>(this T c, string message = null) where T : Component {
             bool isNull = (c == null);
             if (isNull) {
-                Debug.LogError($"Assert: Component is null ({message})");
+                Debug.LogAssertion($"Assert: Component is null ({message})");
             }
             return c;
         }
-        
+
     }
 }

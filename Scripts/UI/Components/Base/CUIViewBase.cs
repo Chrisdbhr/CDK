@@ -55,6 +55,7 @@ namespace CDK.UI {
 		protected CFader _fader;
 		protected CBlockingEventsManager _blockingEventsManager;
         protected CUINavigationManager _navigationManager;
+        protected CompositeDisposable _disposeOnDisable = new CompositeDisposable();
 
 		#endregion <<---------- Properties and Fields ---------->>
 
@@ -78,7 +79,8 @@ namespace CDK.UI {
 		protected virtual void OnEnable() {
             this.UpdateEventSystemAndCheckForObjectSelection(this._eventSystem.firstSelectedGameObject);
 
-            Observable.EveryLateUpdate().TakeUntilDisable(this).Subscribe(_ => {
+            Observable.EveryLateUpdate()
+            .Subscribe(_ => {
                 if (this == null) return;
                 if (this._eventSystem == null || (this._eventSystem.currentSelectedGameObject != null && this._eventSystem.currentSelectedGameObject.GetComponent<CUIInteractable>() != null)) return;
                 var toSelect = this.GetComponentInChildren<CUIInteractable>();
@@ -88,15 +90,20 @@ namespace CDK.UI {
                 }
                 Debug.Log($"Auto selecting item '{toSelect.name}' on menu '{this.name}'", toSelect);
                 this._eventSystem.SetSelectedGameObject(toSelect.gameObject);
-            });
+            })
+            .AddTo(this._disposeOnDisable);
 
-            if(this._buttonReturn != null) this._buttonReturn.Button.OnClickAsObservable().TakeUntilDisable(this).Subscribe(_ => {
-                this._navigationManager.CloseLastMenu();
-            });
+            if(this._buttonReturn != null){
+                this._buttonReturn.Button.OnClickAsObservable()
+                .Subscribe(_ => {
+                    this._navigationManager.CloseLastMenu();
+                })
+                .AddTo(this._disposeOnDisable);
+            }
         }
 
         protected virtual void OnDisable() {
-			
+			this._disposeOnDisable?.Dispose();
 		}
 
         protected virtual void OnDestroy() {

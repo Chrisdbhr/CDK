@@ -1,4 +1,5 @@
-﻿using UniRx;
+﻿using System;
+using UniRx;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -10,16 +11,22 @@ namespace CDK {
 		[SerializeField] private CUnityEventBool _isPlayingTriggerEvent;
 		[SerializeField] private CUnityEventBool _isNotPlayingTriggerEvent;
 		private CBlockingEventsManager _blockingEventsManager;
+        private IDisposable _disposeOnDisable;
 
 		private void Awake() {
 			this._blockingEventsManager = CDependencyResolver.Get<CBlockingEventsManager>();
 		}
 
 		private void OnEnable() {
-			this._blockingEventsManager.PlayingCutsceneRetainable.IsRetainedAsObservable().TakeUntilDisable(this).Subscribe(this.PlayingStateChanged);
+			this._disposeOnDisable = this._blockingEventsManager.PlayingCutsceneRetainable.IsRetainedAsObservable()
+            .Subscribe(this.PlayingStateChanged);
 		}
 
-		void PlayingStateChanged(bool isPlaying) {
+        private void OnDisable() {
+            this._disposeOnDisable?.Dispose();
+        }
+
+        void PlayingStateChanged(bool isPlaying) {
 			if(isPlaying) _isPlayingEvent?.Invoke();
 			else _isNotPlayingEvent?.Invoke();
 			

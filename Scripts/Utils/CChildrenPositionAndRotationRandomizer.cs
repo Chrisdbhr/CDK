@@ -37,11 +37,12 @@ namespace CDK {
 		
 		#endregion <<---------- MonoBehaviour ---------->>
 
-		#if UNITY_EDITOR
-		public void RandomizePositionsEditor() {
+		public void RandomizePositions() {
 			this.DoForEachGameObject(target => {
 				var pos = this.GetValidPosition(target, this._safeOverflowCount);
+				#if UNITY_EDITOR
 				Undo.RecordObject(target, $"undo-position-{target.name}");
+				#endif
 				target.position = pos;
 			});
 		}
@@ -67,11 +68,9 @@ namespace CDK {
         public void RandomizeAll() {
             this.RandomizeScalesEditor();
             this.RandomizeRotationsEditor();
-            this.RandomizePositionsEditor();
+            this.RandomizePositions();
         }
         
-		#endif
-
 		private void DoForEachGameObject(Action<Transform> actionOnTransform) {
 			#if UNITY_EDITOR
 			string progressBarTitle = "Randomizing Objects";
@@ -172,8 +171,8 @@ namespace CDK {
             if(GUILayout.Button(nameof(CChildrenPositionAndRotationRandomizer.RandomizeRotationsEditor))) {
                 myScript.RandomizeRotationsEditor();
             }
-			if(GUILayout.Button(nameof(CChildrenPositionAndRotationRandomizer.RandomizePositionsEditor))) {
-				myScript.RandomizePositionsEditor();
+			if(GUILayout.Button(nameof(CChildrenPositionAndRotationRandomizer.RandomizePositions))) {
+				myScript.RandomizePositions();
 			}
             if(GUILayout.Button(nameof(CChildrenPositionAndRotationRandomizer.RandomizeAll))) {
                 myScript.RandomizeAll();

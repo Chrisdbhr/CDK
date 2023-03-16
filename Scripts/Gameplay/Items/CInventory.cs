@@ -43,7 +43,7 @@ namespace CDK {
 		[NonSerialized] private ReactiveProperty<CWeaponData> _equippedWeaponRx;
 		[NonSerialized] private CWeaponScriptableObject[] _quickSlotWeapons = new CWeaponScriptableObject[4];
 
-		[NonSerialized] private CompositeDisposable _compositeDisposable;
+		[NonSerialized] protected CompositeDisposable _disposeOnDisable = new CompositeDisposable();
 		
 		
 		#endregion <<---------- Properties and Fields ---------->>
@@ -61,9 +61,6 @@ namespace CDK {
 		}
 
 		private void OnEnable() {
-			this._compositeDisposable?.Dispose();
-			this._compositeDisposable = new CompositeDisposable();
-
 			this._equippedWeaponRx.Value = this._firstEquipedWeapon;
 
 			this._equippedWeaponRx.Subscribe(newWeapon => {
@@ -90,12 +87,11 @@ namespace CDK {
 				else {
 					Debug.LogError($"New weapon is not a weapon of type {nameof(CWeaponScriptableObject)}");
 				}
-			}).AddTo(this._compositeDisposable);
+			}).AddTo(this._disposeOnDisable);
 		}
 
 		private void OnDisable() {
-			this._compositeDisposable?.Dispose();
-			this._compositeDisposable = null;
+			this._disposeOnDisable?.Dispose();
 		}
 
 		#endregion <<---------- MonoBehaviour ---------->>

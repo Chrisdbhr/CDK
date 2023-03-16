@@ -1,6 +1,9 @@
+using System;
+using System.Linq;
 using System.Text;
 using UnityEditor;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace CDK.Editor {
     public class CRenameSelectedComponent {
@@ -16,35 +19,39 @@ namespace CDK.Editor {
             var newName = comp.GetType().Name;
 
             newName = AddSpacesToCamelCaseSentence(newName);
-            newName = RemovePrefixes(newName, new[] { "C" });
+            newName = RemovePrefix(newName);
 
             Undo.RecordObject(comp.gameObject, "Rename");
             comp.gameObject.name = newName;
         }
     
         public static string AddSpacesToCamelCaseSentence(string text) {
-            if (string.IsNullOrEmpty(text))
-                return "";
-            StringBuilder newText = new StringBuilder(text.Length * 2);
-            newText.Append(text[0]);
-            for (int i = 1; i < text.Length; i++)
-            {
-                if (char.IsUpper(text[i]) && text[i - 1] != ' ' && char.IsLower(newText[newText.Length - 1]))
-                    newText.Append(' ');
-                newText.Append(text[i]);
+            if (text.CIsNullOrEmpty()) return text;
+            var newText = new StringBuilder(text);
+            try {
+                for (int i = 1; i < newText.Length; i++) {
+                    if (EditorUtility.DisplayCancelableProgressBar("Renaming", "", (float)i / (float)newText.Length)) {
+                        if (i == newText.Length - 1) break;
+                        if (char.IsLower(newText[i])) continue;
+                        newText.Insert(i - 1, ' ');
+                    }
+                }
+            }
+            catch (Exception e) {
+                Debug.LogException(e);
+            }
+            finally {
+                EditorUtility.ClearProgressBar();
             }
             return newText.ToString();
         }
 
-        public static string RemovePrefixes(string text, string[] prefixesToRemove) {
-            foreach (var prefix in prefixesToRemove) {
-                if (
-                    text.StartsWith(prefix) && prefix.Length-1 >= 0 && char.IsUpper(text[prefix.Length-1]) 
-                    && prefix.Length < text.Length && text[prefix.Length] == ' ') {
-                    return text.Substring(prefix.Length);
-                }            
-            }
-            return text;
+        public static string RemovePrefix(string text) {
+            if (text.CIsNullOrEmpty()) return text;
+            var splitted = text.Split(' ');
+            if (splitted.Length <= 1) return text;
+            if (splitted[0].Length > 1) return text;
+            return string.Join(' ', splitted.Skip(1));
         }
     
     }

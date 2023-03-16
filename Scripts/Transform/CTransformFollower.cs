@@ -13,14 +13,7 @@ namespace CDK {
 		[SerializeField] private CMonobehaviourExecutionLoop executionLoop = CMonobehaviourExecutionLoop.LateUpdate;
 		[Obsolete("OBSOLETE, use public property instead.")]
 		[SerializeField] private Transform _transformToFollow;
-		public Transform TransformToFollow {
-			get => this._transformToFollow;
-			set {
-				if (this._transformToFollow == value) return;
-				this._transformToFollow = value;
-				this.CheckIfWillMove();
-			}
-		}
+        public Transform TransformToFollow => this._transformToFollow;
 		[SerializeField] private Vector3 _followOffset = Vector3.zero;
 		[SerializeField] private FollowTypeEnum _followType;
 		[SerializeField] private float _followSpeed = 10f;
@@ -32,6 +25,17 @@ namespace CDK {
 		[SerializeField] private bool _ignoreZAxis;
        
         [SerializeField] private Vector3 _positionMultiplier = UnityEngine.Vector3.one;
+
+        public event Action<Transform> TransformToFollowChanged {
+            add {
+                this._transformToFollowChanged -= value;
+                this._transformToFollowChanged += value;
+            }
+            remove {
+                this._transformToFollowChanged -= value;
+            }
+        }
+        private Action<Transform> _transformToFollowChanged;
 
 		#endregion <<---------- Properties and Fields ---------->>
 
@@ -51,31 +55,31 @@ namespace CDK {
 
 		#region <<---------- MonoBehaviour ---------->>
 		
-		private void Awake() {
+		protected virtual void Awake() {
 			this._myTransform = this.transform;
 		}
 
-		private void OnEnable() {
+        protected virtual void OnEnable() {
 			this.CheckIfWillMove();
 		}
 
-		private void Update() {
+        protected virtual void Update() {
 			if (this.executionLoop != CMonobehaviourExecutionLoop.Update) return;
             Execute(this._ignoreTimeScale ? Time.unscaledDeltaTime : CTime.DeltaTimeScaled);
         }
 
-		private void FixedUpdate() {
+		protected virtual void FixedUpdate() {
 			if (this.executionLoop != CMonobehaviourExecutionLoop.FixedUpdate) return;
             Execute(this._ignoreTimeScale ? Time.fixedUnscaledDeltaTime : CTime.FixedDeltaTimeScaled);
 		}
 
-		private void LateUpdate() {
+        protected virtual void LateUpdate() {
 			if (this.executionLoop != CMonobehaviourExecutionLoop.LateUpdate) return;
             Execute(this._ignoreTimeScale ? Time.unscaledDeltaTime : CTime.DeltaTimeScaled);
 		}
 
 		#if UNITY_EDITOR
-		private void OnDrawGizmosSelected() {
+        protected virtual void OnDrawGizmosSelected() {
 			if (this._transformToFollow == null) {
 				Handles.Label(this.transform.position, $"Follow Target is null!");
 				return;
@@ -110,7 +114,9 @@ namespace CDK {
 			if (this._ignoreXAxis && this._ignoreYAxis && this._ignoreZAxis) return;
 			
 			var targetPos = Vector3.Scale(this._transformToFollow.position, this._positionMultiplier);
-            targetPos += this._followOffset;
+            if (!this._followOffset.CIsZero()) {
+                targetPos += this._transformToFollow.TransformVector(this._followOffset);
+            }
 			if (this._ignoreXAxis) targetPos.x = this.transform.position.x;
 			if (this._ignoreYAxis) targetPos.y = this.transform.position.y;
 			if (this._ignoreZAxis) targetPos.z = this.transform.position.z;
@@ -125,6 +131,13 @@ namespace CDK {
 			}
 
 		}
+
+        public void SetTransformToFollow(Transform t) {
+            if (this._transformToFollow == t) return;
+            this._transformToFollow = t;
+            this._transformToFollowChanged?.Invoke(t);
+            this.CheckIfWillMove();
+        }
 		
 		#endregion <<---------- General ---------->>
 		

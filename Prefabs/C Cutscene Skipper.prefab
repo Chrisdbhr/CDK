@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 1746275858539934040}
   - component: {fileID: 1746275858539934041}
   - component: {fileID: 1746275858539934054}
+  - component: {fileID: 7732337455356841933}
   m_Layer: 5
   m_Name: Text Hold to Skip
   m_TagString: Untagged
@@ -177,6 +178,41 @@ MonoBehaviour:
   references:
     version: 2
     RefIds: []
+--- !u!114 &7732337455356841933
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1746275858539934052}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa4b740a450672543946c1ac034978a6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_LocalizedAssetReference:
+    m_TableReference:
+      m_TableCollectionName: GUID:99e1b1c6512d6f044a1d8b8c19c9be0b
+    m_TableEntryReference:
+      m_KeyId: 12063064064
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+  m_UpdateAsset:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1746275858539934041}
+        m_TargetAssemblyTypeName: TMPro.TMP_Text, Unity.TextMeshPro
+        m_MethodName: set_font
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &1746275858868196660
 GameObject:
   m_ObjectHideFlags: 0

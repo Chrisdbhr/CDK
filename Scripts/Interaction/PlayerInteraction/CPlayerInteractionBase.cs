@@ -1,13 +1,17 @@
 using System;
+using UniRx;
 using UnityEngine;
 
 namespace CDK.Interaction {
 	[DisallowMultipleComponent]
 	public abstract class CPlayerInteractionBase : MonoBehaviour {
+       
+        #region <<---------- Properties and Fields ---------->>
+
         [SerializeField] protected bool _debug;
 
-		[SerializeField] protected LayerMask _interactionLayerMask = 1;
-		protected CBlockingEventsManager _blockingEventsManager;
+        [SerializeField] protected LayerMask _interactionLayerMask = 1;
+        protected CBlockingEventsManager _blockingEventsManager;
 
         protected ICInteractable TargetInteractable {
             get { return this._targetInteractable; }
@@ -31,12 +35,21 @@ namespace CDK.Interaction {
             }
         }
         private Action<ICInteractable> _interactTargetChanged;
+
+        protected CompositeDisposable _disposeOnDisable = new CompositeDisposable();
+        
+        #endregion <<---------- Properties and Fields ---------->>
+
         
 		protected virtual void Awake() {
 			this._blockingEventsManager = CDependencyResolver.Get<CBlockingEventsManager>();
 		}
 
-		public abstract void TryToInteract();
+        protected void OnDisable() {
+            this._disposeOnDisable?.Dispose();
+        }
+
+        public abstract void TryToInteract();
 		
 	}
 }
