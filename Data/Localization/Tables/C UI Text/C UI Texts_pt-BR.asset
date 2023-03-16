@@ -19,7 +19,7 @@ MonoBehaviour:
     m_Items: []
   m_TableData:
   - m_Id: 17956061184
-    m_Localized: Segure para pular
+    m_Localized: Mantenha pressionado para pular
     m_Metadata:
       m_Items: []
   references:
