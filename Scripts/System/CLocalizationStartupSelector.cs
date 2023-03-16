@@ -22,7 +22,7 @@ namespace CDK.Localization {
                 if (locale != null) return locale;
             }
 
-            #if !DISABLESTEAMWORKS
+            #if !DISABLESTEAMWORKS && STEAMWORKS_NET
             // From Steam
             try {
                 if (CSteamManager.Initialized) {
