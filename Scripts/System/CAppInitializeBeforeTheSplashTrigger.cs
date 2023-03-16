@@ -65,7 +65,9 @@ namespace CDK {
             #endif
             #if FMOD
             Debug.Log("Waiting for FMOD to Load Master Banks.");
-            while (!RuntimeManager.HaveMasterBanksLoaded) yield return null;
+            if (!RuntimeManager.HaveMasterBanksLoaded) {
+                RuntimeManager.LoadBank("MasterBank");
+            }
             Debug.Log("FMOD Master Banks are loaded.");
             #endif
 
