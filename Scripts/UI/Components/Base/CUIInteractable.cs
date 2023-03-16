@@ -1,4 +1,5 @@
 using System;
+using UniRx;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -12,20 +13,43 @@ using STOP_MODE = FMOD.Studio.STOP_MODE;
 namespace CDK.UI {
 	public class CUIInteractable : MonoBehaviour, ISelectHandler, ISubmitHandler, ICancelHandler,
 	                               IPointerEnterHandler, IPointerClickHandler, IDeselectHandler {
+       
+        #region <<---------- Properties and Fields ---------->>
 
-		[SerializeField] private bool _debug;
+        [SerializeField] private bool _debug;
         [SerializeField] private bool _playInteractionSound = true;
         
 		#if FMOD
-		private EventInstance _soundEventInstance;
+        private EventInstance _soundEventInstance;
 		#endif
         private CGameSettings _gameSettings;
         protected CUINavigationManager _navigationManager;
+       
+        protected readonly CompositeDisposable _disposeOnDisable = new CompositeDisposable();
+        protected readonly CompositeDisposable _disposeOnDestroy = new CompositeDisposable();
 
-		protected virtual void Awake() {
-			this._gameSettings = CDependencyResolver.Get<CGameSettings>();
+        #endregion <<---------- Properties and Fields ---------->>
+
+
+        
+        
+        #region <<---------- Mono Behaviour ---------->>
+
+        protected virtual void Awake() {
+            this._gameSettings = CDependencyResolver.Get<CGameSettings>();
             this._navigationManager = CDependencyResolver.Get<CUINavigationManager>();
         }
+
+        protected virtual void OnDisable() {
+            this._disposeOnDisable?.Dispose();
+        }
+
+        protected virtual void OnDestroy() {
+            this._disposeOnDestroy?.Dispose();
+        }
+
+        #endregion <<---------- Mono Behaviour ---------->>
+
 
 		#if FMOD
 		private void PlaySound(EventReference sound) {
@@ -47,7 +71,9 @@ namespace CDK.UI {
 		public virtual void Submited() {
 			if(this._debug) Debug.Log($"SUBMIT: CUIInteractable '{this.gameObject.name}'", this);
 			#if FMOD
-			this.PlaySound(this._gameSettings.SoundSubmit);
+            if (!(this is CUIButton b && !b.Button.interactable)) {
+                this.PlaySound(this._gameSettings.SoundSubmit);
+            }
 			#endif
 		}
 

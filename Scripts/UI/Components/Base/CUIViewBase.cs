@@ -56,6 +56,7 @@ namespace CDK.UI {
 		protected CBlockingEventsManager _blockingEventsManager;
         protected CUINavigationManager _navigationManager;
         protected CompositeDisposable _disposeOnDisable = new CompositeDisposable();
+        protected CompositeDisposable _disposeOnDestroy = new CompositeDisposable();
 
 		#endregion <<---------- Properties and Fields ---------->>
 
@@ -73,10 +74,6 @@ namespace CDK.UI {
         }
 
 		protected virtual void Start() {
-			
-		}
-		
-		protected virtual void OnEnable() {
             this.UpdateEventSystemAndCheckForObjectSelection(this._eventSystem.firstSelectedGameObject);
 
             Observable.EveryLateUpdate()
@@ -91,15 +88,19 @@ namespace CDK.UI {
                 Debug.Log($"Auto selecting item '{toSelect.name}' on menu '{this.name}'", toSelect);
                 this._eventSystem.SetSelectedGameObject(toSelect.gameObject);
             })
-            .AddTo(this._disposeOnDisable);
+            .AddTo(this._disposeOnDestroy);
 
             if(this._buttonReturn != null){
                 this._buttonReturn.Button.OnClickAsObservable()
                 .Subscribe(_ => {
                     this._navigationManager.CloseLastMenu();
                 })
-                .AddTo(this._disposeOnDisable);
+                .AddTo(this._disposeOnDestroy);
             }
+		}
+		
+		protected virtual void OnEnable() {
+           
         }
 
         protected virtual void OnDisable() {
@@ -107,7 +108,7 @@ namespace CDK.UI {
 		}
 
         protected virtual void OnDestroy() {
-			
+            this._disposeOnDestroy?.Dispose();
         }
 
         protected virtual void Reset() {
