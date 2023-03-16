@@ -8,11 +8,13 @@ Shader "CDK/C Triplanar Mapping"
 		_Specular("Specular", Float) = 0
 		_Gloss("Gloss", Float) = 0
 		_Tint("Tint", Color) = (1,1,1,1)
-		[Toggle]_UseStochastic("Use Stochastic", Float) = 1
+		[Toggle]_UseStochastic("Use Stochastic", Float) = 0
 		_BaseMap("Texture", 2D) = "gray" {}
+		_TexturePower("Texture Power", Range( 0.01 , 3)) = 1
 		[HideInInspector] __dirty( "", Int ) = 1
 	    [Enum(UnityEngine.Rendering.CullMode)] _Cull ("Cull", Float) = 2
     }
+	}
 
 	SubShader
 	{
@@ -40,6 +42,7 @@ Shader "CDK/C Triplanar Mapping"
 		uniform float _UseStochastic;
 		uniform sampler2D _BaseMap;
 		uniform float2 _Tilling;
+		uniform float _TexturePower;
 		uniform float4 _Tint;
 		uniform float _Specular;
 		uniform float _Gloss;
@@ -157,7 +160,8 @@ Shader "CDK/C Triplanar Mapping"
 			float2 temp_output_107_0_g1 = ddx( Triplanar_UV271_g1 );
 			float2 temp_output_110_0_g1 = ddy( Triplanar_UV271_g1 );
 			float4 Output_Triplanar295_g1 = ( ( ( ( tex2D( _BaseMap, UV153_g1, temp_output_57_0_g1, temp_output_58_0_g1 ) * W153_g1 ) + ( tex2D( _BaseMap, UV253_g1, temp_output_57_0_g1, temp_output_58_0_g1 ) * W253_g1 ) + ( tex2D( _BaseMap, UV353_g1, temp_output_57_0_g1, temp_output_58_0_g1 ) * W353_g1 ) ) * W0108_g1 ) + ( W1108_g1 * ( ( tex2D( _BaseMap, UV183_g1, temp_output_86_0_g1, temp_output_92_0_g1 ) * W183_g1 ) + ( tex2D( _BaseMap, UV283_g1, temp_output_86_0_g1, temp_output_92_0_g1 ) * W283_g1 ) + ( tex2D( _BaseMap, UV383_g1, temp_output_86_0_g1, temp_output_92_0_g1 ) * W383_g1 ) ) ) + ( W2108_g1 * ( ( tex2D( _BaseMap, UV1117_g1, temp_output_107_0_g1, temp_output_110_0_g1 ) * W1117_g1 ) + ( tex2D( _BaseMap, UV2117_g1, temp_output_107_0_g1, temp_output_110_0_g1 ) * W2117_g1 ) + ( tex2D( _BaseMap, UV3117_g1, temp_output_107_0_g1, temp_output_110_0_g1 ) * W3117_g1 ) ) ) );
-			o.Albedo = ( (( _UseStochastic )?( Output_Triplanar295_g1 ):( triplanar1 )) * _Tint ).rgb;
+			float4 lerpResult34 = lerp( float4( 1,1,1,1 ) , (( _UseStochastic )?( Output_Triplanar295_g1 ):( triplanar1 )) , _TexturePower);
+			o.Albedo = ( lerpResult34 * _Tint ).rgb;
 			o.Specular = _Specular;
 			o.Gloss = _Gloss;
 			o.Alpha = 1;
@@ -249,17 +253,19 @@ Version=19100
 Node;AmplifyShaderEditor.StandardSurfaceOutputNode;8;0,0;Float;False;True;-1;2;ASEMaterialInspector;0;0;Lambert;CDK/C Triplanar Mapping;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;Off;0;False;;0;False;;False;0;False;;0;False;;False;0;Opaque;0.5;True;True;0;False;Opaque;;Geometry;All;12;all;True;True;True;True;0;False;;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;2;15;10;25;False;0.5;True;0;0;False;;0;False;;0;0;False;;0;False;;0;False;;0;False;;0;False;0;0,0,0,0;VertexOffset;True;False;Cylindrical;False;True;Relative;0;;-1;-1;-1;-1;0;False;0;0;False;;-1;0;False;;0;0;0;False;0.1;False;;0;False;;False;15;0;FLOAT3;0,0,0;False;1;FLOAT3;0,0,0;False;2;FLOAT3;0,0,0;False;3;FLOAT;0;False;4;FLOAT;0;False;6;FLOAT3;0,0,0;False;7;FLOAT3;0,0,0;False;8;FLOAT;0;False;9;FLOAT;0;False;10;FLOAT;0;False;13;FLOAT3;0,0,0;False;11;FLOAT3;0,0,0;False;12;FLOAT3;0,0,0;False;14;FLOAT4;0,0,0,0;False;15;FLOAT3;0,0,0;False;0
 Node;AmplifyShaderEditor.RangedFloatNode;12;-355.1411,282.319;Inherit;False;Property;_Gloss;Gloss;2;0;Create;True;0;0;0;False;0;False;0;0;0;0;0;1;FLOAT;0
 Node;AmplifyShaderEditor.RangedFloatNode;11;-361.6411,186.1189;Inherit;False;Property;_Specular;Specular;1;0;Create;True;0;0;0;False;0;False;0;0;0;0;0;1;FLOAT;0
-Node;AmplifyShaderEditor.Vector2Node;10;-1798.111,-96.04721;Inherit;False;Property;_Tilling;Tilling;0;0;Create;True;0;0;0;False;0;False;1,1;0.1,0.1;0;3;FLOAT2;0;FLOAT;1;FLOAT;2
+Node;AmplifyShaderEditor.Vector2Node;10;-1798.111,-96.04721;Inherit;False;Property;_Tilling;Tilling;0;0;Create;True;0;0;0;False;0;False;1,1;0.001,0.001;0;3;FLOAT2;0;FLOAT;1;FLOAT;2
 Node;AmplifyShaderEditor.SimpleMultiplyOpNode;13;-405.7031,-123.4888;Inherit;False;2;2;0;COLOR;0,0,0,0;False;1;COLOR;0,0,0,0;False;1;COLOR;0
 Node;AmplifyShaderEditor.ColorNode;15;-707.2907,-37.49837;Inherit;False;Property;_Tint;Tint;3;0;Create;True;0;0;0;False;0;False;1,1,1,1;1,1,1,1;True;0;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
-Node;AmplifyShaderEditor.TexturePropertyNode;21;-2225.788,-41.7213;Inherit;True;Property;_BaseMap;Texture;5;0;Create;False;0;0;0;False;0;False;None;6b4da4910fa4c034c80d17e9fba9e233;False;gray;Auto;Texture2D;-1;0;2;SAMPLER2D;0;SAMPLERSTATE;1
-Node;AmplifyShaderEditor.ToggleSwitchNode;31;-1100.086,-136.6216;Inherit;False;Property;_UseStochastic;Use Stochastic;4;0;Create;True;0;0;0;False;0;False;1;True;2;0;COLOR;0,0,0,0;False;1;COLOR;0,0,0,0;False;1;COLOR;0
+Node;AmplifyShaderEditor.TexturePropertyNode;21;-2225.788,-41.7213;Inherit;True;Property;_BaseMap;Texture;5;0;Create;False;0;0;0;False;0;False;None;7a632f967e8ad42f5bd275898151ab6a;False;gray;Auto;Texture2D;-1;0;2;SAMPLER2D;0;SAMPLERSTATE;1
+Node;AmplifyShaderEditor.ToggleSwitchNode;31;-1100.086,-136.6216;Inherit;False;Property;_UseStochastic;Use Stochastic;4;0;Create;True;0;0;0;False;0;False;0;True;2;0;COLOR;0,0,0,0;False;1;COLOR;0,0,0,0;False;1;COLOR;0
 Node;AmplifyShaderEditor.TriplanarNode;1;-1569.697,-298.4382;Inherit;True;Spherical;World;False;Top Texture;_TopTexture;white;0;None;Mid Texture 0;_MidTexture0;white;-1;None;Bot Texture 0;_BotTexture0;white;-1;None;Triplanar Sampler;Tangent;10;0;SAMPLER2D;;False;5;FLOAT;1;False;1;SAMPLER2D;;False;6;FLOAT;0;False;2;SAMPLER2D;;False;7;FLOAT;0;False;9;FLOAT3;0,0,0;False;8;FLOAT;1;False;3;FLOAT2;1,1;False;4;FLOAT;1;False;5;FLOAT4;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
 Node;AmplifyShaderEditor.FunctionNode;16;-1548.7,42.93499;Inherit;False;Procedural Sample;-1;;1;f5379ff72769e2b4495e5ce2f004d8d4;2,157,2,315,2;7;82;SAMPLER2D;0;False;158;SAMPLER2DARRAY;0;False;183;FLOAT;0;False;5;FLOAT2;0,0;False;80;FLOAT3;0,0,0;False;104;FLOAT2;1,1;False;74;SAMPLERSTATE;0;False;5;COLOR;0;FLOAT;32;FLOAT;33;FLOAT;34;FLOAT;35
+Node;AmplifyShaderEditor.LerpOp;34;-556.1198,-356.7249;Inherit;False;3;0;COLOR;1,1,1,1;False;1;COLOR;1,1,1,1;False;2;FLOAT;0;False;1;COLOR;0
+Node;AmplifyShaderEditor.RangedFloatNode;32;-922.2442,-270.1577;Inherit;False;Property;_TexturePower;Texture Power;6;0;Create;True;0;0;0;False;0;False;1;2.65;0.01;3;0;1;FLOAT;0
 WireConnection;8;0;13;0
 WireConnection;8;3;11;0
 WireConnection;8;4;12;0
-WireConnection;13;0;31;0
+WireConnection;13;0;34;0
 WireConnection;13;1;15;0
 WireConnection;31;0;1;0
 WireConnection;31;1;16;0
@@ -267,5 +273,7 @@ WireConnection;1;0;21;0
 WireConnection;1;3;10;0
 WireConnection;16;82;21;0
 WireConnection;16;104;10;0
+WireConnection;34;1;31;0
+WireConnection;34;2;32;0
 ASEEND*/
-//CHKSM=76C9DA3F53D09E8904AB5587766A86C76B2D6B8A
+//CHKSM=016953B0E86E9BC628C18775DEB8BF4233E6AC11
