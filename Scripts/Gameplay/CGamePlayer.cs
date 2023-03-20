@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using CDK.Interaction;
 using CDK.UI;
 using UniRx;
@@ -148,23 +149,23 @@ namespace CDK {
 		
 		#if UnityAddressables
 		
-		public CCharacter_Base InstantiateAndAssignCharacter(string key) {
+		public async Task<CCharacter_Base> InstantiateAndAssignCharacterAsync(string key) {
 			if (key.CIsNullOrEmpty()) {
 				Debug.LogWarning($"Created player {this.PlayerNumber} with no controlling character because '{nameof(key)}' is null!");
 				return null;
 			}
 
-            var character = CAssets.LoadResourceAndInstantiate<CCharacter_Base>(key);
+            var character = await CAssets.LoadAndInstantiateAsync<CCharacter_Base>(key);
 
             if (character == null) {
                 Debug.LogError($"Asset key '{key}' gameobject doesnt have a {nameof(CCharacter_Base)} component on it! could not create player!");
                 return null;
             }
 
-            return this.AssignInstantiatedCharacter(character);
+            return await this.AssignInstantiatedCharacter(character);
 		}
 
-        public CCharacter_Base AssignInstantiatedCharacter(CCharacter_Base instantiatedCharacter) {
+        public async Task<CCharacter_Base> AssignInstantiatedCharacter(CCharacter_Base instantiatedCharacter) {
             var entryPoint = CSceneEntryPoint.GetSceneEntryPointByNumber(0);
             if (entryPoint != null) {
                 Debug.Log($"Setting '{instantiatedCharacter.name}' to entryPoint number'{0}'", entryPoint.gameObject);
@@ -177,7 +178,7 @@ namespace CDK {
             this.AddControllingCharacter(instantiatedCharacter);
             instantiatedCharacter.gameObject.SetActive(true);
 			
-            this.CheckIfNeedToCreateCamera();
+            await this.CheckIfNeedToCreateCamera();
 
             Debug.Log($"Created player {this.PlayerNumber} controlling character '{instantiatedCharacter.name}'.", instantiatedCharacter);
             instantiatedCharacter.transform.SetAsFirstSibling();
@@ -234,14 +235,14 @@ namespace CDK {
 
 		#region <<---------- Player Camera ---------->>
 
-		private void CheckIfNeedToCreateCamera() {
+		private async Task CheckIfNeedToCreateCamera() {
 			if (this._cameraTransform != null) return;
 			var mainChar = this.GetControllingCharacter();
 			if (mainChar == null) return;
 			
-			this._playerCamera = CAssets.LoadResourceAndInstantiate<CPlayerCamera>("PlayerCamera");
+			this._playerCamera = await CAssets.LoadAndInstantiateAsync<CPlayerCamera>("Player Camera");
             this._playerCamera.name = $"{CameraNamePrefix}{mainChar.name.Replace(CharNamePrefix, string.Empty)}";
-           
+            
             Debug.Log($"Created character camera: '{mainChar.name}'", this._playerCamera);
 
 			this._playerCamera.Initialize(this);
