@@ -32,6 +32,18 @@ namespace CDK {
 
 
 
+        #region <<---------- Load Asset ---------->>
+        
+        public static async Task<T> LoadAndInstantiateAsync<T>(string key, Transform parent = null, bool instantiateInWorldSpace = false, bool trackHandle = true) where T : Component {
+            return await LoadFromHolderSceneAsync<T>(key);
+        }
+        
+        #endregion <<---------- Load Asset ---------->>
+
+        
+        
+
+
         #region <<---------- Load From Resources ---------->>
 
         [Obsolete("Try to not use Resources!")]
@@ -62,13 +74,15 @@ namespace CDK {
 
         #region <<---------- Load From Holder Scene ---------->>
 
-        public static async Task<T> LoadFromHolderSceneAsync<T>(string sceneName, bool setObjectAsDontDestroy = true) where T : UnityEngine.Object {
+        public static async Task<T> LoadFromHolderSceneAsync<T>(string sceneName, bool setObjectAsDontDestroy = false) where T : Component {
+            var activeScene = SceneManager.GetActiveScene();
             var asyncOp = SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive);
             await asyncOp.AsObservable();
             var loadedScene = SceneManager.GetSceneByName(sceneName);
             var rootGameObjects = loadedScene.GetRootGameObjects();
             if (rootGameObjects == null || rootGameObjects.Length <= 0) {
                 Debug.LogError($"No objects inside scene: '{sceneName}'");
+                SceneManager.UnloadSceneAsync(sceneName);
                 return default;
             }
             if (rootGameObjects.Length > 1) {
@@ -79,13 +93,19 @@ namespace CDK {
 
             if (!go.TryGetComponent<T>(out var comp)) {
                 Debug.LogError($"Could not find Object '{nameof(T)}' from scene '{sceneName}'");
+                SceneManager.UnloadSceneAsync(sceneName);
                 return default;
             }
-            
+
             if (setObjectAsDontDestroy) {
                 Object.DontDestroyOnLoad(go);
             }
+            else if(SceneManager.GetActiveScene() == activeScene) {
+                SceneManager.MoveGameObjectToScene(go, activeScene);
+            }
             
+            SceneManager.UnloadSceneAsync(sceneName);
+  
             return comp;
         } 
 
@@ -96,10 +116,10 @@ namespace CDK {
 
         #region <<---------- Load From Addressables ---------->>
 
-        public static async Task<T> LoadObjectAsync<T>(string key) {
+        public static async Task<T> LoadAddressablePrefabAsync<T>(string key) where T : Object {
             Debug.Log($"Loading asset key '{key}'");
 			#if UnityAddressables && UniTask
-            return await Addressables.LoadAssetAsync<T>(key);
+            return (await Addressables.LoadAssetAsync<GameObject>(key)).GetComponent<T>();
 			#else
 			throw new NotImplementedException();
 			#endif
@@ -107,15 +127,15 @@ namespace CDK {
 
 		#if UnityAddressables
 
-        public static async Task<T> LoadObjectAsync<T>(AssetReference key) {
-            return await LoadObjectAsync<T>(key.RuntimeKey.ToString());
+        public static async Task<T> LoadAddressablePrefabAsync<T>(AssetReference key) where T : Object {
+            return await LoadAddressablePrefabAsync<T>(key.RuntimeKey.ToString());
         }
 
-        public static async Task<GameObject> LoadAndInstantiateGameObjectAsync(AssetReference key, Transform parent = null, bool instantiateInWorldSpace = false, bool trackHandle = true) {
-            return await LoadAndInstantiateGameObjectAsync(key.RuntimeKey.ToString(), parent, instantiateInWorldSpace, trackHandle);
+        public static async Task<T> LoadAddressableAndInstantiateAsync<T>(AssetReference key, Transform parent = null, bool instantiateInWorldSpace = false, bool trackHandle = true) where T : Component {
+            return await LoadAddressableAndInstantiateAsync<T>(key.RuntimeKey.ToString(), parent, instantiateInWorldSpace, trackHandle);
         }
 
-        public static async Task<GameObject> LoadAndInstantiateGameObjectAsync(string key, Transform parent = null, bool instantiateInWorldSpace = false, bool trackHandle = true) {
+        public static async Task<T> LoadAddressableAndInstantiateAsync<T>(string key, Transform parent = null, bool instantiateInWorldSpace = false, bool trackHandle = true) where T : Component {
             if (!Application.isPlaying) return null;
 			#if UniTask
             Debug.Log($"Starting to load GameObject with key '{key}'{(parent != null ? $" on parent '{parent.name}'" : string.Empty)}");
@@ -127,13 +147,13 @@ namespace CDK {
                 }
 
                 Debug.Log($"Loaded GameObject with key '{key}' ", go);
-                return go;
+                return go.GetComponent<T>();
             }
             catch (Exception e) {
                 Debug.LogError($"Exception trying to Load and Instantiate GameObject Async with key '{key}':\n" + e);
             }
 			#else
-			Debug.Log($"UniTask is not installed in project with UnityAddressables, could not Load Asset.");
+			Debug.LogError($"UniTask is not installed in project with UnityAddressables, could not Load Asset.");
 			#endif
 
             return null;
