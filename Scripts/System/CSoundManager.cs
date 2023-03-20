@@ -154,7 +154,7 @@ namespace CDK {
         public void RequestPauseState(EventReference soundRef, bool shouldPause) {
             try {
                 if (!this._playingSounds.TryGetValue(soundRef, out var sound)) {
-                    Debug.LogWarning($"Tried to get a sound that is not playing anymore.");
+                    if(_debug) Debug.LogWarning($"Tried to get a sound that is not playing anymore.");
                     return;
                 }
                 
