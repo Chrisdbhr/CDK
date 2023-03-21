@@ -18,6 +18,7 @@ namespace CDK {
         
 		public CGamePlayer CreatePlayer() {
 			var pNumber = this._gamePlayers.Count;
+            Debug.Log($"Creating Game Player number {pNumber}");
 			var player = new CGamePlayer(pNumber);
 			this._gamePlayers.Add(player);
 			return player;
