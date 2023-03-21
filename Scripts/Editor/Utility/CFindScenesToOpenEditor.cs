@@ -63,7 +63,7 @@ namespace CDK.Editor {
             searchDirectory = Application.dataPath;
             isSearchingScenes = true;
 
-            assetsScenesPaths = EditorBuildSettings.scenes.Select(b => b.path.Replace('\\', '/')).ToArray();
+            assetsScenesPaths = EditorBuildSettings.scenes.Where(bs => bs.enabled).Select(b => b.path.Replace('\\', '/')).ToArray();
             isSearchingScenes = false;
             window.Show();
             window.Repaint();
