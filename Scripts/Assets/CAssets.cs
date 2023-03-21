@@ -29,18 +29,6 @@ namespace CDK {
 
         #endregion <<---------- Instantiation ---------->>
 
-
-
-
-        #region <<---------- Load Asset ---------->>
-        
-        public static async Task<T> LoadAndInstantiateAsync<T>(string key, Transform parent = null, bool instantiateInWorldSpace = false, bool trackHandle = true) where T : Component {
-            return await LoadFromHolderSceneAsync<T>(key);
-        }
-        
-        #endregion <<---------- Load Asset ---------->>
-
-        
         
 
 
@@ -116,7 +104,7 @@ namespace CDK {
 
         #region <<---------- Load From Addressables ---------->>
 
-        public static async Task<T> LoadAddressablePrefabAsync<T>(string key) where T : Object {
+        public static async Task<T> LoadPrefabAsync<T>(string key) where T : Object {
             Debug.Log($"Loading asset key '{key}'");
 			#if UnityAddressables && UniTask
             return (await Addressables.LoadAssetAsync<GameObject>(key)).GetComponent<T>();
@@ -127,15 +115,15 @@ namespace CDK {
 
 		#if UnityAddressables
 
-        public static async Task<T> LoadAddressablePrefabAsync<T>(AssetReference key) where T : Object {
-            return await LoadAddressablePrefabAsync<T>(key.RuntimeKey.ToString());
+        public static async Task<T> LoadPrefabAsync<T>(AssetReference key) where T : Object {
+            return await LoadPrefabAsync<T>(key.RuntimeKey.ToString());
         }
 
-        public static async Task<T> LoadAddressableAndInstantiateAsync<T>(AssetReference key, Transform parent = null, bool instantiateInWorldSpace = false, bool trackHandle = true) where T : Component {
-            return await LoadAddressableAndInstantiateAsync<T>(key.RuntimeKey.ToString(), parent, instantiateInWorldSpace, trackHandle);
+        public static async Task<T> LoadAndInstantiateAsync<T>(AssetReference key, Transform parent = null, bool instantiateInWorldSpace = false, bool trackHandle = true) where T : Component {
+            return await LoadAndInstantiateAsync<T>(key.RuntimeKey.ToString(), parent, instantiateInWorldSpace, trackHandle);
         }
 
-        public static async Task<T> LoadAddressableAndInstantiateAsync<T>(string key, Transform parent = null, bool instantiateInWorldSpace = false, bool trackHandle = true) where T : Component {
+        public static async Task<T> LoadAndInstantiateAsync<T>(string key, Transform parent = null, bool instantiateInWorldSpace = false, bool trackHandle = true) where T : Component {
             if (!Application.isPlaying) return null;
 			#if UniTask
             Debug.Log($"Starting to load GameObject with key '{key}'{(parent != null ? $" on parent '{parent.name}'" : string.Empty)}");
