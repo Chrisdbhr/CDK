@@ -30,7 +30,7 @@ namespace CDK {
         #region <<---------- MonoBehaviour ---------->>
         
         private IEnumerator Start() {
-            var cursorManager = CDependencyResolver.Get<CCursorManager>();
+            var cursorManager = CCursorManager.get;
             cursorManager.ShowMouseIfNeeded();
             
             this._playableDirector.Play();
@@ -54,6 +54,12 @@ namespace CDK {
             while (!this._splashEnded) yield return null;
 
             asyncOp.allowSceneActivation = true;
+        }
+
+        private void Update() {
+            if (Input.anyKeyDown) {
+                this._playableDirector.Stop();
+            }
         }
 
         private void OnPlayableDirectorStopped(PlayableDirector pd) {

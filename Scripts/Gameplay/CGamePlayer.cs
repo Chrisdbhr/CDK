@@ -28,7 +28,7 @@ namespace CDK {
 
 			this._gameSettings = CDependencyResolver.Get<CGameSettings>();
 			this._blockingEventsManager = CDependencyResolver.Get<CBlockingEventsManager>();
-            this._navigationManager = CDependencyResolver.Get<CUINavigationManager>();
+            this._navigationManager = CUINavigationManager.get;
 
 			this._disposables?.Dispose();
 			this._disposables = new CompositeDisposable();

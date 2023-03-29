@@ -265,6 +265,7 @@ namespace CDK {
 
         private void ActiveSceneChanged(Scene oldScene, Scene newScene) {
             CheckToRetainSceneChangedBool();
+            Resources.UnloadUnusedAssets();
         }
 
         private void OnSceneLoaded(Scene scene, LoadSceneMode mode) {

@@ -12,11 +12,13 @@ namespace CDK.UI {
 		[SerializeField] private TextMeshProUGUI _valueTmp;
 		[SerializeField] private string _toStringParams = "0";
 
-		private void OnEnable() { 
+        protected override void OnEnable() { 
+            base.OnEnable();
 			this.Slider.onValueChanged.AddListener(this.SliderValueChanged);
 		}
-		
-		private void OnDisable() { 
+
+        protected override void OnDisable() { 
+            base.OnDisable();
 			this.Slider.onValueChanged.RemoveListener(this.SliderValueChanged);
 		}
 

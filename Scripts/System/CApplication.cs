@@ -98,12 +98,10 @@ namespace CDK {
         private static void InitializeDependencyContainerAndBinds() {
             CDependencyResolver.Bind<CGameSettings>(() => Resources.Load<CGameSettings>("GameSettings"));
             CDependencyResolver.Bind<CBlockingEventsManager>(() => new CBlockingEventsManager());
-            CDependencyResolver.Bind<CUINavigationManager>(() => new CUINavigationManager());
             CDependencyResolver.Bind<CGamePlayerManager>(() => new CGamePlayerManager());
             CDependencyResolver.Bind<CLoadingCanvas>(() => CAssets.LoadResourceAndInstantiate<CLoadingCanvas>("System/Loading Canvas"));
 
-            CDependencyResolver.Bind<CCursorManager>(() => new CCursorManager());
-            CDependencyResolver.Get<CCursorManager>(); // force create instance
+            var c = CCursorManager.get; // force create instance
 
             CDependencyResolver.Bind<CFader>(() => new CFader());
 

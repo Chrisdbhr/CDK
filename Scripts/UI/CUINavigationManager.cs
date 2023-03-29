@@ -8,6 +8,22 @@ using Object = UnityEngine.Object;
 
 namespace CDK.UI {
 	public class CUINavigationManager {
+
+        #region <<---------- Singleton ---------->>
+
+        public static CUINavigationManager get {
+            get {
+                if (CSingletonHelper.CannotCreateAnyInstance() || _instance != null) return _instance;
+                return (_instance = new CUINavigationManager());
+            }
+        }
+        private static CUINavigationManager _instance;
+
+        #endregion <<---------- Singleton ---------->>
+
+        
+        
+        
         
         #region <<---------- Initializers ---------->>
 
@@ -115,7 +131,6 @@ namespace CDK.UI {
 		public bool CloseLastMenu(bool closeRequestedByReturnButton = false) {
             this.RemoveNullFromNavigationHistory();
 			if (this._navigationHistory.Count <= 0) {
-				Debug.LogError("No menu to close");
 				return false;
 			}
 

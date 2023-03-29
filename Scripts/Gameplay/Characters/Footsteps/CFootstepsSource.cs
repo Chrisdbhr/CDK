@@ -67,7 +67,7 @@ namespace CDK {
 		#region <<---------- MonoBehaviour ---------->>
         
         private void Awake() {
-            this._soundManager = CDependencyResolver.Get<CSoundManager>();
+            this._soundManager = CSoundManager.get;
         }
 
         private void OnEnable() {

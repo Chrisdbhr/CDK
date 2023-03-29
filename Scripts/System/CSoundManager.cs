@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using FMOD;
 using FMOD.Studio;
 using FMODUnity;
-using UniRx;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
 using STOP_MODE = FMOD.Studio.STOP_MODE;
@@ -12,6 +11,21 @@ using STOP_MODE = FMOD.Studio.STOP_MODE;
 namespace CDK {
     public class CSoundManager : MonoBehaviour {
 
+        #region <<---------- Singleton ---------->>
+
+        public static CSoundManager get { 
+            get{
+                if (CSingletonHelper.CannotCreateAnyInstance() || _instance != null) return _instance;
+                return (_instance = CSingletonHelper.CreateInstance<CSoundManager>("Sound Manager"));
+            }
+        }
+        private static CSoundManager _instance;
+
+        #endregion <<---------- Singleton ---------->>
+
+        
+        
+        
         #region <<---------- Properties and Fields ---------->>
 
         [SerializeField] private bool _debug;
@@ -111,7 +125,13 @@ namespace CDK {
                     return;
                 }
 
-                this.CStartCoroutine(PlaySoundRoutine(sound.instance, soundPosition));
+                if (sound.instance.getDescription(out var description) == RESULT.OK && description.is3D(out var is3d) == RESULT.OK && !is3d) {
+                    this.StartEventInstance(sound.instance);   
+                }
+                else {
+                    this.CStartCoroutine(this.PlaySoundByDistanceRoutine(sound.instance, soundPosition));
+                }
+                
             }
             catch (Exception e) {
                 Debug.LogError(e);
@@ -271,7 +291,7 @@ namespace CDK {
 
          
         #if FMOD
-        private IEnumerator PlaySoundRoutine(EventInstance eventInstance, Vector3 point) {
+        private IEnumerator PlaySoundByDistanceRoutine(EventInstance eventInstance, Vector3 point) {
             if (point == default || MainListener == null) {
                 this.StartEventInstance(eventInstance);
                 yield break;

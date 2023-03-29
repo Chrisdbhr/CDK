@@ -4,7 +4,27 @@ using UniRx;
 
 namespace CDK {
 	public class CCursorManager {
+        
+        #region <<---------- Singleton ---------->>
 
+        public static CCursorManager get { 
+            get{
+                if (CApplication.IsQuitting || !Application.isPlaying) {
+                    return null;
+                }
+                if (_instance == null) {
+                    _instance = new CCursorManager();
+                }
+                return _instance;
+            }
+        }
+        private static CCursorManager _instance;
+
+        #endregion <<---------- Singleton ---------->>
+        
+        
+        
+        
 		[NonSerialized] private readonly CGameSettings _gameSettings;
 		[NonSerialized] private readonly CBlockingEventsManager _blockingEventsManager;
 

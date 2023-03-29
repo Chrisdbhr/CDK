@@ -33,6 +33,11 @@ namespace CDK {
             var root = go.transform.root;
             return root.GetComponentInChildren<T>(includeInactive);
         }
+
+        public static GameObject CDontDestroyOnLoad(this GameObject go) {
+            GameObject.DontDestroyOnLoad(go);
+            return go;
+        }
         
     }
 }

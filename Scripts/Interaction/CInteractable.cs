@@ -28,7 +28,7 @@ namespace CDK.Interaction {
 		
 		protected virtual void Awake() {
 			this._blockingEventsManager = CDependencyResolver.Get<CBlockingEventsManager>();
-            this._navigationManager = CDependencyResolver.Get<CUINavigationManager>();
+            this._navigationManager = CUINavigationManager.get;
         }
 
 		protected virtual void OnEnable() {

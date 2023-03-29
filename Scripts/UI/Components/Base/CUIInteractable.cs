@@ -37,9 +37,11 @@ namespace CDK.UI {
 
         protected virtual void Awake() {
             this._gameSettings = CDependencyResolver.Get<CGameSettings>();
-            this._navigationManager = CDependencyResolver.Get<CUINavigationManager>();
+            this._navigationManager = CUINavigationManager.get;
         }
 
+        protected virtual void OnEnable() { }
+        
         protected virtual void OnDisable() {
             this._disposeOnDisable?.Dispose();
         }

@@ -70,7 +70,7 @@ namespace CDK.UI {
 			this._blockingEventsManager = CDependencyResolver.Get<CBlockingEventsManager>();
 			this._canvas = this.GetComponent<Canvas>();
 			this._fader = CDependencyResolver.Get<CFader>();
-            this._navigationManager = CDependencyResolver.Get<CUINavigationManager>();
+            this._navigationManager = CUINavigationManager.get;
         }
 
 		protected virtual void Start() {
