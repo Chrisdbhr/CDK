@@ -9,10 +9,6 @@ using Object = UnityEngine.Object;
 using UnityEngine.AddressableAssets;
 #endif
 
-#if UniTask
-using Cysharp.Threading.Tasks;
-#endif
-
 namespace CDK {
     public static class CAssets {
 
@@ -64,13 +60,12 @@ namespace CDK {
 
         public static async Task<T> LoadFromHolderSceneAsync<T>(string sceneName, bool setObjectAsDontDestroy = false) where T : Component {
             var activeScene = SceneManager.GetActiveScene();
-            var asyncOp = SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive);
-            await asyncOp.AsObservable();
+            var asyncOp = await SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive).AsAsyncOperationObservable().ToTask();
             var loadedScene = SceneManager.GetSceneByName(sceneName);
             var rootGameObjects = loadedScene.GetRootGameObjects();
             if (rootGameObjects == null || rootGameObjects.Length <= 0) {
                 Debug.LogError($"No objects inside scene: '{sceneName}'");
-                SceneManager.UnloadSceneAsync(sceneName);
+                await SceneManager.UnloadSceneAsync(sceneName).AsAsyncOperationObservable().ToTask();
                 return default;
             }
             if (rootGameObjects.Length > 1) {
@@ -81,7 +76,7 @@ namespace CDK {
 
             if (!go.TryGetComponent<T>(out var comp)) {
                 Debug.LogError($"Could not find Object '{nameof(T)}' from scene '{sceneName}'");
-                SceneManager.UnloadSceneAsync(sceneName);
+                await SceneManager.UnloadSceneAsync(sceneName).AsAsyncOperationObservable().ToTask();
                 return default;
             }
 
@@ -92,7 +87,7 @@ namespace CDK {
                 SceneManager.MoveGameObjectToScene(go, activeScene);
             }
             
-            SceneManager.UnloadSceneAsync(sceneName);
+            await SceneManager.UnloadSceneAsync(sceneName).AsAsyncOperationObservable().ToTask();
   
             return comp;
         } 
@@ -104,10 +99,28 @@ namespace CDK {
 
         #region <<---------- Load From Addressables ---------->>
 
+        public static async Task<T> LoadAssetAsync<T>(AssetReference key) where T : Object {
+            Debug.Log($"Loading asset with key '{key}'");
+            #if UnityAddressables
+            var asyncOp = Addressables.LoadAssetAsync<T>(key);
+            while (!asyncOp.IsDone) {
+                await Observable.NextFrame();
+            }
+            return asyncOp.Result;
+			#else
+			throw new NotImplementedException();
+			#endif
+        }
+        
         public static async Task<T> LoadPrefabAsync<T>(string key) where T : Object {
-            Debug.Log($"Loading asset key '{key}'");
-			#if UnityAddressables && UniTask
-            return (await Addressables.LoadAssetAsync<GameObject>(key)).GetComponent<T>();
+            Debug.Log($"Loading prefab asset with key '{key}'");
+			#if UnityAddressables
+            var asyncOp = Addressables.LoadAssetAsync<GameObject>(key);
+            while (!asyncOp.IsDone) {
+                await Observable.NextFrame();
+            }
+            var go = asyncOp.Result;
+            return go.GetComponent<T>();
 			#else
 			throw new NotImplementedException();
 			#endif
@@ -125,11 +138,17 @@ namespace CDK {
 
         public static async Task<T> LoadAndInstantiateAsync<T>(string key, Transform parent = null, bool instantiateInWorldSpace = false, bool trackHandle = true) where T : Component {
             if (!Application.isPlaying) return null;
-			#if UniTask
-            Debug.Log($"Starting to load GameObject with key '{key}'{(parent != null ? $" on parent '{parent.name}'" : string.Empty)}");
+            Debug.Log($"Loading GameObject with key '{key}'{(parent != null ? $" on parent '{parent.name}'" : string.Empty)}");
             try {
                 var asyncOp = Addressables.InstantiateAsync(key, parent, instantiateInWorldSpace, trackHandle);
-                var go = await asyncOp.WithCancellation(CApplication.QuittingCancellationTokenSource.Token);
+                while (!asyncOp.IsDone) {
+                    await Observable.NextFrame();
+                }
+                var go = asyncOp.Result;
+                if (CApplication.IsQuitting) {
+                    CAssets.UnloadAsset(go);
+                    return null;
+                }
                 if (go == null) {
                     throw new NullReferenceException($"Could not Instantiate object with key '{key}'.");
                 }
@@ -140,9 +159,6 @@ namespace CDK {
             catch (Exception e) {
                 Debug.LogError($"Exception trying to Load and Instantiate GameObject Async with key '{key}':\n" + e);
             }
-			#else
-			Debug.LogError($"UniTask is not installed in project with UnityAddressables, could not Load Asset.");
-			#endif
 
             return null;
         }

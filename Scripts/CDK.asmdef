@@ -7,8 +7,6 @@
         "LINQtoGameObject",
         "Unity.Addressables",
         "Unity.ResourceManager",
-        "UniTask.Addressables",
-        "UniTask",
         "Newtonsoft.Json.UnityConverters",
         "FMODUnity",
         "Cinemachine",
