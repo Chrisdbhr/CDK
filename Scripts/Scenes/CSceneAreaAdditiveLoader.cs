@@ -146,7 +146,6 @@ namespace CDK {
 			}
 			#endif
 
-            int overlapResultsSize = 0;
             switch (this._checkType) {
                 case CheckType.bounds:
                     var tRotation = t.rotation;
