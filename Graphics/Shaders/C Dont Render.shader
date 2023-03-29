@@ -1,4 +1,4 @@
-Shader "Custom/DontRender" {
+Shader "CDK/C Dont Render" {
     SubShader
     {
         Tags {"Queue" = "Geometry-1" }
