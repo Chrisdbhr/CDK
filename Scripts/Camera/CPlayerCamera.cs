@@ -97,6 +97,7 @@ namespace CDK {
 		
 		#if DOTWEEN
 		private Tweener _tween;
+        private Tween _tweenCameraXOffset;
 		#endif
 		
 		private CFader _fader;
@@ -108,8 +109,6 @@ namespace CDK {
 
         [SerializeField] private bool _resetBrainOnEnable;
         [SerializeField] private bool _recenterEnable;
-
-        private Tween _tweenCameraXOffset;
 
         protected CompositeDisposable _disposablesOnDisable = new CompositeDisposable();
         
@@ -194,7 +193,9 @@ namespace CDK {
 		}
 
         protected virtual void OnDestroy() {
+			#if DOTWEEN
             this._tweenCameraXOffset?.Kill();
+			#endif
         }
 
 		#if UNITY_EDITOR
@@ -404,6 +405,7 @@ namespace CDK {
                     freeLookCamera.m_YAxisRecentering.m_enabled = false;
                     break;
                 case CinemachineVirtualCamera cVirtual:
+					#if DOTWEEN
                     var ft = cVirtual.GetCinemachineComponent<CinemachineFramingTransposer>();
                     if (ft != null && ft.m_ScreenX != 0.5f) {
                         if (this._tweenCameraXOffset != null && this._tweenCameraXOffset.IsPlaying()) break;
@@ -415,6 +417,7 @@ namespace CDK {
                         .SetAutoKill(true).Play();
                         break;
                     }
+					#endif
 
                     var pov = cVirtual.GetCinemachineComponent<CinemachinePOV>();
                     if (pov) {
