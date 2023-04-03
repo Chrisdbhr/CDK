@@ -59,6 +59,10 @@ namespace CDK {
 		}
 		private Action<CFootstepInfo, FootstepFeet, Collider> _onFootstep;
 
+        private const float FootstepCooldown = 0.15f;
+        private float _lastFootstepLeft;
+        private float _lastFootstepRight;
+        
 		#endregion <<---------- Properties and Fields ---------->>
 
 		
@@ -112,7 +116,28 @@ namespace CDK {
             this.CStartCoroutine(FootstepProcess(feet));
         }
 
+        public void FootstepLeft() {
+            Footstep(FootstepFeet.left);
+        }
+
+        public void FootstepRight() {
+            Footstep(FootstepFeet.right);
+        }
+
         public IEnumerator FootstepProcess(FootstepFeet feet) {
+            if (feet == FootstepFeet.left) {
+                if (this._lastFootstepLeft + FootstepCooldown > Time.time) {
+                    yield break;
+                }
+                this._lastFootstepLeft = Time.time;
+            }
+            if (feet == FootstepFeet.right) {
+                if (this._lastFootstepRight + FootstepCooldown > Time.time) {
+                    yield break;
+                }
+                this._lastFootstepRight = Time.time;
+            }
+            
             yield return new WaitForFixedUpdate();
 			
             var originTransform = this.transform;
@@ -140,7 +165,7 @@ namespace CDK {
 
             this._lastValidHitPoint = raycastHit.point;
 			
-			if(this._debugFootstep) Debug.Log($"Footstep {feet} on {raycastHit.collider.name}", raycastHit.collider);
+			if(this._debugFootstep) Debug.Log($"Footstep ({feet}) {this.name} on {raycastHit.collider.name}", raycastHit.collider);
 
 			// check for smashable object
 			var smashableObj = raycastHit.collider.GetComponent<CICanBeSmashedWhenStepping>();
@@ -179,7 +204,7 @@ namespace CDK {
 			// play random audio
             if (footstepInfo.Audio.IsNull) yield break;
 
-            this._soundManager.StartAndPlay(footstepInfo.Audio, rayOriginTransform);
+            this._soundManager.PlaySingletonEvent(footstepInfo.Audio, rayOriginTransform);
             
 			#endif
 		}
@@ -202,7 +227,7 @@ namespace CDK {
 
         #endregion <<---------- General ---------->>
 
-
+        
 		
 
 		#region <<---------- Pooling ---------->>
