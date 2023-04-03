@@ -38,6 +38,8 @@ namespace CDK {
         #if UNITY_EDITOR
         protected override void Reset() {
             base.Reset();
+            Undo.RecordObject(this.gameObject, "Set Tag");
+            this._tag = "";
             Undo.RecordObject(this.gameObject, "Renamed object");
             this.name = "Camera Profile";
         }
