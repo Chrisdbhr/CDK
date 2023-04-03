@@ -2,7 +2,6 @@
 using UniRx;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using Object = UnityEngine.Object;
 
 namespace CDK {
     public class COutOfBoundsDestroyer : MonoBehaviour {
@@ -73,7 +72,7 @@ namespace CDK {
                     }
                     yield return null;
                 }
-            } while (true);
+            } while (this.enabled);
         }
         
         public static void CreateMonitor() {
@@ -85,7 +84,9 @@ namespace CDK {
         }
 
         bool IsPositionInvalid(Vector3 v) {
-            return v.y >= ValueLimit || v.y <= -ValueLimit || v.x >= ValueLimit || v.x <= -ValueLimit;
+            return v.y >= ValueLimit || v.y <= -ValueLimit 
+                || v.x >= ValueLimit || v.x <= -ValueLimit
+                || v.z >= ValueLimit || v.z <= -ValueLimit;
         }
         
         #endregion <<---------- General ---------->>
