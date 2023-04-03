@@ -6,7 +6,24 @@ using UnityEngine.UI;
 
 namespace CDK {
 	public class CLoadingCanvas : MonoBehaviour {
+        
+        #region <<---------- Singleton ---------->>
 
+        public static CLoadingCanvas get {
+            get {
+                if (CSingletonHelper.CannotCreateAnyInstance() || _instance != null) {
+                    return _instance;
+                }
+                return (_instance = CAssets.LoadResourceAndInstantiate<CLoadingCanvas>("System/Loading Canvas"));
+            }
+        }
+        private static CLoadingCanvas _instance;
+
+        #endregion <<---------- Singleton ---------->>
+
+        
+        
+        
         #region <<---------- Properties and Fields ---------->>
         
         [SerializeField] private Canvas _loadingUI;
@@ -50,7 +67,12 @@ namespace CDK {
         /// </summary>
         public AsyncOperation MonitorAsyncOperation(AsyncOperation asyncOperation) {
             if (this._activeAsyncOperations.Count <= 0) {
-                this.ShowLoadingUI();
+                this._timerDisposable?.Dispose();
+                this._timerDisposable = Observable.Timer(TimeSpan.FromSeconds(1f), Scheduler.MainThreadIgnoreTimeScale)
+                .Subscribe(_ => {
+                    if (this == null) return;
+                    this.ShowLoadingUI();
+                });
             }
             this._activeAsyncOperations.Add(asyncOperation);
             asyncOperation.completed += ActiveAsyncOperationCompleted;
@@ -64,16 +86,11 @@ namespace CDK {
             }
         }
 
-        private void ShowLoadingUI() {
-            this._timerDisposable?.Dispose();
-            this._timerDisposable = Observable.Timer(TimeSpan.FromSeconds(1f), Scheduler.MainThreadIgnoreTimeScale)
-            .Subscribe(_ => {
-                if (this == null) return;
-                if(this._loadingUI) this._loadingUI.enabled = true;
-            });
+        public void ShowLoadingUI() {
+            if(this._loadingUI) this._loadingUI.enabled = true;
         }
 		
-        private void HideLoadingUI() {
+        public void HideLoadingUI() {
             this._timerDisposable?.Dispose();
             if(this._loadingUI) this._loadingUI.enabled = false;
         }

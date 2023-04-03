@@ -99,7 +99,6 @@ namespace CDK {
             CDependencyResolver.Bind<CGameSettings>(() => Resources.Load<CGameSettings>("GameSettings"));
             CDependencyResolver.Bind<CBlockingEventsManager>(() => new CBlockingEventsManager());
             CDependencyResolver.Bind<CGamePlayerManager>(() => new CGamePlayerManager());
-            CDependencyResolver.Bind<CLoadingCanvas>(() => CAssets.LoadResourceAndInstantiate<CLoadingCanvas>("System/Loading Canvas"));
 
             var c = CCursorManager.get; // force create instance
 
