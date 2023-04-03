@@ -30,7 +30,7 @@ namespace CDK {
 		public CSceneManager() {
 			this._fader = CDependencyResolver.Get<CFader>();
 			this._blockingEventsManager = CDependencyResolver.Get<CBlockingEventsManager>();
-            this._loading = CDependencyResolver.Get<CLoadingCanvas>();
+            this._loading = CLoadingCanvas.get;
           
             LoadedSceneThisFrame = false;
             
@@ -130,10 +130,8 @@ namespace CDK {
 
 			    // move objects to temporary scene
                 Debug.Log($"[Teleport] Creating temporary holder scene");
-			    var tempHolderScene = SceneManager.CreateScene(TemporarySceneName); 
-			    foreach (var rootGo in gameObjectsToTeleport) {
-				    SceneManager.MoveGameObjectToScene(rootGo, tempHolderScene);
-			    }
+			    var tempHolderScene = SceneManager.CreateScene(TemporarySceneName);
+                MoveGameObjectsToScene(gameObjectsToTeleport, tempHolderScene);
 			    SceneManager.SetActiveScene(tempHolderScene);
 
                 // unload scenes
@@ -155,7 +153,7 @@ namespace CDK {
                 
                 // move objects to loaded scene
 			    foreach (var rootGo in gameObjectsToTeleport) {
-				    SceneManager.MoveGameObjectToScene(rootGo, sceneToTeleport);
+				    MoveGameObjectToScene(rootGo, sceneToTeleport);
 			    }
                 
                 (new GameObject("--- Teleported Objects")).transform.SetAsLastSibling();
@@ -339,7 +337,34 @@ namespace CDK {
 
 			return rootTransformObjects;
 		}
-		
+
+        public static void MoveGameObjectsToScene(IReadOnlyList<GameObject> gameObjects, Scene scene) {
+            foreach (var go in gameObjects) {
+                MoveGameObjectToScene(go, scene);
+            }
+        }
+
+        /// <summary>
+        /// Returns TRUE if success moving object.
+        /// </summary>
+        public static bool MoveGameObjectToScene(GameObject go, Scene scene) {
+            try { 
+                if (go == null) {
+                    return false;
+                }
+                if (go.transform.parent != null) {
+                    Debug.LogWarning($"Will not Move '{go.name}' ToScene because its not root, its root is '{go.transform.parent.name}'");
+                    return false;
+                }
+                SceneManager.MoveGameObjectToScene(go, scene);
+            }
+            catch (Exception e) {
+                Debug.LogError(e);
+                return false;
+            }
+            return true;
+        }
+        
 		#endregion <<---------- Scene All Objects ---------->>
 
 
