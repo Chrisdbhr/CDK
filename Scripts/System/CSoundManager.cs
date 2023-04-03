@@ -28,18 +28,34 @@ namespace CDK {
         
         #region <<---------- Properties and Fields ---------->>
 
+        [SerializeField, Min(0.0015f)] private float _occlusionPowerByDistance = 0.0025f;
         [SerializeField] private bool _debug;
+        private LayerMask _occlusionLayerMask = 1;
         
-        #if FMOD 
-        public static StudioListener MainListener;
+        #if FMOD
+        public static StudioListener MainListener {
+            get {
+                if (mainListener == null) {
+                    mainListener = GameObject.FindObjectOfType<StudioListener>();
+                }
+                return mainListener;
+            }
+            set {
+                mainListener = value;
+            }
+        }
+        private static StudioListener mainListener;
         #endif
 
         public const float SoundSpeedInKm = 1224f;
         
-        private Dictionary<EventReference, (EventInstance instance, Transform connectedTransform)> _playingSounds;
+        private Dictionary<EventReference, (EventInstance instance, bool is3d, Transform connectedTransform)> _playingSounds;
         private Dictionary<EventReference, CRetainable> _pausedSounds;
-        private CBlockingEventsManager _blockingEventsManager;
 
+        private const string OcclusionParameter = "Occlusion";
+        private const float OcclusionComputingInterval = 0.1f;
+        private float _timeLastOcclusionCalculation;
+        
         #endregion <<---------- Properties and Fields ---------->>
 
 
@@ -48,10 +64,13 @@ namespace CDK {
         #region <<---------- Mono Behaviour ---------->>
         
         private void Awake() {
-            this._blockingEventsManager = CDependencyResolver.Get<CBlockingEventsManager>();
             DontDestroyOnLoad(this);
-            this._playingSounds = new Dictionary<EventReference, (EventInstance instance, Transform connectedTransform)>();
+            this._playingSounds = new Dictionary<EventReference, (EventInstance instance, bool is3d, Transform connectedTransform)>();
             this._pausedSounds = new Dictionary<EventReference, CRetainable>();
+        }
+
+        private void Update() {
+            this.ComputeOcclusion();            
         }
 
         private void LateUpdate(){
@@ -68,6 +87,19 @@ namespace CDK {
                 #endif
             }
         }
+
+        #if UNITY_EDITOR
+        private Dictionary<StudioEventEmitter, RaycastHit[]> debugRayHits = new Dictionary<StudioEventEmitter,  RaycastHit[]>();
+        private void OnDrawGizmosSelected() {
+            foreach (var hits in this.debugRayHits.Values) {
+                for (int i = 0; i < hits.Length; i ++) {
+                    if (i + 1 >= hits.Length) break;
+                    
+                    Debug.DrawLine(hits[i].point, hits[i + 1].point, new Color(i * 0.01f,i * 0.25f,i * 0.01f), 1f, true);
+                }
+            }
+        }
+        #endif
         
         #endregion <<---------- Mono Behaviour ---------->>
 
@@ -76,33 +108,57 @@ namespace CDK {
 
         #region <<---------- General ---------->>
 
-        public EventInstance StartAndPlay(EventReference soundRef, Transform connectedTransform) {
+        /// <summary>
+        /// Play an event that will be replaced if requested to play again.
+        /// </summary>
+        public EventInstance PlaySingletonEvent(EventReference soundRef, Transform connectedTransform) {
             try{
-                #if UNITY_EDITOR
-                if (this._debug && this._playingSounds.ContainsKey(soundRef)) {
-                    Debug.LogWarning($"Replacing already created sound '{soundRef}'");
+                if (this._playingSounds.ContainsKey(soundRef)) {
+                    #if UNITY_EDITOR
+                    if (this._debug) {
+                        Debug.LogWarning($"Replacing already created sound '{soundRef}'");
+                    }
+                    #endif
+                    if(this._playingSounds[soundRef].instance.isValid()) {
+                        this._playingSounds[soundRef].instance.stop(STOP_MODE.IMMEDIATE);
+                        this._playingSounds[soundRef] = default;
+                    }
                 }
-                #endif
                 
                 var soundInstance = RuntimeManager.CreateInstance(soundRef);
-                this._playingSounds[soundRef] = (soundInstance, connectedTransform);
+
+                var getDescriptionResult = soundInstance.getDescription(out var description);
+                if (getDescriptionResult != RESULT.OK) {
+                    Debug.LogWarning($"Issue getting sound '{soundRef}' description: {getDescriptionResult}");
+                }
+
+                var getIs3dResult = description.is3D(out var is3d);
+                if (getIs3dResult != RESULT.OK) {
+                    Debug.LogWarning($"Issue getting if sound '{soundRef}' is 3D: {getDescriptionResult}");
+                }
+                
+                is3d = (is3d && connectedTransform != null);
+                
+                this._playingSounds[soundRef] = (soundInstance, is3d, connectedTransform);
 
                 Vector3 soundPosition = default;
-                if (connectedTransform) {
+                if (is3d) {
                     soundPosition = connectedTransform.position;
                     var r = soundInstance.set3DAttributes(new FMOD.ATTRIBUTES_3D {
                          forward = connectedTransform.forward.ToFMODVector(),
                          position = soundPosition.ToFMODVector(),
                          up = connectedTransform.up.ToFMODVector()
                     });
-                    #if UNITY_EDITOR
                     if (r != RESULT.OK) {
+                        #if UNITY_EDITOR
                         Debug.LogError($"Issue settings 3d attributes on sound '{soundRef.Path}': {r}");
+                        #endif
                     }
-                    #endif
+                    this.CStartCoroutine(this.PlaySoundByDistanceRoutine(soundInstance, soundPosition));
                 }
-
-                this.PlayAlreadyStarted(soundRef, soundPosition);
+                else {
+                    this.StartEventInstance(soundInstance);   
+                }
 
                 return soundInstance;
             }
@@ -111,31 +167,6 @@ namespace CDK {
             }
 
             return default;
-        }
-
-        public void PlayAlreadyStarted(EventReference soundRef, Vector3 soundPosition) {
-            try {
-                if (!this._playingSounds.TryGetValue(soundRef, out var sound)) {
-                    Debug.LogWarning($"Tried to get a sound that is not playing anymore.");
-                    return;
-                }
-
-                if (!sound.instance.isValid()) {
-                    Debug.LogError($"Tried to play a invalid sound instance.");
-                    return;
-                }
-
-                if (sound.instance.getDescription(out var description) == RESULT.OK && description.is3D(out var is3d) == RESULT.OK && !is3d) {
-                    this.StartEventInstance(sound.instance);   
-                }
-                else {
-                    this.CStartCoroutine(this.PlaySoundByDistanceRoutine(sound.instance, soundPosition));
-                }
-                
-            }
-            catch (Exception e) {
-                Debug.LogError(e);
-            }
         }
 
         public void StopPlaying(EventReference soundRef, STOP_MODE stopMode = STOP_MODE.IMMEDIATE) {
@@ -169,7 +200,7 @@ namespace CDK {
         }
 
         /// <summary>
-        /// Requisitions are Retained and Released.
+        /// Requests are Retained and Released.
         /// </summary>
         public void RequestPauseState(EventReference soundRef, bool shouldPause) {
             try {
@@ -287,6 +318,7 @@ namespace CDK {
 
 
 
+        
         #region <<---------- Distance Based ---------->>
 
          
@@ -315,6 +347,7 @@ namespace CDK {
         }
 
         void StartEventInstance(EventInstance eventInstance) {
+            if (!eventInstance.isValid()) return;
             var r = eventInstance.start();
             #if UNITY_EDITOR
             if (r != RESULT.OK) {
@@ -326,6 +359,65 @@ namespace CDK {
 
         #endregion <<---------- Distance Based ---------->>
 
-       
+
+
+        
+        #region <<---------- Occlusion ---------->>
+
+        private void ComputeOcclusion() {
+            if (this._timeLastOcclusionCalculation + OcclusionComputingInterval > Time.time) {
+                return;
+            }
+            this._timeLastOcclusionCalculation = Time.time;
+            
+            if (MainListener == null) return;
+
+            var originalQueriesHitBackfaces = Physics.queriesHitBackfaces;
+            Physics.queriesHitBackfaces = true;
+
+            var listenerTransform = mainListener.transform;
+
+            foreach (var activeEmitter in StudioEventEmitter.activeEmitters) {
+                if (!activeEmitter.EventInstance.isValid()) continue;
+                if (activeEmitter.EventInstance.getParameterByName(OcclusionParameter, out var currentValue, out var maxValue) != RESULT.OK) continue;
+                if (activeEmitter.EventInstance.getDescription(out EventDescription description) != RESULT.OK) continue;
+                if (description.is3D(out var is3d) != RESULT.OK || !is3d) continue;
+                if (description.getMinMaxDistance(out var minDistance, out var maxDistance) != RESULT.OK) continue;
+                var emitterPos = activeEmitter.transform.position;
+                var allHits = Physics.RaycastAll(emitterPos,
+                    listenerTransform.position - emitterPos,
+                    maxDistance,
+                    this._occlusionLayerMask,
+                    QueryTriggerInteraction.Ignore
+                );
+
+                #if UNITY_EDITOR
+                debugRayHits[activeEmitter] = allHits;
+                #endif
+                
+                var newOcclusionValue = GetOcclusionValue(ref allHits);
+                activeEmitter.EventInstance.setParameterByName(OcclusionParameter, newOcclusionValue);
+            }
+            
+            Physics.queriesHitBackfaces = originalQueriesHitBackfaces;
+        }
+
+        private float GetOcclusionValue(ref RaycastHit[] hits) {
+            float occlusion = 0.0f;
+
+            if (hits.Length <= 0) {
+                return occlusion;
+            }
+            
+            for (int i = 0; i < hits.Length; i += 2) {
+                if (i >= hits.Length || i + 1 >= hits.Length) break;
+                occlusion += Vector3.Distance(hits[i].point, hits[i + 1].point) * this._occlusionPowerByDistance;
+            }
+
+            return occlusion;
+        }
+
+        #endregion <<---------- Occlusion ---------->>
+
     }
 }
