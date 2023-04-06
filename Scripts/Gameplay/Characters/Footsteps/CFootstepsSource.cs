@@ -219,9 +219,16 @@ namespace CDK {
             if (t.TryGetComponent<CIFootstepSurfaceBase>(out var sb)) {
                 return sb.GetFootstepInfoFromRaycastHit(hit);
             }
-            if (t.root.TryGetComponent<CFootstepSurfaceParent>(out var sp)) {
-                return sp.GetFootstepInfoFromRaycastHit(hit);
+            
+            // Check for a parent with footstep info
+            var checkingTransform = t.parent;
+            while (checkingTransform != null) {
+                if (checkingTransform.TryGetComponent<CFootstepSurfaceParent>(out var sp)) {
+                    return sp.GetFootstepInfoFromRaycastHit(hit);
+                }
+                checkingTransform = checkingTransform.parent;
             }
+           
             return null;
         }
 
