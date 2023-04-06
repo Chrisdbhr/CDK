@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.SceneManagement;
 using AsyncOperation = UnityEngine.AsyncOperation;
 
@@ -38,7 +39,9 @@ namespace CDK {
 			}
 		}
 		[SerializeField] private bool _anyTriggerObjectInside;
-		
+
+        [SerializeField] private UnityEvent OnSceneLoaded;
+        [SerializeField] private UnityEvent OnSceneUnloaded;
 
 		private AsyncOperation _loadAsyncOperation;
 		private AsyncOperation _unloadAsyncOperation;

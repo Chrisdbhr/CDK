@@ -14,7 +14,8 @@ namespace CDK {
         
         public static CPlayerPrefs Current {
             get {
-                return _current ??= LoadOrGetNewPlayerPrefs();
+                if (CSingletonHelper.CannotCreateAnyInstance() || _current != null) return _current;
+                return _current = LoadOrGetNewPlayerPrefs();
             }
             set {
                 if (value == null) {

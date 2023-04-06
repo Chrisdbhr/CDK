@@ -7,6 +7,21 @@ using Object = UnityEngine.Object;
 namespace CDK {
 	public class CFader {
 
+        #region <<---------- Singleton ---------->>
+
+        public static CFader get {
+            get {
+                if (CSingletonHelper.CannotCreateAnyInstance() || _instance != null) return _instance;
+                return _instance = new CFader();
+            }
+        }
+        private static CFader _instance;
+        
+        #endregion <<---------- Singleton ---------->>
+
+        
+        
+        
 		#region <<---------- Properties ---------->>
 		
 		private CanvasGroup _fadeCanvasGroup;

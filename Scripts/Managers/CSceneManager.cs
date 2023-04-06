@@ -28,7 +28,7 @@ namespace CDK {
         }
 
 		public CSceneManager() {
-			this._fader = CDependencyResolver.Get<CFader>();
+			this._fader = CFader.get;
 			this._blockingEventsManager = CDependencyResolver.Get<CBlockingEventsManager>();
             this._loading = CLoadingCanvas.get;
           
