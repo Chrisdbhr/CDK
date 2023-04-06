@@ -1,32 +1,29 @@
 ﻿#if FMOD
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using FMODUnity;
-using UniRx;
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace CDK {
-	public class CFmodLoadedBankTrigger : MonoBehaviour {
-		[SerializeField] private CUnityEvent OnBanksLoaded;
-        [SerializeField] [BankRef] private List<string> _otherBankNameToCheck = new List<string>();
+	public class CFmodLoadedBankTrigger : StudioBankLoader {
+        
+        [SerializeField] private GameObject[] SetActiveOnBankLoaded;
+        [SerializeField] private UnityEvent OnBanksLoaded;
+        private bool _banksLoaded;
 
-        private IDisposable _triggerDisposable;
-
-        private void OnEnable() {
-            this._triggerDisposable = Observable.EveryUpdate()
-            .Subscribe(_ => {
-                if (!RuntimeManager.HaveMasterBanksLoaded) return;
-                if (this._otherBankNameToCheck.Count > 0 && !this._otherBankNameToCheck.Where(b => !b.CIsNullOrEmpty()).All(RuntimeManager.HasBankLoaded)) return;
-                this.OnBanksLoaded?.Invoke();
-                this.enabled = false;
-                this._triggerDisposable?.Dispose();
-            });
+        private void Update() {
+            if (this._banksLoaded) return;
+            if (this.Banks.Count <= 0 || !RuntimeManager.HaveMasterBanksLoaded || !this.Banks.Where(b => !b.CIsNullOrEmpty()).Any(RuntimeManager.HasBankLoaded)) return;
+            this._banksLoaded = true;
+            this.OnBanksLoaded?.Invoke();
+            if (!SetActiveOnBankLoaded.CIsNullOrEmpty()) {
+                foreach (var go in SetActiveOnBankLoaded) {
+                    if(go == null) continue;
+                    go.SetActive(true);
+                }
+            }
         }
-
-        private void OnDisable() {
-            this._triggerDisposable?.Dispose();
-        }
+        
     }
 }
 #endif
