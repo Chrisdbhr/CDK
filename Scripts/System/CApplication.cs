@@ -3,17 +3,13 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using CDK.UI;
+using FMODUnity;
 using UnityEngine;
 using ThreadPriority = UnityEngine.ThreadPriority;
 
 #if UnityAddressables
 using UnityEngine.AddressableAssets;
 using UnityEngine.AddressableAssets.ResourceLocators;
-#endif
-
-#if UnityLocalization
-using UnityEngine.Localization;
-using UnityEngine.Localization.Settings;
 #endif
 
 #if Rewired
@@ -71,6 +67,17 @@ namespace CDK {
             if (isMobile) {
                 ScalableBufferManager.ResizeBuffers(0.7f, 0.7f);
             }
+
+            #if FMOD
+            try {
+                RuntimeManager.LoadBank("Master");
+                RuntimeManager.LoadBank("Master.strings");
+            }
+            catch (Exception e) {
+                Debug.LogException(e);
+            }
+            #endif
+            
             QualitySettings.vSyncCount = 1;
             Application.targetFrameRate = isMobile ? 30 : 60;
             Application.backgroundLoadingPriority = ThreadPriority.Low;
@@ -101,8 +108,6 @@ namespace CDK {
             CDependencyResolver.Bind<CGamePlayerManager>(() => new CGamePlayerManager());
 
             var c = CCursorManager.get; // force create instance
-
-            CDependencyResolver.Bind<CFader>(() => new CFader());
 
             CDependencyResolver.Bind<CSceneManager>(() => new CSceneManager());
         }

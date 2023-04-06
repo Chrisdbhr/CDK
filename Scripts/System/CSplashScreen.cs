@@ -30,27 +30,14 @@ namespace CDK {
         #region <<---------- MonoBehaviour ---------->>
         
         private IEnumerator Start() {
-            var cursorManager = CCursorManager.get;
-            cursorManager.ShowMouseIfNeeded();
+            CCursorManager.get.ShowMouseIfNeeded();
             
-            this._playableDirector.Play();
-            this._playableDirector.Pause();
-            #if Rewired
-            while (!ReInput.isReady) yield return null;
-            #endif
-            #if FMOD
-            while (!RuntimeManager.HaveMasterBanksLoaded) yield return null;
-            #endif
-            yield return null;
             this._playableDirector.Play();
             this._playableDirector.stopped += OnPlayableDirectorStopped;
             
             var asyncOp = SceneManager.LoadSceneAsync(this._sceneToLoad, LoadSceneMode.Single);
             asyncOp.allowSceneActivation = false;
 
-            #if FMOD
-            while (!FMODUnity.RuntimeManager.HaveMasterBanksLoaded) yield return null;
-            #endif
             while (!this._splashEnded) yield return null;
 
             asyncOp.allowSceneActivation = true;

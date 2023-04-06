@@ -60,13 +60,15 @@ namespace CDK {
             
             #if Rewired
             Debug.Log("Waiting for Rewired to get ready.");
-            while (!ReInput.isReady) yield return null;
+            while (!ReInput.isReady) {
+                yield return null;
+            }
             Debug.Log("Rewired is ready.");
             #endif
             #if FMOD
             Debug.Log("Waiting for FMOD to Load Master Banks.");
-            if (!RuntimeManager.HaveMasterBanksLoaded) {
-                RuntimeManager.LoadBank("Master");
+            while (!RuntimeManager.HaveMasterBanksLoaded) {
+                yield return null;
             }
             Debug.Log("FMOD Master Banks are loaded.");
             #endif
