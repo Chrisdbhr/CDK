@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace CDK {
 	public class CPhysicsTrigger : CBasePhysicsTriggers {
-
+        
 		#region <<---------- Triggers ---------->>
 		
 		protected virtual void OnTriggerEnter(Collider other) {
@@ -60,13 +60,16 @@ namespace CDK {
 		#region <<---------- Collision and Trigger Registry ---------->>
 		
 		protected virtual void StartedCollisionOrTrigger(Transform other) {
+            if (TriggerOnce && _triggered) return;
             bool exited = false;
             this.Enter?.Invoke(other);
             this.Entered?.Invoke(!exited);
             this.Exited?.Invoke(exited);
-		}
+            _triggered = true;
+        }
 
 		protected virtual void ExitedCollisionOrTrigger(Transform other) {
+            if (TriggerOnce && _triggered) return;
             bool exited = true;
 			this.Exit?.Invoke(other);
 			this.Entered?.Invoke(!exited);

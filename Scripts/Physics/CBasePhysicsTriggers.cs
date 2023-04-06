@@ -5,7 +5,11 @@ namespace CDK {
 	public abstract class CBasePhysicsTriggers : MonoBehaviour {
 	
 		[SerializeField] [CTagSelector] protected string _tag = "Player";
-		
+
+        protected bool TriggerOnce => this._triggerOnce;
+        [SerializeField] private bool _triggerOnce;
+        protected bool _triggered;
+        
 		[SerializeField] protected CUnityEventTransform Enter;
 		[SerializeField] protected CUnityEventTransform Exit;
 		[Space]
