@@ -106,8 +106,6 @@ namespace CDK {
         }
 
 		protected virtual void OnEnable() {
-            this._disposeOnDisable?.Dispose();
-            
             // events
             SceneManager.activeSceneChanged += this.OnActiveSceneChanged;
 
