@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using CDK.UI;
 using FMODUnity;
 using UnityEngine;
 using ThreadPriority = UnityEngine.ThreadPriority;
@@ -18,7 +17,7 @@ using Rewired;
 
 namespace CDK {
     [DefaultExecutionOrder(-100)]
-    public abstract class CApplication {
+    public static class CApplication {
 
         #region <<---------- Initialization ---------->>
 
@@ -53,21 +52,12 @@ namespace CDK {
             Application.backgroundLoadingPriority = ThreadPriority.High; // high to load fast first assets.
             QualitySettings.vSyncCount = 0;
             Application.targetFrameRate = 18;
-
+            
             #if UnityAddressables
-            var resourceLocator = await AddressablesInitializeAsync();
-            Debug.Log($"Resource Locator Id: '{(resourceLocator != null ? resourceLocator.LocatorId : "null")}'");
+            ResourceLocator = await AddressablesInitializeAsync();
+            Debug.Log($"Resource Locator Id: '{(ResourceLocator != null ? ResourceLocator.LocatorId : "null")}'");
 			#endif
-
-            await InitializeInputManagerAsync();
-
-            ApplicationInitialized?.Invoke();
-
-            var isMobile = CPlayerPlatformTrigger.IsMobilePlatform();
-            if (isMobile) {
-                ScalableBufferManager.ResizeBuffers(0.7f, 0.7f);
-            }
-
+            
             #if FMOD
             try {
                 RuntimeManager.LoadBank("Master");
@@ -77,6 +67,15 @@ namespace CDK {
                 Debug.LogException(e);
             }
             #endif
+
+            await InitializeInputManagerAsync();
+
+            ApplicationInitialized?.Invoke();
+
+            var isMobile = CPlayerPlatformTrigger.IsMobilePlatform();
+            if (isMobile) {
+                ScalableBufferManager.ResizeBuffers(0.7f, 0.7f);
+            }
             
             QualitySettings.vSyncCount = 1;
             Application.targetFrameRate = isMobile ? 30 : 60;
@@ -95,6 +94,8 @@ namespace CDK {
         public static bool IsQuitting { get; private set; }
         public static CancellationTokenSource QuittingCancellationTokenSource = new CancellationTokenSource();
 
+        public static IResourceLocator ResourceLocator;
+        
         #endregion <<---------- Properties and Fields ---------->>
 
 

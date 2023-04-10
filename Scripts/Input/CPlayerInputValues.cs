@@ -12,7 +12,7 @@ namespace CDK {
         /// </summary>
         public Vector3 Movement3D;
         public float MovementSqrMagnitude => this.Movement3D.sqrMagnitude;
-        public bool IsDoingMovementInput => MovementSqrMagnitude > 0f;
+        public bool IsDoingMovementInput => MovementSqrMagnitude > 0.01f;
         
         public bool    Walk;
         public bool    Run;
