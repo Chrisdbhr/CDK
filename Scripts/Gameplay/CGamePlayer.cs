@@ -303,14 +303,14 @@ namespace CDK {
 		}
 		
         private void InputWalk(InputActionEventData data) {
-            if (this._blockingEventsManager.IsAnyHappening) return;
+            if (this._blockingEventsManager.IsOnMenu) return;
             var character = this.GetControllingCharacter();
             if (character == null) return;
             character.Input.Walk = data.GetButton();
         }
         
 		private void InputRun(InputActionEventData data) {
-			if (this._blockingEventsManager.IsAnyHappening) return;
+			if (this._blockingEventsManager.IsOnMenu) return;
 			var character = this.GetControllingCharacter();
 			if (character == null) return;
 			character.Input.Run = data.GetButton();

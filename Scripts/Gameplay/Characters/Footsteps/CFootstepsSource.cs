@@ -124,6 +124,10 @@ namespace CDK {
             Footstep(FootstepFeet.right);
         }
 
+        public FootstepFeet GetLastFootstepFeet() {
+            return this._lastFootstepRight > this._lastFootstepLeft ? FootstepFeet.right : FootstepFeet.left;
+        }
+        
         public IEnumerator FootstepProcess(FootstepFeet feet) {
             if (feet == FootstepFeet.left) {
                 if (this._lastFootstepLeft + FootstepCooldown > Time.time) {

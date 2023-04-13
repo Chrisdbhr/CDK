@@ -1,5 +1,8 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace CDK {
 	public static class CIEnumerableExtensions {
@@ -26,5 +29,13 @@ namespace CDK {
 		public static bool CIsNullOrEmpty<T>(this IEnumerable<T> enumerable) {
 			return !CHasAnyAndNotNull(enumerable);
 		}
-	}
+
+        public static void CDoForEachNotNull<T>(this IEnumerable<T> enumerable, Action<T> a) where T : Object {
+            if (enumerable == null || a == null) return;
+            foreach (var o in enumerable) {
+                if (o == null) continue;
+                a.Invoke(o);
+            }
+        }
+    }
 }
