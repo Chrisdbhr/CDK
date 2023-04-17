@@ -197,15 +197,20 @@ namespace CDK.UI {
 				if (this._navigationHistory.Count <= 0) return;
 				var current = EventSystem.current;
 				if (current == null) return;
-				if (current.currentSelectedGameObject != null) return;
-				var activeUi = this._navigationHistory.Last();
-                var objectToSelect = activeUi.FirstSelectedObject;
-                if (objectToSelect != null) {
-                    current.SetSelectedGameObject(objectToSelect);
+                if (current.currentSelectedGameObject != null && current.currentSelectedGameObject.activeInHierarchy && current.currentSelectedGameObject.TryGetComponent<CUIInteractable>(out var _)) {
                     return;
                 }
-                var firstInteractable = activeUi.GetComponentsInChildren<CUIInteractable>().FirstOrDefault();
-                if (firstInteractable == null) return;
+				var activeUi = this._navigationHistory.Last();
+                var objectToSelect = activeUi.FirstSelectedObject;
+                if (objectToSelect != null && objectToSelect.activeInHierarchy && objectToSelect.TryGetComponent<CUIInteractable>(out var interactable)) {
+                    current.SetSelectedGameObject(interactable.gameObject);
+                    return;
+                }
+                var firstInteractable = activeUi.GetComponentsInChildren<CUIInteractable>(false).FirstOrDefault();
+                if (firstInteractable == null) {
+                    Debug.LogError("Could not find valid UI element to set cursor selection!");
+                    return;
+                }
                 current.SetSelectedGameObject(firstInteractable.gameObject);
             });
 
