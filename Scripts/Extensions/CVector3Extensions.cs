@@ -59,5 +59,10 @@ namespace CDK {
             return v.x == 1f && v.y == 1 && v.z == 1f;
         }
 
+        public static float CMagnitudeXZ(this Vector3 v) {
+            if (v.x == 0f && v.z == 0f) return 0f;
+            return new Vector3(v.x, 0f, v.z).magnitude;
+        }
+
     }
 }

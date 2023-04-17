@@ -16,7 +16,7 @@ namespace CDK {
 
 		private void FixedUpdate() {
 			if (this._executionTime != CMonobehaviourExecutionLoop.FixedUpdate) return;
-			this.Execute(CTime.FixedDeltaTimeScaled);
+			this.Execute(CTime.DeltaTimeScaled);
 		}
 
 		private void LateUpdate() {
