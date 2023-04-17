@@ -5,6 +5,21 @@ using UnityEngine;
 namespace CDK {
 	public class CGamePlayerManager {
 
+        #region <<---------- Singleton ---------->>
+        
+        public static CGamePlayerManager get {
+            get {
+                if (CSingletonHelper.CannotCreateAnyInstance() || _current != null) return _current;
+                return _current = new CGamePlayerManager();
+            }
+        }
+        private static CGamePlayerManager _current;
+        
+        #endregion <<---------- Singleton ---------->>
+
+
+        
+        
 		#region <<---------- Properties ---------->>
 
 		private readonly List<CGamePlayer> _gamePlayers = new List<CGamePlayer>();

@@ -106,7 +106,6 @@ namespace CDK {
         private static void InitializeDependencyContainerAndBinds() {
             CDependencyResolver.Bind<CGameSettings>(() => Resources.Load<CGameSettings>("GameSettings"));
             CDependencyResolver.Bind<CBlockingEventsManager>(() => new CBlockingEventsManager());
-            CDependencyResolver.Bind<CGamePlayerManager>(() => new CGamePlayerManager());
 
             var c = CCursorManager.get; // force create instance
 
