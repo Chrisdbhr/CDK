@@ -22,6 +22,11 @@ namespace CDK {
 			return sceneField.sceneName;
 			#endif
 		}
+        
+        public static bool operator ==(CSceneField a, CSceneField b) {
+            return a.sceneName == b.sceneName;
+        }
+        public static bool operator !=(CSceneField a, CSceneField b) => !(a == b);
 
 		public void OnBeforeSerialize() {
 			#if UNITY_EDITOR

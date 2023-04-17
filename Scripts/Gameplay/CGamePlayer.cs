@@ -103,8 +103,8 @@ namespace CDK {
 				if (character == null) return;
 				
 				#if Rewired
-                character.Input.Movement3D.x = this._rePlayer.GetAxis(CInputKeys.MOV_X);
-                character.Input.Movement3D.z = this._rePlayer.GetAxis(CInputKeys.MOV_Y);
+                character.Input.Movement3D.x = this._rePlayer.GetAxis(CInputKeys.MOV_X).CClamp(-1f, 1f);
+                character.Input.Movement3D.z = this._rePlayer.GetAxis(CInputKeys.MOV_Y).CClamp(-1f, 1f);
 
                 if (this._cameraTransform == null) {
                     return;
@@ -317,7 +317,7 @@ namespace CDK {
 		}
 
         private void InputJump(InputActionEventData data) {
-            if (this._blockingEventsManager.IsAnyHappening) return;
+            if (this._blockingEventsManager.IsOnMenu) return;
             var character = this.GetControllingCharacter();
             if (character == null) return;
             character.Input.Jump = data.GetButton();

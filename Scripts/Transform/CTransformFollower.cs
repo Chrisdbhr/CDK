@@ -70,7 +70,7 @@ namespace CDK {
 
 		protected virtual void FixedUpdate() {
 			if (this.executionLoop != CMonobehaviourExecutionLoop.FixedUpdate) return;
-            Execute(this._ignoreTimeScale ? Time.fixedUnscaledDeltaTime : CTime.FixedDeltaTimeScaled);
+            Execute(this._ignoreTimeScale ? Time.fixedUnscaledDeltaTime : CTime.DeltaTimeScaled);
 		}
 
         protected virtual void LateUpdate() {

@@ -14,15 +14,6 @@ namespace CDK {
 		}
 
 		/// <summary>
-		/// Returns Time.fixedDeltaTime scaled with Time.timeScale.
-		/// </summary>
-		public static float FixedDeltaTimeScaled {
-			get {
-				return Time.fixedDeltaTime * Time.timeScale;
-			}
-		}
-
-		/// <summary>
 		/// Set time scale and invoke a event if changed.
 		/// </summary>
 		public static float TimeScale {
