@@ -103,6 +103,14 @@ namespace CDK {
 		private float _lastDamageValue;
 
 		#endregion <<---------- Partial Health Regeneration ---------->>
+
+
+		#region <<---------- Immunity ---------->>
+
+		private float _immuneTimer;
+
+		#endregion <<---------- Immunity ---------->>
+
 		
 		
 		#region <<---------- Events ---------->>
@@ -158,10 +166,20 @@ namespace CDK {
 
 		}
 
+		private void Update() {
+			if (_immuneTimer > 0f) {
+				_immuneTimer -= CTime.DeltaTimeScaled;
+			}
+		}
 		#endregion <<---------- MonoBehaviour ---------->>
-		
 
 
+
+		public void SetImmunityTime(float time) {
+			var newTime = Mathf.Max(this._immuneTimer, time);
+			Debug.Log($"Setting immune time to {newTime}");
+			this._immuneTimer = newTime;
+		}
 
 		public void FullCure() {
 			this.CurrentHealth = this._maxHealth;
@@ -176,6 +194,7 @@ namespace CDK {
 		/// </summary>
 		public float TakeDamage(CHitInfoData hitInfo, float damageMultiplier) {
 			if (this.IsDead) return 0f;
+			if (this._immuneTimer > 0f) return 0f;
 			var hitScriptObj = hitInfo.ScriptableObject;
 			if (hitScriptObj.Damage <= 0f) return 0f;
 
@@ -194,10 +213,10 @@ namespace CDK {
 				this._transform.eulerAngles = new Vector3(0f, this._transform.eulerAngles.y, 0f);
 			}
 
+			this.CurrentHealth -= finalDamage;
 			if (finalDamage > 0f) {
 				this.OnDamageTaken?.Invoke(finalDamage, hitInfo);
 			}
-			this.CurrentHealth -= finalDamage;
 
 			// camera shake
 			if (this._transformShake != null && hitInfo.AttackerRootTransform != null) {
