@@ -38,8 +38,12 @@ namespace CDK {
         #if UNITY_EDITOR
         protected override void Reset() {
             base.Reset();
-            Undo.RecordObject(this.gameObject, "Set Tag");
-            this._tag = "";
+            Undo.RecordObject(this.gameObject, "Add Collider");
+            if (!this.TryGetComponent<Collider>(out var c)) {
+                var box = this.gameObject.AddComponent<BoxCollider>();
+                box.size = new Vector3(10, 5, 10);
+                box.center = new Vector3(0, 5, 0);
+            }
             Undo.RecordObject(this.gameObject, "Renamed object");
             this.name = "Camera Profile";
         }
@@ -71,17 +75,33 @@ namespace CDK {
 
         protected override void StartedCollisionOrTrigger(Transform other) {
             base.StartedCollisionOrTrigger(other);
-            if (!other.TryGetComponent<CPlayerCamera>(out var playerCamera)) return;
-            playerCamera.EnteredCameraArea(this);
+            var playerCamera = GetPlayerCameraFromTransform(other);
+            if (playerCamera != null) {
+                playerCamera.EnteredCameraArea(this);
+            }
         }
 
         protected override void ExitedCollisionOrTrigger(Transform other) {
             base.ExitedCollisionOrTrigger(other);
-            if (!other.TryGetComponent<CPlayerCamera>(out var playerCamera)) return;
-            playerCamera.ExitedCameraArea(this);
+            var playerCamera = GetPlayerCameraFromTransform(other);
+            if (playerCamera != null) {
+                playerCamera.ExitedCameraArea(this);
+            }
         }
         
         #endregion <<---------- CPhysicsTrigger ---------->>
+
+        
+        
+
+        #region <<---------- General ---------->>
+
+        private CPlayerCamera GetPlayerCameraFromTransform(Transform t) {
+            var player = CGamePlayerManager.get.GetPlayerFromTransform(t);
+            return player == null ? null : player.GetCamera;
+        }
+
+        #endregion <<---------- General ---------->>
         
     }
 }
