@@ -12,7 +12,8 @@ namespace CDK {
 
         #region <<---------- Initializers ---------->>
 
-        public CGameProgressBase(string name = null) {
+        public CGameProgressBase(string name = null, bool isAutoInitialized = false) {
+            this.WasLoadedAutomatically = isAutoInitialized;
             this.SaveIdentifier = Guid.NewGuid().ToString();
             if (!name.CIsNullOrEmpty()) this.SaveDescriptiveName = name;
             this.SaveDate = DateTime.UtcNow;
@@ -25,6 +26,9 @@ namespace CDK {
         
         #region <<---------- Properties and Fields ---------->>
 
+        [JsonIgnore]
+        public bool WasLoadedAutomatically { get; }
+        
         [JsonIgnore]
         public const string SavesDirectoryName = "SavesDir";  
         

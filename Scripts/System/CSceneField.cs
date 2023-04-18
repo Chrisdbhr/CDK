@@ -24,7 +24,7 @@ namespace CDK {
 		}
         
         public static bool operator ==(CSceneField a, CSceneField b) {
-            return a.sceneName == b.sceneName;
+            return a?.sceneName == b?.sceneName;
         }
         public static bool operator !=(CSceneField a, CSceneField b) => !(a == b);
 
