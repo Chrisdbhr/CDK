@@ -1,6 +1,4 @@
 ﻿using System.Collections;
-using System.Globalization;
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -9,32 +7,32 @@ namespace CDK {
 	/// <summary>
 	/// All values are normalized.
 	/// </summary>
-	public class CHealthBarManager : MonoBehaviour {
+	public class CFillBarManager : MonoBehaviour {
 
 		#region <<---------- Properties and Fields ---------->>
 
 		[SerializeField] private Image _imageCurrentHealth;
 		[SerializeField] private Image _imageDelayedHealth;
 		[SerializeField] private float _decayDelay = 4f;
+		[SerializeField] private float _decayTime = 4f;
 
-		private float CurrentHealth {
+		private float CurrentValue {
 			get {
-				return this._currentHealth;
+				return this._currentValue;
 			}
 			set {
-				if (value == this._currentHealth) return;
+				if (value == this._currentValue) return;
 
-				if (value < this._currentHealth) {
+				if (value < this._currentValue) {
 					this.CStopCoroutine(this._routineDelayedBar);
-					this._routineDelayedBar = this.CStartCoroutine(this.UpdateDelayedBar(this._currentHealth, value));
+					this._routineDelayedBar = this.CStartCoroutine(this.UpdateDelayedBar(this._currentValue, value));
 				}
 				if (this._imageCurrentHealth != null) this._imageCurrentHealth.fillAmount = value;
 				
-				this._currentHealth = value;
+				this._currentValue = value;
 			}
 		}
-		private float _currentHealth = 1f;
-		private float _delayToStartMoving = 2f;
+		private float _currentValue = 1f;
 		
 		private Coroutine _routineDelayedBar;
 
@@ -44,13 +42,13 @@ namespace CDK {
 
 
 		public void SetValueNormalized(float newValue) {
-			this.CurrentHealth = newValue.CClamp01();
+			this.CurrentValue = newValue.CClamp01();
 		}
 
 		private IEnumerator UpdateDelayedBar(float initialValue, float targetValue) {
 			this.SetDelayedBarValue(initialValue, 0f);
-			yield return new WaitForSeconds(this._delayToStartMoving);
-			while (!this.SetDelayedBarValue(targetValue, this._decayDelay)) {
+			yield return new WaitForSeconds(this._decayDelay);
+			while (!this.SetDelayedBarValue(targetValue, this._decayTime)) {
 				yield return null;
 			}
 		}
