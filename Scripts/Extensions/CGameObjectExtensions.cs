@@ -1,3 +1,4 @@
+using Unity.Linq;
 using UnityEngine;
 
 namespace CDK {
@@ -28,10 +29,16 @@ namespace CDK {
             return go.GetComponentInChildren<T>(includeInactive);
         }
         
-        public static T CGetComponentInChildrenFromRoot<T>(this GameObject go, bool includeInactive = false) {
+        public static T CGetComponentInChildrenRecursiveUntilRoot<T>(this GameObject go, bool includeInactive = false) {
             if (go == null) return default;
-            var root = go.transform.root;
-            return root.GetComponentInChildren<T>(includeInactive);
+            T target = default;
+            foreach (var ancestor in go.AncestorsAndSelf()) {
+                target = ancestor.GetComponentInChildren<T>(includeInactive);
+                if (target != null) {
+                    return target;
+                }
+            }
+            return target;
         }
 
         public static GameObject CDontDestroyOnLoad(this GameObject go) {

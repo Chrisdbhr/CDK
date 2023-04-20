@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Unity.Linq;
+using UnityEngine;
 
 namespace CDK {
     public static class CComponentExtensions {
@@ -11,11 +12,17 @@ namespace CDK {
             return comp.gameObject.CGetComponentInParentOrInChildren<T>(includeInactive);
 
         }
-     
-        public static T CGetComponentInChildrenFromRoot<T>(this Component comp, bool includeInactive = false) {
-            if (comp == null) return default;
-            var root = comp.transform.root;
-            return root.GetComponentInChildren<T>(includeInactive);
+        
+        public static T CGetComponentInChildrenRecursiveUntilRoot<T>(this Component comp, bool includeInactive = false) {
+            if (comp == null || comp.gameObject == null) return default;
+            T target = default;
+            foreach (var ancestor in comp.gameObject.AncestorsAndSelf()) {
+                target = ancestor.GetComponentInChildren<T>(includeInactive);
+                if (target != null) {
+                    return target;
+                }
+            }
+            return target;
         }
         
         public static void CDestroyGameObject(this Component value, float time = 0f) {
