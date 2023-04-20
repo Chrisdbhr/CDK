@@ -102,7 +102,7 @@ namespace CDK {
                 this.transform.SetParent(null, true);
                 this.transform.SetAsFirstSibling();
             }
-            this._blockingEventsManager = CDependencyResolver.Get<CBlockingEventsManager>();
+            this._blockingEventsManager = CBlockingEventsManager.get;
         }
 
 		protected virtual void OnEnable() {

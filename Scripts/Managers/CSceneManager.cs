@@ -19,7 +19,22 @@ using UnityEditor.SceneManagement;
 
 namespace CDK {
 	public class CSceneManager {
+        
+        #region <<---------- Singleton ---------->>
 
+        public static CSceneManager get {
+            get {
+                if (CSingletonHelper.CannotCreateAnyInstance() || _instance != null) return _instance;
+                return (_instance = new CSceneManager());
+            }
+        }
+        private static CSceneManager _instance;
+
+        #endregion <<---------- Singleton ---------->>
+        
+        
+        
+        
 		#region <<---------- Initializers ---------->>
 		
 		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
@@ -27,9 +42,9 @@ namespace CDK {
             
         }
 
-		public CSceneManager() {
+		private CSceneManager() {
 			this._fader = CFader.get;
-			this._blockingEventsManager = CDependencyResolver.Get<CBlockingEventsManager>();
+			this._blockingEventsManager = CBlockingEventsManager.get;
             this._loading = CLoadingCanvas.get;
           
             LoadedSceneThisFrame = false;

@@ -21,7 +21,7 @@ namespace CDK {
 		protected void Awake() {
 			this._transform = this.transform;
 			this._initialRotation = this._transform.rotation;
-			this._blockingEventsManager = CDependencyResolver.Get<CBlockingEventsManager>();
+			this._blockingEventsManager = CBlockingEventsManager.get;
 		}
 
 		private void Update() {

@@ -1,9 +1,5 @@
 using UnityEngine;
 	
-#if UnityAddressables
-using UnityEngine.AddressableAssets;
-#endif
-
 #if UNITY_EDITOR
 using System.IO;
 using UnityEditor;		
@@ -15,18 +11,25 @@ using FMODUnity;
 
 namespace CDK {
 	public class CGameSettings : ScriptableObject {
+    
+        #region <<---------- Singleton ---------->>
 
-		#region <<---------- Constants ---------->>
+        public static CGameSettings get {
+            get {
+                if (CSingletonHelper.CannotCreateAnyInstance() || _instance != null) return _instance;
+                return (_instance = Resources.Load<CGameSettings>("GameSettings"));
+            }
+        }
+        private static CGameSettings _instance;
 
-		private const string GAME_SETTINGS_ASSET_PATH = "Assets/Resources/GameSettings.asset";
+        #endregion <<---------- Singleton ---------->>
         
-		#endregion <<---------- Constants ---------->>
-		
-		
+       
 		
 		
 		#region <<---------- Properties ---------->>
 
+        private const string GAME_SETTINGS_ASSET_PATH = "Assets/Resources/GameSettings.asset";
         public const string AssetRef_PauseMenu = "Prefabs/UI/menus/ui-pausemenu";
 		public const string AssetRef_ConfirmationPopup = "Prefabs/UI/menus/ui-confirm popup";
 		

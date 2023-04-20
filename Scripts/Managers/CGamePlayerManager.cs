@@ -19,6 +19,17 @@ namespace CDK {
 
 
         
+
+        #region <<---------- Initializers ---------->>
+
+        private CGamePlayerManager() {
+            
+        }
+
+        #endregion <<---------- Initializers ---------->>
+
+
+        
         
 		#region <<---------- Properties ---------->>
 

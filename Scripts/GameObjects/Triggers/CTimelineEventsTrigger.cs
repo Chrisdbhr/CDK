@@ -40,7 +40,7 @@ namespace CDK {
 		#region <<---------- MonoBehaviour ---------->>
 
 		protected virtual void Awake() {
-            this._blockingEventsManager = CDependencyResolver.Get<CBlockingEventsManager>();
+            this._blockingEventsManager = CBlockingEventsManager.get;
             if (this._playableDirector.extrapolationMode != DirectorWrapMode.None) {
                 Debug.LogError($"PlayableDirector {this._playableDirector.name} extrapolationMode must be set to None.");
             }

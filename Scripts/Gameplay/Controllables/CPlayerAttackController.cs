@@ -19,7 +19,7 @@ namespace CDK.Weapons {
 		
 		#region <<---------- MonoBehaviour ---------->>
 		private void Awake() {
-			this._blockingEventsManager = CDependencyResolver.Get<CBlockingEventsManager>();
+			this._blockingEventsManager = CBlockingEventsManager.get;
 		}
 
 		private void Update() {

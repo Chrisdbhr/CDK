@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace CDK {
@@ -9,7 +8,7 @@ namespace CDK {
 	// 	
 	// }
 	
-	
+	[Obsolete("This ended up being just a more complex type of Singleton.")]
 	public static class CDependencyResolver {
 
 		

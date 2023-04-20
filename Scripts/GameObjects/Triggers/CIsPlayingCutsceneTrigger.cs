@@ -14,7 +14,7 @@ namespace CDK {
         private IDisposable _disposeOnDisable;
 
 		private void Awake() {
-			this._blockingEventsManager = CDependencyResolver.Get<CBlockingEventsManager>();
+			this._blockingEventsManager = CBlockingEventsManager.get;
 		}
 
 		private void OnEnable() {

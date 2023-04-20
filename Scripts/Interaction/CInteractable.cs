@@ -27,7 +27,7 @@ namespace CDK.Interaction {
 		#region <<---------- MonoBehaviour ---------->>
 		
 		protected virtual void Awake() {
-			this._blockingEventsManager = CDependencyResolver.Get<CBlockingEventsManager>();
+			this._blockingEventsManager = CBlockingEventsManager.get;
             this._navigationManager = CUINavigationManager.get;
         }
 

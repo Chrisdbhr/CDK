@@ -40,8 +40,6 @@ namespace CDK {
             };
             
             CSteamManager.Initialize();
-            
-            InitializeDependencyContainerAndBinds();
 
             InitializeApplicationAsync().CAwait();
 
@@ -97,22 +95,6 @@ namespace CDK {
         public static IResourceLocator ResourceLocator;
         
         #endregion <<---------- Properties and Fields ---------->>
-
-
-
-
-        #region <<---------- Dependencies ---------->>
-
-        private static void InitializeDependencyContainerAndBinds() {
-            CDependencyResolver.Bind<CGameSettings>(() => Resources.Load<CGameSettings>("GameSettings"));
-            CDependencyResolver.Bind<CBlockingEventsManager>(() => new CBlockingEventsManager());
-
-            var c = CCursorManager.get; // force create instance
-
-            CDependencyResolver.Bind<CSceneManager>(() => new CSceneManager());
-        }
-
-        #endregion <<---------- Dependencies ---------->>
 
 
 

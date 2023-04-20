@@ -51,7 +51,9 @@ namespace CDK {
         }
 
         protected virtual float GetChance() {
-            return 100f * Random.value;
+            var chance = 100f * Random.value;
+            Debug.Log($"{this.name} chosen chance: {chance}");
+            return chance;
         }
         
         #endregion <<---------- Random ---------->>

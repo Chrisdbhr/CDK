@@ -38,7 +38,7 @@ namespace CDK {
 
             this.CStartCoroutine(MonitorRoutine());
         }
-
+        
         private void OnDestroy() {
             this._disposables?.Dispose();
 

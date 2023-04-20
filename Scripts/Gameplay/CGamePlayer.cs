@@ -26,8 +26,8 @@ namespace CDK {
 
 		public CGamePlayer(int playerNumber) {
 
-			this._gameSettings = CDependencyResolver.Get<CGameSettings>();
-			this._blockingEventsManager = CDependencyResolver.Get<CBlockingEventsManager>();
+			this._gameSettings = CGameSettings.get;
+			this._blockingEventsManager = CBlockingEventsManager.get;
             this._navigationManager = CUINavigationManager.get;
 
 			this._disposables?.Dispose();

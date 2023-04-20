@@ -38,7 +38,7 @@ namespace CDK.Interaction {
 
 		#region <<---------- MonoBehaviour ---------->>
 		private void Awake() {
-			this._blockingEventsManager = CDependencyResolver.Get<CBlockingEventsManager>();
+			this._blockingEventsManager = CBlockingEventsManager.get;
 			this._transform = this.transform;
 			
 			this._characterBase = this.GetComponent<CCharacter_Base>();

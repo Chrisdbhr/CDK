@@ -36,7 +36,7 @@ namespace CDK.UI {
         #region <<---------- Mono Behaviour ---------->>
 
         protected virtual void Awake() {
-            this._gameSettings = CDependencyResolver.Get<CGameSettings>();
+            this._gameSettings = CGameSettings.get;
             this._navigationManager = CUINavigationManager.get;
         }
 

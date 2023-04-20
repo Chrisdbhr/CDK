@@ -42,7 +42,7 @@ namespace CDK.Interaction {
 
         
 		protected virtual void Awake() {
-			this._blockingEventsManager = CDependencyResolver.Get<CBlockingEventsManager>();
+			this._blockingEventsManager = CBlockingEventsManager.get;
 		}
 
         protected void OnDisable() {

@@ -29,7 +29,7 @@ namespace CDK.UI {
 
 		public CUINavigationManager() {
 			this._navigationHistory = new HashSet<CUIViewBase>();
-			this._blockingEventsManager = CDependencyResolver.Get<CBlockingEventsManager>();
+			this._blockingEventsManager = CBlockingEventsManager.get;
 		}
 		
 		#endregion <<---------- Initializers ---------->>

@@ -9,31 +9,36 @@ namespace CDK {
 
         public static CCursorManager get { 
             get{
-                if (CApplication.IsQuitting || !Application.isPlaying) {
-                    return null;
-                }
-                if (_instance == null) {
-                    _instance = new CCursorManager();
-                }
-                return _instance;
+                if (CSingletonHelper.CannotCreateAnyInstance() || _instance != null) return _instance;
+                return (_instance = new CCursorManager());
             }
         }
         private static CCursorManager _instance;
 
         #endregion <<---------- Singleton ---------->>
-        
-        
-        
-        
-		[NonSerialized] private readonly CGameSettings _gameSettings;
-		[NonSerialized] private readonly CBlockingEventsManager _blockingEventsManager;
 
-		
-		
-		
-		public CCursorManager() {
-			this._gameSettings = CDependencyResolver.Get<CGameSettings>();
-			this._blockingEventsManager = CDependencyResolver.Get<CBlockingEventsManager>();
+
+
+
+        #region <<---------- Properties and Fields ---------->>
+
+        [NonSerialized] private readonly CBlockingEventsManager _blockingEventsManager;
+
+        #endregion <<---------- Properties and Fields ---------->>
+
+
+
+
+
+        #region <<---------- Initializers ---------->>
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSplashScreen)]
+        private static void Initialize() {
+            var c = CCursorManager.get;
+        }
+        
+        private CCursorManager() {
+            this._blockingEventsManager = CBlockingEventsManager.get;
             
             this._blockingEventsManager.OnMenuRetainable.IsRetainedAsObservable().Subscribe(onMenu => {
                 if (!onMenu) {
@@ -43,10 +48,13 @@ namespace CDK {
                 ShowMouseIfNeeded();
             });
             
-            SetCursorState(!this._gameSettings.CursorStartsHidden);
+            SetCursorState(!CGameSettings.get.CursorStartsHidden);
 
             CInputManager.InputTypeChanged += OnInputTypeChanged;
-		}
+        }
+
+        #endregion <<---------- Initializers ---------->>
+
 
 		private void OnInputTypeChanged(CInputManager.InputType newType) {
 			SetCursorState(CInputManager.ActiveInputType.IsMouseOrKeyboard() && this._blockingEventsManager.IsOnMenu);

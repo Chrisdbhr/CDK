@@ -4,41 +4,25 @@ using UnityEngine;
 
 namespace CDK {
 	public class CBlockingEventsManager {
-		
-		#region <<---------- Properties ---------->>
 
-        // --- start Blocking Events
+        #region <<---------- Singleton ---------->>
 
-        public bool IsAnyExceptMenu => IsPlayingCutscene || IsLimitingPlayerActions;
+        public static CBlockingEventsManager get {
+            get {
+                if (CSingletonHelper.CannotCreateAnyInstance() || _instance != null) return _instance;
+                return (_instance = new CBlockingEventsManager());
+            }
+        }
+        private static CBlockingEventsManager _instance;
+
+        #endregion <<---------- Singleton ---------->>
+
         
-        public bool IsPlayingCutscene => this.PlayingCutsceneRetainable.IsRetained;
-        public CRetainable PlayingCutsceneRetainable { get; private set; }
-
-        public bool IsOnMenu => this.OnMenuRetainable.IsRetained;
-        public CRetainable OnMenuRetainable { get; private set; }
-
-        public bool IsLimitingPlayerActions => this.LimitPlayerActionsRetainable.IsRetained;
-        public CRetainable LimitPlayerActionsRetainable { get; private set; }
         
-        // --- end Blocking Events
-
-
-        public bool IsAnyHappening => this._isAnyHappeningRx.Value;
-        private BoolReactiveProperty _isAnyHappeningRx;
-        
-        private CompositeDisposable _disposables;
-        
-		#endregion <<---------- Properties ---------->>
-
-		
-		
 
 		#region <<---------- Initializers ---------->>
 		
-		public CBlockingEventsManager() {
-
-            if (!Application.isPlaying) return;
-            
+		private CBlockingEventsManager() {
             this._disposables?.Dispose();
             this._disposables = new CompositeDisposable();
 
@@ -77,8 +61,36 @@ namespace CDK {
 		}
 
 		#endregion <<---------- Initializers ---------->>
+        
+        
+        
+                
+        #region <<---------- Properties ---------->>
+
+        // --- start Blocking Events
+
+        public bool IsAnyExceptMenu => IsPlayingCutscene || IsLimitingPlayerActions;
+        
+        public bool IsPlayingCutscene => this.PlayingCutsceneRetainable.IsRetained;
+        public CRetainable PlayingCutsceneRetainable { get; private set; }
+
+        public bool IsOnMenu => this.OnMenuRetainable.IsRetained;
+        public CRetainable OnMenuRetainable { get; private set; }
+
+        public bool IsLimitingPlayerActions => this.LimitPlayerActionsRetainable.IsRetained;
+        public CRetainable LimitPlayerActionsRetainable { get; private set; }
+        
+        // --- end Blocking Events
 
 
+        public bool IsAnyHappening => this._isAnyHappeningRx.Value;
+        private BoolReactiveProperty _isAnyHappeningRx;
+        
+        private CompositeDisposable _disposables;
+        
+        #endregion <<---------- Properties ---------->>
+
+        
 
 
         #region <<---------- Observables ---------->>

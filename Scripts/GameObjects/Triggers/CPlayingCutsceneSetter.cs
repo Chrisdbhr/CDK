@@ -11,7 +11,7 @@ namespace CDK {
 		
         
 		private void Awake() {
-			_blockingEventsManager = CDependencyResolver.Get<CBlockingEventsManager>();
+			_blockingEventsManager = CBlockingEventsManager.get;
 		}
 
 		private void OnEnable() {

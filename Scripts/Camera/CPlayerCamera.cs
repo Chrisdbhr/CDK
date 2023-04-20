@@ -122,7 +122,7 @@ namespace CDK {
 		protected virtual void Awake() {
 			this._transform = this.transform;
 			this._fader = CFader.get;
-			this._blockingEventsManager = CDependencyResolver.Get<CBlockingEventsManager>();
+			this._blockingEventsManager = CBlockingEventsManager.get;
 			this.ActiveCameraProfiles = new List<CCameraProfileVolume>();
 
             this._cinemachineBrain.m_IgnoreTimeScale = false;
