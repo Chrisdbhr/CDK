@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 namespace CDK.Data {
@@ -6,15 +5,12 @@ namespace CDK.Data {
 	public class CHitInfoData {
 
 		public CHitInfoScriptableObject ScriptableObject;
-
-		public Transform AttackerRootTransform;
+		public Transform AttackerTransform;
 		public Vector3 HitPointPosition;
-
-
 
 		public CHitInfoData(CHitInfoScriptableObject scriptableObject, Vector3 hitPointPosition, Transform attackerRootTransform) {
 			this.ScriptableObject = scriptableObject;
-			this.AttackerRootTransform = attackerRootTransform;
+			this.AttackerTransform = attackerRootTransform;
 			this.HitPointPosition = hitPointPosition;
 		}
 		

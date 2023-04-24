@@ -57,21 +57,6 @@ namespace CDK {
 				if (oldHealth <= 0f) {
 					this.OnRevive?.Invoke();
 				}
-				if (this._currentHealth <= 0f) {
-					this.OnDie?.Invoke();
-					
-					Debug.Log($"{this.name} died.");
-				
-					foreach (var obj in this._unparentOnDie) {
-						obj.parent = null;
-					}
-					foreach (var obj in this._activateOnDie) {
-						obj.SetActive(true);
-					}
-					foreach (var obj in this._destroyOnDie) {
-						Destroy(obj.gameObject);
-					}
-				}
 
 				this.OnHealthChanged?.Invoke(this._currentHealth);
 				this.HealthChangedAsStringEvent?.Invoke(this._currentHealth.ToString("0"));
@@ -84,10 +69,25 @@ namespace CDK {
 					this._lastDamageTakenTime = Time.timeSinceLevelLoad;
 				}
 				
+				if (this._currentHealth <= 0f) {
+					foreach (var obj in this._unparentOnDie) {
+						obj.parent = null;
+					}
+					foreach (var obj in this._activateOnDie) {
+						obj.SetActive(true);
+					}
+					foreach (var obj in this._destroyOnDie) {
+						Destroy(obj.gameObject);
+					}
+					this.OnDie?.Invoke();
+					Debug.Log($"{this.name} died.");
+				}
 			}
 		}
 		[SerializeField] private float _currentHealth;
 
+		public float CurrentHealthNormalized => this._maxHealth != 0f ? this._currentHealth / this._maxHealth : 0f;
+		
 		public bool IsDead {
 			get { return this._currentHealth <= 0f; }
 		}
@@ -198,7 +198,7 @@ namespace CDK {
 			var hitScriptObj = hitInfo.ScriptableObject;
 			if (hitScriptObj.Damage <= 0f) return 0f;
 
-			this._lastAttacker = hitInfo.AttackerRootTransform;
+			this._lastAttacker = hitInfo.AttackerTransform;
 
 			// Start total damage calculation.
 			float finalDamage = hitScriptObj.Damage * damageMultiplier;
@@ -209,7 +209,7 @@ namespace CDK {
 			//todo play damage animation if apply
 
 			if (hitScriptObj.LookAtAttacker) {
-				this._transform.LookAt(hitInfo.AttackerRootTransform.transform);
+				this._transform.LookAt(hitInfo.AttackerTransform.transform);
 				this._transform.eulerAngles = new Vector3(0f, this._transform.eulerAngles.y, 0f);
 			}
 
@@ -219,15 +219,15 @@ namespace CDK {
 			}
 
 			// camera shake
-			if (this._transformShake != null && hitInfo.AttackerRootTransform != null) {
+			if (this._transformShake != null && hitInfo.AttackerTransform != null) {
 				this._transformShake.RequestShake(
-					(hitInfo.AttackerRootTransform.position - this._transform.position).normalized * (finalDamage * 0.01f), 
+					(hitInfo.AttackerTransform.position - this._transform.position).normalized * (finalDamage * 0.01f), 
 					hitScriptObj.DamageShakePattern,
 					hitScriptObj.ShakeMultiplier
 				);
 			}
 
-			this._lastAttacker = hitInfo.AttackerRootTransform;
+			this._lastAttacker = hitInfo.AttackerTransform;
 			
 			return finalDamage;
 		}

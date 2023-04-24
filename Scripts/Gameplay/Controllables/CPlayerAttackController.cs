@@ -66,7 +66,7 @@ namespace CDK.Weapons {
 									}
 									
 									// set hit info properties
-									ammo.HitInfo.AttackerRootTransform = this._characterBase.transform;
+									ammo.HitInfo.AttackerTransform = this._characterBase.transform;
 									ammo.HitInfo.HitPointPosition = hitInfo.point;
 
 									float damage = ammo.HitInfo.ScriptableObject.Damage;

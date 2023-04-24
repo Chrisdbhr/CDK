@@ -172,7 +172,6 @@ namespace CDK {
                 instantiatedCharacter.TeleportToLocation(entryPoint.transform.position, entryPoint.transform.rotation);
                 Physics.SyncTransforms();
             }
-            instantiatedCharacter.gameObject.SetActive(false);
             instantiatedCharacter.name = $"{CharNamePrefix} {instantiatedCharacter.name}";
 			
             this.AddControllingCharacter(instantiatedCharacter);

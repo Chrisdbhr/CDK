@@ -39,6 +39,8 @@ namespace CDK {
             }
         }
         
+		public CRootMotionReceiver RootMotionReceiver => this._rootMotionReceiver;
+		protected CRootMotionReceiver _rootMotionReceiver;
         
         protected float TimelineTimescale {
             get {

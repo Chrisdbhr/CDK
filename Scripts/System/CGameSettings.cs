@@ -36,9 +36,6 @@ namespace CDK {
 		public bool CursorStartsHidden => this._cursorStartsHidden;
 		[SerializeField] protected bool _cursorStartsHidden;
 
-		public LayerMask LineOfSightBlockingLayers => this._lineOfSightBlockingLayers;
-		[SerializeField] protected LayerMask _lineOfSightBlockingLayers = 1;
-
 		#if FMOD
 		[Header("Default Sounds")]
 		[SerializeField] protected EventReference _soundSelect;
