@@ -177,7 +177,7 @@ namespace CDK {
             this.AddControllingCharacter(instantiatedCharacter);
             instantiatedCharacter.gameObject.SetActive(true);
 			
-            await this.CheckIfNeedToCreateCamera();
+            await this.CheckIfNeedToCreateCamera(instantiatedCharacter);
 
             Debug.Log($"Created player {this.PlayerNumber} controlling character '{instantiatedCharacter.name}'.", instantiatedCharacter);
             instantiatedCharacter.transform.SetAsFirstSibling();
@@ -202,9 +202,12 @@ namespace CDK {
 			this._characters.Add(character);
 		}
 
-		public void RemoveAndDestroyAllControllingCharacters() {
+		public void RemoveAndDestroyAllControllingCharactersAndCameras() {
             foreach (var character in this._characters) {
-                character.CDestroy();
+				if (this._playerCamera) {
+					this._playerCamera.gameObject.CDestroy();
+				}
+				character.gameObject.CDestroy();
             }
             this._characters.Clear();
 		}
@@ -234,22 +237,21 @@ namespace CDK {
 
 		#region <<---------- Player Camera ---------->>
 
-		private async Task CheckIfNeedToCreateCamera() {
-			if (this._cameraTransform != null) return;
-			var mainChar = this.GetControllingCharacter();
-			if (mainChar == null) return;
+		private async Task CheckIfNeedToCreateCamera(CCharacter_Base c) {
+			if (c == null) return;
+			if (this._playerCamera == null) {
+				this._playerCamera = await CAssets.LoadAndInstantiateAsync<CPlayerCamera>("Player Camera");
+				Debug.Log($"Created character camera: '{c.name}'", this._playerCamera);
+			}
 			
-			this._playerCamera = await CAssets.LoadAndInstantiateAsync<CPlayerCamera>("Player Camera");
-            this._playerCamera.name = $"{CameraNamePrefix}{mainChar.name.Replace(CharNamePrefix, string.Empty)}";
-            
-            Debug.Log($"Created character camera: '{mainChar.name}'", this._playerCamera);
+            this._playerCamera.name = $"{CameraNamePrefix}{c.name.Replace(CharNamePrefix, string.Empty)}";
 
 			this._playerCamera.Initialize(this);
 			this._cameraTransform = this._playerCamera.GetCameraTransform();
 
             var t = this._playerCamera.transform;
             t.SetAsFirstSibling();
-            t.rotation = mainChar.transform.rotation;
+            t.rotation = c.transform.rotation;
         }
 
 		private (Vector3 camF, Vector3 camR) GetCameraVectors() {

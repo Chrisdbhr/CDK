@@ -80,7 +80,6 @@ namespace CDK {
 						Destroy(obj.gameObject);
 					}
 					this.OnDie?.Invoke();
-					Debug.Log($"{this.name} died.");
 				}
 			}
 		}
@@ -110,7 +109,6 @@ namespace CDK {
 		private float _immuneTimer;
 
 		#endregion <<---------- Immunity ---------->>
-
 		
 		
 		#region <<---------- Events ---------->>
@@ -163,7 +161,6 @@ namespace CDK {
 
 				this.CurrentHealth = nextHealth;
 			});
-
 		}
 
 		private void Update() {

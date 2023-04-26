@@ -57,7 +57,7 @@ namespace CDK {
         public void DestroyAllPlayers() {
             Debug.Log($"Removing and destroying all '{this._gamePlayers.Count}' players.");
             foreach (var player in this._gamePlayers) {
-                player.RemoveAndDestroyAllControllingCharacters();   
+                player.RemoveAndDestroyAllControllingCharactersAndCameras();   
             }
             foreach (var player in this._gamePlayers) {
                 player?.Dispose();

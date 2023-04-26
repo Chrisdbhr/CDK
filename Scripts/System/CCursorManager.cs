@@ -77,7 +77,7 @@ namespace CDK {
             SetCursorState(true);
         }
 
-        public void HideCursor() {
+		public void HideCursor() {
             SetCursorState(false);
         }
 
