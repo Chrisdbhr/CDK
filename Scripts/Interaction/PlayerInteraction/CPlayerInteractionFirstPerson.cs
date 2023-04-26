@@ -5,20 +5,20 @@ using UnityEngine;
 namespace CDK.Interaction {
 	public class CPlayerInteractionFirstPerson : CPlayerInteractionBase {
 		
-		[SerializeField] private Transform _originTransform;
+		public Transform OriginTransform;
 		[NonSerialized] private float _maxInteractionDistance = 2.2f;
 		[NonSerialized] private RaycastHit _hitInfo;
 
 
 		#if UNITY_EDITOR
 		private void OnDrawGizmosSelected() {
-			if (this._originTransform == null) return;
+			if (this.OriginTransform == null) return;
 			Gizmos.color = Color.red;
-			Gizmos.DrawRay(this._originTransform.position, this._originTransform.forward * this._maxInteractionDistance);
+			Gizmos.DrawRay(this.OriginTransform.position, this.OriginTransform.forward * this._maxInteractionDistance);
 			var interactable = this.GetCollisionInteractable();
 			if (interactable == null) return;
 			Gizmos.color = Color.green;
-			Gizmos.DrawLine(this._originTransform.position, this._hitInfo.point);
+			Gizmos.DrawLine(this.OriginTransform.position, this._hitInfo.point);
 			Handles.Label(this._hitInfo.point, $"Interactable object: {this._hitInfo.transform.root.name}");
 		}
 		#endif
@@ -32,9 +32,10 @@ namespace CDK.Interaction {
 		}
 
 		private ICInteractable GetCollisionInteractable() {
+			if (this.OriginTransform == null) return null;
 			var collided = Physics.Raycast(
-				this._originTransform.transform.position,
-				this._originTransform.forward,
+				this.OriginTransform.transform.position,
+				this.OriginTransform.forward,
 				out this._hitInfo,
 				this._maxInteractionDistance,
 				this._interactionLayerMask,
