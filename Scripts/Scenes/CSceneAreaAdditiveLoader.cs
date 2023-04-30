@@ -19,6 +19,8 @@ namespace CDK {
 
 		#region <<---------- Properties and Fields ---------->>
 
+		[SerializeField] private bool _debug;
+		
         enum CheckType {
             bounds, distance
         }
@@ -97,7 +99,7 @@ namespace CDK {
 		}
 
 		#if UNITY_EDITOR
-		private void OnDrawGizmos() {
+		private void OnDrawGizmosSelected() {
 			var t = this.transform;
 			var tPos = t.position;
 			
@@ -114,7 +116,7 @@ namespace CDK {
                         Gizmos.DrawWireCube(tPos, t.localScale);
                     }
                     else {
-                        Gizmos.DrawCube(tPos, t.localScale);
+                        Gizmos.DrawWireCube(tPos, t.localScale);
                     }
                     break;
                 case CheckType.distance:
@@ -122,7 +124,7 @@ namespace CDK {
                         Gizmos.DrawWireSphere(tPos, t.localScale.x);
                     }
                     else {
-                        Gizmos.DrawSphere(tPos, t.localScale.x);
+                        Gizmos.DrawWireSphere(tPos, t.localScale.x);
                     }
                     break;
             }
@@ -170,7 +172,8 @@ namespace CDK {
 				this.UnloadScene();
 			}
 		}
-		
+
+		[EasyButtons.Button]
 		void LoadScene() {
 			#if UNITY_EDITOR
 			if (!Application.isPlaying && !PrefabStageUtility.GetCurrentPrefabStage()) {

@@ -103,16 +103,16 @@ namespace CDK {
 				if (character == null) return;
 				
 				#if Rewired
-                character.Input.Movement3D.x = this._rePlayer.GetAxis(CInputKeys.MOV_X).CClamp(-1f, 1f);
-                character.Input.Movement3D.z = this._rePlayer.GetAxis(CInputKeys.MOV_Y).CClamp(-1f, 1f);
+                character.PlayerInput.Movement3D.x = this._rePlayer.GetAxis(CInputKeys.MOV_X).CClamp(-1f, 1f);
+                character.PlayerInput.Movement3D.z = this._rePlayer.GetAxis(CInputKeys.MOV_Y).CClamp(-1f, 1f);
 
                 if (this._cameraTransform == null) {
                     return;
                 }
 
-                var cameraDirection = this._cameraTransform.rotation * character.Input.Movement3D;
+                var cameraDirection = this._cameraTransform.rotation * character.PlayerInput.Movement3D;
                 cameraDirection.y = 0f;
-                character.Input.Movement3D = cameraDirection.normalized;
+                character.PlayerInput.Movement3D = cameraDirection.normalized;
 				#else
 				Debug.LogError("'GamePlayer movement handling not implemented without Rewired'");
 				#endif
@@ -307,21 +307,21 @@ namespace CDK {
             if (this._blockingEventsManager.IsOnMenu) return;
             var character = this.GetControllingCharacter();
             if (character == null) return;
-            character.Input.Walk = data.GetButton();
+            character.PlayerInput.Walk = data.GetButton();
         }
         
 		private void InputRun(InputActionEventData data) {
 			if (this._blockingEventsManager.IsOnMenu) return;
 			var character = this.GetControllingCharacter();
 			if (character == null) return;
-			character.Input.Run = data.GetButton();
+			character.PlayerInput.Run = data.GetButton();
 		}
 
         private void InputJump(InputActionEventData data) {
             if (this._blockingEventsManager.IsOnMenu) return;
             var character = this.GetControllingCharacter();
             if (character == null) return;
-            character.Input.Jump = data.GetButton();
+            character.PlayerInput.Jump = data.GetButton();
         }
 		
 		private void InputInteract(InputActionEventData data) {

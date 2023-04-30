@@ -22,7 +22,7 @@ namespace CDK {
 
 		#region <<---------- Properties ---------->>
 
-        public CPlayerInputValues Input = new CPlayerInputValues();
+        public CPlayerInputValues PlayerInput = new CPlayerInputValues();
 
         protected CBlockingEventsManager _blockingEventsManager;
 #pragma warning disable CS0108, CS0114
@@ -123,7 +123,9 @@ namespace CDK {
             }
         }
 
-        protected virtual void Start() { }
+		protected virtual IEnumerator Start() {
+			yield break;
+		}
 
 		protected virtual void Update() { }
 
