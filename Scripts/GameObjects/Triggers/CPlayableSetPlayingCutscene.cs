@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Linq;
+using FMODUnity;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.Playables;
 using UnityEngine.Timeline;
 
@@ -12,6 +15,9 @@ namespace CDK {
 	public class CPlayableSetPlayingCutscene : MonoBehaviour {
 		private PlayableDirector _playable;
 
+		[SerializeField] private UnityEvent _onCutsceneEnded;
+		[SerializeField] private bool _destroyGameObjectOnFinished;
+		
 		public bool IsPlaying {
 			get {
 				return this._isPlaying;
@@ -25,6 +31,10 @@ namespace CDK {
 				}
 				else {
 					this._blockingEventsManager.PlayingCutsceneRetainable.Release(this);
+					this._onCutsceneEnded?.Invoke();
+					if (this._destroyGameObjectOnFinished) {
+						this.gameObject.CDestroy();
+					}
 				}
 			}
 		}
@@ -41,18 +51,27 @@ namespace CDK {
 			var p = data.context as PlayableDirector;
 			if (p == null) return;
 			Undo.RecordObject(p.gameObject, "Add component");
-			p.gameObject.AddComponent<CPlayableSetPlayingCutscene>();
+			p.gameObject.CGetOrAddComponent<CPlayableSetPlayingCutscene>();
 		}
 		#endif
 
-
+		#if UNITY_EDITOR
 		private void Reset() {
-			this.gameObject.AddComponent<SignalReceiver>();
+			Undo.RecordObject(this.gameObject, "Add component");
+			this.gameObject.CGetOrAddComponent<SignalReceiver>();
 		}
+		#endif
 
 		private void Awake() {
 			this._playable = this.GetComponent<PlayableDirector>();
 			this._blockingEventsManager = CBlockingEventsManager.get;
+
+			// unmute FMOD tracks
+			if (_playable.playableAsset is TimelineAsset timeline) {
+				foreach (var track in timeline.GetOutputTracks().Where(t => t.GetType() == typeof(FMODEventTrack))) {
+					track.muted = false;
+				}	
+			}
 		}
 
 		private void LateUpdate() {

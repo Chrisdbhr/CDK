@@ -1,19 +1,18 @@
-using System;
 using System.Collections;
 using UnityEngine;
 
 namespace CDK {
 	public class CTransformShake : MonoBehaviour {
 
-		[NonSerialized] private Coroutine _shakeRoutine;
-		[NonSerialized] private Vector3 _startLocalPosition;
+		private Coroutine _shakeRoutine;
+		private readonly Vector3 _startLocalPosition = Vector3.zero;
 		
-		[NonSerialized] private Transform _transform;
+		private Transform _transform;
 		
 		
 		private void Awake() {
 			this._transform = this.transform;
-			this._startLocalPosition = this._transform.localPosition;
+			this._transform.CAssertLocalPositionIsNotZero();
 		}
 
 		

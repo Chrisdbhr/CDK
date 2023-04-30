@@ -55,5 +55,13 @@ namespace CDK {
             return !isRoot;
         }
         
+        public static bool CAssertLocalPositionIsNotZero(this Transform t, string message = null) {
+            var isZero = t.localPosition.CIsZero();
+            if (!isZero) {
+                Debug.LogAssertion($"Transform local scale is not zero ({message})");
+            }
+            return !isZero;
+        }
+        
     }
 }
