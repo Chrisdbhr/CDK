@@ -102,7 +102,7 @@ namespace CDK {
 			var damageable = go.GetComponent<ICDamageable>();
 			if (damageable != null && !this._damageds.Contains(damageable)) {
 				this._damageds.Add(damageable);
-				damageable.TakeDamage(this._hitInfo);
+				damageable.TakeHit(this._hitInfo);
 				if (this._destroyType == DestroyType.onlyIfDidDamage) {
 					this.gameObject.CDestroy();
 					return;

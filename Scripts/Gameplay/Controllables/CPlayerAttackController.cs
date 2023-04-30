@@ -82,7 +82,7 @@ namespace CDK.Weapons {
 									}
 
 									// apply damage
-									hitInfo.collider.SendMessage(nameof(ICDamageable.TakeDamage), ammo.HitInfo, SendMessageOptions.DontRequireReceiver);
+									hitInfo.collider.SendMessage(nameof(ICDamageable.TakeHit), ammo.HitInfo, SendMessageOptions.DontRequireReceiver);
 									Debug.Log($"TODO spawn effect on point when hit and play sound");
 								}
 								break;

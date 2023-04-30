@@ -3,8 +3,8 @@ using CDK.Data;
 namespace CDK.Damage {
 	public interface ICDamageable {
 		/// <summary>
-		/// Returns TRUE if damaged with success.
+		/// Returns TRUE if toke hit.
 		/// </summary>
-		bool TakeDamage(CHitInfoData hitInfo, float damageMultiplier = 1f);
+		bool TakeHit(CHitInfoData hitInfo, float damageMultiplier = 1f);
 	}
 }

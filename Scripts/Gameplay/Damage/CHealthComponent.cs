@@ -119,6 +119,7 @@ namespace CDK {
 
 		[SerializeField] private CUnityEventString HealthChangedAsStringEvent;
 		[SerializeField] private CUnityEventFloat HealthChangedPercentageEvent;
+		[SerializeField] private CUnityEvent TokeDamageEvent;
 		
 		public event Action<float> OnHealthChanged;
 		public event Action<float, CHitInfoData> OnDamageTaken;
@@ -213,6 +214,7 @@ namespace CDK {
 			this.CurrentHealth -= finalDamage;
 			if (finalDamage > 0f) {
 				this.OnDamageTaken?.Invoke(finalDamage, hitInfo);
+				this.TokeDamageEvent?.Invoke();
 			}
 
 			// camera shake
