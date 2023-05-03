@@ -2,11 +2,13 @@ using System;
 using System.Threading.Tasks;
 using UniRx;
 using UnityEngine;
+using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.SceneManagement;
 using Object = UnityEngine.Object;
 
 #if UnityAddressables
 using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.ResourceProviders;
 #endif
 
 namespace CDK {
@@ -132,15 +134,18 @@ namespace CDK {
             return await LoadPrefabAsync<T>(key.RuntimeKey.ToString());
         }
 
-        public static async Task<T> LoadAndInstantiateAsync<T>(AssetReference key, Transform parent = null, bool instantiateInWorldSpace = false, bool trackHandle = true) where T : Component {
-            return await LoadAndInstantiateAsync<T>(key.RuntimeKey.ToString(), parent, instantiateInWorldSpace, trackHandle);
+        public static async Task<T> LoadAndInstantiateAsync<T>(AssetReference key, Vector3 position = default, Quaternion rotation = default, Transform parent = null, bool trackHandle = true) where T : Component {
+            return await LoadAndInstantiateAsync<T>(key.RuntimeKey.ToString(), position, rotation, parent, trackHandle);
         }
 
-        public static async Task<T> LoadAndInstantiateAsync<T>(string key, Transform parent = null, bool instantiateInWorldSpace = false, bool trackHandle = true) where T : Component {
+        public static async Task<T> LoadAndInstantiateAsync<T>(string key, Vector3 position = default, Quaternion rotation = default, Transform parent = null, bool trackHandle = true) where T : Component {
             if (!Application.isPlaying) return null;
             Debug.Log($"Loading GameObject with key '{key}'{(parent != null ? $" on parent '{parent.name}'" : string.Empty)}");
             try {
-                var asyncOp = Addressables.InstantiateAsync(key, parent, instantiateInWorldSpace, trackHandle);
+                var instantiationParameters = new InstantiationParameters(position, rotation, parent);
+                
+                var asyncOp = Addressables.InstantiateAsync(key, instantiationParameters, trackHandle);
+                
                 while (!asyncOp.IsDone) {
                     await Observable.NextFrame();
                 }

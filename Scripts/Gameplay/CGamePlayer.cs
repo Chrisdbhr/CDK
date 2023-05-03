@@ -13,6 +13,7 @@ using Rewired;
 
 #if UnityAddressables
 using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.ResourceProviders;
 #endif
 
 #if UNITY_EDITOR
@@ -149,13 +150,13 @@ namespace CDK {
 		
 		#if UnityAddressables
 		
-		public async Task<CCharacter_Base> InstantiateAndAssignCharacterAsync(string key) {
+		public async Task<CCharacter_Base> InstantiateAndAssignCharacterAsync(string key, Vector3 position = default, Quaternion rotation = default) {
 			if (key.CIsNullOrEmpty()) {
 				Debug.LogWarning($"Created player {this.PlayerNumber} with no controlling character because '{nameof(key)}' is null!");
 				return null;
 			}
 
-            var character = await CAssets.LoadAndInstantiateAsync<CCharacter_Base>(key);
+            var character = await CAssets.LoadAndInstantiateAsync<CCharacter_Base>(key, position, rotation);
 
             if (character == null) {
                 Debug.LogError($"Asset key '{key}' gameobject doesnt have a {nameof(CCharacter_Base)} component on it! could not create player!");
@@ -166,12 +167,6 @@ namespace CDK {
 		}
 
         public async Task<CCharacter_Base> AssignInstantiatedCharacter(CCharacter_Base instantiatedCharacter) {
-            var entryPoint = CSceneEntryPoint.GetSceneEntryPointByNumber(0);
-            if (entryPoint != null) {
-                Debug.Log($"Setting '{instantiatedCharacter.name}' to entryPoint number'{0}'", entryPoint.gameObject);
-                instantiatedCharacter.TeleportToLocation(entryPoint.transform.position, entryPoint.transform.rotation);
-                Physics.SyncTransforms();
-            }
             instantiatedCharacter.name = $"{CharNamePrefix} {instantiatedCharacter.name}";
 			
             this.AddControllingCharacter(instantiatedCharacter);
@@ -240,7 +235,7 @@ namespace CDK {
 		private async Task CheckIfNeedToCreateCamera(CCharacter_Base c) {
 			if (c == null) return;
 			if (this._playerCamera == null) {
-				this._playerCamera = await CAssets.LoadAndInstantiateAsync<CPlayerCamera>("Player Camera");
+				this._playerCamera = await CAssets.LoadAndInstantiateAsync<CPlayerCamera>("Player Camera", c.Position, c.transform.rotation);
 				Debug.Log($"Created character camera: '{c.name}'", this._playerCamera);
 			}
 			
@@ -383,7 +378,7 @@ namespace CDK {
 		
 		private void TryPauseGame() {
             if (Time.timeScale <= 0) return;
-			if (this._blockingEventsManager.IsOnMenu) return;
+			if (this._blockingEventsManager.IsAnyHappening) return;
             this._navigationManager.OpenMenu(CGameSettings.AssetRef_PauseMenu, null, null);
 		}
 

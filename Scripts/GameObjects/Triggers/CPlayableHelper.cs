@@ -12,11 +12,14 @@ using UnityEditor;
 
 namespace CDK {
 	[RequireComponent(typeof(PlayableDirector))]
-	public class CPlayableSetPlayingCutscene : MonoBehaviour {
+	public class CPlayableHelper : MonoBehaviour {
 		private PlayableDirector _playable;
 
+		[SerializeField] private UnityEvent _onCutsceneStarted;
 		[SerializeField] private UnityEvent _onCutsceneEnded;
 		[SerializeField] private bool _destroyGameObjectOnFinished;
+		[SerializeField] private bool _preventAutoFadeOutOnExit;
+		[SerializeField] private GameObject[] _disableOnExit;
 		
 		public bool IsPlaying {
 			get {
@@ -25,13 +28,23 @@ namespace CDK {
 			set {
 				if (value == this._isPlaying) return;
 				this._isPlaying = value;
-				CFader.get.FadeToTransparent(1f);
 				if (this._isPlaying) {
 					this._blockingEventsManager.PlayingCutsceneRetainable.Retain(this);
+					this._onCutsceneStarted?.Invoke();
 				}
 				else {
+					if (!this._preventAutoFadeOutOnExit) {
+						CFader.get.FadeToTransparent(1f);
+					}
 					this._blockingEventsManager.PlayingCutsceneRetainable.Release(this);
 					this._onCutsceneEnded?.Invoke();
+					if (_disableOnExit.Length > 0) {
+						foreach (var go in _disableOnExit) {
+							if (go == null) continue;
+							Debug.Log($"Disabling {go.name} after finishing cutscene {this.name}");
+							go.SetActive(false);
+						}
+					}
 					if (this._destroyGameObjectOnFinished) {
 						this.gameObject.CDestroy();
 					}
@@ -46,12 +59,12 @@ namespace CDK {
 		
 		
 		#if UNITY_EDITOR
-		[MenuItem("CONTEXT/PlayableDirector/Add IsPlayingCutscene Monitor")]
+		[MenuItem("CONTEXT/PlayableDirector/Add Playable Helper")]
 		private static void RenameGameObjectWithThisComponentName(MenuCommand data) {
 			var p = data.context as PlayableDirector;
 			if (p == null) return;
 			Undo.RecordObject(p.gameObject, "Add component");
-			p.gameObject.CGetOrAddComponent<CPlayableSetPlayingCutscene>();
+			p.gameObject.CGetOrAddComponent<CPlayableHelper>();
 		}
 		#endif
 
@@ -65,6 +78,8 @@ namespace CDK {
 		private void Awake() {
 			this._playable = this.GetComponent<PlayableDirector>();
 			this._blockingEventsManager = CBlockingEventsManager.get;
+			
+			this._playable.played += PlayableStarted; 
 
 			// unmute FMOD tracks
 			if (_playable.playableAsset is TimelineAsset timeline) {
@@ -74,17 +89,27 @@ namespace CDK {
 			}
 		}
 
-		private void LateUpdate() {
-			double time = this._playable.time;
-			IsPlaying = time > 0f && time < this._playable.duration;
+
+		private void OnDestroy() {
+			this._playable.played -= PlayableStarted; 
 		}
 
-		public void FadeToBlack() {
-			CFader.get.FadeToBlack(1f);
+		private void PlayableStarted(PlayableDirector p) {
+			IsPlaying = true;
+			this._playable.stopped += PlayableStopped;
+		}
+
+		private void PlayableStopped(PlayableDirector p) {
+			IsPlaying = false;
+			this._playable.stopped -= PlayableStopped;
+		}
+
+		public void FadeToBlack(float time) {
+			CFader.get.FadeToBlack(time);
 		}
 		
-		public void FadeToTransparent() {
-			CFader.get.FadeToTransparent(1f);
+		public void FadeToTransparent(float time) {
+			CFader.get.FadeToTransparent(time);
 		}
 	}
 }

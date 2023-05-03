@@ -216,16 +216,17 @@ namespace CDK {
 
         private void UpdateUnityCameraParameters() {
             if (this._unityCamera == null) return;
+			var isOnCutscene = this._blockingEventsManager.IsPlayingCutscene;
             switch (this._cinemachineBrain.ActiveVirtualCamera) {
                 case CinemachineFreeLook cFreelook:
-                    this._unityCamera.nearClipPlane = this._unityCamera.nearClipPlane.CLerp(cFreelook.m_Lens.NearClipPlane, CTime.DeltaTimeScaled * this._parametersLerp);
-                    this._unityCamera.farClipPlane = this._unityCamera.farClipPlane.CLerp(cFreelook.m_Lens.FarClipPlane, CTime.DeltaTimeScaled * this._parametersLerp);
-                    this._unityCamera.fieldOfView = this._unityCamera.fieldOfView.CLerp(cFreelook.m_Lens.FieldOfView, CTime.DeltaTimeScaled * this._parametersLerp);
+                    this._unityCamera.nearClipPlane = isOnCutscene ? cFreelook.m_Lens.NearClipPlane : this._unityCamera.nearClipPlane.CLerp(cFreelook.m_Lens.NearClipPlane, CTime.DeltaTimeScaled * this._parametersLerp);
+                    this._unityCamera.farClipPlane = isOnCutscene ? cFreelook.m_Lens.FarClipPlane : this._unityCamera.farClipPlane.CLerp(cFreelook.m_Lens.FarClipPlane, CTime.DeltaTimeScaled * this._parametersLerp);
+                    this._unityCamera.fieldOfView  = isOnCutscene ? cFreelook.m_Lens.FieldOfView : this._unityCamera.fieldOfView.CLerp(cFreelook.m_Lens.FieldOfView, CTime.DeltaTimeScaled * this._parametersLerp);
                     break;
                 case CinemachineVirtualCamera cVirtual:
-                    this._unityCamera.nearClipPlane = this._unityCamera.nearClipPlane.CLerp(cVirtual.m_Lens.NearClipPlane, CTime.DeltaTimeScaled * this._parametersLerp);
-                    this._unityCamera.farClipPlane = this._unityCamera.farClipPlane.CLerp(cVirtual.m_Lens.FarClipPlane, CTime.DeltaTimeScaled * this._parametersLerp);
-                    this._unityCamera.fieldOfView = this._unityCamera.fieldOfView.CLerp(cVirtual.m_Lens.FieldOfView, CTime.DeltaTimeScaled * this._parametersLerp);
+                    this._unityCamera.nearClipPlane = isOnCutscene ? cVirtual.m_Lens.NearClipPlane : this._unityCamera.nearClipPlane.CLerp(cVirtual.m_Lens.NearClipPlane, CTime.DeltaTimeScaled * this._parametersLerp);
+                    this._unityCamera.farClipPlane  = isOnCutscene ? cVirtual.m_Lens.FarClipPlane : this._unityCamera.farClipPlane.CLerp(cVirtual.m_Lens.FarClipPlane, CTime.DeltaTimeScaled * this._parametersLerp);
+                    this._unityCamera.fieldOfView   = isOnCutscene ? cVirtual.m_Lens.FieldOfView : this._unityCamera.fieldOfView.CLerp(cVirtual.m_Lens.FieldOfView, CTime.DeltaTimeScaled * this._parametersLerp);
                     break;
             }
         }
