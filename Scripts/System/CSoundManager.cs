@@ -129,12 +129,12 @@ namespace CDK {
 
                 var getDescriptionResult = soundInstance.getDescription(out var description);
                 if (getDescriptionResult != RESULT.OK) {
-                    Debug.LogWarning($"Issue getting sound '{soundRef}' description: {getDescriptionResult}");
+                    if(_debug) Debug.LogWarning($"Issue getting sound '{soundRef}' description: {getDescriptionResult}");
                 }
 
                 var getIs3dResult = description.is3D(out var is3d);
                 if (getIs3dResult != RESULT.OK) {
-                    Debug.LogWarning($"Issue getting if sound '{soundRef}' is 3D: {getDescriptionResult}");
+                    if(_debug) Debug.LogWarning($"Issue getting if sound '{soundRef}' is 3D: {getDescriptionResult}");
                 }
                 
                 is3d = (is3d && connectedTransform != null);
@@ -172,7 +172,7 @@ namespace CDK {
         public void StopPlaying(EventReference soundRef, STOP_MODE stopMode = STOP_MODE.IMMEDIATE) {
             try {
                 if (!this._playingSounds.TryGetValue(soundRef, out var sound)) {
-                    Debug.LogWarning($"Tried to get a sound that is not playing anymore.");
+                    if(_debug) Debug.LogWarning($"Tried to get a sound that is not playing anymore.");
                     return;
                 }
 
@@ -241,7 +241,7 @@ namespace CDK {
         public void SetParameter(EventReference soundRef, string paramName, float value) {
             try {
                 if (!this._playingSounds.TryGetValue(soundRef, out var sound)) {
-                    Debug.LogWarning($"Tried to get a sound that is not playing anymore.");
+                    if(_debug) Debug.LogWarning($"Tried to get a sound that is not playing anymore.");
                     return;
                 }
                 
@@ -265,7 +265,7 @@ namespace CDK {
         public float GetParameter(EventReference soundRef, string paramName) {
             try {
                 if (!this._playingSounds.TryGetValue(soundRef, out var sound)) {
-                    Debug.LogWarning($"Tried to get a sound that is not playing anymore.");
+                    if(_debug) Debug.LogWarning($"Tried to get a sound that is not playing anymore.");
                     return default;
                 }
                 
