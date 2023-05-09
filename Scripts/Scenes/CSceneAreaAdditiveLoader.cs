@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Events;
@@ -19,38 +20,23 @@ namespace CDK {
 
 		#region <<---------- Properties and Fields ---------->>
 
-		[SerializeField] private bool _debug;
-		
-        enum CheckType {
-            bounds, distance
-        }
-        
-		[SerializeField] private LayerMask _triggerLayer = 1;
 		[SerializeField] private CSceneField _scene;
 		[SerializeField][CTagSelector] private string _tag = "Player";
-        [SerializeField] private CheckType _checkType = CheckType.distance;
 
         private const string SceneNamePrefix = "A - ";
 
-		private bool AnyTriggerObjectInside {
-			get { return this._anyTriggerObjectInside; }
-			set {
-				if (value == this._anyTriggerObjectInside) return;
-				this._anyTriggerObjectInside = value;
-				OnObjectInsideChanged(value);
-			}
-		}
-		[SerializeField] private bool _anyTriggerObjectInside;
+		private HashSet<Collider> _triggerObjectsInside = new HashSet<Collider>();
+		
+		private bool AnyTriggerObjectInside => this._triggerObjectsInside.Count > 0;
 
         [SerializeField] private UnityEvent OnSceneLoaded;
         [SerializeField] private UnityEvent OnSceneUnloaded;
+		[SerializeField] private bool _pauseUnloadOnEditor;
 
 		private AsyncOperation _loadAsyncOperation;
 		private AsyncOperation _unloadAsyncOperation;
 
-		[NonSerialized] private bool _editorSceneIsDirty;
-		private int _updateFrameSkips = 5;
-        private Collider[] _overlapResults; 
+		private int _editorUpdateFrameSkips = 10;
 		
 		#endregion <<---------- Properties and Fields ---------->>
 
@@ -60,15 +46,13 @@ namespace CDK {
 		#region <<---------- MonoBehaviour ---------->>
 		
 		private void Awake() {
-			this._anyTriggerObjectInside = false;
-			this._loadAsyncOperation = null;
-			this._unloadAsyncOperation = null;
+			this._triggerObjectsInside.Clear();
+			this.EnsureColliderIsTrigger();
 			#if UNITY_EDITOR
 			if (!Application.isPlaying && this._scene != null && this._scene.sceneAsset != null) {
 				EditorSceneManager.OpenScene(AssetDatabase.GetAssetOrScenePath(this._scene.sceneAsset), OpenSceneMode.AdditiveWithoutLoading);
 			}
 			#endif
-            this.CheckForObject();
 		}
 
 		private void OnEnable() {
@@ -78,10 +62,10 @@ namespace CDK {
 		}
 
 		private void Update() {
-			#if !UNITY_EDITOR
-			if (Time.frameCount % this._updateFrameSkips != 0) return;
+			#if UNITY_EDITOR
+			if (Time.frameCount % this._editorUpdateFrameSkips != 0) return;
+			this.EditorCheckForObject();
 			#endif
-			this.CheckForObject();
 		}
 
 		#if UNITY_EDITOR
@@ -91,8 +75,6 @@ namespace CDK {
 		#endif
 
 		private void OnDisable() {
-			this._anyTriggerObjectInside = false;
-			
 			#if UNITY_EDITOR
 			EditorApplication.playModeStateChanged -= EditorApplicationOnPlayModeStateChanged;
 			#endif
@@ -106,30 +88,16 @@ namespace CDK {
 			// color
 			Gizmos.color = new Color(0f,200f,0f, 0.1f);
 			Handles.Label(tPos, t.name);
-			if (this._editorSceneIsDirty) {
-				Gizmos.color = Color.yellow;
-			}
-
-            switch (this._checkType) {
-                case CheckType.bounds:
-                    if (this._anyTriggerObjectInside) {
-                        Gizmos.DrawWireCube(tPos, t.localScale);
-                    }
-                    else {
-                        Gizmos.DrawWireCube(tPos, t.localScale);
-                    }
-                    break;
-                case CheckType.distance:
-                    if (this._anyTriggerObjectInside) {
-                        Gizmos.DrawWireSphere(tPos, t.localScale.x);
-                    }
-                    else {
-                        Gizmos.DrawWireSphere(tPos, t.localScale.x);
-                    }
-                    break;
-            }
-			
 		}
+
+		void Reset() {
+			this.EnsureColliderIsTrigger();
+		}
+
+		private void OnValidate() {
+			this.EnsureColliderIsTrigger();
+		}
+
 		#endif
 		
 		#endregion <<---------- MonoBehaviour ---------->>
@@ -139,33 +107,31 @@ namespace CDK {
 
 		#region <<---------- General ---------->>
 		
-		void CheckForObject() {
-			var t = this.transform;
-				
-			#if UNITY_EDITOR
-			if (!Application.isPlaying && !PrefabStageUtility.GetCurrentPrefabStage() && SceneView.lastActiveSceneView != null && SceneView.lastActiveSceneView.camera != null) {
-				var editorCameraTransform = SceneView.lastActiveSceneView.camera.transform;
-                var bounds = new Bounds(t.position, t.localScale);
-				this.AnyTriggerObjectInside = bounds.Contains(editorCameraTransform.position);
-				return;
+		#if UNITY_EDITOR
+		void EditorCheckForObject() {
+			if (Application.isPlaying || PrefabStageUtility.GetCurrentPrefabStage() || SceneView.lastActiveSceneView == null && SceneView.lastActiveSceneView.camera == null) return;
+			var editorCameraTransform = SceneView.lastActiveSceneView.camera.transform;
+			if (!this.TryGetComponent<Collider>(out var c)) return;
+			if (c.bounds.Contains(editorCameraTransform.position)) {
+				this.LoadScene();
 			}
-			#endif
-
-            switch (this._checkType) {
-                case CheckType.bounds:
-                    var tRotation = t.rotation;
-					this._overlapResults = Physics.OverlapBox(t.position, t.localScale*0.5f, tRotation, this._triggerLayer);                    
-                    break;
-                case CheckType.distance:
-					this._overlapResults = Physics.OverlapSphere(t.position, t.localScale.x, this._triggerLayer);
-                    break;
-            }
-            
-            this.AnyTriggerObjectInside = this._overlapResults.Length > 0 && this._overlapResults.Any(c => c != null && c.CompareTag(_tag));
+			else {
+				this.UnloadScene();
+			}
 		}
-
-		void OnObjectInsideChanged(bool isInside) {
-			if (isInside) {
+		#endif
+		
+		void EnsureColliderIsTrigger() {
+			if (!TryGetComponent<Collider>(out var c)) return;
+			if (c.isTrigger) return;
+			c.isTrigger = true;
+			#if UNITY_EDITOR
+			EditorUtility.SetDirty(c);
+			#endif
+		}
+		
+		void OnObjectInsideChanged() {
+			if (this.AnyTriggerObjectInside) {
 				this.LoadScene();
 			}
 			else {
@@ -175,10 +141,16 @@ namespace CDK {
 
 		[EasyButtons.Button]
 		void LoadScene() {
+			if (this._scene == null) return;
 			#if UNITY_EDITOR
-			if (!Application.isPlaying && !PrefabStageUtility.GetCurrentPrefabStage()) {
-				var scene = EditorSceneManager.OpenScene(AssetDatabase.GetAssetOrScenePath(this._scene.sceneAsset), OpenSceneMode.Additive);
-				CSceneManager.EditorSetSceneExpanded(EditorSceneManager.GetSceneByName(this._scene), false);
+			if (!Application.isPlaying) {
+				var scenePath = AssetDatabase.GetAssetOrScenePath(this._scene.sceneAsset);
+				if (PrefabStageUtility.GetCurrentPrefabStage() != null || EditorSceneManager.GetSceneByPath(scenePath).isLoaded) return;
+				var scene = EditorSceneManager.OpenScene(scenePath, OpenSceneMode.Additive);
+				if (scene.isLoaded) {
+					Debug.Log($"Scene loaded: {scenePath}");
+					CSceneManager.EditorSetSceneExpanded(scene, false);
+				}
 				return;
 			}
 			#endif
@@ -187,20 +159,27 @@ namespace CDK {
 			this._loadAsyncOperation = SceneManager.LoadSceneAsync(this._scene, LoadSceneMode.Additive);
 			if (this._loadAsyncOperation == null) return;
 			this._loadAsyncOperation.completed += operation => {
+				this.OnSceneLoaded?.Invoke();
 				this._loadAsyncOperation = null;
 			};
 		}
 
+		[EasyButtons.Button]
 		void UnloadScene() {
+			if (this._scene == null) return;
 			#if UNITY_EDITOR
 			if (!Application.isPlaying && !PrefabStageUtility.GetCurrentPrefabStage()) {
+				if (this._pauseUnloadOnEditor) return;
 				var loadedScene = EditorSceneManager.GetSceneByName(this._scene);
-				this._editorSceneIsDirty = loadedScene.isDirty;
-				if (this._editorSceneIsDirty) {
+				if (!loadedScene.isLoaded) return;
+				if (loadedScene.isDirty) {
 					Debug.LogWarning($"Will not unload on editor scene '{loadedScene.name}' because it isDirty.", this);
 					return;
 				}
-				EditorSceneManager.CloseScene(loadedScene, false);
+
+				if (EditorSceneManager.CloseScene(loadedScene, false)) {
+					Debug.Log($"Scene closed: {this._scene.sceneAsset}");
+				}
 				return;
 			}
 			#endif
@@ -211,6 +190,7 @@ namespace CDK {
 			this._unloadAsyncOperation = SceneManager.UnloadSceneAsync(scene);
 			if (this._unloadAsyncOperation == null) return;
 			this._unloadAsyncOperation.completed += operation => {
+				this.OnSceneUnloaded?.Invoke();
 				this._unloadAsyncOperation = null;
 			};
 		}
@@ -253,6 +233,25 @@ namespace CDK {
         #endif
         
 		#endregion <<---------- General ---------->>
+
+
+
+
+		#region <<---------- Physics ---------->>
+		
+		private void OnTriggerEnter(Collider other) {
+			if (!other.CompareTag(this._tag)) return;
+			if(!this._triggerObjectsInside.Add(other)) return;
+			OnObjectInsideChanged();
+		}
+
+		private void OnTriggerExit(Collider other) {
+			if (!other.CompareTag(this._tag)) return;
+			if(!this._triggerObjectsInside.Remove(other)) return;
+			OnObjectInsideChanged();
+		}
+		
+		#endregion <<---------- Physics ---------->>
 
 	}
 }
