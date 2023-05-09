@@ -56,6 +56,7 @@ namespace CDK {
 
 				if (oldHealth <= 0f) {
 					this.OnRevive?.Invoke();
+					this._isAliveEvent?.Invoke(true);
 				}
 
 				this.OnHealthChanged?.Invoke(this._currentHealth);
@@ -80,6 +81,7 @@ namespace CDK {
 						Destroy(obj.gameObject);
 					}
 					this.OnDie?.Invoke();
+					this._isAliveEvent?.Invoke(false);
 				}
 			}
 		}
@@ -120,6 +122,7 @@ namespace CDK {
 		[SerializeField] private CUnityEventString HealthChangedAsStringEvent;
 		[SerializeField] private CUnityEventFloat HealthChangedPercentageEvent;
 		[SerializeField] private CUnityEvent TokeDamageEvent;
+		[SerializeField] private CUnityEventBool _isAliveEvent;
 		
 		public event Action<float> OnHealthChanged;
 		public event Action<float, CHitInfoData> OnDamageTaken;
