@@ -21,7 +21,7 @@ namespace CDK {
 			#endif
 		} 
 		
-		public static readonly Version VERSION = new Version(1,3,0);
+		public static readonly Version VERSION = new Version(1,4,0);
 
 	}
 }
