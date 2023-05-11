@@ -44,6 +44,14 @@ namespace CDK {
 			}
 			return null;
 		}
+
+        public static (Vector3 pos, Quaternion rot) GetEntryPointPositionAndRotation(int entryPointNumber) {
+            var entry = GetSceneEntryPointByNumber(entryPointNumber);
+            if (entry == null) {
+                return default;
+            }
+            return (entry.transform.position, entry.transform.rotation);
+        }
 		
 		
 		#if UNITY_EDITOR

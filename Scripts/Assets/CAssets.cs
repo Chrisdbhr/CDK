@@ -140,7 +140,7 @@ namespace CDK {
 
         public static async Task<T> LoadAndInstantiateAsync<T>(string key, Vector3 position = default, Quaternion rotation = default, Transform parent = null, bool trackHandle = true) where T : Component {
             if (!Application.isPlaying) return null;
-            Debug.Log($"Loading GameObject with key '{key}'{(parent != null ? $" on parent '{parent.name}'" : string.Empty)}");
+            Debug.Log($"Starting loading GameObject with key '{key}'{(parent != null ? $" on parent '{parent.name}'" : string.Empty)}");
             try {
                 var instantiationParameters = new InstantiationParameters(position, rotation, parent);
                 
@@ -158,7 +158,7 @@ namespace CDK {
                     throw new NullReferenceException($"Could not Instantiate object with key '{key}'.");
                 }
 
-                Debug.Log($"Loaded GameObject with key '{key}' ", go);
+                Debug.Log($"Finished loading GameObject with key '{key}' ", go);
                 return go.GetComponent<T>();
             }
             catch (Exception e) {

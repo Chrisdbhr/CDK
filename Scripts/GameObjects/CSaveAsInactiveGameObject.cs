@@ -15,26 +15,32 @@ namespace CDK {
 		private void Awake() {
 			EditorSceneManager.sceneSaving += EditorSceneManagerOnSceneSaving; 
 			EditorApplication.playModeStateChanged += EditorApplicationOnPlayModeStateChanged;
+            PrefabStage.prefabSaving += PrefabStageSaving;
 		}
-		
-		private void OnDestroy() {
+
+        private void PrefabStageSaving(GameObject go) {
+            SetSelfInactive(go);
+        }
+
+        private void OnDestroy() {
 			EditorSceneManager.sceneSaving -= EditorSceneManagerOnSceneSaving; 
 			EditorApplication.playModeStateChanged -= EditorApplicationOnPlayModeStateChanged;
+            PrefabStage.prefabSaving -= PrefabStageSaving;
 		}
 		
 		private void EditorApplicationOnPlayModeStateChanged(PlayModeStateChange s) {
 			if (s != PlayModeStateChange.ExitingEditMode) return;
-			SetSelfInactive();
+			SetSelfInactive(this.gameObject);
 		}
 		
 		private void EditorSceneManagerOnSceneSaving(Scene scene, string path) {
-			SetSelfInactive();
+			SetSelfInactive(this.gameObject);
 		}
 		
-		private void SetSelfInactive() {
-			if (!this.gameObject.activeSelf) return;
-			this.gameObject.SetActive(false);
-			Debug.Log($"Saving {this.name} as inactive game object in {this.gameObject.scene}");
+		private void SetSelfInactive(GameObject go) {
+            if (!go.activeSelf) return;
+            go.SetActive(false);
+			Debug.Log($"Saving {this.name} as inactive game object in {go.scene}");
 		}
 		
 		#endif

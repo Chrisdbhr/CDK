@@ -2,6 +2,7 @@
 using UnityEngine;
 
 namespace CDK {
+    [Obsolete("Use PlayableHelper instead")]
 	public class CPlayingCutsceneSetter : MonoBehaviour {
 
 		[SerializeField] private bool _setOnEnableDisable = true;
