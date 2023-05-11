@@ -16,8 +16,6 @@ namespace CDK {
         
         public bool    Walk;
         public bool    Run;
-        
-        public bool    Jump;
         public bool    Aim;
     }
 }

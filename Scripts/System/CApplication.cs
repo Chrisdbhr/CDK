@@ -42,8 +42,6 @@ namespace CDK {
             CSteamManager.Initialize();
 
             InitializeApplicationAsync().CAwait();
-
-            COutOfBoundsDestroyer.CreateMonitor();
         }
 
         private static async Task InitializeApplicationAsync() {
