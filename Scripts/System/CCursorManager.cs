@@ -61,7 +61,6 @@ namespace CDK {
 		}
 
 		private void SetCursorState(bool visible) {
-			if (Cursor.visible != visible) Debug.Log($"Setting cursor visibility to {visible}");
 			Cursor.visible = visible;
 			
 			if (visible) {
