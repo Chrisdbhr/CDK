@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if UnityLocalization
+using System;
 using UnityEngine;
 using UnityEngine.Localization;
 using UnityEngine.Localization.Settings;
@@ -60,3 +61,4 @@ namespace CDK.Localization {
         
     }
 }
+#endif

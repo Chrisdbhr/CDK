@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using FMODUnity;
 using UnityEngine;
 using ThreadPriority = UnityEngine.ThreadPriority;
 
@@ -13,6 +12,10 @@ using UnityEngine.AddressableAssets.ResourceLocators;
 
 #if Rewired
 using Rewired;
+#endif
+
+#if FMOD
+using FMODUnity;
 #endif
 
 namespace CDK {
