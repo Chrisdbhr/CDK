@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Linq;
-using FMODUnity;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.Playables;
 using UnityEngine.Timeline;
+
+#if FMOD
+using FMODUnity;
+#endif
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -111,6 +114,7 @@ namespace CDK {
 				this._playable.played += PlayableStarted; 
 			}
 
+            #if FMOD
 			// unmute FMOD tracks
 			if (_playable.playableAsset is TimelineAsset timeline) {
 				foreach (var track in timeline.GetOutputTracks().Where(t => t.GetType() == typeof(FMODEventTrack))) {
@@ -118,6 +122,7 @@ namespace CDK {
 					track.muted = false;
 				}	
 			}
+            #endif
 		}
 
 
