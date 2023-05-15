@@ -11,8 +11,8 @@ namespace CDK.Editor {
         #region <<---------- Properties and Fields ---------->>
 
         private static EditorWindow window;
-        private const float windowWidth = 640f;
-        private const float windowHeight = 280f;
+        private const float windowWidth = 400f;
+        private const float windowHeight = 200f;
 
         private static string[] assetsScenesPaths;
 
@@ -51,12 +51,13 @@ namespace CDK.Editor {
 
             redText.normal.textColor = Color.red;
             window = GetWindow(typeof(CFindScenesToOpenEditor), true, "Find scene to open", true);
-            window.position = new Rect(
-                720 - windowWidth * .5f,
-                540 - windowHeight * .5f,
-                windowWidth,
-                windowHeight
-            );
+            window.minSize = new Vector2(windowWidth, windowHeight);
+            // window.position = new Rect(
+            //     720 - windowWidth * .5f,
+            //     540 - windowHeight * .5f,
+            //     windowWidth,
+            //     windowHeight
+            // );
 
             //window.CenterOnMainWin();
             window.titleContent = new GUIContent("Find scene to open");
