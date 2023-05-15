@@ -3,7 +3,7 @@ using UnityEngine;
 namespace CDK {
 	public abstract class CAutoTriggerCompBase : MonoBehaviour {
 
-		[SerializeField] private CMonobehaviourExecutionTime executionTime = CMonobehaviourExecutionTime.OnEnable;
+		[SerializeField] private CMonobehaviourExecutionTime executionTime = CMonobehaviourExecutionTime.Awake;
 
 		protected virtual void Awake() {
 			if (this.executionTime != CMonobehaviourExecutionTime.Awake) return;
