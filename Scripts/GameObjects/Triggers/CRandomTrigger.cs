@@ -23,7 +23,7 @@ namespace CDK {
         #region <<---------- CAutoTriggerCompBase ---------->>
 
         protected override void TriggerEvent() {
-            this._triggerValue = GetRandomResult(GetChance());
+            this._triggerValue = GetRandomResult(this.GetChanceToTrigger());
 
             if (this._triggerAffectsSelfActiveState) {
                 this.gameObject.SetActive(this._triggerValue);
@@ -47,13 +47,11 @@ namespace CDK {
         #region <<---------- Random ---------->>
 
         protected virtual bool GetRandomResult(float chance) {
-            return (chance <= this._chanceToTrigger);
+            return ((100f - chance) <= 100f * Random.value);
         }
 
-        protected virtual float GetChance() {
-            var chance = 100f * Random.value;
-            Debug.Log($"{this.name} chosen chance: {chance}");
-            return chance;
+        protected virtual float GetChanceToTrigger() {
+            return this._chanceToTrigger;
         }
         
         #endregion <<---------- Random ---------->>
