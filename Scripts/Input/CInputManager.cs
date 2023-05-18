@@ -53,8 +53,6 @@ namespace CDK {
 
 		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
 		private static void InitializeBeforeSceneLoad() {
-			Debug.Log($"Initializing {nameof(CInputManager)}");
-
 			SetControllerTypeBasedOnPlatform();
 			
 			#if Rewired
@@ -147,7 +145,7 @@ namespace CDK {
 			#else
 			ActiveInputType = InputType.JoystickController;
 			#endif
-			Debug.Log($"{nameof(SetControllerTypeBasedOnPlatform)} input type auto set to: {ActiveInputType.ToString()}");
+			//Debug.Log($"{nameof(SetControllerTypeBasedOnPlatform)} input type auto set to: {ActiveInputType.ToString()}");
 		}
 		
         #if Rewired

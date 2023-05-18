@@ -26,8 +26,6 @@ namespace CDK {
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSplashScreen)]
         private static void InitializeBeforeSceneLoad() {
-            Debug.Log($"[{nameof(CApplication)}] Initializing Application. Application.isPlaying: {Application.isPlaying}");
-
             Screen.sleepTimeout = SleepTimeout.NeverSleep;
 
             CreatePersistentDataPath();
@@ -79,8 +77,6 @@ namespace CDK {
             QualitySettings.vSyncCount = 1;
             Application.targetFrameRate = isMobile ? 30 : 60;
             Application.backgroundLoadingPriority = ThreadPriority.Low;
-           
-            Debug.Log($"[{nameof(CApplication)}] Initialized. Application.isPlaying: {Application.isPlaying}");
         }
 
         #endregion <<---------- Initialization ---------->>
@@ -135,7 +131,6 @@ namespace CDK {
 		#if UnityAddressables
 
         private static async Task<IResourceLocator> AddressablesInitializeAsync() {
-            Debug.Log("CApplication initializing Addressables");
             var op = Addressables.InitializeAsync();
             var resourceLocator = await op.Task;
             return resourceLocator;
