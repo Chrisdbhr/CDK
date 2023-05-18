@@ -72,7 +72,6 @@ namespace CDK {
 
             ReInput.ControllerConnectedEvent += ControllerConnectedEvent;
             
-			// wait one frame
 			Observable.EveryUpdate().Subscribe(_ => {
                 if (CApplication.IsQuitting || ReInput.controllers == null) {
                     return;
@@ -134,6 +133,8 @@ namespace CDK {
                 Debug.Log($"New controller connected: {c.name}, assigning to Player {player.id} ({player.name}).");
                 player.controllers.AddController(c.controllerType, c.controllerId, false);
             }
+
+            UpdatePlayerInputLayout(player);
         }
         
 		#endif
@@ -149,6 +150,32 @@ namespace CDK {
 			Debug.Log($"{nameof(SetControllerTypeBasedOnPlatform)} input type auto set to: {ActiveInputType.ToString()}");
 		}
 		
+        #if Rewired
+        public static void UpdatePlayerInputLayout(Rewired.Player rePlayer) {
+            if (CApplication.IsQuitting) return;
+            
+            if (rePlayer == null) {
+                Debug.LogError($"cannot set input for a null Rewired.Player");
+                return;
+            }
+            
+            if (rePlayer.controllers == null) {
+                Debug.LogError($"cannot set input for a Rewired.Player with null controllers");
+                return;
+            }
+
+            bool onMenu = CBlockingEventsManager.get.IsOnMenu;
+
+            int joystickControllersCount = rePlayer.controllers.joystickCount;
+            int customControllersCount = rePlayer.controllers.customControllerCount;
+            
+            rePlayer.controllers.maps.SetMapsEnabled(!onMenu, "Default");
+            rePlayer.controllers.maps.SetMapsEnabled(onMenu, "UI"); 
+			
+            Debug.Log($"Player ID '{rePlayer.id}' controllers maps onMenu changed to '{onMenu}'\nCustom Controllers: {customControllersCount}, JoystickControllers: {joystickControllersCount}");
+        }
+        #endif
+        
 	}
     
     public static class InputTypeExtension {
