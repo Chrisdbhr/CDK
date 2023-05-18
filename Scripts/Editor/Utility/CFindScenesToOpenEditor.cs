@@ -10,6 +10,7 @@ namespace CDK.Editor {
                
         #region <<---------- Properties and Fields ---------->>
 
+        private const string ADDITIVE_SCENE_PREFIX = "A - ";
         private static EditorWindow window;
         private const float windowWidth = 400f;
         private const float windowHeight = 200f;
@@ -135,7 +136,8 @@ namespace CDK.Editor {
 
                 // filter scenes to show
                 for (int i = 0; i < assetsScenesPaths.Length; i++) {
-                    if (!IsEquivalentStrings(TrimScenePath(assetsScenesPaths[i]), searchFilter)) continue;
+                    var sceneName = TrimScenePath(assetsScenesPaths[i]);
+                    if (sceneName.StartsWith(ADDITIVE_SCENE_PREFIX) || !IsEquivalentStrings(sceneName, searchFilter)) continue;
                     this._filteredScenes.Add(assetsScenesPaths[i]);
                 }
 
