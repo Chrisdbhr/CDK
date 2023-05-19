@@ -62,6 +62,11 @@ namespace CDK {
             }
             return !isZero;
         }
+
+        public static void CUnparentAllChildren(this Transform t) {
+            if (t == null) return;
+            t.gameObject.CUnparentAllChildren();
+        }
         
     }
 }
