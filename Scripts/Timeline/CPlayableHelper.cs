@@ -91,9 +91,11 @@ namespace CDK {
 		private void Reset() {
 			Undo.RecordObject(this.gameObject, "Add component");
 			this.gameObject.CGetOrAddComponent<SignalReceiver>();
-		}
+            OnValidate();
+        }
 
 		private void OnValidate() {
+            this._playable = this.GetComponent<PlayableDirector>();
 			if (this._playable != null && this._playable.playOnAwake) {
 				Debug.LogError($"No cutscene should be set as playOnAwake since it interferes in event handling.");
 				this._playable.playOnAwake = false;
