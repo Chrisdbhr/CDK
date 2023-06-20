@@ -8,7 +8,8 @@ using UnityEditor;
 
 namespace CDK {
 	public class CSceneEntryPoint : MonoBehaviour {
-		
+
+        private Transform transform => base.transform;
 		[SerializeField] private int _number;
         [SerializeField] private CUnityEventBool _chosenEntryPoint;
 		#if UNITY_EDITOR
@@ -51,6 +52,23 @@ namespace CDK {
                 return default;
             }
             return (entry.transform.position, entry.transform.rotation);
+        }
+
+        public (Vector3 pos, Quaternion rot) GetValidSpawnPositionAndRotation() {
+            float snapDistance = 20f;
+            var t = this.transform;
+            bool hitGround = Physics.Raycast(
+                t.position,
+                Vector3.down,
+                out var hitInfo,
+                snapDistance,
+                1,
+                QueryTriggerInteraction.Ignore
+            );
+            if (!hitGround) {
+                return (t.position, t.rotation);
+            }
+            return (hitInfo.point, t.rotation);
         }
 		
 		
