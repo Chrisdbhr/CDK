@@ -19,6 +19,7 @@ namespace CDK {
 		}
 
         private void PrefabStageSaving(GameObject go) {
+            if (go != this.gameObject) return;
             SetSelfInactive(go);
         }
 
