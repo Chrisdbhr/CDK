@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+#if FMOD
 using FMOD;
 using FMOD.Studio;
 using FMODUnity;
+using STOP_MODE = FMOD.Studio.STOP_MODE;
+#endif
 using UnityEngine;
 using Debug = UnityEngine.Debug;
-using STOP_MODE = FMOD.Studio.STOP_MODE;
 
 namespace CDK {
     public class CSoundManager : MonoBehaviour {
@@ -31,8 +33,10 @@ namespace CDK {
         [SerializeField, Min(0.0015f)] private float _occlusionPowerByDistance = 0.0025f;
         [SerializeField] private bool _debug;
         private LayerMask _occlusionLayerMask = 1;
+
+        private AudioSource OneShotAudioSource;
         
-        #if FMOD
+#if FMOD
         public static StudioListener MainListener {
             get {
                 if (mainListener == null) {
@@ -45,31 +49,37 @@ namespace CDK {
             }
         }
         private static StudioListener mainListener;
-        #endif
+#endif
 
         public const float SoundSpeedInKm = 1224f;
-        
+
+#if FMOD
         private Dictionary<EventReference, (EventInstance instance, bool is3d, Transform connectedTransform)> _playingSounds;
         private Dictionary<EventReference, CRetainable> _pausedSounds;
-
+#endif
         private const string OcclusionParameter = "Occlusion";
         private const float OcclusionComputingInterval = 0.1f;
         private float _timeLastOcclusionCalculation;
-        
+
         #endregion <<---------- Properties and Fields ---------->>
 
 
 
-        
+
         #region <<---------- Mono Behaviour ---------->>
-        
+
         private void Awake() {
             DontDestroyOnLoad(this);
+            this.OneShotAudioSource = this.gameObject.AddComponent<AudioSource>();
+            this.OneShotAudioSource.playOnAwake = false;
+            #if FMOD
             this._playingSounds = new Dictionary<EventReference, (EventInstance instance, bool is3d, Transform connectedTransform)>();
             this._pausedSounds = new Dictionary<EventReference, CRetainable>();
+            #endif
         }
 
-        private void Update() {
+#if FMOD
+    private void Update() {
             this.ComputeOcclusion();            
         }
 
@@ -80,15 +90,15 @@ namespace CDK {
                     break;
                 }
                 var r = playingSound.Value.instance.set3DAttributes(playingSound.Value.connectedTransform.To3DAttributes());
-                #if UNITY_EDITOR
+#if UNITY_EDITOR
                 if (r != RESULT.OK) {
                     Debug.LogError($"Issue settings 3d attributes on sound '{playingSound.Key.Path}': {r}");
                 }
-                #endif
+#endif
             }
         }
 
-        #if UNITY_EDITOR
+#if UNITY_EDITOR
         private Dictionary<StudioEventEmitter, RaycastHit[]> debugRayHits = new Dictionary<StudioEventEmitter,  RaycastHit[]>();
         private void OnDrawGizmosSelected() {
             foreach (var hits in this.debugRayHits.Values) {
@@ -99,14 +109,16 @@ namespace CDK {
                 }
             }
         }
-        #endif
-        
+#endif
+#endif
+
         #endregion <<---------- Mono Behaviour ---------->>
 
-       
-        
+
+
 
         #region <<---------- General ---------->>
+#if FMOD
 
         /// <summary>
         /// Play an event that will be replaced if requested to play again.
@@ -114,11 +126,11 @@ namespace CDK {
         public EventInstance PlaySingletonEvent(EventReference soundRef, Transform connectedTransform) {
             try{
                 if (this._playingSounds.ContainsKey(soundRef)) {
-                    #if UNITY_EDITOR
+#if UNITY_EDITOR
                     if (this._debug) {
                         Debug.LogWarning($"Replacing already created sound '{soundRef}'");
                     }
-                    #endif
+#endif
                     if(this._playingSounds[soundRef].instance.isValid()) {
                         this._playingSounds[soundRef].instance.stop(STOP_MODE.IMMEDIATE);
                         this._playingSounds[soundRef] = default;
@@ -150,9 +162,9 @@ namespace CDK {
                          up = connectedTransform.up.ToFMODVector()
                     });
                     if (r != RESULT.OK) {
-                        #if UNITY_EDITOR
+#if UNITY_EDITOR
                         Debug.LogError($"Issue settings 3d attributes on sound '{soundRef.Path}': {r}");
-                        #endif
+#endif
                     }
                     this.CStartCoroutine(this.PlaySoundByDistanceRoutine(soundInstance, soundPosition));
                 }
@@ -181,18 +193,18 @@ namespace CDK {
                 }
                 
                 var r = sound.instance.stop(stopMode);
-                #if UNITY_EDITOR
+#if UNITY_EDITOR
                 if (r != RESULT.OK) {
                     Debug.LogError($"Issue when trying to stop sound: {r}");
                 }
-                #endif
+#endif
 
                 var rr = sound.instance.release();
-                #if UNITY_EDITOR
+#if UNITY_EDITOR
                 if (rr != RESULT.OK) {
                     Debug.LogError($"Issue when trying to release sound '{soundRef.Path}': {r}");
                 }
-                #endif
+#endif
             }
             catch (Exception e) {
                 Debug.LogError(e);
@@ -226,11 +238,11 @@ namespace CDK {
                 }
                 
                 var r = sound.instance.setPaused(retainable.IsRetained);
-                #if UNITY_EDITOR
+#if UNITY_EDITOR
                 if (r != RESULT.OK) {
                     Debug.LogError($"Issue when trying to pause sound: {r}");
                 }
-                #endif
+#endif
                 return;
             }
             catch (Exception e) {
@@ -251,11 +263,11 @@ namespace CDK {
                 }
 
                 var r = sound.instance.setParameterByName(paramName, value);
-                #if UNITY_EDITOR
+#if UNITY_EDITOR
                 if (r != RESULT.OK) {
                     Debug.LogError($"Issue when trying to set sound parameter '{paramName}' to '{value}' from '{soundRef.Path}': {r}");
                 }
-                #endif
+#endif
             }
             catch (Exception e) {
                 Debug.LogError(e);
@@ -275,11 +287,11 @@ namespace CDK {
                 }
 
                 var r = sound.instance.getParameterByName(paramName, out float value);
-                #if UNITY_EDITOR
+#if UNITY_EDITOR
                 if (r != RESULT.OK) {
                     Debug.LogError($"Issue when trying to get sound parameter '{paramName}' from '{soundRef.Path}': {r}");
                 }
-                #endif
+#endif
                 return value;
             }
             catch (Exception e) {
@@ -300,11 +312,11 @@ namespace CDK {
                 }
 
                 var r = sound.instance.getPlaybackState(out var state);
-                #if UNITY_EDITOR
+#if UNITY_EDITOR
                 if (r != RESULT.OK) {
                     Debug.LogError($"Issue when trying to get if sound '{soundRef.Path}' is playing: {r}");
                 }
-                #endif
+#endif
                 return state == PLAYBACK_STATE.PLAYING;
             }
             catch (Exception e) {
@@ -314,15 +326,29 @@ namespace CDK {
             return false;
         }
         
+#endif
         #endregion <<---------- General ---------->>
 
 
 
         
+        #region <<---------- Unity Audio ---------->>
+
+        public void PlayOneShot(AudioClip audioClip, float volume = 1f) {
+            this.OneShotAudioSource.Stop();
+            if (audioClip == null) return;
+            this.OneShotAudioSource.PlayOneShot(audioClip, volume);
+        }
+
+        #endregion <<---------- Unity Audio ---------->>
+
+        
+
+
         #region <<---------- Distance Based ---------->>
 
-         
-        #if FMOD
+
+#if FMOD
         private IEnumerator PlaySoundByDistanceRoutine(EventInstance eventInstance, Vector3 point) {
             if (point == default || MainListener == null) {
                 this.StartEventInstance(eventInstance);
@@ -349,22 +375,23 @@ namespace CDK {
         void StartEventInstance(EventInstance eventInstance) {
             if (!eventInstance.isValid()) return;
             var r = eventInstance.start();
-            #if UNITY_EDITOR
+#if UNITY_EDITOR
             if (r != RESULT.OK) {
                 Debug.LogError($"Issue starting to start (play) sound: {r}");
             }
-            #endif
+#endif
         }
-        #endif
+#endif
 
         #endregion <<---------- Distance Based ---------->>
 
 
 
-        
+
         #region <<---------- Occlusion ---------->>
 
         private void ComputeOcclusion() {
+#if FMOD
             if (this._timeLastOcclusionCalculation + OcclusionComputingInterval > Time.time) {
                 return;
             }
@@ -391,15 +418,16 @@ namespace CDK {
                     QueryTriggerInteraction.Ignore
                 );
 
-                #if UNITY_EDITOR
+#if UNITY_EDITOR
                 debugRayHits[activeEmitter] = allHits;
-                #endif
+#endif
                 
                 var newOcclusionValue = GetOcclusionValue(ref allHits);
                 activeEmitter.EventInstance.setParameterByName(OcclusionParameter, newOcclusionValue);
             }
             
             Physics.queriesHitBackfaces = originalQueriesHitBackfaces;
+#endif
         }
 
         private float GetOcclusionValue(ref RaycastHit[] hits) {
@@ -418,6 +446,5 @@ namespace CDK {
         }
 
         #endregion <<---------- Occlusion ---------->>
-
     }
 }
