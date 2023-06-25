@@ -12,7 +12,7 @@ namespace CDK {
 			NullValueHandling = NullValueHandling.Ignore,
 			MissingMemberHandling = MissingMemberHandling.Ignore,
             Error = (sender, e) => {
-                Debug.LogError(e);
+                Debug.LogError(e.ErrorContext.Error);
                 e.ErrorContext.Handled = true;
             },
 			Formatting = Formatting.Indented,
