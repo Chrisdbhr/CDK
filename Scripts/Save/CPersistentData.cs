@@ -40,8 +40,18 @@ namespace CDK {
 		#region <<---------- Path ---------->>
 
         public static string GetApplicationPersistentDataFolder() {
-            if(Debug.isDebugBuild) Debug.Log($"Application.persistentDataPath: '{Application.persistentDataPath}'");
-            return Application.persistentDataPath; //Path.Combine(Application.persistentDataPath, "idbfs"); // Only on WebGL
+            string path = null;
+            
+            #if UNITY_WEBGL
+            path = Path.Combine(Application.persistentDataPath, "idbfs");
+            #else
+            path = Application.persistentDataPath;
+            #endif
+
+            if (Debug.isDebugBuild) {
+                Debug.Log($"Application.{nameof(Application.persistentDataPath)}: '{Application.persistentDataPath}'");
+            }
+            return path;
         }
 
         #endregion <<---------- Path ---------->>
