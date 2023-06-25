@@ -1,4 +1,4 @@
-﻿Shader "Unlit/FrostedGlass"
+﻿Shader "CDK/Unlit/FrostedGlass"
 {
     Properties
     {
