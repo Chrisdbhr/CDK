@@ -40,7 +40,7 @@ namespace CDK {
                 QuittingCancellationTokenSource?.Cancel();
             };
             
-            CSteamManager.Initialize();
+            SteamManager.Initialize();
 
             InitializeApplicationAsync().CAwait();
         }

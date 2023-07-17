@@ -26,7 +26,7 @@ namespace CDK.Localization {
             #if !DISABLESTEAMWORKS && STEAMWORKS_NET
             // From Steam
             try {
-                if (CSteamManager.Initialized) {
+                if (SteamManager.Initialized) {
                     var locale = GetLocaleByString(SteamApps.GetCurrentGameLanguage());
                     if (locale != null) return locale;
                 }

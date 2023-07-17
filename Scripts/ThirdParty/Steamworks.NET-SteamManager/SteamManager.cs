@@ -4,11 +4,14 @@
 // irrevocable license to copy and modify this file as you see fit.
 //
 // Version: 1.0.13
+// Modified by ChrisDBHR
 
 #if !(UNITY_STANDALONE_WIN || UNITY_STANDALONE_LINUX || UNITY_STANDALONE_OSX || STEAMWORKS_WIN || STEAMWORKS_LIN_OSX)
 #define DISABLESTEAMWORKS
 #endif
 
+using System;
+using CDK;
 using UnityEngine;
 #if !DISABLESTEAMWORKS
 using System.Collections;
@@ -34,9 +37,36 @@ public class SteamManager : MonoBehaviour {
         }
 	}
 
+#if STEAMWORKS_WIN
+    protected Callback<GameOverlayActivated_t> m_GameOverlayActivated;
+#endif
+
+    public static event Action OnSteamOverlayOpen {
+        add {
+            _onSteamOverlayOpen -= value;
+            _onSteamOverlayOpen += value;
+        }
+        remove {
+            _onSteamOverlayOpen -= value;
+        }
+    }
+    private static Action _onSteamOverlayOpen;
+        
+    public static event Action OnSteamOverlayClosed {
+        add {
+            _onSteamOverlayClosed -= value;
+            _onSteamOverlayClosed += value;
+        }
+        remove {
+            _onSteamOverlayClosed -= value;
+        }
+    }
+    private static Action _onSteamOverlayClosed;
+    
 	protected bool m_bInitialized = false;
 	public static bool Initialized {
 		get {
+            if (!CanInitialize()) return false;
 			return Instance.m_bInitialized;
 		}
 	}
@@ -47,7 +77,33 @@ public class SteamManager : MonoBehaviour {
 	protected static void SteamAPIDebugTextHook(int nSeverity, System.Text.StringBuilder pchDebugText) {
 		Debug.LogWarning(pchDebugText);
 	}
+    
+#if STEAMWORKS_WIN
+    private void OnGameOverlayActivated(GameOverlayActivated_t pCallback) {
+        if(pCallback.m_bActive != 0) {
+            Debug.Log("Steam Overlay has been activated");
+            _onSteamOverlayOpen?.Invoke();
+        }
+        else {
+            Debug.Log("Steam Overlay has been closed");
+            _onSteamOverlayClosed?.Invoke();
+        }
+    }
+#endif
 
+    public static void DoIfInitialized(Action action) {
+#if !STEAMWORKS_WIN
+            return;
+#else
+        if (action == null) return;
+        if (!Initialized) {
+            return;
+        }
+        action();
+#endif
+    }
+
+    
 #if UNITY_2019_3_OR_NEWER
 	// In case of disabled Domain Reload, reset static members before entering Play Mode.
 	[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
@@ -57,6 +113,19 @@ public class SteamManager : MonoBehaviour {
 		s_instance = null;
 	}
 #endif
+    
+    public static void Initialize() {
+        if (!CanInitialize()) return;
+        var s = SteamManager.Instance; // Initialize instance
+    }
+
+    public static bool CanInitialize() {
+#if DISABLESTEAMWORKS
+            return false;
+#else
+        return !CApplication.IsEditorOrDevelopment();
+#endif
+    }
 
 	protected virtual void Awake() {
 		// Only one instance of SteamManager at a time!
@@ -125,6 +194,10 @@ public class SteamManager : MonoBehaviour {
 		}
 
 		s_EverInitialized = true;
+        
+        if (!Initialized) return;
+            
+        m_GameOverlayActivated = Callback<GameOverlayActivated_t>.Create(OnGameOverlayActivated);
 	}
 
 	// This should only ever get called on first load and after an Assembly reload, You should never Disable the Steamworks Manager yourself.
@@ -160,6 +233,7 @@ public class SteamManager : MonoBehaviour {
 		}
 
 		SteamAPI.Shutdown();
+        m_GameOverlayActivated.Dispose();
 	}
 
 	protected virtual void Update() {
