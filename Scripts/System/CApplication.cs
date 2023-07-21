@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -160,8 +161,12 @@ namespace CDK {
 
 
 
-		#region <<---------- Application Quit ---------->>
-		
+		#region <<---------- Application ---------->>
+
+        public static bool IsEditorOrDevelopment() {
+            return Application.isEditor || Debug.isDebugBuild;
+        }
+        
 		public static void Quit() {
 			Debug.Log("Requesting Application.Quit()");
 			
@@ -174,7 +179,7 @@ namespace CDK {
 			
 		}
 		
-		#endregion <<---------- Application Quit ---------->>
+		#endregion <<---------- Application ---------->>
 
 	}
 }
