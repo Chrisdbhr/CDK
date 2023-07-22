@@ -41,7 +41,9 @@ namespace CDK {
                 QuittingCancellationTokenSource?.Cancel();
             };
             
+            #if !DISABLESTEAMWORKS
             SteamManager.Initialize();
+             #endif
 
             InitializeApplicationAsync().CAwait();
         }
