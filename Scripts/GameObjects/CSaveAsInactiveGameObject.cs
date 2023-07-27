@@ -41,7 +41,7 @@ namespace CDK {
 		private void SetSelfInactive(GameObject go) {
             if (!go.activeSelf) return;
             go.SetActive(false);
-			Debug.Log($"Saving {this.name} as inactive game object in {go.scene}");
+			Debug.Log($"Saving '{this.name}' as inactive game object in '{go.scene.name}'");
 		}
 		
 		#endif

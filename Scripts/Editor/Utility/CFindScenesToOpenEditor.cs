@@ -54,8 +54,8 @@ namespace CDK.Editor {
             window = GetWindow(typeof(CFindScenesToOpenEditor), true, "Find scene to open", true);
             window.minSize = new Vector2(windowWidth, windowHeight);
             // window.position = new Rect(
-            //     720 - windowWidth * .5f,
-            //     540 - windowHeight * .5f,
+            //     (Screen.width * .5f) - (windowWidth * .5f),
+            //     (Screen.height * .5f) - (windowHeight * .5f),
             //     windowWidth,
             //     windowHeight
             // );

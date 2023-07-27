@@ -12,6 +12,14 @@ namespace CDK {
             // Create and return a new Color object using the random RGB values.
             return new Color(r, g, b);
         }
+
+        public static Color CLerp(this Color c, Color target, float time) {
+            return new Color(
+                c.r.CLerp(target.r, time),
+                c.g.CLerp(target.g, time),
+                c.b.CLerp(target.b, time)
+            );
+        }
         
     }
 }

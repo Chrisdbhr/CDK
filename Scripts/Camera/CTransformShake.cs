@@ -5,14 +5,14 @@ namespace CDK {
 	public class CTransformShake : MonoBehaviour {
 
 		private Coroutine _shakeRoutine;
-		private readonly Vector3 _startLocalPosition = Vector3.zero;
+		private Vector3 _startLocalPosition = Vector3.zero;
 		
 		private Transform _transform;
 		
 		
 		private void Awake() {
 			this._transform = this.transform;
-			this._transform.CAssertLocalPositionIsNotZero();
+			this._startLocalPosition = this._transform.localPosition;
 		}
 
 		

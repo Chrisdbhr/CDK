@@ -99,7 +99,6 @@ namespace CDK {
             if (this._skipped) return;
             this._progressCanvas.enabled = false;
             this._playableDirector.time = this._playableDirector.duration;
-            this._playableDirector.Stop();
             #if FMOD
             if(!this._soundOnSkip.IsNull) RuntimeManager.PlayOneShot(this._soundOnSkip);
             #endif

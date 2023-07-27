@@ -45,10 +45,10 @@ namespace CDK {
             return (comp != null ? comp : value.gameObject.AddComponent<T>());
         }
         
-        public static T CAssertIfNull<T>(this T c, string message = null) where T : Component {
+        public static T CAssertIfNull<T>(this T c, string message = null, Object source = null) where T : Component {
             bool isNull = (c == null);
             if (isNull) {
-                Debug.LogAssertion($"Assert: Component is null ({message})");
+                Debug.LogAssertion($"Assert: Component is null ({message})", source);
             }
             return c;
         }

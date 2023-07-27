@@ -43,7 +43,7 @@ namespace CDK {
             
             #if !DISABLESTEAMWORKS
             SteamManager.Initialize();
-             #endif
+            #endif
 
             InitializeApplicationAsync().CAwait();
         }
