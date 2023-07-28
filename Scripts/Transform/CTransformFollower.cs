@@ -14,6 +14,7 @@ namespace CDK {
 		[Obsolete("OBSOLETE, use public property instead.")]
 		[SerializeField] private Transform _transformToFollow;
         public Transform TransformToFollow => this._transformToFollow;
+		[Header("Position")]
 		[SerializeField] private Vector3 _followOffset = Vector3.zero;
 		[SerializeField] private FollowTypeEnum _followType;
 		[SerializeField] private float _followSpeed = 10f;
@@ -26,6 +27,9 @@ namespace CDK {
        
         [SerializeField] private Vector3 _positionMultiplier = UnityEngine.Vector3.one;
 
+		[Header("Rotation")]
+		[SerializeField] private bool _followRotation;
+		
         public event Action<Transform> TransformToFollowChanged {
             add {
                 this._transformToFollowChanged -= value;
@@ -111,6 +115,10 @@ namespace CDK {
 		private void FollowTarget(float deltaTime) {
 			if (this._transformToFollow == null) return;
 
+			if (this._followRotation) {
+				this.transform.rotation = this._transformToFollow.rotation;
+			}
+			
 			if (this._ignoreXAxis && this._ignoreYAxis && this._ignoreZAxis) return;
 			
 			var targetPos = Vector3.Scale(this._transformToFollow.position, this._positionMultiplier);

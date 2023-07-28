@@ -130,7 +130,7 @@ namespace CDK {
 		public event Action OnDie;
 
 		public event Action OnRevive;
-
+		
 		#endregion <<---------- Events ---------->>
 		
 		#endregion <<---------- Properties and Fields ---------->>

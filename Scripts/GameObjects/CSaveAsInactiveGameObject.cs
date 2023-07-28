@@ -13,6 +13,7 @@ namespace CDK {
 #if UNITY_EDITOR
 		
 		private void Awake() {
+			if (Application.isPlaying) return;
 			EditorSceneManager.sceneSaving += EditorSceneManagerOnSceneSaving; 
 			EditorApplication.playModeStateChanged += EditorApplicationOnPlayModeStateChanged;
             PrefabStage.prefabSaving += PrefabStageSaving;
@@ -24,6 +25,7 @@ namespace CDK {
         }
 
         private void OnDestroy() {
+			if (Application.isPlaying) return;
 			EditorSceneManager.sceneSaving -= EditorSceneManagerOnSceneSaving; 
 			EditorApplication.playModeStateChanged -= EditorApplicationOnPlayModeStateChanged;
             PrefabStage.prefabSaving -= PrefabStageSaving;

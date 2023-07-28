@@ -71,6 +71,8 @@ namespace CDK {
 
         public bool IsAnyExceptMenu => IsPlayingCutscene || IsLimitingPlayerActions;
         
+		public bool IsOnMenuOrPlayingCutscene => this.IsPlayingCutscene || this.IsOnMenu;
+
         public bool IsPlayingCutscene => this.PlayingCutsceneRetainable.IsRetained;
         public CRetainable PlayingCutsceneRetainable { get; private set; }
 

@@ -5,11 +5,11 @@ namespace CDK {
     public class CFlashRendererColor : MonoBehaviour {
 
         [SerializeField] private Renderer _targetRenderer;
-        [SerializeField] private float _colorReturnSpeed = 1f;
+        [SerializeField] private float _colorReturnSpeed = 0.25f;
         [SerializeField] private string _shaderKeyword = "_Color";
         private int _shaderKeyboardId;
         private Material _targetMaterial;
-        private Color _initialColor;
+        private Color _initialColor = Color.white;
 
 
         
@@ -17,15 +17,20 @@ namespace CDK {
         #region <<---------- MonoBehaviour ---------->>
 
         private void Awake() {
-            this._shaderKeyboardId = Shader.PropertyToID(this._shaderKeyword);
-            this._targetRenderer.CAssertIfNull("Target renderer cannot be null!", this);
-            this._targetMaterial = this._targetRenderer.material;
-            this._initialColor = this._targetMaterial.GetColor(this._shaderKeyboardId);
+            try {
+                this._shaderKeyboardId = Shader.PropertyToID(this._shaderKeyword);
+                this._targetRenderer.CAssertIfNull("Target renderer cannot be null!", this);
+                this._targetMaterial = this._targetRenderer.material;
+                this._initialColor = this._targetMaterial.GetColor(this._shaderKeyboardId);
+            }
+            catch (Exception e) {
+                this.enabled = false;
+                Debug.LogException(e);
+            }
         }
 
         private void Update() {
-            if (this._targetMaterial.GetColor(this._shaderKeyboardId) == this._initialColor) return;
-            this._targetMaterial.SetColor(this._shaderKeyboardId, this._targetMaterial.GetColor(this._shaderKeyboardId).CLerp(this._initialColor, this._colorReturnSpeed * CTime.DeltaTimeScaled));
+            this.SetColor(this._targetMaterial.GetColor(this._shaderKeyboardId).CLerp(this._initialColor, this._colorReturnSpeed * CTime.DeltaTimeScaled));
         }
         
         #if UNITY_EDITOR
@@ -36,15 +41,20 @@ namespace CDK {
 
         #endregion <<---------- MonoBehaviour ---------->>
 
-        
+
+
+        private void SetColor(Color color) {
+            if (!this.enabled) return;
+            this._targetMaterial.SetColor(this._shaderKeyboardId, color);
+        }
         
         
         public void FlashColor(Color color) {
-            this._targetMaterial.color = color;
+            this.SetColor(color);
         }
 
         public void FlashRed() {
-            this._targetMaterial.color = Color.red;
+            this.SetColor(Color.red);
         }
         
     }
