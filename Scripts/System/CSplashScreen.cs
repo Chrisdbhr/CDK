@@ -30,6 +30,8 @@ namespace CDK {
         #region <<---------- MonoBehaviour ---------->>
         
         private IEnumerator Start() {
+            yield return null;
+            
             CCursorManager.get.ShowMouseIfNeeded();
             
             this._playableDirector.Play();
