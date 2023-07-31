@@ -100,4 +100,5 @@ SubShader {
         ENDCG
     }
 }
+    Fallback "VertexLit"
 }
