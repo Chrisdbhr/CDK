@@ -1,0 +1,18 @@
+name: 'setup-SHFB'
+description: 'Install SHFB'
+author: 'Ralf Beckers'
+
+inputs:
+  version: 
+    description:  'version of SHFB to install'
+    required: true
+    default: '2023.3.4.0'
+    
+runs:
+  using: "composite"
+  steps:
+    - run: ${{ github.action_path }}/setup.ps1 -version ${{ inputs.version }}
+      shell: pwsh
+       
+    - run: echo "SHFBROOT=C:\\Program Files (x86)\\EWSoftware\\Sandcastle Help File Builder\\" >> $GITHUB_ENV 
+      shell: bash
