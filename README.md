@@ -20,7 +20,6 @@ Check more information about my other projects on [my website](https://chrisjogo
 * [UniRx](https://github.com/neuecc/UniRx) for reactive functions.
 
 #### Optional
-* [URP](https://docs.unity3d.com/Packages/com.unity.render-pipelines.universal@latest) shaders if you want to use materials in this project.
 * [Newtonsoft-Json](https://docs.unity3d.com/Packages/com.unity.nuget.newtonsoft-json@3.0/manual/index.html), include **Newtonsoft_Json_for_Unity** on define symbols.
 * [Unity Converters for Newtonsoft.Json](https://github.com/jilleJr/Newtonsoft.Json-for-Unity.Converters) to fix some Unity Json Serialization issues. 
 * [LINQ to Game Object](https://github.com/neuecc/LINQ-to-GameObject-for-Unity), include **LINQ-to-GameObject** on define symbols.
