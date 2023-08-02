@@ -1,0 +1,4 @@
+- name: Install SHFB
+   uses: Bassman2/setup-SHFB@v1
+   with:
+     version: v2021.4.9.0
