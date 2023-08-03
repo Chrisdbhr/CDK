@@ -137,15 +137,15 @@ namespace CDK.UI {
 
             this._blockingEventsManager.OnMenuRetainable.Retain(this);
 
-            if (this._shouldPlayOpenAndCloseMenuSound) {
+			this.UpdateCTime();
+
+			if (this._shouldPlayOpenAndCloseMenuSound) {
 			    #if FMOD
-                RuntimeManager.PlayOneShot(this._gameSettings.SoundOpenMenu);
+				CSoundManager.get.PlaySingletonEvent(this._gameSettings.SoundOpenMenu);
 			    #else
 			    Debug.LogError("'Play Open menu sound' not implemented without FMOD");
 			    #endif
             }
-
-            UpdateCTime();
 		}
 		
         /// <summary>
@@ -160,7 +160,7 @@ namespace CDK.UI {
 
             if (this._shouldPlayOpenAndCloseMenuSound) {
 			    #if FMOD
-                RuntimeManager.PlayOneShot(this._gameSettings.SoundCloseMenu);
+				CSoundManager.get.PlaySingletonEvent(this._gameSettings.SoundCloseMenu);
 			    #else
 			    Debug.LogError("'Play Close menu sound' not implemented without FMOD");
 			    #endif
@@ -187,7 +187,7 @@ namespace CDK.UI {
 
         private void UpdateEventSystemAndCheckForObjectSelection(GameObject gameObjectToSelect) {
             if (gameObjectToSelect == null) return;
-            UpdateEventSystemAndCheckForObjectSelection(gameObjectToSelect.GetComponent<CUIInteractable>());
+			this.UpdateEventSystemAndCheckForObjectSelection(gameObjectToSelect.GetComponent<CUIInteractable>());
         }
 
 

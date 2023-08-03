@@ -55,10 +55,15 @@ namespace CDK.UI {
 
 		#if FMOD
 		private void PlaySound(EventReference sound) {
-			if (this._playInteractionSound && !sound.IsNull) {
-				this._soundEventInstance.stop(STOP_MODE.IMMEDIATE);
-				this._soundEventInstance = FMODUnity.RuntimeManager.CreateInstance(sound);
-				this._soundEventInstance.start();
+			try {
+				if (this._playInteractionSound && !sound.IsNull) {
+					this._soundEventInstance.stop(STOP_MODE.IMMEDIATE);
+					this._soundEventInstance = FMODUnity.RuntimeManager.CreateInstance(sound);
+					this._soundEventInstance.start();
+				}
+			}
+			catch (Exception e) {
+				Debug.LogError($"Error trying to PlaySound '{sound.Path}': {e.Message}\n{e}");
 			}
 		}
 		#endif

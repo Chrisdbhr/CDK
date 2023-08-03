@@ -20,6 +20,7 @@ namespace CDK {
 
 		[SerializeField] private UnityEvent _onCutsceneStarted;
 		[SerializeField] private UnityEvent _onCutsceneEnded;
+		[SerializeField] private UnityEvent _onCutsceneSkipped;
 		[SerializeField] private bool _canSkipCutscene = true;
 		[SerializeField] private bool _destroyGameObjectOnFinished;
 		[SerializeField] private bool _preventAutoFadeOutOnExit;
@@ -143,7 +144,7 @@ namespace CDK {
 		private void CreateCutsceneSkipper() {
 			if (!this._canSkipCutscene || this._cutsceneSkipperSpawned != null) return;
 			this._cutsceneSkipperSpawned = CAssets.LoadResourceAndInstantiate<CCutsceneSkipper>("Cutscene Skipper", this.transform);
-			this._cutsceneSkipperSpawned.Initialize(this._playable);
+			this._cutsceneSkipperSpawned.Initialize(this._playable, this._onCutsceneSkipped);
 		}
 	}
 }

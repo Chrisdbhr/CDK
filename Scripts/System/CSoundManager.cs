@@ -123,7 +123,7 @@ namespace CDK {
         /// <summary>
         /// Play an event that will be replaced if requested to play again.
         /// </summary>
-        public EventInstance PlaySingletonEvent(EventReference soundRef, Transform connectedTransform) {
+        public EventInstance PlaySingletonEvent(EventReference soundRef, Transform connectedTransform = null) {
             try{
                 if (this._playingSounds.ContainsKey(soundRef)) {
 #if UNITY_EDITOR

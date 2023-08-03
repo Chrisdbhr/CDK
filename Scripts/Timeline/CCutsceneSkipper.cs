@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.Playables;
 using UnityEngine.UI;
 
@@ -13,8 +14,9 @@ namespace CDK {
 
         #region <<---------- Initializers ---------->>
 
-        public void Initialize(PlayableDirector p) {
+        public void Initialize(PlayableDirector p, UnityEvent onCutsceneSkipped) {
             this._playableDirector = p;
+            this._onCutsceneSkipped = onCutsceneSkipped;
         }
 
         #endregion <<---------- Initializers ---------->>
@@ -24,6 +26,7 @@ namespace CDK {
         
         #region <<---------- Properties and Fields ---------->>
 
+        private UnityEvent _onCutsceneSkipped;
 
         [SerializeField] private Canvas _progressCanvas;
         [SerializeField] private Image _progressImage;
@@ -78,7 +81,7 @@ namespace CDK {
         #region <<---------- General ---------->>
 
         IEnumerator SkipRoutine() {
-            yield return new WaitForSeconds(1f);
+            yield return new WaitForSecondsRealtime(1f);
             while (!_skipped) {
                 yield return null;
                 if (this._playableDirector.time <= 0 || this._playableDirector.time >= this._playableDirector.duration) {
@@ -86,10 +89,10 @@ namespace CDK {
                 }
                 else {
                     if (Input.anyKey) {
-                        this.InputHoldSeconds += CTime.DeltaTimeScaled;
+                        this.InputHoldSeconds += Time.unscaledDeltaTime;
                     }
                     else if (this.InputHoldSeconds > 0f) {
-                        this.InputHoldSeconds -= CTime.DeltaTimeScaled;
+                        this.InputHoldSeconds -= Time.unscaledDeltaTime;
                     }
                 }
             }
@@ -99,9 +102,8 @@ namespace CDK {
             if (this._skipped) return;
             this._progressCanvas.enabled = false;
             this._playableDirector.time = this._playableDirector.duration;
-            #if FMOD
-            if(!this._soundOnSkip.IsNull) RuntimeManager.PlayOneShot(this._soundOnSkip);
-            #endif
+            this._onCutsceneSkipped?.Invoke();
+            CSoundManager.get.PlaySingletonEvent(this._soundOnSkip);
             this._skipped = true;
         }
 
