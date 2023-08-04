@@ -63,7 +63,7 @@ namespace CDK.UI {
 				}
 			}
 			catch (Exception e) {
-				Debug.LogError($"Error trying to PlaySound '{sound.Path}': {e.Message}\n{e}");
+				Debug.LogError($"Error trying to PlaySound '{sound}': {e.Message}\n{e}");
 			}
 		}
 		#endif

@@ -67,6 +67,12 @@ namespace CDK {
             if (t == null) return;
             t.gameObject.CUnparentAllChildren();
         }
+
+        public static void CResetTransform(this Transform t) {
+            if (t == null) return;
+            t.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
+            t.localScale = Vector3.one;
+        }
         
     }
 }
