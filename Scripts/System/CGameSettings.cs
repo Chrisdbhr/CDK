@@ -29,7 +29,10 @@ namespace CDK {
 		
 		#region <<---------- Properties ---------->>
 
-        private const string GAME_SETTINGS_ASSET_PATH = "Assets/Resources/GameSettings.asset";
+        private static string GAME_SETTINGS_ASSET_FULL_PATH => GAME_SETTINGS_ASSET_PATH + GAME_SETTINGS_ASSET_NAME;
+        private static string GAME_SETTINGS_ASSET_PATH => Application.dataPath + "/Resources/";
+        private const string GAME_SETTINGS_ASSET_NAME = "GameSettings.asset";
+
         public const string AssetRef_PauseMenu = "Prefabs/UI/menus/ui-pausemenu";
 		public const string AssetRef_ConfirmationPopup = "Prefabs/UI/menus/ui-confirm popup";
 		
@@ -75,7 +78,7 @@ namespace CDK {
 			var gameSettingsScriptObj = Resources.Load<CGameSettings>("GameSettings");
 			if (gameSettingsScriptObj != null) return gameSettingsScriptObj;
 
-			gameSettingsScriptObj = AssetDatabase.LoadAssetAtPath<CGameSettings>(GAME_SETTINGS_ASSET_PATH);
+			gameSettingsScriptObj = AssetDatabase.LoadAssetAtPath<CGameSettings>(GAME_SETTINGS_ASSET_FULL_PATH);
 			return gameSettingsScriptObj;
 		}
 
@@ -84,10 +87,14 @@ namespace CDK {
 			if (gameSettingsScriptObj != null) return gameSettingsScriptObj;
 			
 			gameSettingsScriptObj = ScriptableObject.CreateInstance<CGameSettings>();
-			Directory.CreateDirectory(GAME_SETTINGS_ASSET_PATH);
-			AssetDatabase.CreateAsset(gameSettingsScriptObj, GAME_SETTINGS_ASSET_PATH);
-			Debug.Log($"Created GameSettings scriptable object at path: '{GAME_SETTINGS_ASSET_PATH}'");
-			return gameSettingsScriptObj;
+            
+            if(!Directory.Exists(GAME_SETTINGS_ASSET_PATH)) Directory.CreateDirectory(GAME_SETTINGS_ASSET_PATH);
+            
+			AssetDatabase.CreateAsset(gameSettingsScriptObj, GAME_SETTINGS_ASSET_FULL_PATH);
+			
+            Debug.Log($"Created GameSettings scriptable object at path: '{GAME_SETTINGS_ASSET_FULL_PATH}'");
+			
+            return gameSettingsScriptObj;
 		}
 		
 		#endif
