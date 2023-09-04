@@ -64,5 +64,11 @@ namespace CDK {
             return new Vector3(v.x, 0f, v.z).magnitude;
         }
 
+        public static bool CClosestPointIsFirstParameter(this Vector3 originPos, Vector3 firstPos, Vector3 lastPos) {
+            float d1 = Vector3.Distance(firstPos, originPos);
+            float d2 = Vector3.Distance(lastPos, originPos);
+            return d1 < d2;
+        }
+
     }
 }
