@@ -57,12 +57,6 @@ namespace CDK {
 		#region <<---------- General ---------->>
 		
 		public void Retain(object source) {
-            if (source is UnityEngine.Component uComp) {
-                uComp.OnDestroyAsObservable().Subscribe(_ => {
-                    if (CApplication.IsQuitting) return;
-                    this._retainedObjectsRx.Remove(uComp);
-                });
-            }
             if (this._retainedObjectsRx.Contains(source)) return;
             this._retainedObjectsRx.Add(source);
 		}
