@@ -1,4 +1,4 @@
-# README #
+![Project Thumbnail](https://chrisdbhr.github.io/images/thumbs/cdk.png)
 
 CDK (Chris Development Kit) is a useful set of tools to speedup development of core Unity games mechanics. 
 
