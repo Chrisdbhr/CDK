@@ -5,9 +5,14 @@ using UnityEngine;
 namespace CDK.AvatarMask {
     public static class CHumanoidAvatarMasks {
 
+        static AvatarMaskBodyPart[] AllAvatarMaskBodyPart = Enum.GetValues(typeof(AvatarMaskBodyPart)).Cast<AvatarMaskBodyPart>().ToArray();
+
+
+
+
         public static void SetActiveBodyParts(this UnityEngine.AvatarMask avatarMask, params AvatarMaskBodyPart[] parts) {
-            var allEnums = Enum.GetValues(typeof(AvatarMaskBodyPart)).Cast<AvatarMaskBodyPart>();
-            foreach (var bp in allEnums) {
+            foreach (var bp in AllAvatarMaskBodyPart) {
+                if(bp == AvatarMaskBodyPart.LastBodyPart) continue;
                 try {
                     avatarMask.SetHumanoidBodyPartActive(bp, parts.Contains(bp));
                 }
