@@ -70,5 +70,9 @@ namespace CDK {
             return d1 < d2;
         }
 
+        public static Vector3 CMultiplyBy(this Vector3 v, Vector3 multiplier) {
+            return Vector3.Scale(v, multiplier);
+        }
+
     }
 }
