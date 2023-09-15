@@ -31,11 +31,6 @@ namespace CDK {
 
 
         #region <<---------- Initializers ---------->>
-
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSplashScreen)]
-        private static void Initialize() {
-            var c = CCursorManager.get;
-        }
         
         private CCursorManager() {
             this._blockingEventsManager = CBlockingEventsManager.get;
