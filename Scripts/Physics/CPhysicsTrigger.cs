@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace CDK {
@@ -24,8 +25,18 @@ namespace CDK {
 			if (this.WillIgnoreTrigger(other.transform)) return;
 			this.ExitedCollisionOrTrigger(other.transform);
 		}
-		
-		#endregion <<---------- Triggers ---------->>
+
+        private void OnTriggerStay(Collider other) {
+            if (this.WillIgnoreTrigger(other.transform)) return;
+            this.StayingOnCollisionOrTrigger(other.transform);
+        }
+
+        private void OnTriggerStay2D(Collider2D other) {
+            if (this.WillIgnoreTrigger(other.transform)) return;
+            this.StayingOnCollisionOrTrigger(other.transform);
+        }
+
+        #endregion <<---------- Triggers ---------->>
 
 		
 		
@@ -52,7 +63,17 @@ namespace CDK {
 			this.ExitedCollisionOrTrigger(other.transform);
 		}
 
-		#endregion <<---------- Collision ---------->>
+        private void OnCollisionStay(Collision other) {
+            if (this.WillIgnoreTrigger(other.transform)) return;
+            this.StayingOnCollisionOrTrigger(other.transform);
+        }
+
+        private void OnCollisionStay2D(Collision2D other) {
+            if (this.WillIgnoreTrigger(other.transform)) return;
+            this.StayingOnCollisionOrTrigger(other.transform);
+        }
+
+        #endregion <<---------- Collision ---------->>
 		
 
 
@@ -75,6 +96,10 @@ namespace CDK {
 			this.Entered?.Invoke(!exited);
 			this.Exited?.Invoke(exited);
 		}
+
+        protected virtual void StayingOnCollisionOrTrigger(Transform other) {
+            if (this.CannotTrigger) return;
+        }
 		
 		#endregion <<---------- Collision and Trigger Registry ---------->>
 		

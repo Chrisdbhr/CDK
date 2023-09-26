@@ -9,6 +9,7 @@ namespace CDK {
         protected bool TriggerOnce => this._triggerOnce;
         [SerializeField] private bool _triggerOnce;
         protected bool _triggered;
+        protected bool CannotTrigger => this.TriggerOnce && this._triggered;
         
 		[SerializeField] protected CUnityEventTransform Enter;
 		[SerializeField] protected CUnityEventTransform Exit;
