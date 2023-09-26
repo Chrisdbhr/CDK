@@ -11,7 +11,7 @@ using Steamworks;
 namespace CDK.Localization {
     [DisplayName("CDK Startup Selection")]
     [Serializable]
-    public class StartupSelectorExample : IStartupLocaleSelector {
+    public class CLocalizationStartupSelector : IStartupLocaleSelector {
  
         public Locale GetStartupLocale(ILocalesProvider availableLocales) {
             Debug.Log("Initializing Localization System.");

@@ -20,6 +20,7 @@ namespace CDK {
 		}
 
         private void PrefabStageSaving(GameObject go) {
+            if (this == null) return;
             if (go != this.gameObject) return;
             SetSelfInactive(go);
         }
@@ -33,14 +34,17 @@ namespace CDK {
 		
 		private void EditorApplicationOnPlayModeStateChanged(PlayModeStateChange s) {
 			if (s != PlayModeStateChange.ExitingEditMode) return;
+            if (this == null) return;
 			SetSelfInactive(this.gameObject);
 		}
 		
 		private void EditorSceneManagerOnSceneSaving(Scene scene, string path) {
+            if (this == null) return;
 			SetSelfInactive(this.gameObject);
 		}
 		
 		private void SetSelfInactive(GameObject go) {
+            if (this == null) return;
             if (!go.activeSelf) return;
             go.SetActive(false);
 			Debug.Log($"Saving '{this.name}' as inactive game object in '{go.scene.name}'");
