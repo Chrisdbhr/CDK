@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 #if FMOD
 using FMOD;
 using FMOD.Studio;
@@ -33,6 +34,7 @@ namespace CDK {
         [SerializeField, Min(0.0015f)] private float _occlusionPowerByDistance = 0.0025f;
         [SerializeField] private bool _debug;
         private LayerMask _occlusionLayerMask = 1;
+        RaycastHit[] _raycastHitResults = new RaycastHit[1024];
 
         private AudioSource OneShotAudioSource;
         
@@ -54,7 +56,7 @@ namespace CDK {
         public const float SoundSpeedInKm = 1224f;
 
 #if FMOD
-        private Dictionary<EventReference, (EventInstance instance, bool is3d, Transform connectedTransform)> _playingSounds;
+        private Dictionary<EventReference, (EventInstance instance, bool is3d, Transform connectedTransform, bool autoPauseManagment)> _playingSounds;
         private Dictionary<EventReference, CRetainable> _pausedSounds;
 #endif
         private const string OcclusionParameter = "Occlusion";
@@ -73,13 +75,31 @@ namespace CDK {
             this.OneShotAudioSource = this.gameObject.AddComponent<AudioSource>();
             this.OneShotAudioSource.playOnAwake = false;
             #if FMOD
-            this._playingSounds = new Dictionary<EventReference, (EventInstance instance, bool is3d, Transform connectedTransform)>();
+            this._playingSounds = new Dictionary<EventReference, (EventInstance instance, bool is3d, Transform connectedTransform, bool autoPauseManagment)>();
             this._pausedSounds = new Dictionary<EventReference, CRetainable>();
             #endif
         }
 
+        private void OnEnable() {
+            CTime.OnTimePaused += this.OnTimePaused;
+
+            #if FMOD
+            StudioEventEmitter.OnInstancePlay += this.StudioEventOnInstancePlay;
+            StudioEventEmitter.OnInstanceStop += this.StudioEventOnInstanceStop;
+            #endif
+        }
+
+        private void OnDisable() {
+            CTime.OnTimePaused -= this.OnTimePaused;
+
+            #if FMOD
+            StudioEventEmitter.OnInstancePlay -= this.StudioEventOnInstancePlay;
+            StudioEventEmitter.OnInstanceStop -= this.StudioEventOnInstanceStop;
+            #endif
+        }
+
 #if FMOD
-    private void Update() {
+        private void Update() {
             this.ComputeOcclusion();            
         }
 
@@ -118,12 +138,18 @@ namespace CDK {
 
 
         #region <<---------- General ---------->>
-#if FMOD
 
+        private void OnTimePaused(bool paused) {
+            foreach (var playingSound in this._playingSounds.Where(playingSound => playingSound.Value.autoPauseManagment)) {
+                this.RequestPauseState(playingSound.Key, paused);
+            }
+        }
+
+#if FMOD
         /// <summary>
         /// Play an event that will be replaced if requested to play again.
         /// </summary>
-        public EventInstance PlaySingletonEvent(EventReference soundRef, Transform connectedTransform = null) {
+        public EventInstance PlaySingletonEvent(EventReference soundRef, Transform connectedTransform = null, bool autoPauseManagment = true) {
             try{
                 if (this._playingSounds.ContainsKey(soundRef)) {
 #if UNITY_EDITOR
@@ -151,7 +177,7 @@ namespace CDK {
                 
                 is3d = (is3d && connectedTransform != null);
                 
-                this._playingSounds[soundRef] = (soundInstance, is3d, connectedTransform);
+                this._playingSounds[soundRef] = (soundInstance, is3d, connectedTransform, autoPauseManagment);
 
                 Vector3 soundPosition = default;
                 if (is3d) {
@@ -325,8 +351,8 @@ namespace CDK {
 
             return false;
         }
-        
 #endif
+
         #endregion <<---------- General ---------->>
 
 
@@ -346,7 +372,6 @@ namespace CDK {
 
 
         #region <<---------- Distance Based ---------->>
-
 
 #if FMOD
         private IEnumerator PlaySoundByDistanceRoutine(EventInstance eventInstance, Vector3 point) {
@@ -411,18 +436,21 @@ namespace CDK {
                 if (description.is3D(out var is3d) != RESULT.OK || !is3d) continue;
                 if (description.getMinMaxDistance(out var minDistance, out var maxDistance) != RESULT.OK) continue;
                 var emitterPos = activeEmitter.transform.position;
-                var allHits = Physics.RaycastAll(emitterPos,
+
+                var hitsAmount = Physics.RaycastNonAlloc(
+                    emitterPos,
                     listenerTransform.position - emitterPos,
+                    this._raycastHitResults,
                     maxDistance,
                     this._occlusionLayerMask,
                     QueryTriggerInteraction.Ignore
                 );
 
 #if UNITY_EDITOR
-                debugRayHits[activeEmitter] = allHits;
+                debugRayHits[activeEmitter] = this._raycastHitResults.Take(hitsAmount).ToArray();
 #endif
                 
-                var newOcclusionValue = GetOcclusionValue(ref allHits);
+                var newOcclusionValue = GetOcclusionValue(hitsAmount);
                 activeEmitter.EventInstance.setParameterByName(OcclusionParameter, newOcclusionValue);
             }
             
@@ -430,21 +458,46 @@ namespace CDK {
 #endif
         }
 
-        private float GetOcclusionValue(ref RaycastHit[] hits) {
+        private float GetOcclusionValue(int hitsAmount) {
             float occlusion = 0.0f;
 
-            if (hits.Length <= 0) {
+            if (this._raycastHitResults.Length <= 0) {
                 return occlusion;
             }
             
-            for (int i = 0; i < hits.Length; i += 2) {
-                if (i >= hits.Length || i + 1 >= hits.Length) break;
-                occlusion += Vector3.Distance(hits[i].point, hits[i + 1].point) * this._occlusionPowerByDistance;
+            for (int i = 0; i < hitsAmount; i += 2) {
+                if (i >= hitsAmount || i + 1 >= hitsAmount) break;
+                occlusion += Vector3.Distance(this._raycastHitResults[i].point, this._raycastHitResults[i + 1].point) * this._occlusionPowerByDistance;
             }
 
             return occlusion;
         }
 
         #endregion <<---------- Occlusion ---------->>
+
+
+
+        #if FMOD
+        #region <<---------- FMOD Studio Event Emitter Monitoring ---------->>
+
+        private void StudioEventOnInstancePlay(StudioEventEmitter eventEmitter, EventInstance eventInstance) {
+            if (this._playingSounds.ContainsKey(eventEmitter.EventReference)) {
+                Debug.LogError($"Received callback that a {nameof(StudioEventEmitter)} started playing but the emitter is already playing!");
+                return;
+            }
+            this._playingSounds[eventEmitter.EventReference] = (eventInstance, eventEmitter.Is3d, eventEmitter.transform, eventEmitter.Is3d);
+        }
+
+        private void StudioEventOnInstanceStop(EventReference eventReference) {
+            if (CApplication.IsQuitting) return;
+            if (!this._playingSounds.ContainsKey(eventReference)) {
+                Debug.LogError($"Received callback that a {nameof(StudioEventEmitter)} stopped playing but the emitter is null!");
+                return;
+            }
+            this._playingSounds.Remove(eventReference);
+        }
+
+        #endregion <<---------- FMOD Studio Event Emitter Monitoring ---------->>
+        #endif
     }
 }
