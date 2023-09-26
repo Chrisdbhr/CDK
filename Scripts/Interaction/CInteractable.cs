@@ -12,6 +12,7 @@ namespace CDK.Interaction {
 		
         [SerializeField] protected bool _debug;
 		[SerializeField] private bool onlyWorkOneTimePerSceneLoad;
+        [SerializeField] private Transform _interactionPromptPoint;
 		[SerializeField] private CUnityEventTransform InteractEvent;
         protected CBlockingEventsManager _blockingEventsManager;
         protected CUINavigationManager _navigationManager;
@@ -64,7 +65,11 @@ namespace CDK.Interaction {
 		public virtual void OnBecameInteractionTarget(Transform lookingTransform) { }
 
         public virtual void OnStoppedBeingInteractionTarget(Transform lookingTransform) { }
-        
+
+        public Vector3 GetInteractionPromptPoint() {
+            return this._interactionPromptPoint != null ? this._interactionPromptPoint.position : this.transform.position;
+        }
+
         #endregion <<---------- CIInteractable ---------->>
 
 
