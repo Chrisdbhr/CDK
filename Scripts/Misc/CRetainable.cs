@@ -41,7 +41,7 @@ namespace CDK {
                 int count = this._retainedObjectsRx.Count;
                 for (int i = count - 1; i >= 0; i--) {
                     uObject = this._retainedObjectsRx[i] as Object;
-                    if (uObject != null || this._retainedObjectsRx[i] != default) continue;
+                    if (uObject != null && this._retainedObjectsRx[i] != default) continue;
                     Debug.LogWarning($"Removing null retainable at index {i}/{count}.");
                     this._retainedObjectsRx.RemoveAt(i);
                 }
