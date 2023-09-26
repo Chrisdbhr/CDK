@@ -14,7 +14,7 @@ namespace CDK {
         
         public static CPlayerPrefs Current {
             get {
-                if (CSingletonHelper.CannotCreateAnyInstance() || _current != null) return _current;
+                if (CApplication.IsQuitting || _current != null) return _current;
                 return _current = LoadOrGetNewPlayerPrefs();
             }
             set {
@@ -100,7 +100,7 @@ namespace CDK {
                 }
             
                 var fileContent = File.ReadAllText(filePath);
-                Debug.Log($"PlayerPrefs file content: {fileContent}");
+                //Debug.Log($"PlayerPrefs file content: {fileContent}");
 
                 #if Newtonsoft_Json_for_Unity
                 var prefs = JsonConvert.DeserializeObject<CPlayerPrefs>(fileContent, CJsonExtensions.DefaultSettings);

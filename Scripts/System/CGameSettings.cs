@@ -75,21 +75,20 @@ namespace CDK {
 		}
 
 		public static CGameSettings EditorTryLoadingGameSettings() {
+            AssetDatabase.Refresh();
 			var gameSettingsScriptObj = Resources.Load<CGameSettings>("GameSettings");
 			if (gameSettingsScriptObj != null) return gameSettingsScriptObj;
-
-			gameSettingsScriptObj = AssetDatabase.LoadAssetAtPath<CGameSettings>(GAME_SETTINGS_ASSET_FULL_PATH);
-			return gameSettingsScriptObj;
+			return AssetDatabase.LoadAssetAtPath<CGameSettings>(GAME_SETTINGS_ASSET_FULL_PATH);
 		}
 
 		public static CGameSettings EditorCreateGameSettingsResourceIfNeeded() {
 			var gameSettingsScriptObj = EditorTryLoadingGameSettings();
 			if (gameSettingsScriptObj != null) return gameSettingsScriptObj;
 			
-			gameSettingsScriptObj = ScriptableObject.CreateInstance<CGameSettings>();
-            
             if(!Directory.Exists(GAME_SETTINGS_ASSET_PATH)) Directory.CreateDirectory(GAME_SETTINGS_ASSET_PATH);
-            
+
+			gameSettingsScriptObj = ScriptableObject.CreateInstance<CGameSettings>();
+
 			AssetDatabase.CreateAsset(gameSettingsScriptObj, GAME_SETTINGS_ASSET_FULL_PATH);
 			
             Debug.Log($"Created GameSettings scriptable object at path: '{GAME_SETTINGS_ASSET_FULL_PATH}'");

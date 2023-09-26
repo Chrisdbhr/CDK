@@ -21,51 +21,72 @@ namespace CDK {
 
         #endregion <<---------- Initializers ---------->>
 
-        
-        
-        
+
+
+
         #region <<---------- Properties and Fields ---------->>
+
+        public static event Action OnNotifyForExternalModifiedSaveFile {
+            add {
+                _onNotifyForExternalModifiedSaveFile -= value;
+                _onNotifyForExternalModifiedSaveFile += value;
+            }
+            remove {
+                _onNotifyForExternalModifiedSaveFile -= value;
+            }
+        }
+        [JsonIgnore]
+        private static Action _onNotifyForExternalModifiedSaveFile;
+
+        [JsonProperty("_applicationVersionWhenSaved")]
+        public string ApplicationVersionWhenSaved;
 
         [JsonIgnore]
         public bool WasLoadedAutomatically { get; }
-        
+
         [JsonIgnore]
-        public const string SavesDirectoryName = "SavesDir";  
-        
-        #if Newtonsoft_Json_for_Unity
+        public const string SavesDirectoryName = "SavesDir";
+
         [JsonProperty("_saveIdentifier")]
-        #endif
         public string SaveIdentifier;
 
-        #if Newtonsoft_Json_for_Unity
         [JsonProperty("_saveDescriptiveName")]
-        #endif
         public string SaveDescriptiveName = "Save";
-        
-        #if Newtonsoft_Json_for_Unity
+
         [JsonProperty("_saveDateTime")]
-        #endif
         public DateTime SaveDate;
-        
+
+        [JsonProperty("_saveHash")]
+        public string SaveHash;
+
         #endregion <<---------- Properties and Fields ---------->>
-        
-        
-        
-        
+
+
+
+
         #region <<---------- Save ---------->>
 
         public virtual bool Save() {
-            this.SaveDate = DateTime.UtcNow;
             return this.SaveJson();
         }
-        
+
         private bool SaveJson() {
+            this.SaveDate = DateTime.UtcNow;
+            this.SaveHash = String.Empty;
+            this.ApplicationVersionWhenSaved = Application.version;
+
+            // serialized json without hash
+            this.SaveHash = Animator.StringToHash(this.GetSerializedJson()).ToString();
+            // then serialize again and save with hash
+            return SaveJsonTextToFile(this.GetSerializedJson(), GetGameProgressFilePath(this.SaveIdentifier));
+        }
+
+        private string GetSerializedJson() {
             #if Newtonsoft_Json_for_Unity
-            var json = JsonConvert.SerializeObject(this, CJsonExtensions.DefaultSettings);
+            return JsonConvert.SerializeObject(this, CJsonExtensions.DefaultSettings);
             #else
-            var json = JsonUtility.ToJson(data);
-			#endif
-            return SaveJsonTextToFile(json, GetGameProgressFilePath(this.SaveIdentifier));
+            return JsonUtility.ToJson(this);
+            #endif
         }
 
         #endregion <<---------- Save ---------->>
@@ -99,17 +120,13 @@ namespace CDK {
             try {
                 var fileContent = File.ReadAllText(filePath);
 				
-                Debug.Log($"SaveGameProgress file content: {fileContent}");
-
-				#if Newtonsoft_Json_for_Unity
-                var save = JsonConvert.DeserializeObject<T>(fileContent, CJsonExtensions.DefaultSettings);
-                #else
-				var save = JsonUtility.FromJson<T>(fileContent);
-				#endif
+				var save = DeserializeFile<T>(fileContent);
                 if (save == null) {
                     Debug.LogError($"Could not deserialize Save at path '{filePath}'!");
                     return null;
                 }
+
+                CheckForModifiedFile(save);
 
                 Debug.Log($"GameProgress Loaded.");
                 return save;
@@ -120,7 +137,15 @@ namespace CDK {
 
             return null;
         }
-        
+
+        private static T DeserializeFile<T>(string fileContent) where T : CPersistentData {
+            #if Newtonsoft_Json_for_Unity
+            return JsonConvert.DeserializeObject<T>(fileContent, CJsonExtensions.DefaultSettings);
+            #else
+			return JsonUtility.FromJson<T>(fileContent);
+            #endif
+        }
+
         /// <summary>
         /// Never returns a null list.
         /// </summary>
@@ -165,6 +190,25 @@ namespace CDK {
         }
 
         #endregion <<---------- Paths ---------->>
+
+
+
+
+        #region <<---------- General ---------->>
+
+        private static void CheckForModifiedFile<T>(T dataT) {
+            if (!(dataT is CGameProgressBase data)) return;
+            var originalHash = data.SaveHash;
+            data.SaveHash = string.Empty;
+            var newHash = Animator.StringToHash(data.GetSerializedJson()).ToString();
+            if (originalHash != newHash) {
+                Debug.Log($"Save file '{data.SaveIdentifier}' was modified externally!");
+                _onNotifyForExternalModifiedSaveFile?.Invoke();
+            }
+            data.SaveHash = originalHash;
+        }
+
+        #endregion <<---------- General ---------->>
 
     }
 }

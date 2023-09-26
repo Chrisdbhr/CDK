@@ -37,7 +37,7 @@ namespace CDK {
         public Transform FootR;
 		public LayerMask FootCollisionLayers = 1;
 
-        [SerializeField, Min(0f)] private float _rayOffset = 0.50f;
+        [SerializeField, Min(0f)] private float _rayOffset = 1.50f;
         [SerializeField] private float _feetSizeForSphereCast = 0.05f;
         [SerializeField] private bool _overrideFootstepData;
         [SerializeField] private CFootstepInfo _infoOverride;

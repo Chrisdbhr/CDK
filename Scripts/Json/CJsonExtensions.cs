@@ -22,7 +22,7 @@ namespace CDK {
 				new Vector2Converter(),
 				new Vector3Converter(),
 				new Vector2IntConverter(),
-				new Vector3IntConverter()
+				new Vector3IntConverter(),
             },
 			ContractResolver = new UnityTypeContractResolver(),
 		};
