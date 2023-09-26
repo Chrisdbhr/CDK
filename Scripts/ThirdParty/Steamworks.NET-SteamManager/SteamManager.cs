@@ -31,6 +31,7 @@ public class SteamManager : MonoBehaviour {
 	protected static SteamManager Instance {
 		get {
             if (s_instance == null) {
+                if (!CanInitialize()) return s_instance;
 				return (s_instance = new GameObject("SteamManager").AddComponent<SteamManager>());
 			}
             return s_instance;
@@ -66,8 +67,7 @@ public class SteamManager : MonoBehaviour {
 	protected bool m_bInitialized = false;
 	public static bool Initialized {
 		get {
-            if (!CanInitialize()) return false;
-			return Instance.m_bInitialized;
+			return Instance != null && Instance.m_bInitialized;
 		}
 	}
 
@@ -114,17 +114,17 @@ public class SteamManager : MonoBehaviour {
 	}
 #endif
     
-    public static void Initialize() {
+    public static void InitializeIfPossibleAndNeeded() {
         if (!CanInitialize()) return;
         var s = SteamManager.Instance; // Initialize instance
     }
 
     public static bool CanInitialize() {
-#if DISABLESTEAMWORKS
-            return false;
-#else
-        return !CApplication.IsEditorOrDevelopment();
-#endif
+        #if DISABLESTEAMWORKS
+        return false;
+        #else
+        return !Application.isEditor;
+        #endif
     }
 
 	protected virtual void Awake() {
