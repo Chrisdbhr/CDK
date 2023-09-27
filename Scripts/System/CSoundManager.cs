@@ -105,7 +105,7 @@ namespace CDK {
 
         private void LateUpdate(){
             foreach (var playingSound in this._playingSounds) {
-                if (playingSound.Value.connectedTransform == null) {
+                if (playingSound.Value.connectedTransform == null || !playingSound.Value.instance.isValid()) {
                     this.StopPlaying(playingSound.Key);
                     break;
                 }
@@ -491,7 +491,7 @@ namespace CDK {
         private void StudioEventOnInstanceStop(EventReference eventReference) {
             if (CApplication.IsQuitting) return;
             if (!this._playingSounds.ContainsKey(eventReference)) {
-                Debug.LogError($"Received callback that a {nameof(StudioEventEmitter)} stopped playing but the emitter is null!");
+                //Debug.LogError($"Received callback that a {nameof(StudioEventEmitter)} stopped playing but the emitter is null!");
                 return;
             }
             this._playingSounds.Remove(eventReference);
