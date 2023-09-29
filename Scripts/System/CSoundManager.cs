@@ -26,14 +26,35 @@ namespace CDK {
 
         #endregion <<---------- Singleton ---------->>
 
-        
+
+
+
+        #region <<---------- Enum ---------->>
+
+        struct PlayingSoundData {
+            public EventInstance instance { get; }
+            public bool is3d { get; }
+            public Transform connectedTransform { get; }
+            public bool autoPauseManagment { get; }
+
+            public PlayingSoundData(EventInstance instance, bool is3d, Transform connectedTransform, bool autoPauseManagment) {
+                this.instance = instance;
+                this.is3d = is3d;
+                this.connectedTransform = connectedTransform;
+                this.autoPauseManagment = autoPauseManagment;
+            }
+        }
+
+
+        #endregion <<---------- Enum ---------->>
+
         
         
         #region <<---------- Properties and Fields ---------->>
 
-        [SerializeField, Min(0.0015f)] private float _occlusionPowerByDistance = 0.0025f;
-        [SerializeField] private bool _debug;
-        private LayerMask _occlusionLayerMask = 1;
+        [SerializeField, Min(0.0015f)] float _occlusionPowerByDistance = 0.0025f;
+        [SerializeField] bool _debug;
+        LayerMask _occlusionLayerMask = 1;
         RaycastHit[] _raycastHitResults = new RaycastHit[1024];
 
         private AudioSource OneShotAudioSource;
@@ -56,8 +77,9 @@ namespace CDK {
         public const float SoundSpeedInKm = 1224f;
 
 #if FMOD
-        private Dictionary<EventReference, (EventInstance instance, bool is3d, Transform connectedTransform, bool autoPauseManagment)> _playingSounds;
-        private Dictionary<EventReference, CRetainable> _pausedSounds;
+        private Dictionary<EventReference, PlayingSoundData> _playingUniqueSounds;
+        private Dictionary<PlayingSoundData, CRetainable> _pausedSounds;
+        private List<PlayingSoundData> _playingSounds;
 #endif
         private const string OcclusionParameter = "Occlusion";
         private const float OcclusionComputingInterval = 0.1f;
@@ -75,8 +97,9 @@ namespace CDK {
             this.OneShotAudioSource = this.gameObject.AddComponent<AudioSource>();
             this.OneShotAudioSource.playOnAwake = false;
             #if FMOD
-            this._playingSounds = new Dictionary<EventReference, (EventInstance instance, bool is3d, Transform connectedTransform, bool autoPauseManagment)>();
-            this._pausedSounds = new Dictionary<EventReference, CRetainable>();
+            this._playingUniqueSounds = new ();
+            this._pausedSounds = new ();
+            this._playingSounds = new ();
             #endif
         }
 
@@ -104,7 +127,7 @@ namespace CDK {
         }
 
         private void LateUpdate(){
-            foreach (var playingSound in this._playingSounds) {
+            foreach (var playingSound in this._playingUniqueSounds) {
                 if (playingSound.Value.connectedTransform == null || !playingSound.Value.instance.isValid()) {
                     this.StopPlaying(playingSound.Key);
                     break;
@@ -140,7 +163,7 @@ namespace CDK {
         #region <<---------- General ---------->>
 
         private void OnTimePaused(bool paused) {
-            foreach (var playingSound in this._playingSounds.Where(playingSound => playingSound.Value.autoPauseManagment)) {
+            foreach (var playingSound in this._playingUniqueSounds.Where(playingSound => playingSound.Value.autoPauseManagment)) {
                 this.RequestPauseState(playingSound.Key, paused);
             }
         }
@@ -151,15 +174,15 @@ namespace CDK {
         /// </summary>
         public EventInstance PlaySingletonEvent(EventReference soundRef, Transform connectedTransform = null, bool autoPauseManagment = true) {
             try{
-                if (this._playingSounds.ContainsKey(soundRef)) {
+                if (this._playingUniqueSounds.ContainsKey(soundRef)) {
 #if UNITY_EDITOR
                     if (this._debug) {
                         Debug.LogWarning($"Replacing already created sound '{soundRef}'");
                     }
 #endif
-                    if(this._playingSounds[soundRef].instance.isValid()) {
-                        this._playingSounds[soundRef].instance.stop(STOP_MODE.IMMEDIATE);
-                        this._playingSounds[soundRef] = default;
+                    if(this._playingUniqueSounds[soundRef].instance.isValid()) {
+                        this._playingUniqueSounds[soundRef].instance.stop(STOP_MODE.IMMEDIATE);
+                        this._playingUniqueSounds[soundRef] = default;
                     }
                 }
                 
@@ -176,8 +199,8 @@ namespace CDK {
                 }
                 
                 is3d = (is3d && connectedTransform != null);
-                
-                this._playingSounds[soundRef] = (soundInstance, is3d, connectedTransform, autoPauseManagment);
+
+                this._playingUniqueSounds[soundRef] = new PlayingSoundData (soundInstance, is3d, connectedTransform, autoPauseManagment);
 
                 Vector3 soundPosition = default;
                 if (is3d) {
@@ -209,13 +232,13 @@ namespace CDK {
 
         public void StopPlaying(EventReference soundRef, STOP_MODE stopMode = STOP_MODE.IMMEDIATE) {
             try {
-                if (!this._playingSounds.TryGetValue(soundRef, out var sound)) {
+                if (!this._playingUniqueSounds.TryGetValue(soundRef, out var sound)) {
                     if(_debug) Debug.LogWarning($"Tried to get a sound that is not playing anymore.");
                     return;
                 }
 
-                if (!this._playingSounds.Remove(soundRef)) {
-                    Debug.LogError($"Issue trying to remove sound ref from '{nameof(this._playingSounds)}'");
+                if (!this._playingUniqueSounds.Remove(soundRef)) {
+                    Debug.LogError($"Issue trying to remove sound ref from '{nameof(this._playingUniqueSounds)}'");
                 }
                 
                 var r = sound.instance.stop(stopMode);
@@ -240,30 +263,22 @@ namespace CDK {
         /// <summary>
         /// Requests are Retained and Released.
         /// </summary>
-        public void RequestPauseState(EventReference soundRef, bool shouldPause) {
+        public void RequestPauseState(EventReference eventRef, bool shouldPause) {
             try {
-                if (!this._playingSounds.TryGetValue(soundRef, out var sound)) {
-                    if(_debug) Debug.LogWarning($"Tried to get a sound that is not playing anymore.");
-                    return;
-                }
-                
-                if (!sound.instance.isValid()) {
-                    Debug.LogError($"Sound instance '{soundRef}' is not valid");
-                    return;
-                }
+                var data = this.GetUniqueSoundDataFromEventReference(eventRef);
 
                 // analyse pause
-                if (!this._pausedSounds.ContainsKey(soundRef)) this._pausedSounds[soundRef] = new CRetainable();
+                if (!this._pausedSounds.ContainsKey(data)) this._pausedSounds[data] = new CRetainable();
 
-                var retainable = this._pausedSounds[soundRef];
+                var retainable = this._pausedSounds[data];
                 if (shouldPause) {
-                    retainable.Retain(soundRef);
+                    retainable.Retain(eventRef);
                 }
                 else {
-                    retainable.Release(soundRef);
+                    retainable.Release(eventRef);
                 }
                 
-                var r = sound.instance.setPaused(retainable.IsRetained);
+                var r = data.instance.setPaused(retainable.IsRetained);
 #if UNITY_EDITOR
                 if (r != RESULT.OK) {
                     Debug.LogError($"Issue when trying to pause sound: {r}");
@@ -278,7 +293,7 @@ namespace CDK {
 
         public void SetParameter(EventReference soundRef, string paramName, float value) {
             try {
-                if (!this._playingSounds.TryGetValue(soundRef, out var sound)) {
+                if (!this._playingUniqueSounds.TryGetValue(soundRef, out var sound)) {
                     if(_debug) Debug.LogWarning($"Tried to get a sound that is not playing anymore.");
                     return;
                 }
@@ -302,7 +317,7 @@ namespace CDK {
         
         public float GetParameter(EventReference soundRef, string paramName) {
             try {
-                if (!this._playingSounds.TryGetValue(soundRef, out var sound)) {
+                if (!this._playingUniqueSounds.TryGetValue(soundRef, out var sound)) {
                     if(_debug) Debug.LogWarning($"Tried to get a sound that is not playing anymore.");
                     return default;
                 }
@@ -327,9 +342,9 @@ namespace CDK {
             return default;
         }
 
-        public bool IsPlaying(EventReference soundRef) {
+        public bool IsUniquePlaying(EventReference soundRef) {
             try {
-                if (!this._playingSounds.TryGetValue(soundRef, out var sound)) {
+                if (!this._playingUniqueSounds.TryGetValue(soundRef, out var sound)) {
                     return false;
                 }
                 
@@ -350,6 +365,21 @@ namespace CDK {
             }
 
             return false;
+        }
+
+        private PlayingSoundData GetUniqueSoundDataFromEventReference(EventReference eventReference) {
+            if (!this._playingUniqueSounds.TryGetValue(eventReference, out var sound)) {
+                Debug.LogError($"Tried to get a sound that is not playing anymore.");
+                return default;
+            }
+
+            if (!sound.instance.isValid()) {
+                Debug.LogError($"Sound instance '{eventReference}' is not valid");
+                return default;
+            }
+
+            return sound;
+
         }
 #endif
 
@@ -477,27 +507,27 @@ namespace CDK {
 
 
 
-        #if FMOD
         #region <<---------- FMOD Studio Event Emitter Monitoring ---------->>
 
-        private void StudioEventOnInstancePlay(StudioEventEmitter eventEmitter, EventInstance eventInstance) {
-            if (this._playingSounds.ContainsKey(eventEmitter.EventReference)) {
-                Debug.LogError($"Received callback that a {nameof(StudioEventEmitter)} started playing but the emitter is already playing!");
-                return;
-            }
-            this._playingSounds[eventEmitter.EventReference] = (eventInstance, eventEmitter.Is3d, eventEmitter.transform, eventEmitter.Is3d);
+        #if FMOD
+
+        private void StudioEventOnInstancePlay(EventInstance eventInstance, bool is3d, Transform connectedTransform) {
+            var data = new PlayingSoundData (eventInstance, is3d, connectedTransform, true);
+            this._playingSounds.Add(data);
         }
 
-        private void StudioEventOnInstanceStop(EventReference eventReference) {
+        private void StudioEventOnInstanceStop(EventInstance eventInstance) {
             if (CApplication.IsQuitting) return;
-            if (!this._playingSounds.ContainsKey(eventReference)) {
-                //Debug.LogError($"Received callback that a {nameof(StudioEventEmitter)} stopped playing but the emitter is null!");
+            if (eventInstance.handle == default) {
+                Debug.LogError($"Notified a sound stopped but the handle is default.");
                 return;
             }
-            this._playingSounds.Remove(eventReference);
+            var data = this._playingSounds.FirstOrDefault(d => d.instance.handle == eventInstance.handle);
+            this._playingSounds.Remove(data);
         }
+
+        #endif
 
         #endregion <<---------- FMOD Studio Event Emitter Monitoring ---------->>
-        #endif
     }
 }
