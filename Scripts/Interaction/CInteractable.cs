@@ -16,9 +16,6 @@ namespace CDK.Interaction {
 		[SerializeField] private CUnityEventTransform InteractEvent;
         protected CBlockingEventsManager _blockingEventsManager;
         protected CUINavigationManager _navigationManager;
-		#if DOTWEEN
-        private Tween _rotateTween;
-		#endif
 
 		#endregion <<---------- Properties and Fields ---------->>
 
@@ -36,11 +33,7 @@ namespace CDK.Interaction {
 			// show enable checkbox
 		}
 
-        protected virtual void OnDisable() {
-      		#if DOTWEEN
-            this._rotateTween?.Kill(false);
-     		#endif
-        }
+        protected virtual void OnDisable() { }
         
 		#endregion <<---------- MonoBehaviour ---------->>
 
@@ -58,7 +51,6 @@ namespace CDK.Interaction {
 			if (this.onlyWorkOneTimePerSceneLoad) {
 				Destroy(this);
 			}
-            this.RotateTowardsInteraction(interactingTransform);
             return true;
         }
 		
@@ -71,22 +63,6 @@ namespace CDK.Interaction {
         }
 
         #endregion <<---------- CIInteractable ---------->>
-
-
-
-        
-        #region <<---------- General ---------->>
-
-        protected void RotateTowardsInteraction(Transform t) {
-            #if DOTWEEN
-            this._rotateTween = t.DOLookAt(this.transform.position, 0.5f, AxisConstraint.Y);
-            this._rotateTween.Play();
-            #else
-			t.LookAt(this.transform.position);
-			#endif
-        }
-
-        #endregion <<---------- General ---------->>
 
     }
 }
