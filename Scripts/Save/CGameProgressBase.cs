@@ -38,8 +38,11 @@ namespace CDK {
         [JsonIgnore]
         private static Action _onNotifyForExternalModifiedSaveFile;
 
-        [JsonProperty("_applicationVersionWhenSaved")]
-        public string ApplicationVersionWhenSaved;
+        [JsonProperty("_appVersionWhenCreated")]
+        public string AppVersionWhenCreated = Application.version;
+
+        [JsonProperty("_appVersionOnLastSave")]
+        public string AppVersionOnLastSave;
 
         [JsonIgnore]
         public bool WasLoadedAutomatically { get; }
@@ -73,7 +76,7 @@ namespace CDK {
         private bool SaveJson() {
             this.SaveDate = DateTime.UtcNow;
             this.SaveHash = String.Empty;
-            this.ApplicationVersionWhenSaved = Application.version;
+            this.AppVersionOnLastSave = Application.version;
 
             // serialized json without hash
             this.SaveHash = Animator.StringToHash(this.GetSerializedJson()).ToString();
