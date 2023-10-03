@@ -1,4 +1,5 @@
 using System.Collections;
+using UnityEditor;
 using UnityEngine;
 
 namespace CDK {
@@ -24,6 +25,17 @@ namespace CDK {
             if (c != null) return;
             c = m.CGetComponentInChildrenOrInParent<T>();
         }
-        
+
+        public static void CSetNameIfOnlyComponent(this MonoBehaviour m, string name) {
+            if (m == null) return;
+            var comps = m.GetComponents<Component>();
+            if (comps == null) return;
+            if (comps.Length > 2) return;
+            m.name = name;
+            #if UNITY_EDITOR
+            EditorUtility.SetDirty(m);
+            #endif
+        }
+
     }
 }

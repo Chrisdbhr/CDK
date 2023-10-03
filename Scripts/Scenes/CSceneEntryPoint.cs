@@ -31,8 +31,8 @@ namespace CDK {
         
         public static CSceneEntryPoint GetSceneEntryPointByNumber(int entryPointNumber) {
 			var sceneEntryPoints = GameObject.FindObjectsOfType<CSceneEntryPoint>();
-			if (!sceneEntryPoints.Any() || entryPointNumber >= sceneEntryPoints.Length) {
-				Debug.LogWarning($"Cant find any level entry point {entryPointNumber} OR it is invalid. Spawning in 0,0,0");
+			if (!sceneEntryPoints.Any()) {
+				Debug.LogWarning($"Cant find any level entry point. Spawning in 0,0,0");
 			}
 			else {
 				var selectedEntryPoint = sceneEntryPoints.Where(ep => ep._number == entryPointNumber).ToList();
