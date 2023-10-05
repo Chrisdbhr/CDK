@@ -36,5 +36,14 @@ namespace CDK {
                 a.Invoke(o);
             }
         }
+
+        public static IEnumerable<T> CRemoveNulls<T>(this IEnumerable<T> enumerable) {
+            if (enumerable == null) yield break;
+            foreach (var o in enumerable) {
+                if (o == null) continue;
+                yield return o;
+            }
+        }
+
     }
 }

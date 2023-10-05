@@ -31,5 +31,11 @@ namespace CDK {
             return v.x == 1f && v.y == 1f;
         }
 
+        public static Vector2 CLerp(this Vector2 v, Vector2 other, float t) {
+            v.x = Mathf.Lerp(v.x, other.x, t);
+            v.y = Mathf.Lerp(v.y, other.y, t);
+            return v;
+        }
+
 	}
 }
