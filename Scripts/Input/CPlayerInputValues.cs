@@ -31,11 +31,18 @@ namespace CDK {
         }
 
         public void SetMovement3DRelativeToCamera(Transform cameraTransform) {
-            var value = cameraTransform.rotation * this.RawMovement3D;
-            value.x = value.x.CClamp(-1f, 1f);
-            value.y = 0f;
-            value.z = value.z.CClamp(-1f, 1f);
-            this.RelativeMovement3D = value;
+
+            //camera forward and right vectors:
+            var forward = cameraTransform.forward;
+            var right = cameraTransform.right;
+
+            //project forward and right vectors on the horizontal plane (y = 0)
+            forward.y = 0f;
+            right.y = 0f;
+            forward.Normalize();
+            right.Normalize();
+
+            this.RelativeMovement3D = (forward * this.RawMovement3D.z) + (right * this.RawMovement3D.x);
         }
     }
 }
