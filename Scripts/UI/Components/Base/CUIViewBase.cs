@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Threading.Tasks;
 using UniRx;
 using UnityEngine;
@@ -73,7 +74,7 @@ namespace CDK.UI {
             this._navigationManager = CUINavigationManager.get;
         }
 
-		protected virtual void Start() {
+		protected virtual IEnumerator Start() {
             this.UpdateEventSystemAndCheckForObjectSelection(this._eventSystem.firstSelectedGameObject);
 
             Observable.EveryLateUpdate()
@@ -97,7 +98,8 @@ namespace CDK.UI {
                 })
                 .AddTo(this._disposeOnDestroy);
             }
-		}
+            yield break;
+        }
 		
 		protected virtual void OnEnable() {
            
