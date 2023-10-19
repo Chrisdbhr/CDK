@@ -19,6 +19,7 @@ namespace CDK.UI {
 		
 		[Header("Setup")]
 		[SerializeField] protected EventSystem _eventSystem;
+        protected CUIButton ButtonReturn => _buttonReturn;
         [SerializeField] CUIButton _buttonReturn;
 
         public bool ShouldPauseTheGame = true;
