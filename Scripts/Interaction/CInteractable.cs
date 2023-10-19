@@ -41,7 +41,11 @@ namespace CDK.Interaction {
 		
 		
 		#region <<---------- CIInteractable ---------->>
-		
+
+        public virtual bool CanBeInteractedWith() {
+            return true;
+        }
+
         /// <summary>
         /// Returns TRUE if interacted sucesfull.
         /// </summary>
@@ -53,8 +57,8 @@ namespace CDK.Interaction {
 			}
             return true;
         }
-		
-		public virtual void OnBecameInteractionTarget(Transform lookingTransform) { }
+
+        public virtual void OnBecameInteractionTarget(Transform lookingTransform) { }
 
         public virtual void OnStoppedBeingInteractionTarget(Transform lookingTransform) { }
 

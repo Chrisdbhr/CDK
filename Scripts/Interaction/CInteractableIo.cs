@@ -78,6 +78,11 @@ namespace CDK.Interaction {
 
 		
 		#region <<---------- CInteractable ---------->>
+
+        public override bool CanBeInteractedWith() {
+            return base.CanBeInteractedWith() && !this._locked;
+        }
+
 		public override void OnBecameInteractionTarget(Transform lookingTransform) {
 			
 		}
