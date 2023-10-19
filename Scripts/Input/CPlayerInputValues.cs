@@ -23,11 +23,8 @@ namespace CDK {
         public bool Aim;
 
         public void SetRawMovement3D(float x, float z) {
-            var value = this.RawMovement3D;
-            value.x = x.CClamp(-1f, 1f);
-            value.y = 0f;
-            value.z = z.CClamp(-1f, 1f);
-            this.RawMovement3D = value;
+            var value = new Vector3(x, 0f, z);
+            this.RawMovement3D = value.normalized;
         }
 
         public void SetMovement3DRelativeToCamera(Transform cameraTransform) {
