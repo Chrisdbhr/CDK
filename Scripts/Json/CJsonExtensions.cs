@@ -4,8 +4,10 @@ using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.UnityConverters;
 using Newtonsoft.Json.UnityConverters.Math;
 using UnityEngine;
+using UnityEngine.Scripting;
 
 namespace CDK {
+    [Preserve]
 	public static class CJsonExtensions {
 	
 		public static readonly JsonSerializerSettings DefaultSettings = new JsonSerializerSettings {
