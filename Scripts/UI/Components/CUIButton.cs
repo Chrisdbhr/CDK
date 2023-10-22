@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,9 +10,15 @@ namespace CDK.UI {
 	public class CUIButton : CUIInteractable {
 		public Button Button;
 
+
+        #if UNITY_EDITOR
 		private void Reset() {
-			if(Button == null) Button = this.GetComponent<Button>();
+            if (Button == null) {
+                Button = this.GetComponent<Button>();
+                EditorUtility.SetDirty(Button);
+            }
 		}
+        #endif
 	}
 	
 }
