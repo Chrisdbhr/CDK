@@ -27,6 +27,8 @@ namespace CDK {
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSplashScreen)]
         private static void InitializeBeforeSceneLoad() {
+            Debug.Log($"CDK v{CDK.VERSION} -> Initializing Application");
+
             Screen.sleepTimeout = SleepTimeout.NeverSleep;
 
             CreatePersistentDataPath();
@@ -95,7 +97,18 @@ namespace CDK {
         public static CancellationTokenSource QuittingCancellationTokenSource = new CancellationTokenSource();
 
         public static IResourceLocator ResourceLocator;
-        
+
+        public static Version Version {
+            get {
+                if (_version != null) return _version;
+                if (Version.TryParse(Application.version, out _version)) {
+                    return _version;
+                }
+                return _version = new Version(0, 0, 0, 0);
+            }
+        }
+        private static Version _version;
+
         #endregion <<---------- Properties and Fields ---------->>
 
 
