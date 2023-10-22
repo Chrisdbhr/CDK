@@ -23,8 +23,7 @@ namespace CDK.Editor {
         }
 
         static void HierarchyWindowItemOnGUI (int instanceID, Rect selectionRect) {
-            var obj = EditorUtility.InstanceIDToObject(instanceID) as GameObject;
-            if (obj == null) return;
+            if(!(EditorUtility.InstanceIDToObject(instanceID) is GameObject obj))return;
 
             if (Event.current.type != EventType.Repaint) {
                 applicationNameShown = false;
