@@ -87,6 +87,8 @@ namespace CDK {
             }
         }
 
+        public bool IsLoading => this._loadingUI != null && this._loadingUI.enabled;
+
         public void ShowLoadingUI() {
             if(this._loadingUI) this._loadingUI.enabled = true;
         }
