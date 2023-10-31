@@ -33,7 +33,7 @@ namespace CDK {
 				this._healthToNotify.TakeDamage(hitInfo, this._damageMultiplier * damageMultiplier);
 			}
 			this._takeDamageEvent?.Invoke();
-			return true;
+			return _healthToNotify != null && _healthToNotify.IsDead;
 		}
 		
 	}
