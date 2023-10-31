@@ -50,7 +50,7 @@ namespace CDK {
         public static bool CAssertIfNotRoot(this Transform t, string message = null) {
             var isRoot = t.parent == null;
             if (!isRoot) {
-                Debug.LogAssertion($"Transform is not root ({message})");
+                Debug.LogError($"Transform is not root ({message})");
             }
             return !isRoot;
         }
@@ -58,7 +58,7 @@ namespace CDK {
         public static bool CAssertLocalPositionIsNotZero(this Transform t, string message = null) {
             var isZero = t.localPosition.CIsZero();
             if (!isZero) {
-                Debug.LogAssertion($"Transform local position is not zero ({message})");
+                Debug.LogError($"Transform local position is not zero ({message})");
             }
             return !isZero;
         }
