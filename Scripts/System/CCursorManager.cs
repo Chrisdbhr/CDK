@@ -20,9 +20,22 @@ namespace CDK {
 
 
 
+		#region <<---------- Initializers ---------->>
+
+		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSplashScreen)]
+		private static void InitializeBeforeSceneLoad() {
+			var cursor = get;
+		}
+
+		#endregion <<---------- Initializers ---------->>
+
+
+
+
         #region <<---------- Properties and Fields ---------->>
 
         [NonSerialized] private readonly CBlockingEventsManager _blockingEventsManager;
+		CompositeDisposable _disposeOnDestroy = new CompositeDisposable();
 
         #endregion <<---------- Properties and Fields ---------->>
 
@@ -33,6 +46,7 @@ namespace CDK {
         #region <<---------- Initializers ---------->>
         
         private CCursorManager() {
+			_disposeOnDestroy.Clear();
             this._blockingEventsManager = CBlockingEventsManager.get;
             
             this._blockingEventsManager.OnMenuRetainable.IsRetainedAsObservable().Subscribe(onMenu => {
@@ -41,14 +55,19 @@ namespace CDK {
                     return;
                 }
                 ShowMouseIfNeeded();
-            });
+            })
+			.AddTo(_disposeOnDestroy);
             
             SetCursorState(!CGameSettings.get.CursorStartsHidden);
 
             CInputManager.InputTypeChanged += OnInputTypeChanged;
         }
 
-        #endregion <<---------- Initializers ---------->>
+		~CCursorManager() {
+			_disposeOnDestroy?.Dispose();
+		}
+
+		#endregion <<---------- Initializers ---------->>
 
 
 		private void OnInputTypeChanged(CInputManager.InputType newType) {
