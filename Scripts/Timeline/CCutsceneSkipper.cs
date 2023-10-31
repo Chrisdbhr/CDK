@@ -103,8 +103,8 @@ namespace CDK {
             this._progressCanvas.enabled = false;
             this._playableDirector.time = this._playableDirector.duration;
             this._onCutsceneSkipped?.Invoke();
-            CSoundManager.get.PlaySingletonEvent(this._soundOnSkip);
             this._skipped = true;
+            CSoundManager.get.PlaySingletonEvent(this._soundOnSkip);
         }
 
         #endregion <<---------- General ---------->>

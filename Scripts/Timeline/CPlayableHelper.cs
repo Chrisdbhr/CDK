@@ -19,59 +19,15 @@ namespace CDK {
 		private PlayableDirector _playable;
 
 		[SerializeField] private UnityEvent _onCutsceneStarted;
-		[SerializeField] private UnityEvent _onCutsceneEnded;
 		[SerializeField] private UnityEvent _onCutsceneSkipped;
+		[SerializeField] private UnityEvent _onCutsceneEnded;
 		[SerializeField] private bool _canSkipCutscene = true;
 		[SerializeField] private bool _destroyGameObjectOnFinished;
 		[SerializeField] private bool _preventAutoFadeOutOnExit;
 		[SerializeField] private GameObject[] _disableOnExit;
 		private CCutsceneSkipper _cutsceneSkipperSpawned;
         [SerializeField, Range(-1, 5f)] private float _startFadeInTime = -1f;
-        
-		
-		public bool IsPlaying {
-			get {
-				return this._isPlaying;
-			}
-			set {
-				if (!Application.isPlaying || CApplication.IsQuitting) return;
-				if (value == this._isPlaying) return;
-				this._isPlaying = value;
-				
-				if (this._isPlaying) {
-					// cutscene started
-					this._blockingEventsManager.PlayingCutsceneRetainable.Retain(this);
-					this._onCutsceneStarted?.Invoke();
-					this.CreateCutsceneSkipper();
-                    if (this._startFadeInTime >= 0f) {
-                        CFader.get.FadeToTransparent(this._startFadeInTime);
-                    }
-				}
-				else {
-					// cutscene ended
-					if (!this._preventAutoFadeOutOnExit) {
-						CFader.get.FadeToTransparent(1f);
-					}
-					this._blockingEventsManager.PlayingCutsceneRetainable.Release(this);
-					this._onCutsceneEnded?.Invoke();
-					if (_disableOnExit.Length > 0) {
-						foreach (var go in _disableOnExit) {
-							if (go == null) continue;
-							Debug.Log($"Disabling {go.name} after finishing cutscene {this.name}");
-							go.SetActive(false);
-						}
-					}
-					if (this._destroyGameObjectOnFinished) {
-						this.gameObject.CDestroy();
-					}
 
-					if (this._cutsceneSkipperSpawned != null) {
-						this._cutsceneSkipperSpawned.gameObject.CDestroy();
-					}
-				}
-			}
-		}
-		private bool _isPlaying;
 		private CBlockingEventsManager _blockingEventsManager;
 		
 		
@@ -100,37 +56,71 @@ namespace CDK {
 			this._playable = this.GetComponent<PlayableDirector>();
 			this._blockingEventsManager = CBlockingEventsManager.get;
 
-			if (this._playable.state == PlayState.Playing) {
-				PlayableStarted(this._playable);
+			if (_playable.state == PlayState.Playing) {
+				IsPlayingChanged(_playable);
 			}
 			else {
-				this._playable.played += PlayableStarted; 
+				this._playable.played += IsPlayingChanged;
 			}
 
-            #if FMOD
-			// unmute FMOD tracks
-			if (_playable.playableAsset is TimelineAsset timeline) {
-				foreach (var track in timeline.GetOutputTracks().Where(t => t.GetType() == typeof(FMODEventTrack))) {
-					Debug.Log($"Unmuting FMOD track '{track.name}'");
-					track.muted = false;
-				}	
-			}
-            #endif
+			// Workarround to FMOD bug, fixed on new FMOD versions.
+   //          #if FMOD
+			// // unmute FMOD tracks
+			// if (_playable.playableAsset is TimelineAsset timeline) {
+			// 	foreach (var track in timeline.GetOutputTracks().Where(t => t.GetType() == typeof(FMODEventTrack))) {
+			// 		Debug.Log($"Unmuting FMOD track '{track.name}'");
+			// 		track.muted = false;
+			// 	}
+			// }
+   //          #endif
 		}
 
 
 		private void OnDestroy() {
-			this._playable.played -= PlayableStarted; 
+			this._playable.played -= IsPlayingChanged;
+			this._playable.stopped -= IsPlayingChanged;
 		}
 
-		private void PlayableStarted(PlayableDirector p) {
-			IsPlaying = true;
-			this._playable.stopped += PlayableStopped;
-		}
+		void IsPlayingChanged(PlayableDirector p) {
+			if (!Application.isPlaying || CApplication.IsQuitting) return;
+			if (p.state == PlayState.Playing) {
 
-		private void PlayableStopped(PlayableDirector p) {
-			IsPlaying = false;
-			this._playable.stopped -= PlayableStopped;
+				Debug.Log($"Cutscene '{p.name}' is playing", this);
+
+				this._blockingEventsManager.PlayingCutsceneRetainable.Retain(this);
+				this._onCutsceneStarted?.Invoke();
+				this.CreateCutsceneSkipper();
+				if (this._startFadeInTime >= 0f) {
+					CFader.get.FadeToTransparent(this._startFadeInTime);
+				}
+				p.played -= IsPlayingChanged;
+				p.stopped += IsPlayingChanged;
+			}
+			else {
+
+				Debug.Log($"Cutscene '{p.name}' is not playing ({p.state})", this);
+
+				if (!this._preventAutoFadeOutOnExit) {
+					CFader.get.FadeToTransparent(1f);
+				}
+				this._blockingEventsManager.PlayingCutsceneRetainable.Release(this);
+				this._onCutsceneEnded?.Invoke();
+				if (_disableOnExit.Length > 0) {
+					foreach (var go in _disableOnExit) {
+						if (go == null) continue;
+						Debug.Log($"Disabling {go.name} after finishing cutscene {this.name}");
+						go.SetActive(false);
+					}
+				}
+				if (this._destroyGameObjectOnFinished) {
+					this.gameObject.CDestroy();
+				}
+
+				if (this._cutsceneSkipperSpawned != null) {
+					this._cutsceneSkipperSpawned.gameObject.CDestroy();
+				}
+				p.stopped -= IsPlayingChanged;
+			}
 		}
 
 		public void FadeToBlack(float time) {
