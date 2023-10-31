@@ -188,6 +188,8 @@ namespace CDK {
 			#if UNITY_EDITOR
 			Time.timeScale = 1f;
             UnityEditor.EditorApplication.isPlaying = false;
+            #elif UNITY_WEBGL
+			Application.OpenURL("https://chrisjogos.com");
 			#else
 			Application.Quit();			
 			#endif
@@ -196,5 +198,12 @@ namespace CDK {
 		
 		#endregion <<---------- Application ---------->>
 
-	}
+        /// <summary>
+        /// Log and try Open URL.
+        /// </summary>
+        public static void OpenURL(string urlToOpen) {
+            Debug.Log($"Requested to open url {urlToOpen}");
+            Application.OpenURL(urlToOpen);
+        }
+    }
 }

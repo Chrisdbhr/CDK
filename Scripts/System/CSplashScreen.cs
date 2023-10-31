@@ -19,7 +19,7 @@ namespace CDK {
         
         [SerializeField] private CSceneField _sceneToLoad;
         [SerializeField] private PlayableDirector _playableDirector;
-        
+        [SerializeField] private GameObject _noHardwareAccelerationWarning;
         [NonSerialized] private bool _splashEnded;
 
         #endregion <<---------- Properties and Fields ---------->>
@@ -31,6 +31,13 @@ namespace CDK {
         
         private IEnumerator Start() {
             yield return null;
+
+            #if UNITY_WEBGL
+            if (SystemInfo.graphicsDeviceName == "GDI Generic") {
+                this._noHardwareAccelerationWarning.SetActive(true);
+                yield break;
+            }
+            #endif
             
             CCursorManager.get.ShowMouseIfNeeded();
             
