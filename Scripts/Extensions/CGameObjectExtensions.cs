@@ -48,8 +48,7 @@ namespace CDK {
         
         public static void CUnparentAllChildren(this GameObject go, bool worldPositionStays = true) {
             if (go == null) return;
-            var children = go.Children().ToArray();
-            foreach (var c in children) {
+            foreach (var c in go.Children()) {
                 c.transform.SetParent(null, worldPositionStays);
                 c.transform.SetAsLastSibling();
             }
