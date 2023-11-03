@@ -1,4 +1,4 @@
-#if EasyButtons
+#if EASY_BUTTONS
 using EasyButtons;
 #endif
 using UnityEngine;
@@ -16,7 +16,7 @@ namespace CDK.Graphics {
             ChooseSkybox();
         }
 
-        #if EasyButtons
+        #if EASY_BUTTONS
         [Button]
         #endif
         public void ChooseSkybox() {

@@ -5,12 +5,12 @@ using System.Threading.Tasks;
 using UnityEngine;
 using ThreadPriority = UnityEngine.ThreadPriority;
 
-#if UnityAddressables
+#if UNITY_ADDRESSABLES_EXIST
 using UnityEngine.AddressableAssets;
 using UnityEngine.AddressableAssets.ResourceLocators;
 #endif
 
-#if Rewired
+#if REWIRED
 using Rewired;
 #endif
 
@@ -54,7 +54,7 @@ namespace CDK {
             QualitySettings.vSyncCount = 0;
             Application.targetFrameRate = 18;
             
-            #if UnityAddressables
+            #if UNITY_ADDRESSABLES_EXIST
             ResourceLocator = await AddressablesInitializeAsync();
             Debug.Log($"Resource Locator Id: '{(ResourceLocator != null ? ResourceLocator.LocatorId : "null")}'");
 			#endif
@@ -116,7 +116,7 @@ namespace CDK {
         #region <<---------- Input ---------->>
 
         private static async Task InitializeInputManagerAsync() {
-            #if Rewired
+            #if REWIRED
             var rInputManager = GameObject.FindObjectOfType<InputManager_Base>();
             if (rInputManager) {
                 Debug.Log("Will not Instantiate a new <b>Rewired Input Manager</b> because one is already in the scene.");
@@ -143,7 +143,7 @@ namespace CDK {
 
         #region <<---------- Addressables ---------->>
 
-		#if UnityAddressables
+		#if UNITY_ADDRESSABLES_EXIST
 
         private static async Task<IResourceLocator> AddressablesInitializeAsync() {
             var op = Addressables.InitializeAsync();

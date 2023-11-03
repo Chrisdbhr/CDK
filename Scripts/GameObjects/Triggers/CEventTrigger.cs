@@ -3,7 +3,7 @@ using UniRx;
 using UnityEngine;
 using UnityEngine.Events;
 
-#if EasyButtons
+#if EASY_BUTTONS
 using EasyButtons;
 #endif
 
@@ -21,7 +21,7 @@ namespace CDK {
 
 		private void OnEnable() { } // exposing to allow enable/disable component.
 
-		#if EasyButtons
+		#if EASY_BUTTONS
 		[Button]
 		#endif
 		public virtual void TriggerEvent() {

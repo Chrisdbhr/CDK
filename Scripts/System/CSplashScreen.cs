@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.Playables;
 using UnityEngine.SceneManagement;
 
-#if Rewired
+#if REWIRED
 using Rewired;
 #endif
 

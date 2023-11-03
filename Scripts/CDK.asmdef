@@ -27,39 +27,29 @@
     "defineConstraints": [],
     "versionDefines": [
         {
-            "name": "com.unity.addressables",
-            "expression": "0.0.0",
-            "define": "UnityAddressables"
+          "name": "com.unity.addressables",
+          "expression": "0.0.0",
+          "define": "UNITY_ADDRESSABLES_EXIST"
         },
         {
             "name": "com.madsbangh.easybuttons",
             "expression": "0.0.0",
-            "define": "EasyButtons"
-        },
-        {
-            "name": "com.cysharp.unitask",
-            "expression": "0.0.0",
-            "define": "UniTask"
+            "define": "EASY_BUTTONS"
         },
         {
             "name": "com.unity.localization",
             "expression": "0.0.0",
-            "define": "UnityLocalization"
+            "define": "UNITY_LOCALIZATION"
         },
         {
             "name": "com.unity.cinemachine",
             "expression": "0.0.0",
-            "define": "Cinemachine"
+            "define": "CINEMACHINE"
         },
         {
             "name": "com.unity.nuget.newtonsoft-json",
             "expression": "0.0.0",
-            "define": "Newtonsoft_Json_for_Unity"
-        },
-        {
-            "name": "com.neuecc.unirx",
-            "expression": "0.0.0",
-            "define": "UniRx"
+            "define": "NEWTONSOFT_JSON_FOR_UNITY"
         }
     ],
     "noEngineReferences": false

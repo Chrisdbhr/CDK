@@ -3,7 +3,7 @@ using UniRx;
 using UnityEngine;
 using UnityEngine.Events;
 
-#if UnityAddressables
+#if UNITY_ADDRESSABLES_EXIST
 using UnityEngine.AddressableAssets;
 #endif
 
@@ -16,7 +16,7 @@ namespace CDK {
 		[SerializeField] private Animator _characterAnimator;
 		
 		// items
-		#if UnityAddressables
+		#if UNITY_ADDRESSABLES_EXIST
 		[SerializeField] private AssetReference _inventoryViewRef;
 		#endif
 		[NonSerialized] private CInventoryView _inventoryViewSpawned;

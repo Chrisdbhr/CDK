@@ -6,7 +6,7 @@ using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.SceneManagement;
 using Object = UnityEngine.Object;
 
-#if UnityAddressables
+#if UNITY_ADDRESSABLES_EXIST
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.ResourceProviders;
 #endif
@@ -103,7 +103,7 @@ namespace CDK {
 
         public static async Task<T> LoadAssetAsync<T>(AssetReference key) where T : Object {
             Debug.Log($"Loading asset with key '{key}'");
-            #if UnityAddressables
+            #if UNITY_ADDRESSABLES_EXIST
             var asyncOp = Addressables.LoadAssetAsync<T>(key);
             while (!asyncOp.IsDone) {
                 await Observable.NextFrame();
@@ -116,7 +116,7 @@ namespace CDK {
         
         public static async Task<T> LoadPrefabAsync<T>(string key) where T : Object {
             Debug.Log($"Loading prefab asset with key '{key}'");
-			#if UnityAddressables
+			#if UNITY_ADDRESSABLES_EXIST
             var asyncOp = Addressables.LoadAssetAsync<GameObject>(key);
             while (!asyncOp.IsDone) {
                 await Observable.NextFrame();
@@ -128,7 +128,7 @@ namespace CDK {
 			#endif
         }
 
-		#if UnityAddressables
+		#if UNITY_ADDRESSABLES_EXIST
 
         public static async Task<T> LoadPrefabAsync<T>(AssetReference key) where T : Object {
             return await LoadPrefabAsync<T>(key.RuntimeKey.ToString());
@@ -182,7 +182,7 @@ namespace CDK {
                 Debug.LogError($"Will not unload a null asset.");
                 return false;
             }
-			#if UnityAddressables
+			#if UNITY_ADDRESSABLES_EXIST
             bool success = Addressables.ReleaseInstance(goToUnload);
             if (success) return true;
 			#endif

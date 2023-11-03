@@ -1,4 +1,4 @@
-#if Newtonsoft_Json_for_Unity
+#if NEWTONSOFT_JSON_FOR_UNITY
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.UnityConverters;

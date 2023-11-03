@@ -53,7 +53,7 @@ namespace CDK.UI {
 		
 		#region <<---------- Open / Close ---------->>
         
-		#if UnityAddressables
+		#if UNITY_ADDRESSABLES_EXIST
 	    
 		public T OpenMenu<T>(string uiReference, CUIViewBase originUI, CUIInteractable originButton, bool canCloseByReturnButton = true) {
 			var openedMenu = this.OpenMenu(uiReference, originUI, originButton, canCloseByReturnButton);

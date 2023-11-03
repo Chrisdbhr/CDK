@@ -1,7 +1,5 @@
 using System.Text;
-#if TextMeshPro
 using TMPro;
-#endif
 using UnityEditor;
 using UnityEngine;
 
@@ -97,7 +95,6 @@ namespace CDK.Editor {
             }
 
             // Text Mesh Pro
-            #if TextMeshPro
             if (obj.GetComponent<TextMeshPro>() != null) {
                 guiStyleRight.normal.textColor = new Color(0.4f,0.4f, 1f);
                 guiStyleRight.Draw(selectionRect, new GUIContent("Text Mesh Pro"), instanceID );
@@ -110,8 +107,7 @@ namespace CDK.Editor {
                 guiStyleRight.Draw(selectionRect, new GUIContent("Text Mesh Pro UGUI"), instanceID );
                 return;
             }
-            #endif
-            
+
             // Text (Legacy)
             if (obj.GetComponent<UnityEngine.UI.Text>() != null) {
                 guiStyleRight.normal.textColor = new Color(.9f,.7f, .4f);

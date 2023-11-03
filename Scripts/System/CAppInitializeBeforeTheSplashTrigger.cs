@@ -7,11 +7,11 @@ using UnityEngine.SceneManagement;
 using FMODUnity;
 #endif
 
-#if Rewired
+#if REWIRED
 using Rewired;
 #endif
 
-#if UnityLocalization
+#if UNITY_LOCALIZATION
 using UnityEngine.Localization.Settings;
 #endif
 
@@ -31,7 +31,7 @@ namespace CDK {
 
             this.CStartCoroutine(DelayedShowText());
 
-            #if Rewired
+            #if REWIRED
             SetStateText("Waiting for Rewired to get ready...");
             while (!ReInput.isReady) {
                 yield return null;
@@ -44,7 +44,7 @@ namespace CDK {
             }
             #endif
 
-            #if UnityLocalization
+            #if UNITY_LOCALIZATION
             SetStateText("Waiting for Localization System get ready...");
             yield return LocalizationSettings.InitializationOperation;
             #endif

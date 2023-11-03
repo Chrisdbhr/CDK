@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
-#if Newtonsoft_Json_for_Unity
+#if NEWTONSOFT_JSON_FOR_UNITY
 using Newtonsoft.Json;
 #endif
 
@@ -85,7 +85,7 @@ namespace CDK {
         }
 
         private string GetSerializedJson() {
-            #if Newtonsoft_Json_for_Unity
+            #if NEWTONSOFT_JSON_FOR_UNITY
             return JsonConvert.SerializeObject(this, CJsonExtensions.DefaultSettings);
             #else
             return JsonUtility.ToJson(this);
@@ -142,7 +142,7 @@ namespace CDK {
         }
 
         private static T DeserializeFile<T>(string fileContent) where T : CPersistentData {
-            #if Newtonsoft_Json_for_Unity
+            #if NEWTONSOFT_JSON_FOR_UNITY
             return JsonConvert.DeserializeObject<T>(fileContent, CJsonExtensions.DefaultSettings);
             #else
 			return JsonUtility.FromJson<T>(fileContent);

@@ -1,4 +1,4 @@
-﻿#if Newtonsoft_Json_for_Unity
+﻿#if NEWTONSOFT_JSON_FOR_UNITY
 using Newtonsoft.Json;
 #endif
 
@@ -39,7 +39,7 @@ namespace CDK {
         public Vector2 CameraSensitivityMultiplier {
             get => this._cameraSensitivityMultiplier;
         }
-        #if Newtonsoft_Json_for_Unity
+        #if NEWTONSOFT_JSON_FOR_UNITY
         [JsonProperty("cameraSensitivityMultiplier")]
 		#endif
         private Vector2 _cameraSensitivityMultiplier = Vector3.one * 0.5f;
@@ -55,7 +55,7 @@ namespace CDK {
             this._cameraSensitivityMultiplier = new Vector2(this._cameraSensitivityMultiplier.x, value);
         }
 
-        #if Newtonsoft_Json_for_Unity
+        #if NEWTONSOFT_JSON_FOR_UNITY
         [JsonProperty("resolutionScale")]
 		#endif
         public float ResolutionScale {
@@ -67,18 +67,18 @@ namespace CDK {
                 this._resolutionScaleRx.Value = value;
             }
         }
-        #if Newtonsoft_Json_for_Unity
+        #if NEWTONSOFT_JSON_FOR_UNITY
         [JsonIgnore]
 		#endif
         private FloatReactiveProperty _resolutionScaleRx = new FloatReactiveProperty(1f);
-        #if Newtonsoft_Json_for_Unity
+        #if NEWTONSOFT_JSON_FOR_UNITY
         [JsonIgnore]
 		#endif
         public IReadOnlyReactiveProperty<float> ResolutionScaleRx => this._resolutionScaleRx.ToReadOnlyReactiveProperty();
 
         #endregion <<---------- Camera ---------->>
 
-		#if Newtonsoft_Json_for_Unity
+		#if NEWTONSOFT_JSON_FOR_UNITY
         [JsonProperty("language")]
 		#endif
         public string Language;
@@ -102,7 +102,7 @@ namespace CDK {
                 var fileContent = File.ReadAllText(filePath);
                 //Debug.Log($"PlayerPrefs file content: {fileContent}");
 
-                #if Newtonsoft_Json_for_Unity
+                #if NEWTONSOFT_JSON_FOR_UNITY
                 var prefs = JsonConvert.DeserializeObject<CPlayerPrefs>(fileContent, CJsonExtensions.DefaultSettings);
                 #else
 				var prefs = JsonUtility.FromJson<CPlayerPrefs>(fileContent);
@@ -131,7 +131,7 @@ namespace CDK {
         
         private void Save() {
             try {
-                #if Newtonsoft_Json_for_Unity
+                #if NEWTONSOFT_JSON_FOR_UNITY
                 var json = JsonConvert.SerializeObject(this, CJsonExtensions.DefaultSettings);
                 #else
                 var json = JsonUtility.ToJson(prefs);

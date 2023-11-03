@@ -171,7 +171,7 @@ namespace CDK.UI {
             
             this._blockingEventsManager.OnMenuRetainable.Release(this);
   
-			#if UnityAddressables
+			#if UNITY_ADDRESSABLES_EXIST
 			if (!CAssets.UnloadAsset(this.gameObject)) {
 				Debug.LogError($"Error releasing instance of object '{this.gameObject.name}'", this);
 			}

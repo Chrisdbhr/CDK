@@ -3,7 +3,7 @@ using System.Linq;
 using UniRx;
 using UnityEngine;
 
-#if Rewired
+#if REWIRED
 using Rewired;
 #endif
 
@@ -55,13 +55,13 @@ namespace CDK {
 		private static void InitializeBeforeSceneLoad() {
 			SetControllerTypeBasedOnPlatform();
 			
-			#if Rewired
+			#if REWIRED
 			if (ReInput.isReady) Initialize();
 			else ReInput.InitializedEvent += Initialize;
 			#endif
 		}
 
-		#if Rewired
+		#if REWIRED
 		private static void Initialize() {
 			
 			ReInput.InitializedEvent -= Initialize;
@@ -148,7 +148,7 @@ namespace CDK {
 			//Debug.Log($"{nameof(SetControllerTypeBasedOnPlatform)} input type auto set to: {ActiveInputType.ToString()}");
 		}
 		
-        #if Rewired
+        #if REWIRED
         public static void UpdatePlayerInputLayout(Rewired.Player rePlayer) {
             if (CApplication.IsQuitting) return;
             
