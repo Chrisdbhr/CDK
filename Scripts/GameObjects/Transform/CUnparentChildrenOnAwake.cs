@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 
 namespace CDK {
-    public class CUnparentOnAwake : MonoBehaviour {
+    public class CUnparentChildrenOnAwake : MonoBehaviour {
         protected virtual void Awake() {
             Unparent();
         }
