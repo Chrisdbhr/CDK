@@ -2,7 +2,7 @@
 using UnityEditor;
 
 namespace CDK {
-    public static class CPlayerSettings {
+    public static class CEditorPlayerSettings {
 
         public static void RaiseBuildVersion() {
             if (!Version.TryParse(PlayerSettings.bundleVersion, out var version)) return;

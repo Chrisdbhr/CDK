@@ -8,7 +8,7 @@ namespace CDK {
         
         public void OnPostprocessBuild(BuildReport report) {
             if (report == null || report.summary.result != BuildResult.Succeeded) return;
-            CPlayerSettings.RaiseBuildVersion();
+            CEditorPlayerSettings.RaiseBuildVersion();
         }
 
     }
