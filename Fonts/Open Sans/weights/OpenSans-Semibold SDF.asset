@@ -12,15 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 71c1514a6bd24e1e882cebbe1904ce04, type: 3}
   m_Name: OpenSans-Semibold SDF
   m_EditorClassIdentifier: 
-  hashCode: 1225993904
-  material: {fileID: 21261991626553910}
-  materialHashCode: 2042529424
   m_Version: 1.1.0
-  m_SourceFontFileGUID: 99379e9302ec0c74eb0570f38fa25a10
-  m_SourceFontFile_EditorRef: {fileID: 12800000, guid: 99379e9302ec0c74eb0570f38fa25a10,
-    type: 3}
-  m_SourceFontFile: {fileID: 12800000, guid: 99379e9302ec0c74eb0570f38fa25a10, type: 3}
-  m_AtlasPopulationMode: 1
   m_FaceInfo:
     m_FaceIndex: 0
     m_FamilyName: Open Sans
@@ -43,6 +35,31 @@ MonoBehaviour:
     m_StrikethroughOffset: 19.75
     m_StrikethroughThickness: 3.4863281
     m_TabWidth: 181.875
+  m_Material: {fileID: 21261991626553910}
+  m_SourceFontFileGUID: 99379e9302ec0c74eb0570f38fa25a10
+  m_CreationSettings:
+    sourceFontFileName: 
+    sourceFontFileGUID: 29d1861da7232b847ad1337bd27c3113
+    faceIndex: 0
+    pointSizeSamplingMode: 0
+    pointSize: 70
+    padding: 5
+    paddingMode: 0
+    packingMode: 0
+    atlasWidth: 512
+    atlasHeight: 512
+    characterSetSelectionMode: 0
+    characterSequence: 32 - 126, 160, 8203, 8230, 9633
+    referencedFontAssetGUID: 
+    referencedTextAssetGUID: 
+    fontStyle: 0
+    fontStyleModifier: 2
+    renderMode: 4165
+    includeFontFeatures: 0
+  m_SourceFontFile: {fileID: 12800000, guid: 99379e9302ec0c74eb0570f38fa25a10, type: 3}
+  m_SourceFontFilePath: 
+  m_AtlasPopulationMode: 1
+  InternalDynamicOS: 0
   m_GlyphTable:
   - m_Index: 3
     m_Metrics:
@@ -1912,7 +1929,12 @@ MonoBehaviour:
   - {fileID: 4216223399258095774}
   m_AtlasTextureIndex: 1
   m_IsMultiAtlasTexturesEnabled: 1
+  m_GetFontFeatures: 1
   m_ClearDynamicDataOnBuild: 0
+  m_AtlasWidth: 512
+  m_AtlasHeight: 512
+  m_AtlasPadding: 5
+  m_AtlasRenderMode: 4165
   m_UsedGlyphRects:
   - m_X: 0
     m_Y: 0
@@ -1955,919 +1977,9 @@ MonoBehaviour:
     m_Y: 237
     m_Width: 476
     m_Height: 274
-  m_fontInfo:
-    Name: Open Sans
-    PointSize: 70
-    Scale: 1
-    CharacterCount: 98
-    LineHeight: 95.3125
-    Baseline: 0
-    Ascender: 74.8125
-    CapHeight: 50
-    Descender: -20.5
-    CenterLine: 0
-    SuperscriptOffset: 74.8125
-    SubscriptOffset: -7.006836
-    SubSize: 0.5
-    Underline: -7.006836
-    UnderlineThickness: 3.4863281
-    strikethrough: 19.75
-    strikethroughThickness: 3.4863281
-    TabWidth: 181.875
-    Padding: 5
-    AtlasWidth: 512
-    AtlasHeight: 512
-  atlas: {fileID: 28923401521066630}
-  m_AtlasWidth: 512
-  m_AtlasHeight: 512
-  m_AtlasPadding: 5
-  m_AtlasRenderMode: 4165
-  m_glyphInfoList:
-  - id: 32
-    x: 6
-    y: 517
-    width: 18.1875
-    height: 95.3125
-    xOffset: 0
-    yOffset: 74.8125
-    xAdvance: 18.1875
-    scale: 1
-  - id: 33
-    x: 163
-    y: 33
-    width: 10.125
-    height: 51
-    xOffset: 4.5
-    yOffset: 50
-    xAdvance: 19.3125
-    scale: 1
-  - id: 34
-    x: 190
-    y: 222
-    width: 21.375
-    height: 18.0625
-    xOffset: 4.5
-    yOffset: 50
-    xAdvance: 30.5
-    scale: 1
-  - id: 35
-    x: 297
-    y: 332
-    width: 41.9375
-    height: 49.875
-    xOffset: 1.5625
-    yOffset: 49.875
-    xAdvance: 45.25
-    scale: 1
-  - id: 36
-    x: 35
-    y: 211
-    width: 32.5
-    height: 57.1875
-    xOffset: 3.75
-    yOffset: 53.125
-    xAdvance: 39.9375
-    scale: 1
-  - id: 37
-    x: 128
-    y: 315
-    width: 54.5625
-    height: 51.375
-    xOffset: 2.8125
-    yOffset: 50.6875
-    xAdvance: 60.3125
-    scale: 1
-  - id: 38
-    x: 131
-    y: 389
-    width: 48.375
-    height: 51.375
-    xOffset: 3.25
-    yOffset: 50.6875
-    xAdvance: 51.8125
-    scale: 1
-  - id: 39
-    x: 223
-    y: 222
-    width: 7.9375
-    height: 18.0625
-    xOffset: 4.5
-    yOffset: 50
-    xAdvance: 17
-    scale: 1
-  - id: 40
-    x: 6
-    y: 207
-    width: 17.3125
-    height: 61.0625
-    xOffset: 2.75
-    yOffset: 50
-    xAdvance: 22.1875
-    scale: 1
-  - id: 41
-    x: 6
-    y: 134
-    width: 17.3125
-    height: 61.0625
-    xOffset: 2.0625
-    yOffset: 50
-    xAdvance: 22.1875
-    scale: 1
-  - id: 42
-    x: 382
-    y: 118
-    width: 33.125
-    height: 32.0625
-    xOffset: 2.5
-    yOffset: 53.1875
-    xAdvance: 38.375
-    scale: 1
-  - id: 43
-    x: 289
-    y: 223
-    width: 33.4375
-    height: 33.875
-    xOffset: 3.25
-    yOffset: 41.75
-    xAdvance: 39.9375
-    scale: 1
-  - id: 44
-    x: 453
-    y: 466
-    width: 11.9375
-    height: 17.1875
-    xOffset: 2.125
-    yOffset: 8.125
-    xAdvance: 18.6875
-    scale: 1
-  - id: 45
-    x: 79
-    y: 212
-    width: 17.5625
-    height: 6.8125
-    xOffset: 2.4375
-    yOffset: 22.1875
-    xAdvance: 22.5
-    scale: 1
-  - id: 46
-    x: 236
-    y: 12
-    width: 10.125
-    height: 10.4375
-    xOffset: 4.5
-    yOffset: 9.4375
-    xAdvance: 19.25
-    scale: 1
-  - id: 47
-    x: 262
-    y: 8
-    width: 26.1875
-    height: 50
-    xOffset: 0.5
-    yOffset: 50
-    xAdvance: 27.3125
-    scale: 1
-  - id: 48
-    x: 146
-    y: 252
-    width: 33.9375
-    height: 51.4375
-    xOffset: 3
-    yOffset: 50.75
-    xAdvance: 39.9375
-    scale: 1
-  - id: 49
-    x: 338
-    y: 8
-    width: 21.375
-    height: 50
-    xOffset: 5.25
-    yOffset: 50
-    xAdvance: 39.9375
-    scale: 1
-  - id: 50
-    x: 295
-    y: 393
-    width: 33.875
-    height: 50.6875
-    xOffset: 3.0625
-    yOffset: 50.6875
-    xAdvance: 39.9375
-    scale: 1
-  - id: 51
-    x: 147
-    y: 158
-    width: 33.5625
-    height: 51.375
-    xOffset: 2.9375
-    yOffset: 50.6875
-    xAdvance: 39.9375
-    scale: 1
-  - id: 52
-    x: 258
-    y: 455
-    width: 37.375
-    height: 50.125
-    xOffset: 1.3125
-    yOffset: 50.125
-    xAdvance: 39.9375
-    scale: 1
-  - id: 53
-    x: 307
-    y: 455
-    width: 32.375
-    height: 50.6875
-    xOffset: 3.9375
-    yOffset: 50
-    xAdvance: 39.9375
-    scale: 1
-  - id: 54
-    x: 191
-    y: 252
-    width: 33.9375
-    height: 51.3125
-    xOffset: 3.1875
-    yOffset: 50.625
-    xAdvance: 39.9375
-    scale: 1
-  - id: 55
-    x: 337
-    y: 163
-    width: 34.5625
-    height: 49.875
-    xOffset: 2.5
-    yOffset: 49.875
-    xAdvance: 39.9375
-    scale: 1
-  - id: 56
-    x: 194
-    y: 328
-    width: 33.9375
-    height: 51.3125
-    xOffset: 3
-    yOffset: 50.625
-    xAdvance: 39.9375
-    scale: 1
-  - id: 57
-    x: 149
-    y: 95
-    width: 33.9375
-    height: 51.3125
-    xOffset: 2.9375
-    yOffset: 50.625
-    xAdvance: 39.9375
-    scale: 1
-  - id: 58
-    x: 489
-    y: 247
-    width: 10.125
-    height: 39.625
-    xOffset: 4.5
-    yOffset: 38.625
-    xAdvance: 19.25
-    scale: 1
-  - id: 59
-    x: 491
-    y: 298
-    width: 12.5
-    height: 47.6875
-    xOffset: 2.125
-    yOffset: 38.625
-    xAdvance: 19.4375
-    scale: 1
-  - id: 60
-    x: 334
-    y: 224
-    width: 33.4375
-    height: 35.5
-    xOffset: 3.25
-    yOffset: 43.0625
-    xAdvance: 39.9375
-    scale: 1
-  - id: 61
-    x: 146
-    y: 221
-    width: 32.875
-    height: 19.75
-    xOffset: 3.4375
-    yOffset: 34.5
-    xAdvance: 39.9375
-    scale: 1
-  - id: 62
-    x: 428
-    y: 151
-    width: 33.4375
-    height: 35.5
-    xOffset: 3.25
-    yOffset: 43.0625
-    xAdvance: 39.9375
-    scale: 1
-  - id: 63
-    x: 236
-    y: 265
-    width: 29.4375
-    height: 51.6875
-    xOffset: 0.5
-    yOffset: 50.6875
-    xAdvance: 31.75
-    scale: 1
-  - id: 64
-    x: 35
-    y: 143
-    width: 55.1875
-    height: 56.0625
-    xOffset: 3.75
-    yOffset: 50.25
-    xAdvance: 62.875
-    scale: 1
-  - id: 65
-    x: 239
-    y: 329
-    width: 46.25
-    height: 50.1875
-    xOffset: 0
-    yOffset: 50.1875
-    xAdvance: 46.25
-    scale: 1
-  - id: 66
-    x: 290
-    y: 162
-    width: 35.75
-    height: 50
-    xOffset: 6.5625
-    yOffset: 50
-    xAdvance: 46.1875
-    scale: 1
-  - id: 67
-    x: 209
-    y: 454
-    width: 37.9375
-    height: 51.375
-    xOffset: 4.125
-    yOffset: 50.6875
-    xAdvance: 44.375
-    scale: 1
-  - id: 68
-    x: 332
-    y: 271
-    width: 40.625
-    height: 50
-    xOffset: 6.5625
-    yOffset: 50
-    xAdvance: 51.375
-    scale: 1
-  - id: 69
-    x: 401
-    y: 273
-    width: 28.25
-    height: 50
-    xOffset: 6.5625
-    yOffset: 50
-    xAdvance: 39.0625
-    scale: 1
-  - id: 70
-    x: 476
-    y: 186
-    width: 28.1875
-    height: 50
-    xOffset: 6.5625
-    yOffset: 50
-    xAdvance: 37.25
-    scale: 1
-  - id: 71
-    x: 191
-    y: 391
-    width: 41.3125
-    height: 51.375
-    xOffset: 4.125
-    yOffset: 50.6875
-    xAdvance: 50.8125
-    scale: 1
-  - id: 72
-    x: 350
-    y: 333
-    width: 39.375
-    height: 50
-    xOffset: 6.5625
-    yOffset: 50
-    xAdvance: 52.5625
-    scale: 1
-  - id: 73
-    x: 371
-    y: 8
-    width: 8.125
-    height: 50
-    xOffset: 6.5625
-    yOffset: 50
-    xAdvance: 21.375
-    scale: 1
-  - id: 74
-    x: 6
-    y: 280
-    width: 19.875
-    height: 63.9375
-    xOffset: -5.375
-    yOffset: 50
-    xAdvance: 20.9375
-    scale: 1
-  - id: 75
-    x: 393
-    y: 395
-    width: 38.125
-    height: 50
-    xOffset: 6.5625
-    yOffset: 50
-    xAdvance: 44.75
-    scale: 1
-  - id: 76
-    x: 401
-    y: 334
-    width: 29.3125
-    height: 50
-    xOffset: 6.5625
-    yOffset: 50
-    xAdvance: 37.9375
-    scale: 1
-  - id: 77
-    x: 194
-    y: 98
-    width: 51.4375
-    height: 50
-    xOffset: 6.5625
-    yOffset: 50
-    xAdvance: 64.625
-    scale: 1
-  - id: 78
-    x: 340
-    y: 394
-    width: 41.5625
-    height: 50
-    xOffset: 6.5625
-    yOffset: 50
-    xAdvance: 54.8125
-    scale: 1
-  - id: 79
-    x: 151
-    y: 454
-    width: 46.875
-    height: 51.4375
-    xOffset: 4.125
-    yOffset: 50.75
-    xAdvance: 55.125
-    scale: 1
-  - id: 80
-    x: 431
-    y: 198
-    width: 33.0625
-    height: 50
-    xOffset: 6.5625
-    yOffset: 50
-    xAdvance: 43.0625
-    scale: 1
-  - id: 81
-    x: 24
-    y: 362
-    width: 46.875
-    height: 62.625
-    xOffset: 4.125
-    yOffset: 50.75
-    xAdvance: 55.125
-    scale: 1
-  - id: 82
-    x: 404
-    y: 456
-    width: 37.5
-    height: 50
-    xOffset: 6.5625
-    yOffset: 50
-    xAdvance: 44.75
-    scale: 1
-  - id: 83
-    x: 192
-    y: 159
-    width: 32
-    height: 51.375
-    xOffset: 3.375
-    yOffset: 50.6875
-    xAdvance: 38.5
-    scale: 1
-  - id: 84
-    x: 257
-    y: 100
-    width: 37.5625
-    height: 50
-    xOffset: 0.9375
-    yOffset: 50
-    xAdvance: 39.625
-    scale: 1
-  - id: 85
-    x: 244
-    y: 392
-    width: 39.625
-    height: 50.6875
-    xOffset: 6.125
-    yOffset: 50
-    xAdvance: 51.9375
-    scale: 1
-  - id: 86
-    x: 235
-    y: 161
-    width: 43.5625
-    height: 50
-    xOffset: 0
-    yOffset: 50
-    xAdvance: 43.5625
-    scale: 1
-  - id: 87
-    x: 185
-    y: 34
-    width: 65.25
-    height: 50
-    xOffset: 0.375
-    yOffset: 50
-    xAdvance: 66.1875
-    scale: 1
-  - id: 88
-    x: 277
-    y: 268
-    width: 43.3125
-    height: 50
-    xOffset: 0.125
-    yOffset: 50
-    xAdvance: 43.5625
-    scale: 1
-  - id: 89
-    x: 351
-    y: 456
-    width: 41.4375
-    height: 50
-    xOffset: 0
-    yOffset: 50
-    xAdvance: 41.4375
-    scale: 1
-  - id: 90
-    x: 384
-    y: 212
-    width: 35.75
-    height: 50
-    xOffset: 2.25
-    yOffset: 50
-    xAdvance: 40.25
-    scale: 1
-  - id: 91
-    x: 6
-    y: 61
-    width: 16.125
-    height: 61.0625
-    xOffset: 5.25
-    yOffset: 50
-    xAdvance: 23.125
-    scale: 1
-  - id: 92
-    x: 300
-    y: 8
-    width: 26.1875
-    height: 50
-    xOffset: 0.5
-    yOffset: 50
-    xAdvance: 27.3125
-    scale: 1
-  - id: 93
-    x: 34
-    y: 61
-    width: 16.0625
-    height: 61.0625
-    xOffset: 1.6875
-    yOffset: 50
-    xAdvance: 23.125
-    scale: 1
-  - id: 94
-    x: 242
-    y: 222
-    width: 35.625
-    height: 31.9375
-    xOffset: 0.9375
-    yOffset: 50.25
-    xAdvance: 37.625
-    scale: 1
-  - id: 95
-    x: 82
-    y: 362
-    width: 30.3125
-    height: 4.625
-    xOffset: -0.1875
-    yOffset: -6.3125
-    xAdvance: 30.0625
-    scale: 1
-  - id: 96
-    x: 163
-    y: 10
-    width: 16.625
-    height: 11.1875
-    xOffset: 12.375
-    yOffset: 53.625
-    xAdvance: 41.4375
-    scale: 1
-  - id: 97
-    x: 473
-    y: 135
-    width: 32.0625
-    height: 39.1875
-    xOffset: 3.0625
-    yOffset: 38.5
-    xAdvance: 40.625
-    scale: 1
-  - id: 98
-    x: 105
-    y: 452
-    width: 34.3125
-    height: 53.875
-    xOffset: 5.6875
-    yOffset: 53.1875
-    xAdvance: 43.625
-    scale: 1
-  - id: 99
-    x: 427
-    y: 100
-    width: 28.9375
-    height: 39.1875
-    xOffset: 3.4375
-    yOffset: 38.5
-    xAdvance: 34.6875
-    scale: 1
-  - id: 100
-    x: 79
-    y: 230
-    width: 34.375
-    height: 53.875
-    xOffset: 3.4375
-    yOffset: 53.1875
-    xAdvance: 43.625
-    scale: 1
-  - id: 101
-    x: 53
-    y: 10
-    width: 33.4375
-    height: 39.1875
-    xOffset: 3.4375
-    yOffset: 38.5
-    xAdvance: 40.3125
-    scale: 1
-  - id: 102
-    x: 110
-    y: 82
-    width: 27.3125
-    height: 53.5625
-    xOffset: 1.1875
-    yOffset: 53.5625
-    xAdvance: 25.375
-    scale: 1
-  - id: 103
-    x: 62
-    y: 76
-    width: 36.875
-    height: 55.3125
-    xOffset: 0.75
-    yOffset: 38.5
-    xAdvance: 38.9375
-    scale: 1
-  - id: 104
-    x: 83
-    y: 297
-    width: 33.25
-    height: 53.1875
-    xOffset: 5.6875
-    yOffset: 53.1875
-    xAdvance: 44.4375
-    scale: 1
-  - id: 105
-    x: 125
-    y: 233
-    width: 9.0625
-    height: 52.3125
-    xOffset: 5.25
-    yOffset: 52.3125
-    xAdvance: 19.5
-    scale: 1
-  - id: 106
-    x: 6
-    y: 436
-    width: 18.4375
-    height: 69.125
-    xOffset: -4.1875
-    yOffset: 52.3125
-    xAdvance: 19.5
-    scale: 1
-  - id: 107
-    x: 102
-    y: 147
-    width: 33.9375
-    height: 53.1875
-    xOffset: 5.6875
-    yOffset: 53.1875
-    xAdvance: 40
-    scale: 1
-  - id: 108
-    x: 144
-    y: 17
-    width: 8
-    height: 53.1875
-    xOffset: 5.6875
-    yOffset: 53.1875
-    xAdvance: 19.5
-    scale: 1
-  - id: 109
-    x: 443
-    y: 406
-    width: 55.6875
-    height: 38.5
-    xOffset: 5.6875
-    yOffset: 38.5
-    xAdvance: 66.9375
-    scale: 1
-  - id: 110
-    x: 383
-    y: 162
-    width: 33.25
-    height: 38.5
-    xOffset: 5.6875
-    yOffset: 38.5
-    xAdvance: 44.4375
-    scale: 1
-  - id: 111
-    x: 6
-    y: 10
-    width: 35.75
-    height: 39.1875
-    xOffset: 3.4375
-    yOffset: 38.5
-    xAdvance: 42.75
-    scale: 1
-  - id: 112
-    x: 98
-    y: 9
-    width: 34.3125
-    height: 55.3125
-    xOffset: 5.6875
-    yOffset: 38.5
-    xAdvance: 43.625
-    scale: 1
-  - id: 113
-    x: 37
-    y: 295
-    width: 34.375
-    height: 55.3125
-    xOffset: 3.4375
-    yOffset: 38.5
-    xAdvance: 43.625
-    scale: 1
-  - id: 114
-    x: 427
-    y: 50
-    width: 23.1875
-    height: 38.5
-    xOffset: 5.6875
-    yOffset: 38.5
-    xAdvance: 30.1875
-    scale: 1
-  - id: 115
-    x: 467
-    y: 84
-    width: 27.75
-    height: 39.1875
-    xOffset: 3.3125
-    yOffset: 38.5
-    xAdvance: 34.0625
-    scale: 1
-  - id: 116
-    x: 391
-    y: 11
-    width: 24.375
-    height: 46.9375
-    xOffset: 1.3125
-    yOffset: 46.25
-    xAdvance: 27.5
-    scale: 1
-  - id: 117
-    x: 337
-    y: 113
-    width: 33.375
-    height: 38.5
-    xOffset: 5.375
-    yOffset: 37.8125
-    xAdvance: 44.4375
-    scale: 1
-  - id: 118
-    x: 442
-    y: 308
-    width: 37.4375
-    height: 37.8125
-    xOffset: 0
-    yOffset: 37.8125
-    xAdvance: 37.4375
-    scale: 1
-  - id: 119
-    x: 443
-    y: 357
-    width: 55.75
-    height: 37.8125
-    xOffset: 0.625
-    yOffset: 37.8125
-    xAdvance: 57.1875
-    scale: 1
-  - id: 120
-    x: 441
-    y: 259
-    width: 36.8125
-    height: 37.8125
-    xOffset: 0.8125
-    yOffset: 37.8125
-    xAdvance: 38.5625
-    scale: 1
-  - id: 121
-    x: 82
-    y: 378
-    width: 37.5
-    height: 54.625
-    xOffset: 0
-    yOffset: 37.8125
-    xAdvance: 37.5
-    scale: 1
-  - id: 122
-    x: 382
-    y: 69
-    width: 28.6875
-    height: 37.8125
-    xOffset: 2.3125
-    yOffset: 37.8125
-    xAdvance: 33.4375
-    scale: 1
-  - id: 123
-    x: 36
-    y: 444
-    width: 23.9375
-    height: 61.0625
-    xOffset: 1.5
-    yOffset: 50
-    xAdvance: 27.0625
-    scale: 1
-  - id: 124
-    x: 6
-    y: 355
-    width: 6.125
-    height: 69.5
-    xOffset: 16.125
-    yOffset: 53.0625
-    xAdvance: 38.5625
-    scale: 1
-  - id: 125
-    x: 71
-    y: 444
-    width: 22.875
-    height: 61.0625
-    xOffset: 1.5
-    yOffset: 50
-    xAdvance: 26
-    scale: 1
-  - id: 126
-    x: 191
-    y: 12
-    width: 33.4375
-    height: 10.3125
-    xOffset: 3.25
-    yOffset: 29.8125
-    xAdvance: 39.9375
-    scale: 1
-  - id: 160
-    x: 6
-    y: 517
-    width: 0
-    height: 0
-    xOffset: 0
-    yOffset: 0
-    xAdvance: 18.1875
-    scale: 1
-  - id: 8203
-    x: 6
-    y: 517
-    width: 0
-    height: 0
-    xOffset: 0
-    yOffset: 0
-    xAdvance: 0
-    scale: 1
-  - id: 8230
-    x: 453
-    y: 495
-    width: 48.1875
-    height: 10.4375
-    xOffset: 4.5
-    yOffset: 9.4375
-    xAdvance: 57.3125
-    scale: 1
-  m_KerningTable:
-    kerningPairs: []
   m_FontFeatureTable:
+    m_MultipleSubstitutionRecords: []
+    m_LigatureSubstitutionRecords: []
     m_GlyphPairAdjustmentRecords:
     - m_FirstAdjustmentRecord:
         m_GlyphIndex: 5
@@ -7564,25 +6676,10 @@ MonoBehaviour:
           m_XAdvance: 0
           m_YAdvance: 0
       m_FeatureLookupFlags: 0
-  fallbackFontAssets: []
+    m_MarkToBaseAdjustmentRecords: []
+    m_MarkToMarkAdjustmentRecords: []
+  m_ShouldReimportFontFeatures: 0
   m_FallbackFontAssetTable: []
-  m_CreationSettings:
-    sourceFontFileName: 
-    sourceFontFileGUID: 29d1861da7232b847ad1337bd27c3113
-    pointSizeSamplingMode: 0
-    pointSize: 70
-    padding: 5
-    packingMode: 0
-    atlasWidth: 512
-    atlasHeight: 512
-    characterSetSelectionMode: 0
-    characterSequence: 32 - 126, 160, 8203, 8230, 9633
-    referencedFontAssetGUID: 
-    referencedTextAssetGUID: 
-    fontStyle: 0
-    fontStyleModifier: 2
-    renderMode: 4165
-    includeFontFeatures: 0
   m_FontWeightTable:
   - regularTypeface: {fileID: 0}
     italicTypeface: {fileID: 0}
@@ -7631,6 +6728,915 @@ MonoBehaviour:
   boldSpacing: 7
   italicStyle: 35
   tabSize: 10
+  m_fontInfo:
+    Name: Open Sans
+    PointSize: 70
+    Scale: 1
+    CharacterCount: 98
+    LineHeight: 95.3125
+    Baseline: 0
+    Ascender: 74.8125
+    CapHeight: 50
+    Descender: -20.5
+    CenterLine: 0
+    SuperscriptOffset: 74.8125
+    SubscriptOffset: -7.006836
+    SubSize: 0.5
+    Underline: -7.006836
+    UnderlineThickness: 3.4863281
+    strikethrough: 19.75
+    strikethroughThickness: 3.4863281
+    TabWidth: 181.875
+    Padding: 5
+    AtlasWidth: 512
+    AtlasHeight: 512
+  m_glyphInfoList:
+  - id: 32
+    x: 6
+    y: 517
+    width: 18.1875
+    height: 95.3125
+    xOffset: 0
+    yOffset: 74.8125
+    xAdvance: 18.1875
+    scale: 1
+  - id: 33
+    x: 163
+    y: 33
+    width: 10.125
+    height: 51
+    xOffset: 4.5
+    yOffset: 50
+    xAdvance: 19.3125
+    scale: 1
+  - id: 34
+    x: 190
+    y: 222
+    width: 21.375
+    height: 18.0625
+    xOffset: 4.5
+    yOffset: 50
+    xAdvance: 30.5
+    scale: 1
+  - id: 35
+    x: 297
+    y: 332
+    width: 41.9375
+    height: 49.875
+    xOffset: 1.5625
+    yOffset: 49.875
+    xAdvance: 45.25
+    scale: 1
+  - id: 36
+    x: 35
+    y: 211
+    width: 32.5
+    height: 57.1875
+    xOffset: 3.75
+    yOffset: 53.125
+    xAdvance: 39.9375
+    scale: 1
+  - id: 37
+    x: 128
+    y: 315
+    width: 54.5625
+    height: 51.375
+    xOffset: 2.8125
+    yOffset: 50.6875
+    xAdvance: 60.3125
+    scale: 1
+  - id: 38
+    x: 131
+    y: 389
+    width: 48.375
+    height: 51.375
+    xOffset: 3.25
+    yOffset: 50.6875
+    xAdvance: 51.8125
+    scale: 1
+  - id: 39
+    x: 223
+    y: 222
+    width: 7.9375
+    height: 18.0625
+    xOffset: 4.5
+    yOffset: 50
+    xAdvance: 17
+    scale: 1
+  - id: 40
+    x: 6
+    y: 207
+    width: 17.3125
+    height: 61.0625
+    xOffset: 2.75
+    yOffset: 50
+    xAdvance: 22.1875
+    scale: 1
+  - id: 41
+    x: 6
+    y: 134
+    width: 17.3125
+    height: 61.0625
+    xOffset: 2.0625
+    yOffset: 50
+    xAdvance: 22.1875
+    scale: 1
+  - id: 42
+    x: 382
+    y: 118
+    width: 33.125
+    height: 32.0625
+    xOffset: 2.5
+    yOffset: 53.1875
+    xAdvance: 38.375
+    scale: 1
+  - id: 43
+    x: 289
+    y: 223
+    width: 33.4375
+    height: 33.875
+    xOffset: 3.25
+    yOffset: 41.75
+    xAdvance: 39.9375
+    scale: 1
+  - id: 44
+    x: 453
+    y: 466
+    width: 11.9375
+    height: 17.1875
+    xOffset: 2.125
+    yOffset: 8.125
+    xAdvance: 18.6875
+    scale: 1
+  - id: 45
+    x: 79
+    y: 212
+    width: 17.5625
+    height: 6.8125
+    xOffset: 2.4375
+    yOffset: 22.1875
+    xAdvance: 22.5
+    scale: 1
+  - id: 46
+    x: 236
+    y: 12
+    width: 10.125
+    height: 10.4375
+    xOffset: 4.5
+    yOffset: 9.4375
+    xAdvance: 19.25
+    scale: 1
+  - id: 47
+    x: 262
+    y: 8
+    width: 26.1875
+    height: 50
+    xOffset: 0.5
+    yOffset: 50
+    xAdvance: 27.3125
+    scale: 1
+  - id: 48
+    x: 146
+    y: 252
+    width: 33.9375
+    height: 51.4375
+    xOffset: 3
+    yOffset: 50.75
+    xAdvance: 39.9375
+    scale: 1
+  - id: 49
+    x: 338
+    y: 8
+    width: 21.375
+    height: 50
+    xOffset: 5.25
+    yOffset: 50
+    xAdvance: 39.9375
+    scale: 1
+  - id: 50
+    x: 295
+    y: 393
+    width: 33.875
+    height: 50.6875
+    xOffset: 3.0625
+    yOffset: 50.6875
+    xAdvance: 39.9375
+    scale: 1
+  - id: 51
+    x: 147
+    y: 158
+    width: 33.5625
+    height: 51.375
+    xOffset: 2.9375
+    yOffset: 50.6875
+    xAdvance: 39.9375
+    scale: 1
+  - id: 52
+    x: 258
+    y: 455
+    width: 37.375
+    height: 50.125
+    xOffset: 1.3125
+    yOffset: 50.125
+    xAdvance: 39.9375
+    scale: 1
+  - id: 53
+    x: 307
+    y: 455
+    width: 32.375
+    height: 50.6875
+    xOffset: 3.9375
+    yOffset: 50
+    xAdvance: 39.9375
+    scale: 1
+  - id: 54
+    x: 191
+    y: 252
+    width: 33.9375
+    height: 51.3125
+    xOffset: 3.1875
+    yOffset: 50.625
+    xAdvance: 39.9375
+    scale: 1
+  - id: 55
+    x: 337
+    y: 163
+    width: 34.5625
+    height: 49.875
+    xOffset: 2.5
+    yOffset: 49.875
+    xAdvance: 39.9375
+    scale: 1
+  - id: 56
+    x: 194
+    y: 328
+    width: 33.9375
+    height: 51.3125
+    xOffset: 3
+    yOffset: 50.625
+    xAdvance: 39.9375
+    scale: 1
+  - id: 57
+    x: 149
+    y: 95
+    width: 33.9375
+    height: 51.3125
+    xOffset: 2.9375
+    yOffset: 50.625
+    xAdvance: 39.9375
+    scale: 1
+  - id: 58
+    x: 489
+    y: 247
+    width: 10.125
+    height: 39.625
+    xOffset: 4.5
+    yOffset: 38.625
+    xAdvance: 19.25
+    scale: 1
+  - id: 59
+    x: 491
+    y: 298
+    width: 12.5
+    height: 47.6875
+    xOffset: 2.125
+    yOffset: 38.625
+    xAdvance: 19.4375
+    scale: 1
+  - id: 60
+    x: 334
+    y: 224
+    width: 33.4375
+    height: 35.5
+    xOffset: 3.25
+    yOffset: 43.0625
+    xAdvance: 39.9375
+    scale: 1
+  - id: 61
+    x: 146
+    y: 221
+    width: 32.875
+    height: 19.75
+    xOffset: 3.4375
+    yOffset: 34.5
+    xAdvance: 39.9375
+    scale: 1
+  - id: 62
+    x: 428
+    y: 151
+    width: 33.4375
+    height: 35.5
+    xOffset: 3.25
+    yOffset: 43.0625
+    xAdvance: 39.9375
+    scale: 1
+  - id: 63
+    x: 236
+    y: 265
+    width: 29.4375
+    height: 51.6875
+    xOffset: 0.5
+    yOffset: 50.6875
+    xAdvance: 31.75
+    scale: 1
+  - id: 64
+    x: 35
+    y: 143
+    width: 55.1875
+    height: 56.0625
+    xOffset: 3.75
+    yOffset: 50.25
+    xAdvance: 62.875
+    scale: 1
+  - id: 65
+    x: 239
+    y: 329
+    width: 46.25
+    height: 50.1875
+    xOffset: 0
+    yOffset: 50.1875
+    xAdvance: 46.25
+    scale: 1
+  - id: 66
+    x: 290
+    y: 162
+    width: 35.75
+    height: 50
+    xOffset: 6.5625
+    yOffset: 50
+    xAdvance: 46.1875
+    scale: 1
+  - id: 67
+    x: 209
+    y: 454
+    width: 37.9375
+    height: 51.375
+    xOffset: 4.125
+    yOffset: 50.6875
+    xAdvance: 44.375
+    scale: 1
+  - id: 68
+    x: 332
+    y: 271
+    width: 40.625
+    height: 50
+    xOffset: 6.5625
+    yOffset: 50
+    xAdvance: 51.375
+    scale: 1
+  - id: 69
+    x: 401
+    y: 273
+    width: 28.25
+    height: 50
+    xOffset: 6.5625
+    yOffset: 50
+    xAdvance: 39.0625
+    scale: 1
+  - id: 70
+    x: 476
+    y: 186
+    width: 28.1875
+    height: 50
+    xOffset: 6.5625
+    yOffset: 50
+    xAdvance: 37.25
+    scale: 1
+  - id: 71
+    x: 191
+    y: 391
+    width: 41.3125
+    height: 51.375
+    xOffset: 4.125
+    yOffset: 50.6875
+    xAdvance: 50.8125
+    scale: 1
+  - id: 72
+    x: 350
+    y: 333
+    width: 39.375
+    height: 50
+    xOffset: 6.5625
+    yOffset: 50
+    xAdvance: 52.5625
+    scale: 1
+  - id: 73
+    x: 371
+    y: 8
+    width: 8.125
+    height: 50
+    xOffset: 6.5625
+    yOffset: 50
+    xAdvance: 21.375
+    scale: 1
+  - id: 74
+    x: 6
+    y: 280
+    width: 19.875
+    height: 63.9375
+    xOffset: -5.375
+    yOffset: 50
+    xAdvance: 20.9375
+    scale: 1
+  - id: 75
+    x: 393
+    y: 395
+    width: 38.125
+    height: 50
+    xOffset: 6.5625
+    yOffset: 50
+    xAdvance: 44.75
+    scale: 1
+  - id: 76
+    x: 401
+    y: 334
+    width: 29.3125
+    height: 50
+    xOffset: 6.5625
+    yOffset: 50
+    xAdvance: 37.9375
+    scale: 1
+  - id: 77
+    x: 194
+    y: 98
+    width: 51.4375
+    height: 50
+    xOffset: 6.5625
+    yOffset: 50
+    xAdvance: 64.625
+    scale: 1
+  - id: 78
+    x: 340
+    y: 394
+    width: 41.5625
+    height: 50
+    xOffset: 6.5625
+    yOffset: 50
+    xAdvance: 54.8125
+    scale: 1
+  - id: 79
+    x: 151
+    y: 454
+    width: 46.875
+    height: 51.4375
+    xOffset: 4.125
+    yOffset: 50.75
+    xAdvance: 55.125
+    scale: 1
+  - id: 80
+    x: 431
+    y: 198
+    width: 33.0625
+    height: 50
+    xOffset: 6.5625
+    yOffset: 50
+    xAdvance: 43.0625
+    scale: 1
+  - id: 81
+    x: 24
+    y: 362
+    width: 46.875
+    height: 62.625
+    xOffset: 4.125
+    yOffset: 50.75
+    xAdvance: 55.125
+    scale: 1
+  - id: 82
+    x: 404
+    y: 456
+    width: 37.5
+    height: 50
+    xOffset: 6.5625
+    yOffset: 50
+    xAdvance: 44.75
+    scale: 1
+  - id: 83
+    x: 192
+    y: 159
+    width: 32
+    height: 51.375
+    xOffset: 3.375
+    yOffset: 50.6875
+    xAdvance: 38.5
+    scale: 1
+  - id: 84
+    x: 257
+    y: 100
+    width: 37.5625
+    height: 50
+    xOffset: 0.9375
+    yOffset: 50
+    xAdvance: 39.625
+    scale: 1
+  - id: 85
+    x: 244
+    y: 392
+    width: 39.625
+    height: 50.6875
+    xOffset: 6.125
+    yOffset: 50
+    xAdvance: 51.9375
+    scale: 1
+  - id: 86
+    x: 235
+    y: 161
+    width: 43.5625
+    height: 50
+    xOffset: 0
+    yOffset: 50
+    xAdvance: 43.5625
+    scale: 1
+  - id: 87
+    x: 185
+    y: 34
+    width: 65.25
+    height: 50
+    xOffset: 0.375
+    yOffset: 50
+    xAdvance: 66.1875
+    scale: 1
+  - id: 88
+    x: 277
+    y: 268
+    width: 43.3125
+    height: 50
+    xOffset: 0.125
+    yOffset: 50
+    xAdvance: 43.5625
+    scale: 1
+  - id: 89
+    x: 351
+    y: 456
+    width: 41.4375
+    height: 50
+    xOffset: 0
+    yOffset: 50
+    xAdvance: 41.4375
+    scale: 1
+  - id: 90
+    x: 384
+    y: 212
+    width: 35.75
+    height: 50
+    xOffset: 2.25
+    yOffset: 50
+    xAdvance: 40.25
+    scale: 1
+  - id: 91
+    x: 6
+    y: 61
+    width: 16.125
+    height: 61.0625
+    xOffset: 5.25
+    yOffset: 50
+    xAdvance: 23.125
+    scale: 1
+  - id: 92
+    x: 300
+    y: 8
+    width: 26.1875
+    height: 50
+    xOffset: 0.5
+    yOffset: 50
+    xAdvance: 27.3125
+    scale: 1
+  - id: 93
+    x: 34
+    y: 61
+    width: 16.0625
+    height: 61.0625
+    xOffset: 1.6875
+    yOffset: 50
+    xAdvance: 23.125
+    scale: 1
+  - id: 94
+    x: 242
+    y: 222
+    width: 35.625
+    height: 31.9375
+    xOffset: 0.9375
+    yOffset: 50.25
+    xAdvance: 37.625
+    scale: 1
+  - id: 95
+    x: 82
+    y: 362
+    width: 30.3125
+    height: 4.625
+    xOffset: -0.1875
+    yOffset: -6.3125
+    xAdvance: 30.0625
+    scale: 1
+  - id: 96
+    x: 163
+    y: 10
+    width: 16.625
+    height: 11.1875
+    xOffset: 12.375
+    yOffset: 53.625
+    xAdvance: 41.4375
+    scale: 1
+  - id: 97
+    x: 473
+    y: 135
+    width: 32.0625
+    height: 39.1875
+    xOffset: 3.0625
+    yOffset: 38.5
+    xAdvance: 40.625
+    scale: 1
+  - id: 98
+    x: 105
+    y: 452
+    width: 34.3125
+    height: 53.875
+    xOffset: 5.6875
+    yOffset: 53.1875
+    xAdvance: 43.625
+    scale: 1
+  - id: 99
+    x: 427
+    y: 100
+    width: 28.9375
+    height: 39.1875
+    xOffset: 3.4375
+    yOffset: 38.5
+    xAdvance: 34.6875
+    scale: 1
+  - id: 100
+    x: 79
+    y: 230
+    width: 34.375
+    height: 53.875
+    xOffset: 3.4375
+    yOffset: 53.1875
+    xAdvance: 43.625
+    scale: 1
+  - id: 101
+    x: 53
+    y: 10
+    width: 33.4375
+    height: 39.1875
+    xOffset: 3.4375
+    yOffset: 38.5
+    xAdvance: 40.3125
+    scale: 1
+  - id: 102
+    x: 110
+    y: 82
+    width: 27.3125
+    height: 53.5625
+    xOffset: 1.1875
+    yOffset: 53.5625
+    xAdvance: 25.375
+    scale: 1
+  - id: 103
+    x: 62
+    y: 76
+    width: 36.875
+    height: 55.3125
+    xOffset: 0.75
+    yOffset: 38.5
+    xAdvance: 38.9375
+    scale: 1
+  - id: 104
+    x: 83
+    y: 297
+    width: 33.25
+    height: 53.1875
+    xOffset: 5.6875
+    yOffset: 53.1875
+    xAdvance: 44.4375
+    scale: 1
+  - id: 105
+    x: 125
+    y: 233
+    width: 9.0625
+    height: 52.3125
+    xOffset: 5.25
+    yOffset: 52.3125
+    xAdvance: 19.5
+    scale: 1
+  - id: 106
+    x: 6
+    y: 436
+    width: 18.4375
+    height: 69.125
+    xOffset: -4.1875
+    yOffset: 52.3125
+    xAdvance: 19.5
+    scale: 1
+  - id: 107
+    x: 102
+    y: 147
+    width: 33.9375
+    height: 53.1875
+    xOffset: 5.6875
+    yOffset: 53.1875
+    xAdvance: 40
+    scale: 1
+  - id: 108
+    x: 144
+    y: 17
+    width: 8
+    height: 53.1875
+    xOffset: 5.6875
+    yOffset: 53.1875
+    xAdvance: 19.5
+    scale: 1
+  - id: 109
+    x: 443
+    y: 406
+    width: 55.6875
+    height: 38.5
+    xOffset: 5.6875
+    yOffset: 38.5
+    xAdvance: 66.9375
+    scale: 1
+  - id: 110
+    x: 383
+    y: 162
+    width: 33.25
+    height: 38.5
+    xOffset: 5.6875
+    yOffset: 38.5
+    xAdvance: 44.4375
+    scale: 1
+  - id: 111
+    x: 6
+    y: 10
+    width: 35.75
+    height: 39.1875
+    xOffset: 3.4375
+    yOffset: 38.5
+    xAdvance: 42.75
+    scale: 1
+  - id: 112
+    x: 98
+    y: 9
+    width: 34.3125
+    height: 55.3125
+    xOffset: 5.6875
+    yOffset: 38.5
+    xAdvance: 43.625
+    scale: 1
+  - id: 113
+    x: 37
+    y: 295
+    width: 34.375
+    height: 55.3125
+    xOffset: 3.4375
+    yOffset: 38.5
+    xAdvance: 43.625
+    scale: 1
+  - id: 114
+    x: 427
+    y: 50
+    width: 23.1875
+    height: 38.5
+    xOffset: 5.6875
+    yOffset: 38.5
+    xAdvance: 30.1875
+    scale: 1
+  - id: 115
+    x: 467
+    y: 84
+    width: 27.75
+    height: 39.1875
+    xOffset: 3.3125
+    yOffset: 38.5
+    xAdvance: 34.0625
+    scale: 1
+  - id: 116
+    x: 391
+    y: 11
+    width: 24.375
+    height: 46.9375
+    xOffset: 1.3125
+    yOffset: 46.25
+    xAdvance: 27.5
+    scale: 1
+  - id: 117
+    x: 337
+    y: 113
+    width: 33.375
+    height: 38.5
+    xOffset: 5.375
+    yOffset: 37.8125
+    xAdvance: 44.4375
+    scale: 1
+  - id: 118
+    x: 442
+    y: 308
+    width: 37.4375
+    height: 37.8125
+    xOffset: 0
+    yOffset: 37.8125
+    xAdvance: 37.4375
+    scale: 1
+  - id: 119
+    x: 443
+    y: 357
+    width: 55.75
+    height: 37.8125
+    xOffset: 0.625
+    yOffset: 37.8125
+    xAdvance: 57.1875
+    scale: 1
+  - id: 120
+    x: 441
+    y: 259
+    width: 36.8125
+    height: 37.8125
+    xOffset: 0.8125
+    yOffset: 37.8125
+    xAdvance: 38.5625
+    scale: 1
+  - id: 121
+    x: 82
+    y: 378
+    width: 37.5
+    height: 54.625
+    xOffset: 0
+    yOffset: 37.8125
+    xAdvance: 37.5
+    scale: 1
+  - id: 122
+    x: 382
+    y: 69
+    width: 28.6875
+    height: 37.8125
+    xOffset: 2.3125
+    yOffset: 37.8125
+    xAdvance: 33.4375
+    scale: 1
+  - id: 123
+    x: 36
+    y: 444
+    width: 23.9375
+    height: 61.0625
+    xOffset: 1.5
+    yOffset: 50
+    xAdvance: 27.0625
+    scale: 1
+  - id: 124
+    x: 6
+    y: 355
+    width: 6.125
+    height: 69.5
+    xOffset: 16.125
+    yOffset: 53.0625
+    xAdvance: 38.5625
+    scale: 1
+  - id: 125
+    x: 71
+    y: 444
+    width: 22.875
+    height: 61.0625
+    xOffset: 1.5
+    yOffset: 50
+    xAdvance: 26
+    scale: 1
+  - id: 126
+    x: 191
+    y: 12
+    width: 33.4375
+    height: 10.3125
+    xOffset: 3.25
+    yOffset: 29.8125
+    xAdvance: 39.9375
+    scale: 1
+  - id: 160
+    x: 6
+    y: 517
+    width: 0
+    height: 0
+    xOffset: 0
+    yOffset: 0
+    xAdvance: 18.1875
+    scale: 1
+  - id: 8203
+    x: 6
+    y: 517
+    width: 0
+    height: 0
+    xOffset: 0
+    yOffset: 0
+    xAdvance: 0
+    scale: 1
+  - id: 8230
+    x: 453
+    y: 495
+    width: 48.1875
+    height: 10.4375
+    xOffset: 4.5
+    yOffset: 9.4375
+    xAdvance: 57.3125
+    scale: 1
+  m_KerningTable:
+    kerningPairs: []
+  fallbackFontAssets: []
+  atlas: {fileID: 28923401521066630}
 --- !u!21 &21261991626553910
 Material:
   serializedVersion: 8
