@@ -22,7 +22,7 @@ namespace CDK {
 				return;
 			}
 
-			this._transform.position += this._transform.forward * (deltaTime * this._moveSpeed);
+			this._transform.position += this._transform.forward.normalized * (deltaTime * this._moveSpeed);
 		}
 	}
 }
