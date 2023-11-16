@@ -1,7 +1,7 @@
 using CDK.Data;
 
 namespace CDK.Damage {
-	public interface ICDamageDealerItem {
+	public interface ICDamageDealer {
 		CHitInfoData HitInfo { get; } 
 	}
 }

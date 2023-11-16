@@ -4,13 +4,13 @@ using CDK.Data;
 using UnityEngine;
 
 namespace CDK {
-	public class CDamageDealerTrigger : MonoBehaviour, ICDamageDealerItem {
+	public class CDamageDealerTrigger : MonoBehaviour, ICDamageDealer {
 
 		#region <<---------- Initializers ---------->>
 		
 		public void Initialize(CHitInfoData hitInfo, Transform attackerTransform) {
-			this._hitInfo = hitInfo;
-			this._hitInfo.AttackerTransform = attackerTransform;
+			_hitInfo = hitInfo;
+			_hitInfo.AttackerTransform = attackerTransform;
 		}
 		
 		#endregion <<---------- Initializers ---------->>
@@ -21,14 +21,8 @@ namespace CDK {
 		#region <<---------- Properties and Fields ---------->>
 		
 		[SerializeField] private bool _debug;
-		public CHitInfoData HitInfo {
-			get {
-				return this._hitInfo;
-			}
-		}
+		public CHitInfoData HitInfo => _hitInfo;
 		[SerializeField] private CHitInfoData _hitInfo;
-
-		[SerializeField] private bool _isTrigger;
 
 		private enum DestroyType {
 			dontDestroy,
@@ -45,51 +39,34 @@ namespace CDK {
 		
 
 		#region <<---------- MonoBehaviour ---------->>
-		
-		private void Awake() {
-			if (this._hitInfo.AttackerTransform == null) {
-				var root = this.transform.root;
-				//Debug.Log($"'{this.name}' DamageDealer auto setting AttackerRootTransform as '{root.name}' because it was null on Awake()");
-				this._hitInfo.AttackerTransform = root;
-			}
-		}
 
 		private void OnEnable() {
-			this._damageds.Clear();
+			_damageds.Clear();
 		}
 
 		private void OnTriggerEnter(Collider other) {
-			if(this._debug) Debug.Log($"'{this.name}' OnTriggerEnter '{other.name}'");
-			if (!this._isTrigger) return;
-			if (other.transform.root == this._hitInfo.AttackerTransform) return;
-			this.DoDamageOnContact(other);
+			if(_debug) Debug.Log($"'{this.name}' OnTriggerEnter '{other.name}'");
+			DoDamageOnContact(other);
 		}
 
 		private void OnCollisionEnter(Collision other) {
-			if(this._debug) Debug.Log($"'{this.name}' OnCollisionEnter '{other.transform.name}'");
-			if (this._isTrigger) return;
-			if (other.transform.root == this._hitInfo.AttackerTransform) return;
-			this.DoDamageOnContact(other.collider);
+			if(_debug) Debug.Log($"'{this.name}' OnCollisionEnter '{other.transform.name}'");
+			DoDamageOnContact(other.collider);
 		}
 
 		private void OnTriggerEnter2D(Collider2D other) {
-			if(this._debug) Debug.Log($"'{this.name}' OnTriggerEnter2D '{other.name}'");
-			if (!this._isTrigger) return;
-			if (other.transform.root == this._hitInfo.AttackerTransform) return;
-			this.DoDamageOnContact(other);
+			if(_debug) Debug.Log($"'{this.name}' OnTriggerEnter2D '{other.name}'");
+			DoDamageOnContact(other);
 		}
 
 		private void OnCollisionEnter2D(Collision2D other) {
-			if(this._debug) Debug.Log($"'{this.name}' OnCollisionEnter2D '{other.transform.name}'");
-			if (this._isTrigger) return;
-			if (other.transform.root == this._hitInfo.AttackerTransform) return;
-			this.DoDamageOnContact(other.collider);
+			if(_debug) Debug.Log($"'{this.name}' OnCollisionEnter2D '{other.transform.name}'");
+			DoDamageOnContact(other.collider);
 		}
 
 		private void OnControllerColliderHit(ControllerColliderHit hit) {
-			if(this._debug) Debug.Log($"'{this.name}' OnControllerColliderHit '{hit.transform.name}'");
-			if (hit.transform.root == this._hitInfo.AttackerTransform) return;
-			this.DoDamageOnContact(hit.collider);
+			if(_debug) Debug.Log($"'{this.name}' OnControllerColliderHit '{hit.transform.name}'");
+			DoDamageOnContact(hit.collider);
 		}
 		
 		#endregion <<---------- MonoBehaviour ---------->>
@@ -98,19 +75,24 @@ namespace CDK {
 		
 		
 		private void DoDamageOnContact(Component go) {
-			if(this._debug) Debug.Log($"'{this.name}' starting {nameof(DoDamageOnContact)} in '{go.name}'");
-			var damageable = go.GetComponent<ICDamageable>();
-			if (damageable != null && !this._damageds.Contains(damageable)) {
-				this._damageds.Add(damageable);
-				damageable.TakeHit(this._hitInfo);
-				if (this._destroyType == DestroyType.onlyIfDidDamage) {
+			if(_debug) Debug.Log($"'{this.name}' starting {nameof(DoDamageOnContact)} in '{go.name}'");
+			if (!go.TryGetComponent<ICDamageable>(out var damageable)) {
+				if (_destroyType == DestroyType.onAnyCollisionOrTrigger) {
 					this.gameObject.CDestroy();
-					return;
+				}
+				return;
+			}
+
+			if (_destroyType == DestroyType.dontDestroy) {
+				damageable.TakeHit(_hitInfo);
+			} else if (!_damageds.Contains(damageable)) {
+				_damageds.Add(damageable);
+				damageable.TakeHit(_hitInfo);
+				if (_destroyType == DestroyType.onlyIfDidDamage) {
+					this.gameObject.CDestroy();
 				}
 			}
-			if (this._destroyType == DestroyType.onAnyCollisionOrTrigger) {
-				this.gameObject.CDestroy();
-			}
+
 		}
 		
 	}

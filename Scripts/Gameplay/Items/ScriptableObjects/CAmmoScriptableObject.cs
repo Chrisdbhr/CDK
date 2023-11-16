@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace CDK {
 	[CreateAssetMenu(fileName = "ammo_", menuName = CConst.EDITOR_SCRIPTABLEOBJECT_CREATION_PREFIX + "Ammo data", order = 51)]
-	public class CAmmoScriptableObject : CItemBaseScriptableObject, ICDamageDealerItem {
+	public class CAmmoScriptableObject : CItemBaseScriptableObject, ICDamageDealer {
 		public CHitInfoData HitInfo {
 			get { return this.hitInfo; }
 		}

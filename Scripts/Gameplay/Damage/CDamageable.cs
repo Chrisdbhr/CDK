@@ -6,6 +6,7 @@ using UnityEngine;
 namespace CDK {
 	public class CDamageable : MonoBehaviour, ICDamageable {
 
+		public CHealthComponent HealthComponent => this._healthToNotify;
 		[SerializeField] private CHealthComponent _healthToNotify;
 		[SerializeField] private CUnityEvent _takeDamageEvent;
 		[SerializeField] private float _damageMultiplier = 1f;
