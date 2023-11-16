@@ -1,3 +1,4 @@
+using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -30,5 +31,10 @@ namespace CDK.UI {
 			this.Slider.value += (eventData.moveVector.x * this._inputMovementMultiplier) * Time.deltaTime;
 			this.Selected();
 		}
+
+		private void Reset() {
+			if(!Slider) this.Slider = this.GetComponent<Slider>();
+		}
+
 	}
 }
