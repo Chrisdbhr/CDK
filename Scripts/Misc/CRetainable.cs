@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UniRx;
 using UniRx.Triggers;
 using UnityEngine;
+using UnityEngine.PlayerLoop;
 using Object = UnityEngine.Object;
 
 namespace CDK {
@@ -10,11 +11,17 @@ namespace CDK {
 
 		#region <<---------- Properties and Fields ---------->>
         
-        public bool IsRetained => this._retainedObjectsRx.Count > 0;
-		private ReactiveProperty<bool> _isRetainedRx;
+        public bool IsRetained {
+            get {
+                UpdateRetainedState();
+                return this._isRetainedRx.Value;
+            }
+        }
+
+        private ReactiveProperty<bool> _isRetainedRx;
 
         public IReadOnlyCollection<object> RetainedObjectsCollection => _retainedObjectsRx;
-        private ReactiveCollection<object> _retainedObjectsRx;
+        private List<object> _retainedObjectsRx;
 
         private CompositeDisposable _disposables;
 
@@ -28,25 +35,8 @@ namespace CDK {
 		public CRetainable() {
             this._disposables?.Dispose();
             this._disposables = new CompositeDisposable();
-            this._retainedObjectsRx = new ReactiveCollection<object>();
+            this._retainedObjectsRx = new List<object>();
 			this._isRetainedRx = new ReactiveProperty<bool>();
-
-            this._retainedObjectsRx.ObserveCountChanged(true)
-            .Subscribe(count => {
-                this._isRetainedRx.Value = count > 0;
-            }).AddTo(this._disposables);
-
-            Object uObject;
-            Observable.EveryLateUpdate().Subscribe(_ => {
-                int count = this._retainedObjectsRx.Count;
-                for (int i = count - 1; i >= 0; i--) {
-                    uObject = this._retainedObjectsRx[i] as Object;
-                    if (uObject != null && this._retainedObjectsRx[i] != default) continue;
-                    Debug.LogWarning($"Removing null retainable at index {i}/{count}.");
-                    this._retainedObjectsRx.RemoveAt(i);
-                }
-            })
-            .AddTo(this._disposables);
         }
 		
 		#endregion <<---------- Initializers ---------->>
@@ -59,11 +49,35 @@ namespace CDK {
 		public void Retain(object source) {
             if (this._retainedObjectsRx.Contains(source)) return;
             this._retainedObjectsRx.Add(source);
+            UpdateRetainedState();
 		}
 
 		public void Release(object source) {
-           if (this._retainedObjectsRx.Remove(source)) return;
-           //Debug.LogWarning($"Tried to remove a Release source that was not in retainedObjects list.");
+            if (!this._retainedObjectsRx.Remove(source)) {
+                //Debug.LogWarning($"Tried to remove a Release source that was not in retainedObjects list.");
+                return;
+            }
+            UpdateRetainedState();
+        }
+
+        private void UpdateRetainedState() {
+            int count = this._retainedObjectsRx.Count;
+            if (count <= 0) {
+                this._isRetainedRx.Value = false;
+                return;
+            }
+            for (int i = count - 1; i >= 0; i--) {
+                var currentObject = _retainedObjectsRx[i];
+                if (currentObject is Object uObject) {
+                    if (uObject != null) continue;
+                }
+                else {
+                    if (currentObject != null) continue;
+                }
+                Debug.LogWarning($"Removing null retainable at index {i}/{count}.");
+                this._retainedObjectsRx.RemoveAt(i);
+            }
+            this._isRetainedRx.Value = _retainedObjectsRx.Count > 0;
         }
         
         #endregion <<---------- General ---------->>
