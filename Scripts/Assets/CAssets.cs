@@ -49,8 +49,8 @@ namespace CDK {
                 Debug.LogError($"Could not {nameof(LoadResourceAndInstantiate)} from key '{address}'");
                 return null;
             }
-            
-            return GameObject.Instantiate(resource, parent).GetComponent<T>();
+
+            return Object.Instantiate(resource, parent).GetComponent<T>();
         }
 
         #endregion <<---------- Load From Resources ---------->>

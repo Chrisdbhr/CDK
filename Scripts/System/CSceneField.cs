@@ -11,7 +11,7 @@ namespace CDK {
         #region <<---------- Properties and Fields ---------->>
 
 		#if UNITY_EDITOR
-        [Obsolete("Do not use on runtime scripts! This is a editor only variable.")]
+        [Obsolete("Editor only variable, do not use on runtime scripts!")]
         public SceneAsset sceneAsset;
 		#endif
 

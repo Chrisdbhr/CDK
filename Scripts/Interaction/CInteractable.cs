@@ -43,7 +43,7 @@ namespace CDK.Interaction {
 		#region <<---------- CIInteractable ---------->>
 
         public virtual bool CanBeInteractedWith() {
-            return true;
+            return this.enabled;
         }
 
         /// <summary>
