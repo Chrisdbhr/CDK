@@ -4139,7 +4139,7 @@ MonoBehaviour:
   m_AtlasWidth: 512
   m_AtlasHeight: 512
   m_AtlasPadding: 5
-  m_AtlasRenderMode: 4121
+  m_AtlasRenderMode: 4169
   m_UsedGlyphRects:
   - m_X: 0
     m_Y: 0
