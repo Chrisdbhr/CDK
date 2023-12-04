@@ -3,6 +3,7 @@ using System.Collections;
 using System.Threading.Tasks;
 using UniRx;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
@@ -23,8 +24,11 @@ namespace CDK.UI {
         [SerializeField] CUIButton _buttonReturn;
 
         public bool ShouldPauseTheGame = true;
-        protected bool _shouldPlayOpenAndCloseMenuSound;
-        public bool CanCloseByReturnButton => this._canCloseByReturnButton;
+
+		[Obsolete("Trigger audio using OnOpen/OnClose unity events")]
+		protected bool _shouldPlayOpenAndCloseMenuSound;
+
+		public bool CanCloseByReturnButton => this._canCloseByReturnButton;
         protected bool _canCloseByReturnButton = true;
 		
 		private CUIViewBase _previousUI;
@@ -52,6 +56,9 @@ namespace CDK.UI {
 			}
 		}
 		private Action<CUIViewBase> _onClose;
+
+		protected UnityEvent OnOpenEvent;
+		protected UnityEvent OnCloseEvent;
 
 		protected CGameSettings _gameSettings;
 		protected CFader _fader;
@@ -112,6 +119,7 @@ namespace CDK.UI {
 
         protected virtual void OnDestroy() {
             this._disposeOnDestroy?.Dispose();
+			this._blockingEventsManager.OnMenuRetainable.Release(this);
         }
 
         protected virtual void Reset() {
@@ -142,15 +150,9 @@ namespace CDK.UI {
 
 			this.UpdateCTime();
 
-			if (this._shouldPlayOpenAndCloseMenuSound) {
-			    #if FMOD
-				CSoundManager.get.PlaySingletonEvent(this._gameSettings.SoundOpenMenu);
-			    #else
-			    Debug.LogError("'Play Open menu sound' not implemented without FMOD");
-			    #endif
-            }
+			OnOpenEvent?.Invoke();
 		}
-		
+
         /// <summary>
         /// Close the menu.
         /// </summary>
@@ -161,15 +163,9 @@ namespace CDK.UI {
 
 			if (this._previousUI != null) this._previousUI.ShowIfHidden(this._previousButton);
 
-            if (this._shouldPlayOpenAndCloseMenuSound) {
-			    #if FMOD
-				CSoundManager.get.PlaySingletonEvent(this._gameSettings.SoundCloseMenu);
-			    #else
-			    Debug.LogError("'Play Close menu sound' not implemented without FMOD");
-			    #endif
-            }
-            
-            this._blockingEventsManager.OnMenuRetainable.Release(this);
+			OnCloseEvent?.Invoke();
+
+			this._blockingEventsManager.OnMenuRetainable.Release(this);
   
 			#if UNITY_ADDRESSABLES_EXIST
 			if (!CAssets.UnloadAsset(this.gameObject)) {
