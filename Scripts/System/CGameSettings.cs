@@ -69,7 +69,9 @@ namespace CDK {
 		[MenuItem("Tools/Open GameSettings")]
 		public static void EditorOpenGameSettingsData() {
 			var gameSettings = EditorTryLoadingGameSettings();
-			if (!gameSettings) EditorCreateGameSettingsResourceIfNeeded();
+			if (!gameSettings) {
+				gameSettings = EditorCreateGameSettingsResourceIfNeeded();
+			}
 			Selection.activeObject = gameSettings;
 			AssetDatabase.OpenAsset(gameSettings);
 		}
@@ -84,10 +86,12 @@ namespace CDK {
 		public static CGameSettings EditorCreateGameSettingsResourceIfNeeded() {
 			var gameSettingsScriptObj = EditorTryLoadingGameSettings();
 			if (gameSettingsScriptObj != null) return gameSettingsScriptObj;
-			
+
+			Debug.Log($"Cant find GameSettings asset, will try to create at: '{GAME_SETTINGS_ASSET_FULL_PATH}'");
+
             if(!Directory.Exists(GAME_SETTINGS_ASSET_PATH)) Directory.CreateDirectory(GAME_SETTINGS_ASSET_PATH);
 
-			gameSettingsScriptObj = ScriptableObject.CreateInstance<CGameSettings>();
+			gameSettingsScriptObj = CreateInstance<CGameSettings>();
 
 			AssetDatabase.CreateAsset(gameSettingsScriptObj, GAME_SETTINGS_ASSET_FULL_PATH);
 			
