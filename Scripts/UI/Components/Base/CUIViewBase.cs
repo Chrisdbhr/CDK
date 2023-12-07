@@ -110,16 +110,16 @@ namespace CDK.UI {
         }
 		
 		protected virtual void OnEnable() {
-           
+            this._blockingEventsManager.OnMenuRetainable.Retain(this);
         }
 
         protected virtual void OnDisable() {
 			this._disposeOnDisable?.Dispose();
+            this._blockingEventsManager.OnMenuRetainable.Release(this);
 		}
 
         protected virtual void OnDestroy() {
             this._disposeOnDestroy?.Dispose();
-			this._blockingEventsManager.OnMenuRetainable.Release(this);
         }
 
         protected virtual void Reset() {
@@ -145,8 +145,6 @@ namespace CDK.UI {
 			this._onOpen?.Invoke();
 
 			this._canvas.sortingOrder = sortOrder;
-
-            this._blockingEventsManager.OnMenuRetainable.Retain(this);
 
 			this.UpdateCTime();
 
