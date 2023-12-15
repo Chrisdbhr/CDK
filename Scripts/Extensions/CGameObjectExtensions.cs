@@ -9,6 +9,11 @@ namespace CDK {
             return comp != null ? comp : go.AddComponent<T>();
         }
 
+        public static T CGetInChildrenOrAddComponent<T>(this GameObject go) where T : Component {
+            var comp = go.GetComponentInChildren<T>();
+            return comp != null ? comp : go.AddComponent<T>();
+        }
+
         public static GameObject CSetLayerFromLayerMask(this GameObject go, LayerMask layer) {
             if (go == null) return null;
             go.layer = (int)Mathf.Log(layer.value, 2);
