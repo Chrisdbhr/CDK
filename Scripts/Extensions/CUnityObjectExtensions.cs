@@ -13,8 +13,11 @@ namespace CDK {
             actionToDo?.Invoke(value);
         }
 
-        public static void CDestroy(this Object value, float time = 0f) {
+        public static void CDestroy(this Object value, bool shouldLog = false, float time = 0f) {
             if (value == null) return;
+            if (shouldLog) {
+                Debug.Log("Destroying " + value.name + " - " + value.GetType().Name + " - " + value.GetInstanceID(), value);
+            }
             if (Application.isPlaying) {
                 Object.Destroy(value, time > 0f ? time : 0f);
                 return;
