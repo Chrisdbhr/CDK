@@ -2,7 +2,7 @@ using UnityEditor;
 using UnityEngine;
 
 namespace CDK.Editor {
-    public class CPrintSelectedObjectLayer {
+    public static class CPrintSelectedObjectLayer {
         [MenuItem("CONTEXT/Component/Print this object layer int value")]
         private static void RenameGameObjectWithThisComponentName(MenuCommand data) {
             if (!(data?.context is Component comp)) return;
