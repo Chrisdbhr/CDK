@@ -5,8 +5,11 @@ namespace CDK {
     public static class CGameObjectExtensions {
         
         public static T CGetOrAddComponent<T>(this GameObject go) where T : Component {
-            var comp = go.GetComponent<T>();
-            return comp != null ? comp : go.AddComponent<T>();
+            if (go == null) {
+                Debug.LogError("Cant get or add component from null GameObject!");
+                return null;
+            }
+            return go.TryGetComponent<T>(out var comp) ? comp : go.AddComponent<T>();
         }
 
         public static T CGetInChildrenOrAddComponent<T>(this GameObject go) where T : Component {
