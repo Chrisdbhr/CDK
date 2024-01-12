@@ -15,8 +15,7 @@
         "Ludiq.Chronos",
         "EasyButtons",
         "DebugExtension",
-        "Unity.Timeline",
-        "com.rlabrecque.steamworks.net"
+        "Unity.Timeline"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
