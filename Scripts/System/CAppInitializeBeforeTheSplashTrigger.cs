@@ -33,15 +33,11 @@ namespace CDK {
 
             #if REWIRED
             SetStateText("Waiting for Rewired to get ready...");
-            while (!ReInput.isReady) {
-                yield return null;
-            }
+            while (!ReInput.isReady) yield return null;
             #endif
             #if FMOD
             SetStateText("Waiting for FMOD to Load Master Banks...");
-            while (!RuntimeManager.HaveMasterBanksLoaded) {
-                yield return null;
-            }
+            while (!RuntimeManager.HaveMasterBanksLoaded) yield return null;
             #endif
 
             #if UNITY_LOCALIZATION
