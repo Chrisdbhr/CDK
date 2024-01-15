@@ -32,12 +32,16 @@ namespace CDK {
 
         #region <<---------- Load From Resources ---------->>
 
-        [Obsolete("Try to not use Resources!")]
+        /// <summary>
+        /// Load a Resource asset from the Resources folder.
+        /// </summary>
         public static T LoadResource<T>(string address) where T : UnityEngine.Object {
             return Resources.Load<T>(address);
         }
 
-        [Obsolete("Try to not use Resources!")]
+        /// <summary>
+        /// Load a Resource from the Resources folder and instantiate it.
+        /// </summary>
         public static T LoadResourceAndInstantiate<T>(string address, Transform parent = null) where T : UnityEngine.Component {
             if (!Application.isPlaying) {
                 Debug.LogError($"Will not load from resources because application is not playing.");
