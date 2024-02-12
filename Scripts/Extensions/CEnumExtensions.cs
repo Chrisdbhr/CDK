@@ -12,6 +12,10 @@ namespace CDK {
 		public static int CToInt(this Enum @enum) {
 			return Convert.ToInt32(@enum);
 		}
+        
+        public static uint CToUInt(this Enum @enum) {
+            return Convert.ToUInt32(@enum);
+        }
 
         public static T CGetMaxValue<T>() {
             var values = CGetValues<T>();
