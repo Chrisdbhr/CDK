@@ -3,10 +3,10 @@
     "references": [
       "Unity.TextMeshPro",
       "UniRx",
-      "CDK",
       "FMODUnity",
       "Unity.Localization",
-      "Unity.Localization.Editor"
+      "Unity.Localization.Editor",
+      "CDK"
     ],
     "includePlatforms": [
         "Editor"
