@@ -83,33 +83,34 @@ namespace CDK.UI {
         }
 
 		protected virtual IEnumerator Start() {
-            this.UpdateEventSystemAndCheckForObjectSelection(this._eventSystem.firstSelectedGameObject);
-
-            Observable.EveryLateUpdate()
-            .Subscribe(_ => {
-                if (this == null) return;
-                if (this._eventSystem == null || (this._eventSystem.currentSelectedGameObject != null && this._eventSystem.currentSelectedGameObject.GetComponent<CUIInteractable>() != null)) return;
-                var toSelect = this.GetComponentInChildren<CUIInteractable>();
-                if (toSelect == null) {
-                    Debug.LogError($"Could not find object to select with a '{nameof(CUIInteractable)}' in '{this.name}', this will lead to non functional UI on controllers.", this);
-                    return;
-                }
-                Debug.Log($"Auto selecting item '{toSelect.name}' on menu '{this.name}'", toSelect);
-                this._eventSystem.SetSelectedGameObject(toSelect.gameObject);
-            })
-            .AddTo(this._disposeOnDestroy);
-
-            if(this._buttonReturn != null){
-                this._buttonReturn.Button.OnClickAsObservable()
-                .Subscribe(_ => {
-                    this._navigationManager.CloseLastMenu();
-                })
-                .AddTo(this._disposeOnDestroy);
-            }
-            yield break;
+            yield return null;
         }
 		
 		protected virtual void OnEnable() {
+            this.UpdateEventSystemAndCheckForObjectSelection(this._eventSystem.firstSelectedGameObject);
+
+            Observable.EveryLateUpdate()
+                .Subscribe(_ => {
+                    if (this == null) return;
+                    if (this._eventSystem == null || (this._eventSystem.currentSelectedGameObject != null && this._eventSystem.currentSelectedGameObject.GetComponent<CUIInteractable>() != null)) return;
+                    var toSelect = this.GetComponentInChildren<CUIInteractable>();
+                    if (toSelect == null) {
+                        Debug.LogError($"Could not find object to select with a '{nameof(CUIInteractable)}' in '{this.name}', this will lead to non functional UI on controllers.", this);
+                        return;
+                    }
+                    Debug.Log($"Auto selecting item '{toSelect.name}' on menu '{this.name}'", toSelect);
+                    this._eventSystem.SetSelectedGameObject(toSelect.gameObject);
+                })
+                .AddTo(this._disposeOnDestroy);
+
+            if(this._buttonReturn != null){
+                this._buttonReturn.Button.OnClickAsObservable()
+                    .Subscribe(_ => {
+                        this._navigationManager.CloseLastMenu();
+                    })
+                    .AddTo(this._disposeOnDestroy);
+            }
+            
             this._blockingEventsManager.OnMenuRetainable.Retain(this);
         }
 
@@ -137,6 +138,7 @@ namespace CDK.UI {
 
 		public void Open(int sortOrder, CUIViewBase originUI, CUIInteractable originButton, bool canCloseByReturnButton = true) {
 			Debug.Log($"Open UI {this.gameObject.name}");
+            this.Awake();
 			this._previousUI = originUI;
 			this._previousButton = originButton;
 
@@ -149,6 +151,8 @@ namespace CDK.UI {
 			this.UpdateCTime();
 
 			OnOpenEvent?.Invoke();
+            
+            this.gameObject.SetActive(true);
 		}
 
         /// <summary>

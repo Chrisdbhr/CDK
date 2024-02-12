@@ -194,7 +194,6 @@ namespace CDK.UI {
             this._disposableIsNavigating = Observable.EveryUpdate().Subscribe(_ => {
 				//if (CInputManager.ActiveInputType != CInputManager.InputType.JoystickController) return;
                 this.RemoveNullFromNavigationHistory();
-				if (this._navigationHistory.Count <= 0) return;
 				var current = EventSystem.current;
 				if (current == null) return;
                 if (current.currentSelectedGameObject != null && current.currentSelectedGameObject.activeInHierarchy && current.currentSelectedGameObject.TryGetComponent<CUIInteractable>(out var _)) {

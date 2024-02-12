@@ -1,4 +1,5 @@
 using System;
+using TMPro;
 using UniRx;
 using UnityEngine;
 
@@ -7,10 +8,11 @@ namespace CDK.UI {
 		
 		[Header("Confirmation")]
 		[SerializeField] private CUIButton _buttonConfirm;
+        [SerializeField] private TextMeshProUGUI _title;
+        
 
 		
-		public void SetupPopup(Action onConfirm) {
-			
+		public void SetupPopup(Action onConfirm, string title) {
 			// confirm exit
 			this._buttonConfirm.Button.interactable = true;
 			this._buttonConfirm.Button.OnClickAsObservable().Subscribe(_ => {
@@ -20,6 +22,8 @@ namespace CDK.UI {
 			});
 					
 			this._eventSystem.SetSelectedGameObject(this._buttonConfirm.gameObject);
+            
+            _title.text = title;
 		}
 
 	}
