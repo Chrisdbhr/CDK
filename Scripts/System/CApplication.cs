@@ -40,6 +40,8 @@ namespace CDK {
                 Debug.Log("<color=red>CApplication is quitting...</color>");
                 IsQuitting = true;
                 QuittingCancellationTokenSource?.Cancel();
+                Cursor.lockState = CursorLockMode.None;
+                Cursor.visible = true;
             };
 
             InitializeApplicationAsync().CAwait();
