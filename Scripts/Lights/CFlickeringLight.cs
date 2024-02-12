@@ -40,11 +40,13 @@ namespace CDK.Scripts.Lights {
 
         #region MonoBehaviour
 
+        #if UNITY_EDITOR
         [MenuItem("CONTEXT/Light/Add Flickering Light component")]
         private static void AddFlickeringLightComponent(MenuCommand command) {
             if(!(command.context is Light light)) return;
             light.gameObject.AddComponent<CFlickeringLight>();
         }
+        #endif
         
         private void Awake() {
             this._light = this.GetComponent<Light>();
