@@ -1,6 +1,10 @@
 using System;
 using UnityEngine;
 
+#if ODIN_INSPECTOR
+using Sirenix.OdinInspector;
+#endif
+
 namespace CDK {
 	public abstract class CBasePhysicsTriggers : MonoBehaviour {
 	
@@ -11,10 +15,22 @@ namespace CDK {
         protected bool _triggered;
         protected bool CannotTrigger => this.TriggerOnce && this._triggered;
         
+        #if ODIN_INSPECTOR
+        [FoldoutGroup("Transform Events")]
+        #endif
 		[SerializeField] protected CUnityEventTransform Enter;
-		[SerializeField] protected CUnityEventTransform Exit;
+        #if ODIN_INSPECTOR
+        [FoldoutGroup("Transform Events")]
+        #endif
+        [SerializeField] protected CUnityEventTransform Exit;
 		[Space]
+        #if ODIN_INSPECTOR
+        [FoldoutGroup("Transform Booleans")]
+        #endif
 		[SerializeField] protected CUnityEventBool Entered;
+        #if ODIN_INSPECTOR
+        [FoldoutGroup("Transform Booleans")]
+        #endif
 		[SerializeField] protected CUnityEventBool Exited;
         protected Collider _collider;
 

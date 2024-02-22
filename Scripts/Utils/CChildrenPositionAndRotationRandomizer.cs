@@ -18,7 +18,7 @@ namespace CDK {
 		[SerializeField] private Vector2 _scaleRange = new Vector2(1f, 2f);
 		[SerializeField] private Vector3 _angleRange = Vector3.one * 30;
         [NonSerialized] private GameObject[] _childObjs;
-        [SerializeField] private LayerMask _checkLayers = -1;
+        [SerializeField] private LayerMask _checkLayers = 1;
         [SerializeField, CTagSelector] private string[] _ignoreTag = new []{ "NoCameraCollision" };
 
 		#endregion <<---------- Properties and Fields ---------->>

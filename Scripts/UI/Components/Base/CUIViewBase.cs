@@ -77,7 +77,7 @@ namespace CDK.UI {
 		protected virtual void Awake() {
 			this._gameSettings = CGameSettings.get;
 			this._blockingEventsManager = CBlockingEventsManager.get;
-			this._canvas = this.GetComponent<Canvas>();
+			this._canvas = this.GetComponentInChildren<Canvas>(true);
 			this._fader = CFader.get;
             this._navigationManager = CUINavigationManager.get;
         }

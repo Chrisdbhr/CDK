@@ -3,8 +3,8 @@ using UniRx;
 using UnityEngine;
 using UnityEngine.Events;
 
-#if EASY_BUTTONS
-using EasyButtons;
+#if ODIN_INSPECTOR
+using Sirenix.OdinInspector;
 #endif
 
 namespace CDK {
@@ -21,7 +21,7 @@ namespace CDK {
 
 		private void OnEnable() { } // exposing to allow enable/disable component.
 
-		#if EASY_BUTTONS
+		#if ODIN_INSPECTOR
 		[Button]
 		#endif
 		public virtual void TriggerEvent() {

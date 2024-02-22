@@ -27,7 +27,7 @@ namespace CDK {
 			}
 		}
 
-        public static bool IsPaused => Time.timeScale == 0f;
+        public static bool IsPaused => Time.timeScale.CImprecise() == 0f;
 
 		/// <summary>
 		/// Notify time scaled changed (oldTimeScale, newTimeScale)

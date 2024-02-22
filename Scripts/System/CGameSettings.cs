@@ -12,7 +12,7 @@ using FMODUnity;
 namespace CDK {
 	public class CGameSettings : ScriptableObject {
     
-        #region <<---------- Singleton ---------->>
+        #region <<---------- Resource Singleton ---------->>
 
         public static CGameSettings get {
             get {
@@ -22,7 +22,7 @@ namespace CDK {
         }
         private static CGameSettings _instance;
 
-        #endregion <<---------- Singleton ---------->>
+        #endregion <<---------- Resource Singleton ---------->>
         
        
 		

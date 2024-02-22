@@ -13,7 +13,6 @@
         "DynamicBone",
         "Unity.Localization",
         "Ludiq.Chronos",
-        "EasyButtons",
         "DebugExtension",
         "Unity.Timeline"
     ],

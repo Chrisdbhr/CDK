@@ -1,7 +1,8 @@
-#if EASY_BUTTONS
-using EasyButtons;
-#endif
 using UnityEngine;
+
+#if ODIN_INSPECTOR
+using Sirenix.OdinInspector;
+#endif
 
 namespace CDK.Graphics {
     public class CRandomSkyboxSetter : MonoBehaviour {
@@ -16,7 +17,7 @@ namespace CDK.Graphics {
             ChooseSkybox();
         }
 
-        #if EASY_BUTTONS
+        #if ODIN_INSPECTOR
         [Button]
         #endif
         public void ChooseSkybox() {
