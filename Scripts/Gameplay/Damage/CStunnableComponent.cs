@@ -1,7 +1,7 @@
 using System;
 using CDK.Data;
 using CDK.Enums;
-using UniRx;
+using R3;
 using UnityEngine;
 
 namespace CDK {
@@ -92,17 +92,19 @@ namespace CDK {
 		private void Awake() {
 			this._health = this.GetComponent<CHealthComponent>();
 			this._animator = this.GetComponent<Animator>();
+
+            // stun
+            Observable.Timer(TimeSpan.FromSeconds(this._stunRecoveryRatePerSecond),TimeSpan.FromSeconds(this._stunRecoveryRatePerSecond))
+            .Subscribe(_ => {
+                if (this._health.IsDead) return;
+                this.StunProgress -= this._stunRecoveryRatePerSecond;
+            })
+            .AddTo(this);
 		}
 
 		private void OnEnable() {
 			this._health.OnDamageTaken += this.DamageTake;
 			this._health.OnRevive += this.Revived;
-			
-			// stun
-			Observable.Timer(TimeSpan.FromSeconds(this._stunRecoveryRatePerSecond)).RepeatUntilDisable(this).Subscribe(_ => {
-				if (this._health.IsDead) return;
-				this.StunProgress -= this._stunRecoveryRatePerSecond;
-			});
 		}
 
 		private void OnDisable() {

@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using UniRx;
+using R3;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using Object = UnityEngine.Object;
@@ -53,8 +53,6 @@ namespace CDK.UI {
 		
 		#region <<---------- Open / Close ---------->>
         
-		#if UNITY_ADDRESSABLES_EXIST
-	    
 		public T OpenMenu<T>(string uiReference, CUIViewBase originUI, CUIInteractable originButton, bool canCloseByReturnButton = true) {
 			var openedMenu = this.OpenMenu(uiReference, originUI, originButton, canCloseByReturnButton);
 			return openedMenu != null ? openedMenu.GetComponent<T>() : default;
@@ -122,8 +120,6 @@ namespace CDK.UI {
             return ui;
         }
 		
-		#endif
-        
 		/// <summary>
 		/// Closes active menu selecting previous button.
 		/// </summary>

@@ -1,6 +1,6 @@
 using System;
 using UnityEngine;
-using UniRx;
+using R3;
 
 namespace CDK {
 	public class CClockGameObject : MonoBehaviour {
@@ -29,14 +29,13 @@ namespace CDK {
 	
 		private void Awake() {
 			this.UpdateTime();
+            Observable.Timer(TimeSpan.FromSeconds(1),TimeSpan.FromSeconds(1))
+            .Subscribe(_ => {
+                this.UpdateTime();
+            })
+            .AddTo(this);
 		}
 
-		private void OnEnable() {
-			Observable.Timer(TimeSpan.FromSeconds(1)).RepeatUntilDisable(this).Subscribe(_ => {
-				this.UpdateTime();
-			});
-		}
-		
 		#endregion <<---------- MonoBehaviour ---------->>
 
 		

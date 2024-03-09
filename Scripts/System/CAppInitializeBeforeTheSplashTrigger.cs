@@ -11,10 +11,6 @@ using FMODUnity;
 using Rewired;
 #endif
 
-#if UNITY_LOCALIZATION
-using UnityEngine.Localization.Settings;
-#endif
-
 namespace CDK {
     public class CAppInitializeBeforeTheSplashTrigger : MonoBehaviour {
 
@@ -38,11 +34,6 @@ namespace CDK {
             #if FMOD
             SetStateText("Waiting for FMOD to Load Master Banks...");
             while (!RuntimeManager.HaveMasterBanksLoaded) yield return null;
-            #endif
-
-            #if UNITY_LOCALIZATION
-            SetStateText("Waiting for Localization System get ready...");
-            yield return LocalizationSettings.InitializationOperation;
             #endif
 
             yield return null;

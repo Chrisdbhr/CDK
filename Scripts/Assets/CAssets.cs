@@ -1,15 +1,9 @@
 using System;
 using System.Threading.Tasks;
-using UniRx;
+using R3;
 using UnityEngine;
-using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.SceneManagement;
 using Object = UnityEngine.Object;
-
-#if UNITY_ADDRESSABLES_EXIST
-using UnityEngine.AddressableAssets;
-using UnityEngine.ResourceManagement.ResourceProviders;
-#endif
 
 namespace CDK {
     public static class CAssets {
@@ -42,21 +36,35 @@ namespace CDK {
         /// <summary>
         /// Load a Resource from the Resources folder and instantiate it.
         /// </summary>
-        public static T LoadResourceAndInstantiate<T>(string address, Transform parent = null) where T : UnityEngine.Component {
+        public static T LoadResourceAndInstantiate<T>(string address, Vector3 position, Quaternion rotation, Transform parent = null) where T : UnityEngine.Component {
             if (!Application.isPlaying) {
                 Debug.LogError($"Will not load from resources because application is not playing.");
                 return null;
             }
-
             var resource = Resources.Load<GameObject>(address);
             if (resource == null) {
                 Debug.LogError($"Could not {nameof(LoadResourceAndInstantiate)} from key '{address}'");
                 return null;
             }
-
+            return Object.Instantiate(resource, position, rotation, parent).GetComponent<T>();
+        }
+        
+        /// <summary>
+        /// Load a Resource from the Resources folder and instantiate it.
+        /// </summary>
+        public static T LoadResourceAndInstantiate<T>(string address, Transform parent = null) where T : UnityEngine.Component {
+            if (!Application.isPlaying) {
+                Debug.LogError($"Will not load from resources because application is not playing.");
+                return null;
+            }
+            var resource = Resources.Load<GameObject>(address);
+            if (resource == null) {
+                Debug.LogError($"Could not {nameof(LoadResourceAndInstantiate)} from key '{address}'");
+                return null;
+            }
             return Object.Instantiate(resource, parent).GetComponent<T>();
         }
-
+        
         #endregion <<---------- Load From Resources ---------->>
 
 
@@ -66,12 +74,13 @@ namespace CDK {
 
         public static async Task<T> LoadFromHolderSceneAsync<T>(string sceneName, bool setObjectAsDontDestroy = false) where T : Component {
             var activeScene = SceneManager.GetActiveScene();
-            var asyncOp = await SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive).AsAsyncOperationObservable().ToTask();
+            var asyncOp = SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive);
+            await asyncOp;
             var loadedScene = SceneManager.GetSceneByName(sceneName);
             var rootGameObjects = loadedScene.GetRootGameObjects();
             if (rootGameObjects == null || rootGameObjects.Length <= 0) {
                 Debug.LogError($"No objects inside scene: '{sceneName}'");
-                await SceneManager.UnloadSceneAsync(sceneName).AsAsyncOperationObservable().ToTask();
+                await SceneManager.UnloadSceneAsync(sceneName);
                 return default;
             }
             if (rootGameObjects.Length > 1) {
@@ -82,7 +91,7 @@ namespace CDK {
 
             if (!go.TryGetComponent<T>(out var comp)) {
                 Debug.LogError($"Could not find Object '{nameof(T)}' from scene '{sceneName}'");
-                await SceneManager.UnloadSceneAsync(sceneName).AsAsyncOperationObservable().ToTask();
+                await SceneManager.UnloadSceneAsync(sceneName);
                 return default;
             }
 
@@ -93,7 +102,7 @@ namespace CDK {
                 SceneManager.MoveGameObjectToScene(go, activeScene);
             }
             
-            await SceneManager.UnloadSceneAsync(sceneName).AsAsyncOperationObservable().ToTask();
+            await SceneManager.UnloadSceneAsync(sceneName);
   
             return comp;
         } 
@@ -103,99 +112,18 @@ namespace CDK {
 
 
 
-        #region <<---------- Load From Addressables ---------->>
-
-        public static async Task<T> LoadAssetAsync<T>(AssetReference key) where T : Object {
-            Debug.Log($"Loading asset with key '{key}'");
-            #if UNITY_ADDRESSABLES_EXIST
-            var asyncOp = Addressables.LoadAssetAsync<T>(key);
-            while (!asyncOp.IsDone) {
-                await Observable.NextFrame();
-            }
-            return asyncOp.Result;
-			#else
-			throw new NotImplementedException();
-			#endif
-        }
-        
-        public static async Task<T> LoadPrefabAsync<T>(string key) where T : Object {
-            Debug.Log($"Loading prefab asset with key '{key}'");
-			#if UNITY_ADDRESSABLES_EXIST
-            var asyncOp = Addressables.LoadAssetAsync<GameObject>(key);
-            while (!asyncOp.IsDone) {
-                await Observable.NextFrame();
-            }
-            var go = asyncOp.Result;
-            return go.GetComponent<T>();
-			#else
-			throw new NotImplementedException();
-			#endif
-        }
-
-		#if UNITY_ADDRESSABLES_EXIST
-
-        public static async Task<T> LoadPrefabAsync<T>(AssetReference key) where T : Object {
-            return await LoadPrefabAsync<T>(key.RuntimeKey.ToString());
-        }
-
-        public static async Task<T> LoadAndInstantiateAsync<T>(AssetReference key, Vector3 position = default, Quaternion rotation = default, Transform parent = null, bool trackHandle = true) where T : Component {
-            return await LoadAndInstantiateAsync<T>(key.RuntimeKey.ToString(), position, rotation, parent, trackHandle);
-        }
-
-        public static async Task<T> LoadAndInstantiateAsync<T>(string key, Vector3 position = default, Quaternion rotation = default, Transform parent = null, bool trackHandle = true) where T : Component {
-            if (!Application.isPlaying) return null;
-            Debug.Log($"Starting loading GameObject with key '{key}'{(parent != null ? $" on parent '{parent.name}'" : string.Empty)}");
-            try {
-                var instantiationParameters = new InstantiationParameters(position, rotation, parent);
-                
-                var asyncOp = Addressables.InstantiateAsync(key, instantiationParameters, trackHandle);
-                
-                while (!asyncOp.IsDone) {
-                    await Observable.NextFrame();
-                }
-                var go = asyncOp.Result;
-                if (CApplication.IsQuitting) {
-                    CAssets.UnloadAsset(go);
-                    return null;
-                }
-                if (go == null) {
-                    throw new NullReferenceException($"Could not Instantiate object with key '{key}'.");
-                }
-
-                Debug.Log($"Finished loading GameObject with key '{key}' ", go);
-                return go.GetComponent<T>();
-            }
-            catch (Exception e) {
-                Debug.LogError($"Exception trying to Load and Instantiate GameObject Async with key '{key}':\n" + e);
-            }
-
-            return null;
-        }
-
-        #endif
-
-        #endregion <<---------- Load From Addressables ---------->>
-
-
-
-
         #region <<---------- Unloaders ---------->>
 
-        public static bool UnloadAsset(GameObject goToUnload, bool destroyIfCantReleaseInstance = true) {
+        public static void UnloadAsset(GameObject goToUnload, bool releaseAsset = false) {
             if (goToUnload == null) {
-                Debug.LogError($"Will not unload a null asset.");
-                return false;
-            }
-			#if UNITY_ADDRESSABLES_EXIST
-            bool success = Addressables.ReleaseInstance(goToUnload);
-            if (success) return true;
-			#endif
-            if (destroyIfCantReleaseInstance) {
-                Debug.Log($"GameObject '{goToUnload.name}' will be destroyed.", goToUnload);
-                goToUnload.CDestroy();
+                Debug.LogError($"Can't unload a null asset.");
+                return;
             }
 
-            return destroyIfCantReleaseInstance;
+            goToUnload.CDestroy();
+            if (releaseAsset) {
+                Resources.UnloadAsset(goToUnload);
+            }
         }
 
         public static void UnloadAsset(Object obj) {

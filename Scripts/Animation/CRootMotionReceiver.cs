@@ -1,13 +1,13 @@
 using System;
-using UniRx;
+using R3;
 using UnityEngine;
 
 namespace CDK {
 	[RequireComponent(typeof(Animator))]
 	public class CRootMotionReceiver : MonoBehaviour {
 
-        public Vector3ReactiveProperty DeltaPositionRx { get; private set; }
-        public QuaternionReactiveProperty DeltaRotationRx { get; private set; }
+        public SerializableReactiveProperty<Vector3> DeltaPositionRx { get; private set; }
+        public SerializableReactiveProperty<Quaternion> DeltaRotationRx { get; private set; }
         private Animator _animator;
 
 
@@ -16,8 +16,8 @@ namespace CDK {
 		private void Awake() {
 			this._animator = this.CGetComponentInChildrenOrInParent<Animator>();
             
-            this.DeltaPositionRx = new Vector3ReactiveProperty();
-            this.DeltaRotationRx = new QuaternionReactiveProperty();
+            this.DeltaPositionRx = new ();
+            this.DeltaRotationRx = new ();
         }
 
 		private void OnDestroy() {

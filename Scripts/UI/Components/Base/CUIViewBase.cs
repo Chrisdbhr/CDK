@@ -1,7 +1,7 @@
 using System;
 using System.Collections;
 using System.Threading.Tasks;
-using UniRx;
+using R3;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
@@ -65,7 +65,6 @@ namespace CDK.UI {
 		protected CBlockingEventsManager _blockingEventsManager;
         protected CUINavigationManager _navigationManager;
         protected CompositeDisposable _disposeOnDisable = new CompositeDisposable();
-        protected CompositeDisposable _disposeOnDestroy = new CompositeDisposable();
 
 		#endregion <<---------- Properties and Fields ---------->>
 
@@ -89,7 +88,7 @@ namespace CDK.UI {
 		protected virtual void OnEnable() {
             this.UpdateEventSystemAndCheckForObjectSelection(this._eventSystem.firstSelectedGameObject);
 
-            Observable.EveryLateUpdate()
+            Observable.TimerFrame(1, 1, UnityFrameProvider.PostLateUpdate)
                 .Subscribe(_ => {
                     if (this == null) return;
                     if (this._eventSystem == null || (this._eventSystem.currentSelectedGameObject != null && this._eventSystem.currentSelectedGameObject.GetComponent<CUIInteractable>() != null)) return;
@@ -101,14 +100,14 @@ namespace CDK.UI {
                     Debug.Log($"Auto selecting item '{toSelect.name}' on menu '{this.name}'", toSelect);
                     this._eventSystem.SetSelectedGameObject(toSelect.gameObject);
                 })
-                .AddTo(this._disposeOnDestroy);
+                .AddTo(this);
 
             if(this._buttonReturn != null){
                 this._buttonReturn.Button.OnClickAsObservable()
                     .Subscribe(_ => {
                         this._navigationManager.CloseLastMenu();
                     })
-                    .AddTo(this._disposeOnDestroy);
+                    .AddTo(this);
             }
             
             this._blockingEventsManager.OnMenuRetainable.Retain(this);
@@ -119,9 +118,7 @@ namespace CDK.UI {
             this._blockingEventsManager.OnMenuRetainable.Release(this);
 		}
 
-        protected virtual void OnDestroy() {
-            this._disposeOnDestroy?.Dispose();
-        }
+        protected virtual void OnDestroy() { }
 
         protected virtual void Reset() {
             if (this._eventSystem == null) {

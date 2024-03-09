@@ -1,7 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using UniRx;
+using R3;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -69,7 +69,7 @@ namespace CDK {
         public AsyncOperation MonitorAsyncOperation(AsyncOperation asyncOperation) {
             if (this._activeAsyncOperations.Count <= 0) {
                 this._timerDisposable?.Dispose();
-                this._timerDisposable = Observable.Timer(TimeSpan.FromSeconds(1f), Scheduler.MainThreadIgnoreTimeScale)
+                this._timerDisposable = Observable.Timer(TimeSpan.FromSeconds(1f))
                 .Subscribe(_ => {
                     if (this == null) return;
                     this.ShowLoadingUI();

@@ -2,16 +2,13 @@
     "name": "CDK",
     "rootNamespace": "",
     "references": [
-        "UniRx",
+        "R3.Unity",
         "Unity.TextMeshPro",
         "LINQtoGameObject",
-        "Unity.Addressables",
-        "Unity.ResourceManager",
         "Newtonsoft.Json.UnityConverters",
         "FMODUnity",
         "Cinemachine",
         "DynamicBone",
-        "Unity.Localization",
         "Ludiq.Chronos",
         "DebugExtension",
         "Unity.Timeline"
@@ -23,22 +20,10 @@
     "precompiledReferences": [],
     "autoReferenced": true,
     "defineConstraints": [],
+    "dependencies": [
+        "com.cysharp.r3"
+    ],
     "versionDefines": [
-        {
-          "name": "com.unity.addressables",
-          "expression": "0.0.0",
-          "define": "UNITY_ADDRESSABLES_EXIST"
-        },
-        {
-            "name": "com.madsbangh.easybuttons",
-            "expression": "0.0.0",
-            "define": "EASY_BUTTONS"
-        },
-        {
-            "name": "com.unity.localization",
-            "expression": "0.0.0",
-            "define": "UNITY_LOCALIZATION"
-        },
         {
             "name": "com.unity.cinemachine",
             "expression": "0.0.0",

@@ -1,5 +1,6 @@
 using System;
-using UniRx;
+using System.Linq;
+using R3;
 using UnityEngine;
 
 namespace CDK {
@@ -48,12 +49,11 @@ namespace CDK {
             .AddTo(this._disposables);
             
 			// blocking Event Happening
-            this._isAnyHappeningRx = new BoolReactiveProperty();
-			Observable.CombineLatest(
-			this.OnMenuRetainable.IsRetainedAsObservable(), 
-			this.PlayingCutsceneRetainable.IsRetainedAsObservable(),
-            this.LimitPlayerActionsRetainable.IsRetainedAsObservable(),
-			(isOnMenu, isPlayingCutscene, limitPlayerActions) => isOnMenu || isPlayingCutscene || limitPlayerActions)
+            this._isAnyHappeningRx = new ReactiveProperty<bool>();
+			Observable.Merge(
+			    this.OnMenuRetainable.IsRetainedAsObservable(),
+			    this.PlayingCutsceneRetainable.IsRetainedAsObservable(),
+                this.LimitPlayerActionsRetainable.IsRetainedAsObservable())
 			.Subscribe(blockingEventHappening => {
 				this._isAnyHappeningRx.Value = blockingEventHappening;
 			})
@@ -86,7 +86,7 @@ namespace CDK {
 
 
         public bool IsAnyHappening => this._isAnyHappeningRx.Value;
-        private BoolReactiveProperty _isAnyHappeningRx;
+        private ReactiveProperty<bool> _isAnyHappeningRx;
         
         private CompositeDisposable _disposables;
         
@@ -97,7 +97,7 @@ namespace CDK {
 
         #region <<---------- Observables ---------->>
 
-        public IObservable<bool> IsAnyHappeningAsObservable() {
+        public Observable<bool> IsAnyHappeningAsObservable() {
             return this._isAnyHappeningRx.DistinctUntilChanged().AsObservable();
         }
 

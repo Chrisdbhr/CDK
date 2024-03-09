@@ -1,7 +1,7 @@
 using System;
 using CDK.Damage;
 using CDK.Data;
-using UniRx;
+using R3;
 using UnityEngine;
 
 namespace CDK {
@@ -143,28 +143,26 @@ namespace CDK {
 		private void Awake() {
 			this._transform = this.transform;
 			this.FullCure();
-		}
+            // regen only one hearth
+            Observable.Timer(TimeSpan.FromSeconds(1f), TimeSpan.FromSeconds(1f)).Subscribe(_ => {
+                if (this.IsDead) return;
+                if (Time.timeSinceLevelLoad < (this._lastDamageTakenTime + this._regenDelayAfterHit)) return;
 
-		private void OnEnable() {
-			// regen only one hearth
-			Observable.Timer(TimeSpan.FromSeconds(1f)).RepeatUntilDisable(this).Subscribe(_ => {
-				if (this.IsDead) return;
-				if (Time.timeSinceLevelLoad < (this._lastDamageTakenTime + this._regenDelayAfterHit)) return;
+                int healthInt = (int)this.CurrentHealth;
 
-				int healthInt = (int)this.CurrentHealth;
+                // dont heal if full hearth.
+                if (healthInt == this.CurrentHealth) return;
 
-				// dont heal if full hearth.
-				if (healthInt == this.CurrentHealth) return;
+                // check if will heal all
+                float nextHealth = this.CurrentHealth + this._regenAmountPerTick;
+                if (nextHealth > healthInt + 1) {
+                    // will heal more than necessary, fix it
+                    nextHealth = healthInt + 1;
+                }
 
-				// check if will heal all
-				float nextHealth = this.CurrentHealth + this._regenAmountPerTick;
-				if (nextHealth > healthInt + 1) {
-					// will heal more than necessary, fix it
-					nextHealth = healthInt + 1;
-				}
-
-				this.CurrentHealth = nextHealth;
-			});
+                this.CurrentHealth = nextHealth;
+            })
+            .AddTo(this);
 		}
 
 		private void Update() {

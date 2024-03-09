@@ -1,4 +1,4 @@
-﻿using UniRx;
+﻿using R3;
 using UnityEngine;
 
 namespace CDK {
@@ -27,10 +27,9 @@ namespace CDK {
             Observable.CombineLatest(
                 b.OnMenuRetainable.IsRetainedAsObservable(),
                 b.PlayingCutsceneRetainable.IsRetainedAsObservable(),
-                b.LimitPlayerActionsRetainable.IsRetainedAsObservable(),
-                (isOnMenu, isPlayingCutscene, limitPlayerActions) => (isOnMenu, isPlayingCutscene, limitPlayerActions)
+                b.LimitPlayerActionsRetainable.IsRetainedAsObservable()
             )
-            .Subscribe(x => OnBlockingEvent(x.isOnMenu, x.isPlayingCutscene, x.limitPlayerActions))
+            .Subscribe(x => OnBlockingEvent(x[0], x[1], x[2]))
             .AddTo(_disposables);
 
         }

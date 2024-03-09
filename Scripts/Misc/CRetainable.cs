@@ -1,9 +1,7 @@
 using System;
 using System.Collections.Generic;
-using UniRx;
-using UniRx.Triggers;
+using R3;
 using UnityEngine;
-using UnityEngine.PlayerLoop;
 using Object = UnityEngine.Object;
 
 namespace CDK {
@@ -87,7 +85,7 @@ namespace CDK {
 
         #region <<---------- Observables ---------->>
 
-        public IObservable<bool> IsRetainedAsObservable() {
+        public Observable<bool> IsRetainedAsObservable() {
             return this._isRetainedRx.DistinctUntilChanged().AsObservable();
         }
 

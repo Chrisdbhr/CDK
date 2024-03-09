@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿#if UNITY_ADDRESSABLES_EXIST
+using UnityEngine;
 using UnityEngine.AddressableAssets;
 
 namespace CDK {
@@ -12,3 +13,4 @@ namespace CDK {
 
     }
 }
+#endif

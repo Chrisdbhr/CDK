@@ -1,5 +1,5 @@
 using System;
-using UniRx;
+using R3;
 using UnityEngine;
 using UnityEngine.UI;
 using Object = UnityEngine.Object;
@@ -69,9 +69,11 @@ namespace CDK {
 			imgRect.sizeDelta = Vector2.zero;
 			imgRect.anchoredPosition = Vector2.zero;
 
-			Observable.EveryUpdate().TakeUntilDestroy(parentGo).Subscribe(_ => {
+			Observable.EveryUpdate().
+            Subscribe(_ => {
 				this.UpdateOpacity();
-			});
+			})
+            .AddTo(parentGo);
 		}
 		
 		#endregion <<---------- Initializers ---------->>

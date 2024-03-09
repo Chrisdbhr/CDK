@@ -93,8 +93,10 @@ namespace CDK {
         public static bool IsQuitting { get; private set; }
         public static CancellationTokenSource QuittingCancellationTokenSource = new CancellationTokenSource();
 
+        #if UNITY_ADDRESSABLES_EXIST
         public static IResourceLocator ResourceLocator;
-
+        #endif
+        
         public static Version Version {
             get {
                 if (_version != null) return _version;
