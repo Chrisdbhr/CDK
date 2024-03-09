@@ -93,7 +93,7 @@ namespace CDK {
 
 			gameSettingsScriptObj = CreateInstance<CGameSettings>();
 
-			AssetDatabase.CreateAsset(gameSettingsScriptObj, GAME_SETTINGS_ASSET_FULL_PATH);
+			AssetDatabase.CreateAsset(gameSettingsScriptObj, "Assets/Resources/" + GAME_SETTINGS_ASSET_NAME);
 			
             Debug.Log($"Created GameSettings scriptable object at path: '{GAME_SETTINGS_ASSET_FULL_PATH}'");
 			
