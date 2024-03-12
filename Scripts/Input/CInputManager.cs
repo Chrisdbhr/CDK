@@ -170,7 +170,7 @@ namespace CDK {
             rePlayer.controllers.maps.SetMapsEnabled(!onMenu, "Default");
             rePlayer.controllers.maps.SetMapsEnabled(onMenu, "UI"); 
 			
-            Debug.Log($"Player ID '{rePlayer.id}' controllers maps onMenu changed to '{onMenu}'\nCustom Controllers: {customControllersCount}, JoystickControllers: {joystickControllersCount}");
+            Debug.Log($"Player '{rePlayer.id}' controllers maps onMenu changed to '{onMenu}'\nCustom Controllers: {customControllersCount}, JoystickControllers: {joystickControllersCount}");
         }
         #endif
         

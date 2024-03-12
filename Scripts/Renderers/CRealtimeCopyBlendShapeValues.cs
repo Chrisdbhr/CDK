@@ -2,7 +2,7 @@
 using UnityEngine;
 
 namespace CDK.Renderers {
-    public class CRealtimeCopyBlendShapes : MonoBehaviour {
+    public class CRealtimeCopyBlendShapeValues : MonoBehaviour {
 
         [SerializeField] private SkinnedMeshRenderer _sourceMeshRenderer;
         [SerializeField] private SkinnedMeshRenderer _targetMeshRenderer;

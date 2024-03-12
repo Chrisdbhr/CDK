@@ -50,12 +50,12 @@ namespace CDK {
             
 			// blocking Event Happening
             this._isAnyHappeningRx = new ReactiveProperty<bool>();
-			Observable.Merge(
+			Observable.CombineLatest(
 			    this.OnMenuRetainable.IsRetainedAsObservable(),
 			    this.PlayingCutsceneRetainable.IsRetainedAsObservable(),
                 this.LimitPlayerActionsRetainable.IsRetainedAsObservable())
 			.Subscribe(blockingEventHappening => {
-				this._isAnyHappeningRx.Value = blockingEventHappening;
+				this._isAnyHappeningRx.Value = blockingEventHappening.Any(b=>b);
 			})
             .AddTo(this._disposables);
 		}
@@ -86,6 +86,7 @@ namespace CDK {
 
 
         public bool IsAnyHappening => this._isAnyHappeningRx.Value;
+
         private ReactiveProperty<bool> _isAnyHappeningRx;
         
         private CompositeDisposable _disposables;

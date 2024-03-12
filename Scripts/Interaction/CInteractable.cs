@@ -43,7 +43,7 @@ namespace CDK.Interaction {
 		#region <<---------- CIInteractable ---------->>
 
         public virtual bool CanBeInteractedWith() {
-            return this.enabled;
+            return this != null && this.enabled;
         }
 
         /// <summary>
@@ -63,6 +63,7 @@ namespace CDK.Interaction {
         public virtual void OnStoppedBeingInteractionTarget(Transform lookingTransform) { }
 
         public Vector3 GetInteractionPromptPoint() {
+            if(this == null)return Vector3.zero;
             return this._interactionPromptPoint != null ? this._interactionPromptPoint.position : this.transform.position;
         }
 

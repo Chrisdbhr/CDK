@@ -23,7 +23,7 @@ namespace CDK {
 
 		protected override void TriggerEvent() {
 			if (!this._destroyThis) return;
-			Debug.Log($"{nameof(CDestroyGameObjectTrigger)} <color=orange>self destroying</color>.");
+			Debug.Log($"[{nameof(CDestroyGameObjectTrigger)}] '{this.name}' <color=orange>self destroying</color>.");
 			this.gameObject.CDestroy();
 		}
 	}
