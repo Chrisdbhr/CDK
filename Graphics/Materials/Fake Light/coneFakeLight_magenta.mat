@@ -9,6 +9,8 @@ Material:
   m_PrefabAsset: {fileID: 0}
   m_Name: coneFakeLight_magenta
   m_Shader: {fileID: 211, guid: 0000000000000000f000000000000000, type: 0}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
   m_ValidKeywords:
   - _ALPHABLEND_ON
   - _FADING_ON
@@ -25,6 +27,7 @@ Material:
   - SHADOWCASTER
   - DepthOnly
   - GRABPASS
+  m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
@@ -91,8 +94,8 @@ Material:
     - _BlendOp: 0
     - _BumpScale: 1
     - _CameraFadingEnabled: 1
-    - _CameraFarFadeDistance: 1
-    - _CameraNearFadeDistance: 0.1
+    - _CameraFarFadeDistance: 6
+    - _CameraNearFadeDistance: 1
     - _ColorMask: 15
     - _ColorMode: 0
     - _Cull: 0
@@ -143,7 +146,7 @@ Material:
     m_Colors:
     - _BaseColor: {r: 0, g: 0.36078432, b: 3.2627451, a: 0.11764706}
     - _BaseColorAddSubDiff: {r: 0, g: 0, b: 0, a: 0}
-    - _CameraFadeParams: {r: 0.1, g: 1.1111112, b: 0, a: 0}
+    - _CameraFadeParams: {r: 1, g: 0.2, b: 0, a: 0}
     - _Color: {r: 1.6941177, g: 0, b: 2.996079, a: 0.11764706}
     - _Color0: {r: 0, g: 0, b: 0, a: 0}
     - _ColorAddSubDiff: {r: 1, g: 0, b: 0, a: 0}
@@ -152,6 +155,7 @@ Material:
     - _Specular: {r: 0, g: 0, b: 0, a: 0}
     - _Tint: {r: 0, g: 0, b: 0, a: 0}
   m_BuildTextureStacks: []
+  m_AllowLocking: 1
 --- !u!114 &8471710642324270038
 MonoBehaviour:
   m_ObjectHideFlags: 11
