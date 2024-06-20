@@ -24,14 +24,17 @@ namespace CDK.SFX {
             _sfxInstances = new();
         }
 
-        public void PlaySfx(ParticleSystem key, Vector3 position, Quaternion rotation = default) {
-            if (!_sfxInstances.TryGetValue(key, out var instance) || instance == null) {
-                var newInstance = Instantiate(key, position, rotation);
-                _sfxInstances[key] = newInstance;
-                return;
+        public ParticleSystem PlaySfx(ParticleSystem key, Vector3 position, Quaternion rotation = default) {
+            ParticleSystem part;
+            if (!_sfxInstances.TryGetValue(key, out part) || part == null) {
+                part = Instantiate(key, position, rotation);
+                _sfxInstances[key] = part;
             }
-            instance.transform.SetPositionAndRotation(position, rotation);
-            instance.Play(true);
+            else {
+                part.transform.SetPositionAndRotation(position, rotation);
+            }
+            part.Play(true);
+            return part;
         }
         
     }
