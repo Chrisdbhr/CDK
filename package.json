@@ -10,7 +10,7 @@
         "url": "https://github.com/chrisdbhr"
     },
     "dependencies": {
-        "com.cysharp.r3" : "1.1.10",
+        "com.cysharp.r3" : "1.1.12",
         "jillejr.newtonsoft.json-for-unity.converters" : "1.6.3"
     },
     "keywords": [
