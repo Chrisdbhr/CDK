@@ -18,7 +18,10 @@ Check more information about my other projects on [my website](https://chrisjogo
 
 #### Required
 * [R3](https://github.com/Cysharp/R3) for reactive functions.
-	* Insert this line in the Unity **Packages/manifest.json** file : `"com.cysharp.r3" : "https://github.com/Cysharp/R3.git?path=src/R3.Unity/Assets/R3.Unity"`
+	* Insert this line in the Unity **Packages/manifest.json** file: 
+	```
+	"com.cysharp.r3" : "https://github.com/Cysharp/R3.git?path=src/R3.Unity/Assets/R3.Unity"
+	```
 #### Optional
 * [Newtonsoft-Json](https://docs.unity3d.com/Packages/com.unity.nuget.newtonsoft-json@3.0/manual/index.html), include **NEWTONSOFT_JSON_FOR_UNITY** on define symbols.
 * [Unity Converters for Newtonsoft.Json](https://github.com/jilleJr/Newtonsoft.Json-for-Unity.Converters) to fix some Unity Json Serialization issues. 
