@@ -17,21 +17,15 @@ Check more information about my other projects on [my website](https://chrisjogo
 ### Dependencies
 
 #### Required
-* [UniRx](https://github.com/neuecc/UniRx) for reactive functions.
-
+* [R3](https://github.com/Cysharp/R3) for reactive functions.
+	* Insert this line in the Unity **Packages/manifest.json** file : `"com.cysharp.r3" : "https://github.com/Cysharp/R3.git?path=src/R3.Unity/Assets/R3.Unity"`
 #### Optional
-* [Newtonsoft-Json](https://docs.unity3d.com/Packages/com.unity.nuget.newtonsoft-json@3.0/manual/index.html), include **Newtonsoft_Json_for_Unity** on define symbols.
+* [Newtonsoft-Json](https://docs.unity3d.com/Packages/com.unity.nuget.newtonsoft-json@3.0/manual/index.html), include **NEWTONSOFT_JSON_FOR_UNITY** on define symbols.
 * [Unity Converters for Newtonsoft.Json](https://github.com/jilleJr/Newtonsoft.Json-for-Unity.Converters) to fix some Unity Json Serialization issues. 
-* [LINQ to Game Object](https://github.com/neuecc/LINQ-to-GameObject-for-Unity), include **LINQ-to-GameObject** on define symbols.
-* [EasyButtons](https://openupm.com/packages/com.madsbangh.easybuttons/), include **EasyButtons** on define symbols.
-* [DOTween](https://assetstore.unity.com/packages/tools/animation/dotween-hotween-v2-27676), include **DOTween** on define symbols.
-* [Chronos - Time control](https://ludiq.io/chronos), include **LUDIQ_CHRONOS** on define symbols.
-* Unity Addressables system (install via package manager), include **UnityAddressables** on define symbols.
-* Unity Localization system (install via package manager), include **UnityLocalization** on define symbols.
-* Cinemachine (install via package manager), include **Cinemachine** on define symbols.
+* [DOTween](https://assetstore.unity.com/packages/tools/animation/dotween-hotween-v2-27676), include **DOTWEEN** on define symbols.
+* Unity Addressables system (install via package manager), include **UNITY_ADDRESSABLES_EXIST** on define symbols.
 * [FMOD](https://www.fmod.com) (for audio processing), include **FMOD** on define symbols.
-* [UniTask](https://github.com/Cysharp/UniTask), include **UniTask** on define symbols.
-* [Rewired](https://assetstore.unity.com/packages/tools/utilities/rewired-21676) for input handling, **Rewired** on define symbols.
+* [Rewired](https://assetstore.unity.com/packages/tools/utilities/rewired-21676) for input handling, **REWIRED** on define symbols.
 
 ### Contribution guidelines ###
 
@@ -40,7 +34,7 @@ Check more information about my other projects on [my website](https://chrisjogo
 
 ### Who do I talk to? ###
 
-* I am an Unity games and application developer. You can find more info about me and my projects [here](https://chrisjogos.com).
+* I'm an Unity games and application developer. You can find more info about me and my projects [here](https://chrisjogos.com).
 
 ### Special thanks to ###
 

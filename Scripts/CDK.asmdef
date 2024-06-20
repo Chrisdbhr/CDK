@@ -7,10 +7,6 @@
         "LINQtoGameObject",
         "Newtonsoft.Json.UnityConverters",
         "FMODUnity",
-        "Cinemachine",
-        "DynamicBone",
-        "Ludiq.Chronos",
-        "DebugExtension",
         "Unity.Timeline"
     ],
     "includePlatforms": [],
@@ -21,18 +17,20 @@
     "autoReferenced": true,
     "defineConstraints": [],
     "dependencies": [
-        "com.cysharp.r3"
+        "com.cysharp.r3".
+        "com.unity.nuget.newtonsoft-json",
+        "jillejr.newtonsoft.json-for-unity.converters"
     ],
     "versionDefines": [
-        {
-            "name": "com.unity.cinemachine",
-            "expression": "0.0.0",
-            "define": "CINEMACHINE"
-        },
         {
             "name": "com.unity.nuget.newtonsoft-json",
             "expression": "0.0.0",
             "define": "NEWTONSOFT_JSON_FOR_UNITY"
+        },
+        {
+            "name": "com.unity.addressables",
+            "expression": "0.0.0",
+            "define": "UNITY_ADDRESSABLES_EXIST"
         }
     ],
     "noEngineReferences": false
