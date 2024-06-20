@@ -18,10 +18,14 @@ Check more information about my other projects on [my website](https://chrisjogo
 
 #### Required
 * [R3](https://github.com/Cysharp/R3) for reactive functions.
-	* Insert this line in the Unity **Packages/manifest.json** file: 
-	```
-	"com.cysharp.r3" : "https://github.com/Cysharp/R3.git?path=src/R3.Unity/Assets/R3.Unity"
-	```
+	* Install the `R3.Unity` package by referencing the git URL
+
+		`https://github.com/Cysharp/R3.git?path=src/R3.Unity/Assets/R3.Unity`
+		![image](https://github.com/Cysharp/ZLogger/assets/46207/7325d266-05b4-47c9-b06a-a67a40368dd2)
+		![image](https://github.com/Cysharp/ZLogger/assets/46207/29bf5636-4d6a-4e75-a3d8-3f8408bd8c51)
+	
+		More details of this package [here](https://github.com/Cysharp/R3?tab=readme-ov-file#unity)
+
 #### Optional
 * [Newtonsoft-Json](https://docs.unity3d.com/Packages/com.unity.nuget.newtonsoft-json@3.0/manual/index.html), include **NEWTONSOFT_JSON_FOR_UNITY** on define symbols.
 * [Unity Converters for Newtonsoft.Json](https://github.com/jilleJr/Newtonsoft.Json-for-Unity.Converters) to fix some Unity Json Serialization issues. 
