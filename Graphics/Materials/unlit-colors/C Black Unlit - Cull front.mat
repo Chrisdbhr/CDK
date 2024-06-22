@@ -20,7 +20,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: C Black Unlit
+  m_Name: C Black Unlit - Cull front
   m_Shader: {fileID: 4800000, guid: 18433c9c45a9421796ed56a2c159e027, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
@@ -162,7 +162,7 @@ Material:
     - _DistortionSrcBlend: 1
     - _DistortionVectorBias: -1
     - _DistortionVectorScale: 2
-    - _DoubleSided: 2
+    - _DoubleSided: 1
     - _DoubleSidedEnable: 0
     - _DoubleSidedGIMode: 0
     - _DstBlend: 0
