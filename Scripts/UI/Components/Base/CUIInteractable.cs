@@ -22,9 +22,7 @@ namespace CDK.UI {
 		#if FMOD
         private EventInstance _soundEventInstance;
 		#endif
-        private CGameSettings _gameSettings;
-        protected CUINavigationManager _navigationManager;
-       
+
         protected readonly CompositeDisposable _disposeOnDisable = new CompositeDisposable();
         protected readonly CompositeDisposable _disposeOnDestroy = new CompositeDisposable();
 
@@ -35,10 +33,7 @@ namespace CDK.UI {
         
         #region <<---------- Mono Behaviour ---------->>
 
-        protected virtual void Awake() {
-            this._gameSettings = CGameSettings.get;
-            this._navigationManager = CUINavigationManager.get;
-        }
+        protected virtual void Awake() { }
 
         protected virtual void OnEnable() { }
         
@@ -71,7 +66,7 @@ namespace CDK.UI {
 		public virtual void Selected(bool playSound = true) {
 			if(this._debug) Debug.Log($"Selected: CUIInteractable '{this.gameObject.name}'", this);
 			#if FMOD
-			if(playSound) this.PlaySound(this._gameSettings.SoundSelect);	
+			if(playSound) this.PlaySound(CGameSettings.get.SoundSelect);
 			#endif
 		}
 
@@ -79,7 +74,7 @@ namespace CDK.UI {
 			if(this._debug) Debug.Log($"SUBMIT: CUIInteractable '{this.gameObject.name}'", this);
 			#if FMOD
             if (!(this is CUIButton b && !b.Button.interactable)) {
-                this.PlaySound(this._gameSettings.SoundSubmit);
+                this.PlaySound(CGameSettings.get.SoundSubmit);
             }
 			#endif
 		}
@@ -87,7 +82,7 @@ namespace CDK.UI {
 		public virtual void Canceled() {
 			if(this._debug) Debug.Log($"CANCEL: CUIInteractable '{this.gameObject.name}'", this);
 			#if FMOD
-			this.PlaySound(this._gameSettings.SoundCancel);
+			this.PlaySound(CGameSettings.get.SoundCancel);
 			#endif
 		}
 		
@@ -105,7 +100,7 @@ namespace CDK.UI {
 		
 		public void OnCancel(BaseEventData eventData) {
 			if (!this.gameObject.activeInHierarchy) return;
-            if (this._navigationManager.CloseLastMenu(true)) {
+            if (CUINavigationManager.get.CloseLastMenu(true)) {
                 this.Canceled();
             }
         }
