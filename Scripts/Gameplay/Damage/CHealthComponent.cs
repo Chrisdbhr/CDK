@@ -8,7 +8,7 @@ namespace CDK {
 	/// <summary>
 	/// Makes something have health, can be hit and die.
 	/// </summary>
-	public class CHealthComponent : MonoBehaviour {
+	public class CHealthComponent : MonoBehaviour, ICDamageable {
 
 		#region <<---------- Properties and Fields ---------->>
 	
@@ -42,6 +42,9 @@ namespace CDK {
 		public float MaxHealth {
 			get {
 				return this._maxHealth;
+			}
+			set {
+				_maxHealth = Mathf.Max(0f, value);
 			}
 		}
 		
@@ -125,7 +128,7 @@ namespace CDK {
 		[SerializeField] private CUnityEventBool _isAliveEvent;
 		
 		public event Action<float> OnHealthChanged;
-		public event Action<float, CHitInfoData> OnDamageTaken;
+		public event Action<float, CHitInfoData, Transform> OnDamageTaken;
 		public event Action<float> OnRecoverHealth;
 		public event Action OnDie;
 
@@ -188,19 +191,25 @@ namespace CDK {
             CurrentHealth = 0f;
         }
 
+        public void RecoverHealth(float recoverAmount) {
+	        this.CurrentHealth += recoverAmount;
+        }
+
+        #region ICDamageable
+
 		/// <summary>
-		/// Returns the amount of damage taken.
+		/// Returns the amount of damage taken. If the target is already dead, returns 0. If the damage is bigger than the health before, returns the health before.
 		/// </summary>
-		public float TakeDamage(CHitInfoData hitInfo, float damageMultiplier) {
+		public float TakeHit(CHitInfoData attack, Transform attacker, float damageMultiplier) {
 			if (this.IsDead) return 0f;
 			if (this._immuneTimer > 0f) return 0f;
-			var hitScriptObj = hitInfo.ScriptableObject;
-			if (hitScriptObj.Damage <= 0f) return 0f;
+			var hitScriptObj = attack;
+			if (hitScriptObj.RawDamage <= 0f) return 0f;
 
-			this._lastAttacker = hitInfo.AttackerTransform;
+			this._lastAttacker = attacker;
 
 			// Start total damage calculation.
-			float finalDamage = hitScriptObj.Damage * damageMultiplier;
+			float finalDamage = hitScriptObj.RawDamage * damageMultiplier;
 			
 			//todo calculate armor damage reduction
 			//todo calculate damage bonus
@@ -208,33 +217,34 @@ namespace CDK {
 			//todo play damage animation if apply
 
 			if (hitScriptObj.LookAtAttacker) {
-				this._transform.LookAt(hitInfo.AttackerTransform.transform);
+				this._transform.LookAt(attacker);
 				this._transform.eulerAngles = new Vector3(0f, this._transform.eulerAngles.y, 0f);
 			}
 
-			this.CurrentHealth -= finalDamage;
+			if (finalDamage >= this._currentHealth) {
+				finalDamage = this._currentHealth;
+				this.CurrentHealth = 0f;
+			}
+			else this.CurrentHealth -= finalDamage;
+
 			if (finalDamage > 0f) {
-				this.OnDamageTaken?.Invoke(finalDamage, hitInfo);
+				this.OnDamageTaken?.Invoke(finalDamage, attack, attacker);
 				this.TokeDamageEvent?.Invoke();
 			}
 
 			// camera shake
-			if (this._transformShake != null && hitInfo.AttackerTransform != null) {
+			if (this._transformShake != null && attacker != null) {
 				this._transformShake.RequestShake(
-					(hitInfo.AttackerTransform.position - this._transform.position).normalized * (finalDamage * 0.01f), 
+					(attacker.position - this._transform.position).normalized * (finalDamage * 0.01f),
 					hitScriptObj.DamageShakePattern,
 					hitScriptObj.ShakeMultiplier
 				);
 			}
 
-			this._lastAttacker = hitInfo.AttackerTransform;
-			
 			return finalDamage;
 		}
 
-		public void RecoverHealth(float recoverAmount) {
-			this.CurrentHealth += recoverAmount;
-		}
+		#endregion ICDamageable
 
 	}
 

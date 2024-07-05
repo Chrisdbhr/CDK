@@ -2,15 +2,16 @@ using System.Collections.Generic;
 using CDK.Damage;
 using CDK.Data;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace CDK {
 	public class CDamageDealerTrigger : MonoBehaviour, ICDamageDealer {
 
 		#region <<---------- Initializers ---------->>
 		
-		public void Initialize(CHitInfoData hitInfo, Transform attackerTransform) {
-			_hitInfo = hitInfo;
-			_hitInfo.AttackerTransform = attackerTransform;
+		public void Initialize(CAttackData attack, float damageMultiplier = 1f) {
+			this.attackData = attack;
+
 		}
 		
 		#endregion <<---------- Initializers ---------->>
@@ -21,8 +22,8 @@ namespace CDK {
 		#region <<---------- Properties and Fields ---------->>
 		
 		[SerializeField] private bool _debug;
-		public CHitInfoData HitInfo => _hitInfo;
-		[SerializeField] private CHitInfoData _hitInfo;
+		public CAttackData AttackData => attackData;
+		[FormerlySerializedAs("attack")] [FormerlySerializedAs("_hitInfo")] [SerializeField] private CAttackData attackData;
 
 		private enum DestroyType {
 			dontDestroy,
@@ -32,6 +33,8 @@ namespace CDK {
 		[SerializeField] private DestroyType _destroyType = DestroyType.onAnyCollisionOrTrigger;
 
 		private List<ICDamageable> _damageds = new List<ICDamageable>();
+
+		[Min(0.01f)] public float DamageMultiplier = 1f;
 		
 		#endregion <<---------- Properties and Fields ---------->>
 
@@ -84,10 +87,10 @@ namespace CDK {
 			}
 
 			if (_destroyType == DestroyType.dontDestroy) {
-				damageable.TakeHit(_hitInfo);
+				damageable.TakeHit(attackData.data, attackData.AttackerTransform, DamageMultiplier);
 			} else if (!_damageds.Contains(damageable)) {
 				_damageds.Add(damageable);
-				damageable.TakeHit(_hitInfo);
+				damageable.TakeHit(attackData.data, attackData.AttackerTransform, DamageMultiplier);
 				if (_destroyType == DestroyType.onlyIfDidDamage) {
 					this.gameObject.CDestroy();
 				}

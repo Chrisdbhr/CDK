@@ -14,7 +14,7 @@ namespace CDK {
 		#region <<---------- Properties and Fields ---------->>
 		
 		// References
-		[NonSerialized] private CHitInfoData _lastHitInfoData;
+		[NonSerialized] private CHitInfoData _lastAttackData;
 		[NonSerialized] private CHealthComponent _health;
 		
 		// Animation
@@ -119,9 +119,9 @@ namespace CDK {
 		
 		#region <<---------- Callbacks ---------->>
 		
-		private void DamageTake(float dmgAmount, CHitInfoData hitInfo) {
+		private void DamageTake(float dmgAmount, CHitInfoData attack, Transform attacker) {
 			this.StunProgress += dmgAmount;
-			this._lastHitInfoData = hitInfo;
+			this._lastAttackData = attack;
 		}
 
 		private void Revived() {

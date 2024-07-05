@@ -1,14 +1,15 @@
 using System;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace CDK {
 	[CreateAssetMenu(fileName = "Hit info", menuName = CConst.EDITOR_SCRIPTABLEOBJECT_CREATION_PREFIX + "Hit info data", order = 51)]
-	public class CHitInfoScriptableObject : ScriptableObject {
+	public class CHitInfoData : ScriptableObject {
 		
-		public float Damage {
-			get { return this._damage; }
+		public float RawDamage {
+			get { return this.rawDamage; }
 		}
-		[SerializeField] private float _damage = 1f;
+		[FormerlySerializedAs("_damage")] [SerializeField] private float rawDamage = 1f;
 
 		public bool LookAtAttacker {
 			get { return this._lookAtAttacker; }

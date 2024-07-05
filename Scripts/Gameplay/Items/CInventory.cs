@@ -233,7 +233,7 @@ namespace CDK {
 				Debug.Log($"Cant fire gun because its has no more ammo.");
 				return null;
 			}
-			float damage = ((CAmmoScriptableObject) this.EquippedWeapon.EquippedAmmoData.GetScriptableObject()).HitInfo.ScriptableObject.Damage;
+			float damage = ((CAmmoScriptableObject) this.EquippedWeapon.EquippedAmmoData.GetScriptableObject()).AttackData.data.RawDamage;
 
 			this._onAttackRecoilEvent?.Invoke(damage * 0.1f);
 			

@@ -1,10 +1,11 @@
 using CDK.Data;
+using UnityEngine;
 
 namespace CDK.Damage {
 	public interface ICDamageable {
 		/// <summary>
-		/// Returns TRUE if died.
+		/// Returns the amount of final damage taken.
 		/// </summary>
-		bool TakeHit(CHitInfoData hitInfo, float damageMultiplier = 1f);
+		float TakeHit(CHitInfoData attack, Transform attackerTransform, float damageMultiplier = 1f);
 	}
 }

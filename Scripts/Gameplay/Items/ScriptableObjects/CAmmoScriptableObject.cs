@@ -1,14 +1,15 @@
 using CDK.Damage;
 using CDK.Data;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace CDK {
 	[CreateAssetMenu(fileName = "ammo_", menuName = CConst.EDITOR_SCRIPTABLEOBJECT_CREATION_PREFIX + "Ammo data", order = 51)]
 	public class CAmmoScriptableObject : CItemBaseScriptableObject, ICDamageDealer {
-		public CHitInfoData HitInfo {
-			get { return this.hitInfo; }
+		public CAttackData AttackData {
+			get { return this.attackData; }
 		}
-		[SerializeField] private CHitInfoData hitInfo;
+		[FormerlySerializedAs("attack")] [FormerlySerializedAs("hitInfo")] [SerializeField] private CAttackData attackData;
 
 		public CAmmoType CAmmoType {
 			get { return this._ammoType; }
