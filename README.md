@@ -30,7 +30,6 @@ Check more information about my other projects on [my website](https://chrisjogo
 ### Contribution guidelines ###
 
 * Fell free to open a pull request for fixes or new versions.
-* Please follow some code conventions like using "**this.**" on variables even though its not mandatory.
 
 ### Who do I talk to? ###
 
