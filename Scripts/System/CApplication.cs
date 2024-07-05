@@ -77,7 +77,7 @@ namespace CDK {
             }
             
             QualitySettings.vSyncCount = 1;
-            Application.targetFrameRate = isMobile ? 30 : 60;
+            Application.targetFrameRate = isMobile ? 30 : -1;
             Application.backgroundLoadingPriority = ThreadPriority.Low;
         }
 
@@ -203,6 +203,17 @@ namespace CDK {
         public static void OpenURL(string urlToOpen) {
             Debug.Log($"Requested to open url {urlToOpen}");
             Application.OpenURL(urlToOpen);
+        }
+
+        public static int GetRefreshRateOrFallback() {
+            const int fallback = 60;
+            try {
+                return Mathf.Max(fallback, (int)Screen.currentResolution.refreshRateRatio.value);
+            }
+            catch (Exception e) {
+                Debug.LogError(e);
+            }
+            return fallback;
         }
     }
 }
