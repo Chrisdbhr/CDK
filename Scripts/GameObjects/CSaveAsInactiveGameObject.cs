@@ -9,10 +9,9 @@ using UnityEditor.SceneManagement;
 namespace CDK {
 	[ExecuteInEditMode]
 	public class CSaveAsInactiveGameObject : MonoBehaviour {
-		
-#if UNITY_EDITOR
-		
-		private void Awake() {
+
+		#if UNITY_EDITOR
+		void Awake() {
 			if (Application.isPlaying) return;
 			EditorSceneManager.sceneSaving += EditorSceneManagerOnSceneSaving; 
 			EditorApplication.playModeStateChanged += EditorApplicationOnPlayModeStateChanged;
@@ -49,7 +48,6 @@ namespace CDK {
             go.SetActive(false);
 			Debug.Log($"Saving '{this.name}' as inactive game object in '{go.scene.name}'");
 		}
-		
 		#endif
 	}
 }

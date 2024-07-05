@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.Events;
 
 namespace CDK {
+	[Obsolete("Use "+nameof(CBlockingEventsTrigger)+" instead")]
 	public class CIsPlayingCutsceneTrigger : MonoBehaviour {
 		
 		[SerializeField] private UnityEvent _isPlayingEvent;

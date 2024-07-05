@@ -8,7 +8,7 @@ namespace CDK {
 	public class CRetainable {
 
 		#region <<---------- Properties and Fields ---------->>
-        
+
         public bool IsRetained {
             get {
                 UpdateRetainedState();
@@ -25,8 +25,8 @@ namespace CDK {
 
 		#endregion <<---------- Properties and Fields ---------->>
 
-		
-		
+
+
 
 		#region <<---------- Initializers ---------->>
 
@@ -36,14 +36,14 @@ namespace CDK {
             this._retainedObjects = new List<object>();
 			this._isRetainedRx = new ReactiveProperty<bool>();
         }
-		
+
 		#endregion <<---------- Initializers ---------->>
-		
-		
-		
-		
+
+
+
+
 		#region <<---------- General ---------->>
-		
+
 		public void Retain(object source) {
             if (this._retainedObjects.Contains(source)) return;
             this._retainedObjects.Add(source);
@@ -77,7 +77,7 @@ namespace CDK {
             }
             this._isRetainedRx.Value = _retainedObjects.Count > 0;
         }
-        
+
         #endregion <<---------- General ---------->>
 
 

@@ -1,5 +1,6 @@
 ﻿using R3;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace CDK {
     public class CBlockingEventsTrigger : MonoBehaviour {
@@ -14,6 +15,7 @@ namespace CDK {
         [SerializeField] private CUnityEventBool NotOnMenuEvent;
         [SerializeField] private CUnityEventBool NotPlayingCutsceneEvent;
         [SerializeField] private CUnityEventBool NotLimitingPlayerActionsEvent;
+        [FormerlySerializedAs("NotOnMenuOrNotPlayingCutsceneEvent")] [SerializeField] private CUnityEventBool NotOnMenuAndNotPlayingCutsceneEvent;
 
         CompositeDisposable _disposables;
 
@@ -45,6 +47,7 @@ namespace CDK {
             NotOnMenuEvent.Invoke(!isOnMenu);
             NotPlayingCutsceneEvent.Invoke(!isPlayingCutscene);
             NotLimitingPlayerActionsEvent.Invoke(!limitPlayerActions);
+            NotOnMenuAndNotPlayingCutsceneEvent.Invoke(!isOnMenu && !isPlayingCutscene);
         }
 
         private void OnDestroy() {
