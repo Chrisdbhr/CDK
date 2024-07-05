@@ -1,10 +1,6 @@
 using CDK.UI;
 using UnityEngine;
 
-#if DOTWEEN
-using DG.Tweening;
-#endif
-
 namespace CDK.Interaction {
 	public class CInteractable : MonoBehaviour, ICInteractable {
 
