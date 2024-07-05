@@ -12,7 +12,7 @@ namespace CDK {
 
         #region <<---------- Initializers ---------->>
 
-        public CGameProgressBase(string name = null, bool isAutoInitialized = false) {
+        protected CGameProgressBase(string name = null, bool isAutoInitialized = false) {
             this.WasLoadedAutomatically = isAutoInitialized;
             this.SaveIdentifier = Guid.NewGuid().ToString();
             if (!name.CIsNullOrEmpty()) this.SaveDescriptiveName = name;
@@ -175,9 +175,29 @@ namespace CDK {
 
         #endregion <<---------- Loading ---------->>
 
+
+
+
+        #region Deleting
+
+        public bool DeleteSave() {
+            try {
+                var filePath = GetGameProgressFilePath(this.SaveIdentifier);
+                if (!File.Exists(filePath)) return false;
+                File.Delete(filePath);
+                return true;
+            }
+            catch (Exception e) {
+                Debug.LogException(e);
+            }
+            return false;
+        }
+
+        #endregion Deleting
+
         
-        
-        
+
+
         #region <<---------- Paths ---------->>
 
         public static string GetGameProgressFolder() {
@@ -199,16 +219,18 @@ namespace CDK {
 
         #region <<---------- General ---------->>
 
-        private static void CheckForModifiedFile<T>(T dataT) {
-            if (!(dataT is CGameProgressBase data)) return;
+        public static bool CheckForModifiedFile<T>(T dataT) {
+            if (!(dataT is CGameProgressBase data)) return true;
             var originalHash = data.SaveHash;
             data.SaveHash = string.Empty;
             var newHash = Animator.StringToHash(data.GetSerializedJson()).ToString();
             if (originalHash != newHash) {
                 Debug.Log($"Save file '{data.SaveIdentifier}' was modified externally!");
                 _onNotifyForExternalModifiedSaveFile?.Invoke();
+                return true;
             }
             data.SaveHash = originalHash;
+            return false;
         }
 
         #endregion <<---------- General ---------->>
