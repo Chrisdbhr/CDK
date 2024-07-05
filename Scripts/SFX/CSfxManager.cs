@@ -24,6 +24,14 @@ namespace CDK.SFX {
             _sfxInstances = new();
         }
 
+        public ParticleSystem PlaySfx(ParticleSystem key, Transform target) {
+            if (target == null) {
+                Debug.LogError("Tried to play sfx on a null target! Playing on Vector3.zero instead.");
+                return PlaySfx(key, Vector3.zero);
+            }
+            return PlaySfx(key, target.position, target.rotation);
+        }
+
         public ParticleSystem PlaySfx(ParticleSystem key, Vector3 position, Quaternion rotation = default) {
             ParticleSystem part;
             if (!_sfxInstances.TryGetValue(key, out part) || part == null) {
