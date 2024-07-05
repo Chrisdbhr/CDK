@@ -53,5 +53,10 @@ namespace CDK {
             return c;
         }
 
+        public static void CDestroyGameObject<T>(this T value, bool shouldLog = false, float time = 0f) where T : Component {
+            if (value == null) return;
+            value.gameObject.CDestroy(shouldLog, time);
+        }
+
     }
 }
