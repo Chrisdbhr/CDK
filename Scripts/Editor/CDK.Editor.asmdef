@@ -6,7 +6,9 @@
       "FMODUnity",
       "Unity.Localization",
       "Unity.Localization.Editor",
-      "CDK"
+      "CDK",
+      "Unity.Timeline",
+      "Unity.Timeline.Editor"
     ],
     "includePlatforms": [
         "Editor"

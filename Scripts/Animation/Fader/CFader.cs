@@ -1,82 +1,78 @@
 using System;
-using R3;
 using UnityEngine;
 using UnityEngine.UI;
 using Object = UnityEngine.Object;
 
 namespace CDK {
-	public class CFader {
+	[Obsolete("Use Fader on timeline instead")]
+	public class CFader : MonoBehaviour {
 
         #region <<---------- Singleton ---------->>
 
-        public static CFader get {
+        public static CFader Instance {
             get {
-                if (CSingletonHelper.CannotCreateAnyInstance() || _instance != null) return _instance;
-                return _instance = new CFader();
+                if (CApplication.IsQuitting || _instance != null) return _instance;
+                var go = new GameObject("Fader");
+                #if UNITY_EDITOR
+                go.hideFlags = HideFlags.DontSaveInEditor;
+                #endif
+                return _instance = go.AddComponent<CFader>();
             }
         }
-        private static CFader _instance;
-        
+        static CFader _instance;
+
         #endregion <<---------- Singleton ---------->>
 
-        
-        
-        
+
+
+
 		#region <<---------- Properties ---------->>
 		
-		private CanvasGroup _fadeCanvasGroup;
-		private float TargetAlpha;
-		private float TargetFadeTime;
-		private bool IgnoreTimeScale;
+		CanvasGroup _fadeCanvasGroup;
+		float TargetAlpha;
+		float TargetFadeTime;
+		bool IgnoreTimeScale;
 		
 		#endregion <<---------- Properties ---------->>
 
 		
 		
 		
-		#region <<---------- Initializers ---------->>
-		
-		public CFader() {
-			var parentGo = new GameObject("FadeCanvas");
-			parentGo.layer = 5; // UI
-			Object.DontDestroyOnLoad(parentGo);
+		#region <<---------- MonoBehaviour ---------->>
+
+		void Awake() {
+			if (_instance != null && _instance != this) {
+				gameObject.CDestroy(true);
+				return;
+			}
+			gameObject.layer = 5; // UI
+			gameObject.CDontDestroyOnLoad();
 
 			// canvas
-			var goCanvas = parentGo.AddComponent<Canvas>();
+			var goCanvas = gameObject.AddComponent<Canvas>();
 			goCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
 			goCanvas.sortingOrder = -1;
 			try {
 				goCanvas.sortingLayerID++;
 			} catch (Exception e) {
-				Console.WriteLine(e);
+				Debug.LogException(e);
 			}
-			
+
 			// canvas group
-			this._fadeCanvasGroup = parentGo.AddComponent<CanvasGroup>();
+			this._fadeCanvasGroup = gameObject.AddComponent<CanvasGroup>();
 			this._fadeCanvasGroup.blocksRaycasts = false;
 			this._fadeCanvasGroup.interactable = false;
-			
-			var goImg = new GameObject("Black Image");
-			goImg.layer = 5; // UI
-			goImg.transform.SetParent(goCanvas.transform);
-			var imgComp = goImg.AddComponent<Image>();
+
+			// image black
+			var imgComp = gameObject.AddComponent<Image>();
 			imgComp.color = Color.black;
 			imgComp.maskable = false;
 			imgComp.raycastTarget = false;
-			var imgRect = goImg.GetComponent<RectTransform>();
-			imgRect.anchorMin = Vector2.zero;
-			imgRect.anchorMax = Vector2.one;
-			imgRect.sizeDelta = Vector2.zero;
-			imgRect.anchoredPosition = Vector2.zero;
-
-			Observable.EveryUpdate().
-            Subscribe(_ => {
-				this.UpdateOpacity();
-			})
-            .AddTo(parentGo);
 		}
-		
-		#endregion <<---------- Initializers ---------->>
+
+		void Update() => UpdateOpacity();
+
+		#endregion <<---------- MonoBehaviour ---------->>
 		
 		
 		
@@ -105,7 +101,7 @@ namespace CDK {
                 return;
             }
             float currentAlpha = this._fadeCanvasGroup.alpha.CImprecise();
-			if (this.TargetAlpha == currentAlpha) return;
+			if (Mathf.Approximately(this.TargetAlpha, currentAlpha)) return;
 			float delta = this.IgnoreTimeScale ? Time.unscaledDeltaTime : CTime.DeltaTimeScaled;
 			float step = delta / this.TargetFadeTime;
 			if (currentAlpha > this.TargetAlpha) step *= -1f;
@@ -129,6 +125,5 @@ namespace CDK {
 
         #endregion <<---------- Debug ---------->>
 
-		
 	}
 }
