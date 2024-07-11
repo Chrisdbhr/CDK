@@ -7,7 +7,9 @@
         "LINQtoGameObject",
         "Newtonsoft.Json.UnityConverters",
         "FMODUnity",
-        "Unity.Timeline"
+        "Unity.Timeline",
+        "Unity.Timeline.Editor",
+        "Reflex"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
@@ -31,6 +33,11 @@
             "name": "com.unity.addressables",
             "expression": "0.0.0",
             "define": "UNITY_ADDRESSABLES_EXIST"
+        },
+        {
+            "name": "com.unity.cinemachine",
+            "expression": "0.0.0",
+            "define": "CINEMACHINE"
         }
     ],
     "noEngineReferences": false

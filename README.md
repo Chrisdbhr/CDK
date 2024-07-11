@@ -18,6 +18,7 @@ Check more information about my other projects on [my website](https://chrisjogo
 
 #### Required
 * [R3](https://github.com/Cysharp/R3) for reactive functions, instructions of how to install this package [here](https://github.com/Cysharp/R3?tab=readme-ov-file#unity)
+* [Reflex](https://github.com/gustavopsantos/Reflex) for Dependency Injection, instructions of how to install this package [here](https://github.com/gustavopsantos/Reflex?tab=readme-ov-file#-installation)
 
 #### Optional
 * [Newtonsoft-Json](https://docs.unity3d.com/Packages/com.unity.nuget.newtonsoft-json@3.0/manual/index.html), include **NEWTONSOFT_JSON_FOR_UNITY** on define symbols.
