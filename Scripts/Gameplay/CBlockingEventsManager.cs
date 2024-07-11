@@ -4,60 +4,41 @@ using R3;
 using UnityEngine;
 
 namespace CDK {
-	public class CBlockingEventsManager {
-
-        #region <<---------- Singleton ---------->>
-
-        public static CBlockingEventsManager get {
-            get {
-                if (CSingletonHelper.CannotCreateAnyInstance() || _instance != null) return _instance;
-                return (_instance = new CBlockingEventsManager());
-            }
-        }
-        private static CBlockingEventsManager _instance;
-
-        #endregion <<---------- Singleton ---------->>
-
-        
-        
+	public class CBlockingEventsManager : IDisposable {
 
 		#region <<---------- Initializers ---------->>
 		
-		private CBlockingEventsManager() {
+		public CBlockingEventsManager() {
             this._disposables?.Dispose();
             this._disposables = new CompositeDisposable();
 
 			// on menu
 			this.OnMenuRetainable = new CRetainable();
 			this.OnMenuRetainable.IsRetainedAsObservable().Subscribe(onMenu => {
-				Debug.Log($"<color={"#4fafb6"}>{nameof(onMenu)}: {onMenu}</color>");
+				Debug.Log($"<color={"#4fafb6"}>{nameof(onMenu)}: <b>{onMenu}</b></color>");
 			})
             .AddTo(this._disposables);
 			
 			// playing cutscene
 			this.PlayingCutsceneRetainable = new CRetainable();
 			this.PlayingCutsceneRetainable.IsRetainedAsObservable().Subscribe(isPlayingCutscene => {
-				Debug.Log($"<color={"#cc5636"}>{nameof(isPlayingCutscene)}: {isPlayingCutscene}</color>");
+				Debug.Log($"<color={"#cc5636"}>{nameof(isPlayingCutscene)}: <b>{isPlayingCutscene}</b></color>");
 			})
             .AddTo(this._disposables);
 
-            // limit player actions
-            this.LimitPlayerActionsRetainable = new CRetainable();
-            this.LimitPlayerActionsRetainable.IsRetainedAsObservable().Subscribe(isLimitingPlayerActions => {
-                //Debug.Log($"<color={"#bb91ff"}>{nameof(isLimitingPlayerActions)}: {isLimitingPlayerActions}</color>");
-            })
-            .AddTo(this._disposables);
-            
 			// blocking Event Happening
             this._isAnyHappeningRx = new ReactiveProperty<bool>();
 			Observable.CombineLatest(
 			    this.OnMenuRetainable.IsRetainedAsObservable(),
-			    this.PlayingCutsceneRetainable.IsRetainedAsObservable(),
-                this.LimitPlayerActionsRetainable.IsRetainedAsObservable())
+			    this.PlayingCutsceneRetainable.IsRetainedAsObservable())
 			.Subscribe(blockingEventHappening => {
 				this._isAnyHappeningRx.Value = blockingEventHappening.Any(b=>b);
 			})
             .AddTo(this._disposables);
+		}
+
+		~CBlockingEventsManager() {
+			Dispose();
 		}
 
 		#endregion <<---------- Initializers ---------->>
@@ -69,8 +50,6 @@ namespace CDK {
 
         // --- start Blocking Events
 
-        public bool IsAnyExceptMenu => IsPlayingCutscene || IsLimitingPlayerActions;
-        
 		public bool IsOnMenuOrPlayingCutscene => this.IsPlayingCutscene || this.IsOnMenu;
 
         public bool IsPlayingCutscene => this.PlayingCutsceneRetainable.IsRetained;
@@ -79,9 +58,6 @@ namespace CDK {
         public bool IsOnMenu => this.OnMenuRetainable.IsRetained;
         public CRetainable OnMenuRetainable { get; private set; }
 
-        public bool IsLimitingPlayerActions => this.LimitPlayerActionsRetainable.IsRetained;
-        public CRetainable LimitPlayerActionsRetainable { get; private set; }
-        
         // --- end Blocking Events
 
 
@@ -103,6 +79,12 @@ namespace CDK {
         }
 
         #endregion <<---------- Observables ---------->>
-		
+
+
+        public void Dispose() {
+	        _isAnyHappeningRx?.Dispose();
+	        _disposables?.Dispose();
+        }
+
 	}
 }
