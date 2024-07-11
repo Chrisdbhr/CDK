@@ -1,8 +1,4 @@
-using System;
-using System.Threading.Tasks;
-using R3;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using Object = UnityEngine.Object;
 
 namespace CDK {
@@ -10,13 +6,24 @@ namespace CDK {
 
         #region <<---------- Instantiation ---------->>
 
-        public static T InstantiateAndGetComponent<T>(GameObject prefab, Transform parent = null) {
-            return InstantiateAndGetComponent<T>(prefab, Vector3.zero, Quaternion.identity, parent);
+        public static T CInstantiate<T>(T original, Transform parent = null) where T : Object
+        {
+            return CInstantiate(original, Vector3.zero, Quaternion.identity, parent);
         }
-        
-        public static T InstantiateAndGetComponent<T>(GameObject prefab, Vector3 position, Quaternion rotation, Transform parent = null) {
-            var createdGo = GameObject.Instantiate(prefab, position, rotation, parent);
-            return createdGo == null ? default : createdGo.GetComponent<T>();
+
+        public static T CInstantiate<T>(T original, Vector3 position, Quaternion rotation, Transform parent = null) where T : Object
+        {
+            return Object.Instantiate(original, position, rotation, parent);
+        }
+
+        public static T CInstantiate<T>(this Object source, T original, Transform parent = null) where T : Object
+        {
+            return CInstantiate(source, original, Vector3.zero, Quaternion.identity, parent);
+        }
+
+        public static T CInstantiate<T>(this Object source, T original, Vector3 position, Quaternion rotation, Transform parent = null) where T : Object
+        {
+            return CInstantiate(original, position, rotation, parent);
         }
 
         #endregion <<---------- Instantiation ---------->>
@@ -50,64 +57,13 @@ namespace CDK {
         }
         
         /// <summary>
-        /// Load a Resource from the Resources folder and instantiate it.
+        /// Load a Resource from the Resources folder and instantiate it at zero position and identity quaterion rotation.
         /// </summary>
         public static T LoadResourceAndInstantiate<T>(string address, Transform parent = null) where T : UnityEngine.Component {
-            if (!Application.isPlaying) {
-                Debug.LogError($"Will not load from resources because application is not playing.");
-                return null;
-            }
-            var resource = Resources.Load<GameObject>(address);
-            if (resource == null) {
-                Debug.LogError($"Could not {nameof(LoadResourceAndInstantiate)} from key '{address}'");
-                return null;
-            }
-            return Object.Instantiate(resource, parent).GetComponent<T>();
+            return LoadResourceAndInstantiate<T>(address, Vector3.zero, Quaternion.identity, parent);
         }
         
         #endregion <<---------- Load From Resources ---------->>
-
-
-        
-
-        #region <<---------- Load From Holder Scene ---------->>
-
-        public static async Task<T> LoadFromHolderSceneAsync<T>(string sceneName, bool setObjectAsDontDestroy = false) where T : Component {
-            var activeScene = SceneManager.GetActiveScene();
-            var asyncOp = SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive);
-            await asyncOp;
-            var loadedScene = SceneManager.GetSceneByName(sceneName);
-            var rootGameObjects = loadedScene.GetRootGameObjects();
-            if (rootGameObjects == null || rootGameObjects.Length <= 0) {
-                Debug.LogError($"No objects inside scene: '{sceneName}'");
-                await SceneManager.UnloadSceneAsync(sceneName);
-                return default;
-            }
-            if (rootGameObjects.Length > 1) {
-                Debug.LogError($"A holder scene should not have more than 1 root object ({sceneName})");
-            }
-
-            var go = rootGameObjects[0];
-
-            if (!go.TryGetComponent<T>(out var comp)) {
-                Debug.LogError($"Could not find Object '{nameof(T)}' from scene '{sceneName}'");
-                await SceneManager.UnloadSceneAsync(sceneName);
-                return default;
-            }
-
-            if (setObjectAsDontDestroy) {
-                Object.DontDestroyOnLoad(go);
-            }
-            else if(SceneManager.GetActiveScene() == activeScene) {
-                SceneManager.MoveGameObjectToScene(go, activeScene);
-            }
-            
-            await SceneManager.UnloadSceneAsync(sceneName);
-  
-            return comp;
-        } 
-
-        #endregion <<---------- Load From Holder Scene ---------->>
 
 
 
