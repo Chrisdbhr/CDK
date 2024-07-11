@@ -21,13 +21,13 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: AreaOfEffect_Red
-  m_Shader: {fileID: 4800000, guid: d89eb388dc0440f4aa12e7746ad105c2, type: 3}
+  m_Shader: {fileID: -6465566751694194690, guid: 64d4184ea8f98a043bb6dc0f38ca6bf0, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
   m_InvalidKeywords: []
   m_LightmapFlags: 0
-  m_EnableInstancingVariants: 1
+  m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
   m_CustomRenderQueue: -1
   stringTagMap: {}
@@ -94,6 +94,7 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
+    - _1: 1
     - _AlphaClip: 0
     - _BUILTIN_QueueControl: 0
     - _BUILTIN_QueueOffset: 0
@@ -106,11 +107,14 @@ Material:
     - _DetailAlbedoMapScale: 1
     - _DetailNormalMapScale: 1
     - _Distance: 1
+    - _Dither: 1.3
     - _DstBlend: 0
     - _EnvironmentReflections: 1
+    - _Factor: 0.47
     - _GlossMapScale: 0
     - _Glossiness: 0
     - _GlossyReflections: 1
+    - _Invert: 1
     - _Metallic: 0
     - _Mode: 0
     - _OcclusionStrength: 1
@@ -123,6 +127,7 @@ Material:
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 0
     - _SrcBlend: 1
+    - _Strength: 1
     - _Surface: 0
     - _UVSec: 0
     - _WorkflowMode: 1
@@ -130,7 +135,7 @@ Material:
     - __dirty: 0
     m_Colors:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
-    - _Color: {r: 1, g: 0.31603742, b: 0.31603742, a: 1}
+    - _Color: {r: 1, g: 0.31603736, b: 0.31603736, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _SpecColor: {r: 0.2, g: 0.2, b: 0.2, a: 1}
   m_BuildTextureStacks: []
