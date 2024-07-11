@@ -1,5 +1,6 @@
 ﻿using System;
 using R3;
+using Reflex.Attributes;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -7,16 +8,13 @@ namespace CDK {
 	[Obsolete("Use "+nameof(CBlockingEventsTrigger)+" instead")]
 	public class CIsPlayingCutsceneTrigger : MonoBehaviour {
 		
-		[SerializeField] private UnityEvent _isPlayingEvent;
-		[SerializeField] private UnityEvent _isNotPlayingEvent;
-		[SerializeField] private CUnityEventBool _isPlayingTriggerEvent;
-		[SerializeField] private CUnityEventBool _isNotPlayingTriggerEvent;
-		private CBlockingEventsManager _blockingEventsManager;
-        private IDisposable _disposeOnDisable;
+		[SerializeField] UnityEvent _isPlayingEvent;
+		[SerializeField] UnityEvent _isNotPlayingEvent;
+		[SerializeField] CUnityEventBool _isPlayingTriggerEvent;
+		[SerializeField] CUnityEventBool _isNotPlayingTriggerEvent;
+		[Inject] readonly CBlockingEventsManager _blockingEventsManager;
+        IDisposable _disposeOnDisable;
 
-		private void Awake() {
-			this._blockingEventsManager = CBlockingEventsManager.get;
-		}
 
 		private void OnEnable() {
 			this._disposeOnDisable = this._blockingEventsManager.PlayingCutsceneRetainable.IsRetainedAsObservable()

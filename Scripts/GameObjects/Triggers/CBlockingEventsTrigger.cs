@@ -1,57 +1,77 @@
 ﻿using R3;
+using Reflex.Extensions;
 using UnityEngine;
 using UnityEngine.Serialization;
+
+#if ODIN_INSPECTOR
+using Sirenix.OdinInspector;
+#endif
 
 namespace CDK {
     public class CBlockingEventsTrigger : MonoBehaviour {
 
-        [SerializeField] private CUnityEventBool AnyBlockingEvent;
-        [SerializeField] private CUnityEventBool OnMenuOrPlayingCutsceneEvent;
+        #if ODIN_INSPECTOR
+        [FoldoutGroup("Default")]
+        #else
+        [Header("Default")]
+        #endif
+        [SerializeField] CUnityEventBool AnyBlockingEvent;
+        #if ODIN_INSPECTOR
+        [FoldoutGroup("Default")]
+        #endif
+        [SerializeField] CUnityEventBool OnMenuOrPlayingCutsceneEvent;
+
+        #if ODIN_INSPECTOR
+        [FoldoutGroup("Individual")]
+        #else
         [Header("Individual")]
-        [SerializeField] private CUnityEventBool OnMenuEvent;
-        [SerializeField] private CUnityEventBool PlayingCutsceneEvent;
-        [SerializeField] private CUnityEventBool LimitingPlayerActionsEvent;
+        #endif
+        [SerializeField] CUnityEventBool OnMenuEvent;
+        #if ODIN_INSPECTOR
+        [FoldoutGroup("Individual")]
+        #endif
+        [SerializeField] CUnityEventBool PlayingCutsceneEvent;
+
+        #if ODIN_INSPECTOR
+        [FoldoutGroup("Inverted")]
+        #else
         [Header("Inverted")]
-        [SerializeField] private CUnityEventBool NotOnMenuEvent;
-        [SerializeField] private CUnityEventBool NotPlayingCutsceneEvent;
-        [SerializeField] private CUnityEventBool NotLimitingPlayerActionsEvent;
-        [FormerlySerializedAs("NotOnMenuOrNotPlayingCutsceneEvent")] [SerializeField] private CUnityEventBool NotOnMenuAndNotPlayingCutsceneEvent;
+        #endif
+        [SerializeField] CUnityEventBool NotOnMenuEvent;
+        #if ODIN_INSPECTOR
+        [FoldoutGroup("Inverted")]
+        #endif
+        [SerializeField] CUnityEventBool NotPlayingCutsceneEvent;
+        #if ODIN_INSPECTOR
+        [FoldoutGroup("Inverted")]
+        #endif
+        [FormerlySerializedAs("NotOnMenuOrNotPlayingCutsceneEvent")] [SerializeField] CUnityEventBool NotOnMenuAndNotPlayingCutsceneEvent;
 
-        CompositeDisposable _disposables;
+        CBlockingEventsManager b;
 
-        private void Awake() {
-            _disposables = new CompositeDisposable();
-
-            var b = CBlockingEventsManager.get;
-
-            OnBlockingEvent(b.IsOnMenu, b.IsPlayingCutscene, b.IsLimitingPlayerActions);
+        void Awake() {
+            b = this.gameObject.scene.GetSceneContainer().Resolve<CBlockingEventsManager>();
+            OnBlockingEvent(b.IsOnMenu, b.IsPlayingCutscene);
 
             Observable.CombineLatest(
                 b.OnMenuRetainable.IsRetainedAsObservable(),
-                b.PlayingCutsceneRetainable.IsRetainedAsObservable(),
-                b.LimitPlayerActionsRetainable.IsRetainedAsObservable()
+                b.PlayingCutsceneRetainable.IsRetainedAsObservable()
             )
-            .Subscribe(x => OnBlockingEvent(x[0], x[1], x[2]))
-            .AddTo(_disposables);
-
+            .Subscribe(x => OnBlockingEvent(x[0], x[1]))
+            .AddTo(this);
         }
 
-        private void OnBlockingEvent(bool isOnMenu, bool isPlayingCutscene, bool limitPlayerActions) {
-            AnyBlockingEvent.Invoke(isOnMenu || isPlayingCutscene || limitPlayerActions);
+        void OnBlockingEvent(bool isOnMenu, bool isPlayingCutscene) {
+            AnyBlockingEvent.Invoke(isOnMenu || isPlayingCutscene);
             OnMenuOrPlayingCutsceneEvent.Invoke(isOnMenu || isPlayingCutscene);
             OnMenuEvent.Invoke(isOnMenu);
             PlayingCutsceneEvent.Invoke(isPlayingCutscene);
-            LimitingPlayerActionsEvent.Invoke(limitPlayerActions);
 
             // inverted
             NotOnMenuEvent.Invoke(!isOnMenu);
             NotPlayingCutsceneEvent.Invoke(!isPlayingCutscene);
-            NotLimitingPlayerActionsEvent.Invoke(!limitPlayerActions);
             NotOnMenuAndNotPlayingCutsceneEvent.Invoke(!isOnMenu && !isPlayingCutscene);
         }
 
-        private void OnDestroy() {
-            _disposables?.Dispose();
-        }
     }
 }

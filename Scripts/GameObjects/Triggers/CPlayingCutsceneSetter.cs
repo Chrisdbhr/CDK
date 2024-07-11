@@ -1,4 +1,5 @@
 ﻿using System;
+using Reflex.Attributes;
 using UnityEngine;
 
 namespace CDK {
@@ -6,14 +7,11 @@ namespace CDK {
 	public class CPlayingCutsceneSetter : MonoBehaviour {
 
 		[SerializeField] private bool _setOnEnableDisable = true;
-		private CBlockingEventsManager _blockingEventsManager;
+		[Inject] readonly CBlockingEventsManager _blockingEventsManager;
 		
 		
 		
-        
-		private void Awake() {
-			_blockingEventsManager = CBlockingEventsManager.get;
-		}
+
 
 		private void OnEnable() {
 			if (!_setOnEnableDisable) return;
