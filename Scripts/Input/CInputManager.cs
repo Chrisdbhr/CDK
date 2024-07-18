@@ -30,8 +30,10 @@ namespace CDK {
         public CInputManager(Container container) {
 	        blockingEventsManager = container.Resolve<CBlockingEventsManager>();
 	        SetControllerTypeBasedOnPlatform();
+	        #if REWIRED
 	        if (ReInput.isReady) Initialize();
 	        else ReInput.InitializedEvent += Initialize;
+			#endif
         }
 
 
