@@ -7,6 +7,7 @@ Shader "CDK/C Dont Render" {
 
       struct v2f {
           float4 pos : SV_POSITION;
+          float4 depth : TEXCOORD0; // Stores depth
       };
 
       v2f vert ()
