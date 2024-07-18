@@ -2,6 +2,9 @@ using System;
 using System.Collections;
 using System.Threading.Tasks;
 using R3;
+using Reflex.Attributes;
+using Reflex.Extensions;
+using Reflex.Injectors;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
@@ -61,10 +64,9 @@ namespace CDK.UI {
 		protected UnityEvent OnCloseEvent;
 
 		protected CGameSettings _gameSettings;
-		protected CFader _fader;
-		protected CBlockingEventsManager _blockingEventsManager;
-        protected CUINavigationManager _navigationManager;
-        protected CompositeDisposable _disposeOnDisable = new CompositeDisposable();
+		[Inject] protected readonly CBlockingEventsManager _blockingEventsManager;
+		[Inject] protected CUINavigationManager _navigationManager;
+        protected CompositeDisposable _disposeOnDisable;
 
 		#endregion <<---------- Properties and Fields ---------->>
 
@@ -74,11 +76,9 @@ namespace CDK.UI {
 		#region <<---------- MonoBehaviour ---------->>
 
 		protected virtual void Awake() {
+			GameObjectInjector.InjectRecursive(gameObject, gameObject.scene.GetSceneContainer());
 			this._gameSettings = CGameSettings.get;
-			this._blockingEventsManager = CBlockingEventsManager.get;
 			this._canvas = this.GetComponentInChildren<Canvas>(true);
-			this._fader = CFader.get;
-            this._navigationManager = CUINavigationManager.get;
         }
 
 		protected virtual IEnumerator Start() {
@@ -86,7 +86,8 @@ namespace CDK.UI {
         }
 		
 		protected virtual void OnEnable() {
-            this.UpdateEventSystemAndCheckForObjectSelection(this._eventSystem.firstSelectedGameObject);
+			_disposeOnDisable = new CompositeDisposable();
+			this.UpdateEventSystemAndCheckForObjectSelection(this._eventSystem.firstSelectedGameObject);
 
             Observable.TimerFrame(1, 1, UnityFrameProvider.PostLateUpdate)
                 .Subscribe(_ => {

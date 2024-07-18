@@ -1,5 +1,6 @@
 using System;
 using R3;
+using Reflex.Attributes;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -16,8 +17,8 @@ namespace CDK.UI {
        
         #region <<---------- Properties and Fields ---------->>
 
-        [SerializeField] private bool _debug;
-        [SerializeField] private bool _playInteractionSound = true;
+        [SerializeField] bool _debug;
+        [SerializeField] bool _playInteractionSound = true;
         
 		#if FMOD
         private EventInstance _soundEventInstance;
@@ -25,6 +26,7 @@ namespace CDK.UI {
 
         protected readonly CompositeDisposable _disposeOnDisable = new CompositeDisposable();
         protected readonly CompositeDisposable _disposeOnDestroy = new CompositeDisposable();
+        [Inject] protected readonly CUINavigationManager navigationManager;
 
         #endregion <<---------- Properties and Fields ---------->>
 
@@ -100,7 +102,7 @@ namespace CDK.UI {
 		
 		public void OnCancel(BaseEventData eventData) {
 			if (!this.gameObject.activeInHierarchy) return;
-            if (CUINavigationManager.get.CloseLastMenu(true)) {
+            if (navigationManager.CloseLastMenu(true)) {
                 this.Canceled();
             }
         }

@@ -11,7 +11,7 @@ namespace CDK.UI {
             base.Awake();
             this.Button.OnClickAsObservable()
             .Subscribe(_ => {
-                CUINavigationManager.get.OpenMenu(this._menuToOpen, this.GetComponentInParent<CUIViewBase>(), this);
+                navigationManager.OpenMenu(this._menuToOpen, this.GetComponentInParent<CUIViewBase>(), this);
             })
             .AddTo(this._disposeOnDestroy);
         }
