@@ -7,12 +7,14 @@ using UnityEngine.Serialization;
 namespace CDK {
 	public class CHitbox : MonoBehaviour, ICDamageable {
 
-		public CHealthComponent HealthComponent => this._healthToNotify;
-		[SerializeField] private CHealthComponent _healthToNotify;
+		public const float CriticalMultiplier = 1.5f;
+
+		public virtual CHealthComponent Health => this._healthToNotify;
+		[SerializeField] CHealthComponent _healthToNotify;
 		[FormerlySerializedAs("_takeDamageEvent")] [SerializeField] private CUnityEvent _takeHitEvent;
-		[SerializeField] private float _damageMultiplier = 1f;
-		public float DamageMultiplier => _damageMultiplier;
-		
+		public bool IsCriticalHitbox => _isCriticalHitbox;
+		[SerializeField] bool _isCriticalHitbox;
+
 		
 		
 		public event Action<CHitInfoData> OnHit {
@@ -29,15 +31,19 @@ namespace CDK {
 		
 		
 		
-		public float TakeHit(CHitInfoData attack, Transform attacker, float damageMultiplier) {
+		public virtual float TakeHit(CHitInfoData attack, Transform attacker, float damageMultiplier) {
 			this._onHit?.Invoke(attack);
 			float damage = attack.RawDamage;
-			if (this._healthToNotify != null) {
-				damage = this._healthToNotify.TakeHit(attack, attacker, this._damageMultiplier * damageMultiplier);
+			if (this.Health != null) {
+				damage = this.Health.TakeHit(attack, attacker, GetDamageMultiplierForHit(attack) * damageMultiplier);
 			}
 			this._takeHitEvent?.Invoke();
 			return damage;
 		}
-		
+
+		float GetDamageMultiplierForHit(CHitInfoData attack) {
+			if (!attack.CanCritical) return 1f;
+			return _isCriticalHitbox ? CriticalMultiplier : 1f;
+		}
 	}
 }

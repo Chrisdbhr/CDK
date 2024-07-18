@@ -31,7 +31,9 @@ namespace CDK {
 			get { return this._shakeMultiplier; }
 		}
 		[SerializeField] private float _shakeMultiplier = 1f;
-		
+
+		public bool CanCritical => _canCritical;
+		[SerializeField] bool _canCritical = true;
 
 	}
 }

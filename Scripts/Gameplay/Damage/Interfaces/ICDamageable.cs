@@ -3,6 +3,7 @@ using UnityEngine;
 
 namespace CDK.Damage {
 	public interface ICDamageable {
+		public CHealthComponent Health { get; }
 		/// <summary>
 		/// Returns the amount of final damage taken.
 		/// </summary>

@@ -8,10 +8,10 @@ namespace CDK {
 	/// <summary>
 	/// Makes something have health, can be hit and die.
 	/// </summary>
-	public class CHealthComponent : MonoBehaviour, ICDamageable {
+	public class CHealthComponent : CHitbox {
 
 		#region <<---------- Properties and Fields ---------->>
-	
+
 		#region <<---------- References ---------->>
 
 		[SerializeField] private Animator _animator;
@@ -21,22 +21,24 @@ namespace CDK {
 		private Transform _transform;
 		public Transform LastAttacker => this._lastAttacker;
 		private Transform _lastAttacker;
-		
+
 		#endregion <<---------- References ---------->>
 
 
 		#region <<---------- Animations ---------->>
-		
+
 		protected readonly int ANIM_STUN_LIGHT = Animator.StringToHash("lightStun");
 		protected readonly int ANIM_STUN_MEDIUM = Animator.StringToHash("mediumStun");
 		protected readonly int ANIM_STUN_HEAVY = Animator.StringToHash("heavyStun");
 		protected readonly int ANIM_FALLEN = Animator.StringToHash("fallen");
-		
+
 		#endregion <<---------- Animations ---------->>
 
-		
+
 		#region <<---------- Health ---------->>
-		
+
+		public override CHealthComponent Health => this;
+
 		[Header("Health")]
 		[SerializeField] protected float _maxHealth = 3f;
 		public float MaxHealth {
@@ -47,12 +49,12 @@ namespace CDK {
 				_maxHealth = Mathf.Max(0f, value);
 			}
 		}
-		
+
 		public float CurrentHealth {
 			get { return this._currentHealth; }
 			private set {
-				var clampedValue = value.CClamp(0f, this._maxHealth);
-				if (clampedValue == this._currentHealth || clampedValue == this._maxHealth && this._currentHealth == this._maxHealth) return;
+				var clampedValue = value.CClamp(0f, this.MaxHealth);
+				if (clampedValue == this._currentHealth || clampedValue == this.MaxHealth && this._currentHealth == this.MaxHealth) return;
 
 				float oldHealth = this._currentHealth;
 				this._currentHealth = clampedValue;
@@ -64,7 +66,7 @@ namespace CDK {
 
 				this.OnHealthChanged?.Invoke(this._currentHealth);
 				this.HealthChangedAsStringEvent?.Invoke(this._currentHealth.ToString("0"));
-				this.HealthChangedPercentageEvent?.Invoke(this._maxHealth != 0 ? this._currentHealth / this._maxHealth : 0);
+				this.HealthChangedPercentageEvent?.Invoke(this.MaxHealth != 0 ? this._currentHealth / this.MaxHealth : 0);
 
 				if (this._currentHealth > oldHealth) {
 					this.OnRecoverHealth?.Invoke(this._currentHealth);
@@ -72,7 +74,7 @@ namespace CDK {
 				else {
 					this._lastDamageTakenTime = Time.timeSinceLevelLoad;
 				}
-				
+
 				if (this._currentHealth <= 0f) {
 					foreach (var obj in this._unparentOnDie) {
 						obj.parent = null;
@@ -84,18 +86,19 @@ namespace CDK {
 						Destroy(obj.gameObject);
 					}
 					this.OnDie?.Invoke();
+					OnDieEvent?.Invoke();
 					this._isAliveEvent?.Invoke(false);
 				}
 			}
 		}
 		[SerializeField] private float _currentHealth;
 
-		public float CurrentHealthNormalized => this._maxHealth != 0f ? this._currentHealth / this._maxHealth : 0f;
-		
+		public float CurrentHealthNormalized => this.MaxHealth != 0f ? this._currentHealth / this.MaxHealth : 0f;
+
 		public bool IsDead {
 			get { return this._currentHealth <= 0f; }
 		}
-		
+
 		#endregion <<---------- Health ---------->>
 
 
@@ -114,8 +117,8 @@ namespace CDK {
 		private float _immuneTimer;
 
 		#endregion <<---------- Immunity ---------->>
-		
-		
+
+
 		#region <<---------- Events ---------->>
 
 		[SerializeField] private Transform[] _unparentOnDie;
@@ -126,24 +129,25 @@ namespace CDK {
 		[SerializeField] private CUnityEventFloat HealthChangedPercentageEvent;
 		[SerializeField] private CUnityEvent TokeDamageEvent;
 		[SerializeField] private CUnityEventBool _isAliveEvent;
-		
+		[SerializeField] private CUnityEvent OnDieEvent;
+
 		public event Action<float> OnHealthChanged;
 		public event Action<float, CHitInfoData, Transform> OnDamageTaken;
 		public event Action<float> OnRecoverHealth;
 		public event Action OnDie;
 
 		public event Action OnRevive;
-		
+
 		#endregion <<---------- Events ---------->>
-		
+
 		#endregion <<---------- Properties and Fields ---------->>
 
-		
-		
+
+
 
 		#region <<---------- MonoBehaviour ---------->>
-		
-		private void Awake() {
+
+		protected virtual void Awake() {
 			this._transform = this.transform;
 			this.FullCure();
             // regen only one hearth
@@ -168,11 +172,12 @@ namespace CDK {
             .AddTo(this);
 		}
 
-		private void Update() {
+		protected virtual void Update() {
 			if (_immuneTimer > 0f) {
 				_immuneTimer -= CTime.DeltaTimeScaled;
 			}
 		}
+
 		#endregion <<---------- MonoBehaviour ---------->>
 
 
@@ -184,7 +189,7 @@ namespace CDK {
 		}
 
 		public void FullCure() {
-			this.CurrentHealth = this._maxHealth;
+			this.CurrentHealth = this.MaxHealth;
 		}
 
         public void Kill() {
@@ -209,8 +214,9 @@ namespace CDK {
 			this._lastAttacker = attacker;
 
 			// Start total damage calculation.
-			float finalDamage = hitScriptObj.RawDamage * damageMultiplier;
-			
+			float multipliedDamage = hitScriptObj.RawDamage * damageMultiplier;
+			float finalDamage = multipliedDamage;
+
 			//todo calculate armor damage reduction
 			//todo calculate damage bonus
 			//todo repulsion by animation
