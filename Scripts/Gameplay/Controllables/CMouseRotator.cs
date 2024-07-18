@@ -1,4 +1,5 @@
 ﻿using System;
+using Reflex.Attributes;
 using UnityEngine;
 
 namespace CDK {
@@ -6,14 +7,14 @@ namespace CDK {
 		
 		#region <<---------- Properties and Fields ---------->>
 		
-		[SerializeField] private Vector2 _rotationSpeed = Vector2.one * 0.2f;
-		[SerializeField] private Vector2 _rotationYRange = new Vector2(60f, 60f);
-		[SerializeField] private Vector2 _rotationXRange = new Vector2(60f, 30f);
-		[NonSerialized] private Vector3 _eulerRotation;
-		[NonSerialized] private Vector2 _inputLook;
-		[NonSerialized] private Transform _transform;
-		[NonSerialized] private Quaternion _initialRotation;
-		[NonSerialized] private CBlockingEventsManager _blockingEventsManager;
+		[SerializeField] Vector2 _rotationSpeed = Vector2.one * 0.2f;
+		[SerializeField] Vector2 _rotationYRange = new Vector2(60f, 60f);
+		[SerializeField] Vector2 _rotationXRange = new Vector2(60f, 30f);
+		Vector3 _eulerRotation;
+		Vector2 _inputLook;
+		Transform _transform;
+		Quaternion _initialRotation;
+		[Inject] readonly CBlockingEventsManager _blockingEventsManager;
 
 		#endregion <<---------- Properties and Fields ---------->>
 
@@ -21,7 +22,6 @@ namespace CDK {
 		protected void Awake() {
 			this._transform = this.transform;
 			this._initialRotation = this._transform.rotation;
-			this._blockingEventsManager = CBlockingEventsManager.get;
 		}
 
 		private void Update() {

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using Reflex.Attributes;
 using UnityEngine;
 using UnityEngine.Playables;
 using UnityEngine.SceneManagement;
@@ -17,10 +18,11 @@ namespace CDK {
 
         #region <<---------- Properties and Fields ---------->>
         
-        [SerializeField] private CSceneField _sceneToLoad;
-        [SerializeField] private PlayableDirector _playableDirector;
-        [SerializeField] private GameObject _noHardwareAccelerationWarning;
-        [NonSerialized] private bool _splashEnded;
+        [SerializeField] CSceneField _sceneToLoad;
+        [SerializeField] PlayableDirector _playableDirector;
+        [SerializeField] GameObject _noHardwareAccelerationWarning;
+        [Inject] readonly CCursorManager cursorManager;
+        bool _splashEnded;
 
         #endregion <<---------- Properties and Fields ---------->>
 
@@ -39,7 +41,7 @@ namespace CDK {
             }
             #endif
             
-            CCursorManager.get.ShowMouseIfNeeded();
+            cursorManager.ShowMouseIfNeeded();
             
             this._playableDirector.Play();
             this._playableDirector.stopped += OnPlayableDirectorStopped;
@@ -64,7 +66,7 @@ namespace CDK {
         }
 
         private void Reset() {
-            if (this._playableDirector == null) this._playableDirector = this.GetComponent<PlayableDirector>();
+            if (this._playableDirector == null) TryGetComponent(out _playableDirector);
         }
 
         #endregion <<---------- MonoBehaviour ---------->>

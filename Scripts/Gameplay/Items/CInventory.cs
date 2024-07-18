@@ -78,7 +78,7 @@ namespace CDK {
 				if (newWeapon.GetScriptableObject() is CWeaponScriptableObject weaponScripObj) {
 					if (weaponScripObj.EquippedWeaponPrefab != null) {
 						// create world object representation
-						this._currentSpawnedWeapon = Instantiate(weaponScripObj.EquippedWeaponPrefab, this._handTransform);
+						this._currentSpawnedWeapon = this.CInstantiate(weaponScripObj.EquippedWeaponPrefab, this._handTransform);
 					
 						// set animator parameters
 						this._characterAnimator.SetBool(weaponScripObj.AnimEquipString.ToString(), true);
@@ -200,7 +200,7 @@ namespace CDK {
 			if (drop) {
 				var posToDrop = this.transform.position + Vector3.up * 0.5f;
 				var itemScriptObj = this.InventoryItems[itemIndex].GetScriptableObject();
-				var droppedItem = Instantiate(itemScriptObj.ItemMeshWhenDropped, posToDrop, itemScriptObj.ItemMeshWhenDropped.transform.rotation);
+				var droppedItem = this.CInstantiate(itemScriptObj.ItemMeshWhenDropped, posToDrop, itemScriptObj.ItemMeshWhenDropped.transform.rotation);
 				var collectable = droppedItem.GetComponent<CCollectableItemGameObject>(); 
 				collectable.SetItemHere(this.InventoryItems[itemIndex]);
 			}

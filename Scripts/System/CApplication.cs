@@ -25,33 +25,31 @@ namespace CDK {
         #region <<---------- Initialization ---------->>
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSplashScreen)]
-        private static void InitializeBeforeSceneLoad() {
+        static void InitializeBeforeSceneLoad() {
             Debug.Log($"CDK v{CDK.VERSION} -> Initializing Application");
 
             Screen.sleepTimeout = SleepTimeout.NeverSleep;
 
             CreatePersistentDataPath();
 
+            QuittingCancellationTokenSource?.Dispose();
+            QuittingCancellationTokenSource = new CancellationTokenSource();
+
             // app quit
             IsQuitting = false;
             Application.quitting -= QuittingEvent;
             Application.quitting += QuittingEvent;
-            Application.quitting += () => {
-                Debug.Log("<color=red>CApplication is quitting...</color>");
-                IsQuitting = true;
-                QuittingCancellationTokenSource?.Cancel();
-                Cursor.lockState = CursorLockMode.None;
-                Cursor.visible = true;
-            };
+            Application.quitting -= OnApplicationIsQuitting;
+            Application.quitting += OnApplicationIsQuitting;
 
             InitializeApplicationAsync().CAwait();
         }
 
-        private static async Task InitializeApplicationAsync() {
+        static async Task InitializeApplicationAsync() {
             Application.backgroundLoadingPriority = ThreadPriority.High; // high to load fast first assets.
             QualitySettings.vSyncCount = 0;
-            Application.targetFrameRate = 18;
-            
+            SetSlowFramerate();
+
             #if UNITY_ADDRESSABLES_EXIST
             ResourceLocator = await AddressablesInitializeAsync();
             Debug.Log($"Resource Locator Id: '{(ResourceLocator != null ? ResourceLocator.LocatorId : "null")}'");
@@ -67,7 +65,7 @@ namespace CDK {
             }
             #endif
 
-            await InitializeInputManagerAsync();
+            InitializeInputManager();
 
             ApplicationInitialized?.Invoke();
 
@@ -77,8 +75,19 @@ namespace CDK {
             }
             
             QualitySettings.vSyncCount = 1;
-            Application.targetFrameRate = isMobile ? 30 : -1;
             Application.backgroundLoadingPriority = ThreadPriority.Low;
+
+            Application.focusChanged -= ApplicationOnfocusChanged;
+            Application.focusChanged += ApplicationOnfocusChanged;
+        }
+
+        static void ApplicationOnfocusChanged(bool focused) {
+            if (focused) {
+                SetDefaultFramerate();
+            }
+            else {
+                SetSlowFramerate();
+            }
         }
 
         #endregion <<---------- Initialization ---------->>
@@ -91,7 +100,7 @@ namespace CDK {
         public static event Action QuittingEvent;
         public static event Action ApplicationInitialized;
         public static bool IsQuitting { get; private set; }
-        public static CancellationTokenSource QuittingCancellationTokenSource = new CancellationTokenSource();
+        public static CancellationTokenSource QuittingCancellationTokenSource;
 
         #if UNITY_ADDRESSABLES_EXIST
         public static IResourceLocator ResourceLocator;
@@ -115,7 +124,7 @@ namespace CDK {
 
         #region <<---------- Input ---------->>
 
-        private static async Task InitializeInputManagerAsync() {
+        static void InitializeInputManager() {
             #if REWIRED
             var rInputManager = GameObject.FindObjectOfType<InputManager_Base>();
             if (rInputManager) {
@@ -180,7 +189,16 @@ namespace CDK {
         public static bool IsEditorOrDevelopment() {
             return Application.isEditor || Debug.isDebugBuild;
         }
-        
+
+        static void OnApplicationIsQuitting() {
+            Debug.Log("<color=red><b>CApplication is quitting...</b></color>");
+            IsQuitting = true;
+            QuittingCancellationTokenSource?.Cancel();
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+            Application.focusChanged -= ApplicationOnfocusChanged;
+        }
+
 		public static void Quit() {
 			Debug.Log("Requesting Application.Quit()");
 			
@@ -197,12 +215,17 @@ namespace CDK {
 
 		#endregion <<---------- Application ---------->>
 
-        /// <summary>
-        /// Log and try Open URL.
-        /// </summary>
-        public static void OpenURL(string urlToOpen) {
-            Debug.Log($"Requested to open url {urlToOpen}");
-            Application.OpenURL(urlToOpen);
+
+
+        #region Framerate
+
+        static void SetDefaultFramerate() {
+            var isMobile = CPlayerPlatformTrigger.IsMobilePlatform();
+            Application.targetFrameRate = isMobile ? 30 : -1;
+        }
+
+        static void SetSlowFramerate() {
+            Application.targetFrameRate = 18;
         }
 
         public static int GetRefreshRateOrFallback() {
@@ -215,5 +238,18 @@ namespace CDK {
             }
             return fallback;
         }
+
+        #endregion Framerate
+
+
+
+        /// <summary>
+        /// Log and try Open URL.
+        /// </summary>
+        public static void OpenURL(string urlToOpen) {
+            Debug.Log($"Requested to open url {urlToOpen}");
+            Application.OpenURL(urlToOpen);
+        }
+
     }
 }

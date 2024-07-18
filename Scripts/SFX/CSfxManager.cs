@@ -35,7 +35,7 @@ namespace CDK.SFX {
         public ParticleSystem PlaySfx(ParticleSystem key, Vector3 position, Quaternion rotation = default) {
             ParticleSystem part;
             if (!_sfxInstances.TryGetValue(key, out part) || part == null) {
-                part = Instantiate(key, position, rotation);
+                part = this.CInstantiate(key, position, rotation);
                 _sfxInstances[key] = part;
             }
             else {

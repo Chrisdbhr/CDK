@@ -1,4 +1,5 @@
 using CDK.UI;
+using Reflex.Attributes;
 using UnityEngine;
 
 namespace CDK.Interaction {
@@ -7,11 +8,11 @@ namespace CDK.Interaction {
 		#region <<---------- Properties and Fields ---------->>
 		
         [SerializeField] protected bool _debug;
-		[SerializeField] private bool onlyWorkOneTimePerSceneLoad;
-        [SerializeField] private Transform _interactionPromptPoint;
-		[SerializeField] private CUnityEventTransform InteractEvent;
-        protected CBlockingEventsManager _blockingEventsManager;
-        protected CUINavigationManager _navigationManager;
+		[SerializeField] bool onlyWorkOneTimePerSceneLoad;
+        [SerializeField] Transform _interactionPromptPoint;
+		[SerializeField] CUnityEventTransform InteractEvent;
+		[Inject] protected readonly CBlockingEventsManager _blockingEventsManager;
+		[Inject] protected readonly CUINavigationManager _navigationManager;
 
 		#endregion <<---------- Properties and Fields ---------->>
 
@@ -20,16 +21,11 @@ namespace CDK.Interaction {
 		
 		#region <<---------- MonoBehaviour ---------->>
 		
-		protected virtual void Awake() {
-			this._blockingEventsManager = CBlockingEventsManager.get;
-            this._navigationManager = CUINavigationManager.get;
-        }
+		protected virtual void Awake() { }
 
 		protected virtual void OnEnable() {
 			// show enable checkbox
 		}
-
-        protected virtual void OnDisable() { }
         
 		#endregion <<---------- MonoBehaviour ---------->>
 

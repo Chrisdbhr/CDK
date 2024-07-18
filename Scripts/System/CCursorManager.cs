@@ -1,40 +1,14 @@
-using System;
 using UnityEngine;
 using R3;
+using Reflex.Core;
 
 namespace CDK {
 	public class CCursorManager {
-        
-        #region <<---------- Singleton ---------->>
-
-        public static CCursorManager get { 
-            get{
-                if (CSingletonHelper.CannotCreateAnyInstance() || _instance != null) return _instance;
-                return (_instance = new CCursorManager());
-            }
-        }
-        private static CCursorManager _instance;
-
-        #endregion <<---------- Singleton ---------->>
-
-
-
-
-		#region <<---------- Initializers ---------->>
-
-		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSplashScreen)]
-		private static void InitializeBeforeSceneLoad() {
-			var cursor = get;
-		}
-
-		#endregion <<---------- Initializers ---------->>
-
-
-
 
         #region <<---------- Properties and Fields ---------->>
 
-        [NonSerialized] private readonly CBlockingEventsManager _blockingEventsManager;
+        readonly CBlockingEventsManager _blockingEventsManager;
+        readonly CInputManager _inputManager;
 		CompositeDisposable _disposeOnDestroy = new CompositeDisposable();
 
         #endregion <<---------- Properties and Fields ---------->>
@@ -44,12 +18,14 @@ namespace CDK {
 
 
         #region <<---------- Initializers ---------->>
-        
-        private CCursorManager() {
+
+        public CCursorManager(Container container) {
+	        _blockingEventsManager = container.Resolve<CBlockingEventsManager>();
+	        _inputManager = container.Resolve<CInputManager>();
+
 			_disposeOnDestroy.Clear();
-            this._blockingEventsManager = CBlockingEventsManager.get;
-            
-            this._blockingEventsManager.OnMenuRetainable.IsRetainedAsObservable().Subscribe(onMenu => {
+
+            _blockingEventsManager.OnMenuRetainable.IsRetainedAsObservable().Subscribe(onMenu => {
                 if (!onMenu) {
                     SetCursorState(false);
                     return;
@@ -57,24 +33,25 @@ namespace CDK {
                 ShowMouseIfNeeded();
             })
 			.AddTo(_disposeOnDestroy);
-            
-            SetCursorState(!CGameSettings.get.CursorStartsHidden);
 
-            CInputManager.InputTypeChanged += OnInputTypeChanged;
+            _inputManager.InputTypeChanged += OnInputTypeChanged;
         }
 
+        #if UNITY_EDITOR
 		~CCursorManager() {
+			SetCursorState(true);
 			_disposeOnDestroy?.Dispose();
 		}
+		#endif
 
 		#endregion <<---------- Initializers ---------->>
 
 
-		private void OnInputTypeChanged(CInputManager.InputType newType) {
-			SetCursorState(CInputManager.ActiveInputType.IsMouseOrKeyboard() && this._blockingEventsManager.IsOnMenu);
+		void OnInputTypeChanged(object sender, CInputManager.InputType inputType) {
+			SetCursorState(_inputManager.ActiveInputType.IsMouseOrKeyboard() && _blockingEventsManager.IsOnMenu);
 		}
 
-		private void SetCursorState(bool visible) {
+		static void SetCursorState(bool visible) {
 			Cursor.visible = visible;
 			
 			if (visible) {
@@ -86,7 +63,7 @@ namespace CDK {
 		}
 
         public void ShowMouseIfNeeded() {
-            if (!CInputManager.ActiveInputType.IsMouseOrKeyboard()) return;
+            if (!_inputManager.ActiveInputType.IsMouseOrKeyboard()) return;
             SetCursorState(true);
         }
 

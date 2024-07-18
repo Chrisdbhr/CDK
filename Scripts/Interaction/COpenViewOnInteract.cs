@@ -1,18 +1,19 @@
 ﻿using CDK.Interaction;
 using CDK.UI;
+using Reflex.Attributes;
 using UnityEngine;
 
 namespace CDK {
     public class COpenViewOnInteract : CInteractable {
 
-        [SerializeField] private CUIViewBase _viewToOpen;
-
+        [SerializeField] CUIViewBase _viewToOpen;
+        [Inject] protected readonly CUINavigationManager navigationManager;
         
         
         
         public override bool OnInteract(Transform interactingTransform) {
             if (!base.OnInteract(interactingTransform)) return false;
-            CUINavigationManager.get.OpenMenu(this._viewToOpen, null, null);
+            navigationManager.OpenMenu(this._viewToOpen, null, null);
             return true;
         }
         

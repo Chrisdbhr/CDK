@@ -19,9 +19,6 @@ namespace CDK.Timeline {
 
         void Awake() {
             GetReferences();
-            if (_fadeImage.color.r != 0 || _fadeImage.color.g != 0 || _fadeImage.color.b != 0) {
-                Debug.LogWarning("FadeController: The fade image color is not black. Is this intended?", this);
-            }
         }
 
         void GetReferences() {

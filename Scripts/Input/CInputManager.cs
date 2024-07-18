@@ -1,6 +1,8 @@
 using System;
 using System.Linq;
 using R3;
+using Reflex.Attributes;
+using Reflex.Core;
 using UnityEngine;
 
 #if REWIRED
@@ -8,11 +10,14 @@ using Rewired;
 #endif
 
 namespace CDK {
-	public static class CInputManager {
+	public class CInputManager {
 
         #region <<---------- Enums ---------->>
 
-        public enum InputType { // beware when changing name because there is compile conditions using this values
+        /// <summary>
+        /// Beware when changing names because there are compile conditions using this values!
+        /// </summary>
+        public enum InputType {
             Keyboard,
             Mouse,
             JoystickController,
@@ -21,48 +26,39 @@ namespace CDK {
 
         #endregion <<---------- Enums ---------->>
 
-        
-        
-        
+
+        public CInputManager(Container container) {
+	        blockingEventsManager = container.Resolve<CBlockingEventsManager>();
+	        SetControllerTypeBasedOnPlatform();
+	        if (ReInput.isReady) Initialize();
+	        else ReInput.InitializedEvent += Initialize;
+        }
+
+
         #region <<---------- Properties and Fields ---------->>
 
-		public static InputType ActiveInputType {
+		public InputType ActiveInputType {
 			get => _activeInputType;
 			private set {
 				if (_activeInputType == value) return;
                 if(!value.IsMouseOrKeyboard() && !_activeInputType.IsMouseOrKeyboard()) Debug.Log($"Input type changed to '{value.ToString()}'");
 				_activeInputType = value;
-				_inputTypeChanged?.Invoke(value);
+				InputTypeChanged?.Invoke(this, value);
 			}
 		}
-		private static InputType _activeInputType;
+		InputType _activeInputType;
 
-		public static event Action<InputType> InputTypeChanged {
-			add {
-				_inputTypeChanged -= value;
-				_inputTypeChanged += value;
-			}
-			remove => _inputTypeChanged -= value;
-		}
-		private static Action<InputType> _inputTypeChanged;
-        
+		public EventHandler<InputType> InputTypeChanged;
+
+		readonly CBlockingEventsManager blockingEventsManager;
+
         #endregion <<---------- Properties and Fields ---------->>
 
 
-        
 
-		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-		private static void InitializeBeforeSceneLoad() {
-			SetControllerTypeBasedOnPlatform();
-			
-			#if REWIRED
-			if (ReInput.isReady) Initialize();
-			else ReInput.InitializedEvent += Initialize;
-			#endif
-		}
 
 		#if REWIRED
-		private static void Initialize() {
+		void Initialize() {
 			
 			ReInput.InitializedEvent -= Initialize;
 
@@ -120,7 +116,7 @@ namespace CDK {
             }
         }
 
-        static void ControllerConnectedEvent(ControllerStatusChangedEventArgs c) {
+        void ControllerConnectedEvent(ControllerStatusChangedEventArgs c) {
             if (!ReInput.players.SystemPlayer.controllers.ContainsController(c.controller)) {
                 Debug.Log($"New controller connected: {c.name}, assigning to System Player.");
                 ReInput.players.SystemPlayer.controllers.AddController(c.controllerType, c.controllerId, false);
@@ -137,7 +133,7 @@ namespace CDK {
         
 		#endif
 
-		private static void SetControllerTypeBasedOnPlatform() {
+		void SetControllerTypeBasedOnPlatform() {
 			#if UNITY_STANDALONE || UNITY_WEBGL
 			ActiveInputType = InputType.Keyboard;
 			#elif UNITY_ANDROID || UNITY_IOS || UNITY_IPHONE
@@ -149,7 +145,7 @@ namespace CDK {
 		}
 		
         #if REWIRED
-        public static void UpdatePlayerInputLayout(Rewired.Player rePlayer) {
+        public void UpdatePlayerInputLayout(Rewired.Player rePlayer) {
             if (CApplication.IsQuitting) return;
             
             if (rePlayer == null) {
@@ -162,7 +158,7 @@ namespace CDK {
                 return;
             }
 
-            bool onMenu = CBlockingEventsManager.get.IsOnMenu;
+            bool onMenu = blockingEventsManager.IsOnMenu;
 
             int joystickControllersCount = rePlayer.controllers.joystickCount;
             int customControllersCount = rePlayer.controllers.customControllerCount;

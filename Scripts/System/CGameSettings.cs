@@ -1,3 +1,4 @@
+using CDK.UI;
 using UnityEngine;
 	
 #if UNITY_EDITOR
@@ -20,7 +21,7 @@ namespace CDK {
                 return (_instance = Resources.Load<CGameSettings>("GameSettings"));
             }
         }
-        private static CGameSettings _instance;
+        static CGameSettings _instance;
 
         #endregion <<---------- Resource Singleton ---------->>
         
@@ -29,15 +30,12 @@ namespace CDK {
 		
 		#region <<---------- Properties ---------->>
 
-        private static string GAME_SETTINGS_ASSET_FULL_PATH => GAME_SETTINGS_ASSET_PATH + GAME_SETTINGS_ASSET_NAME;
-        private static string GAME_SETTINGS_ASSET_PATH => Application.dataPath + "/Resources/";
-        private const string GAME_SETTINGS_ASSET_NAME = "GameSettings.asset";
+		static string GAME_SETTINGS_ASSET_FULL_PATH => GAME_SETTINGS_ASSET_PATH + GAME_SETTINGS_ASSET_NAME;
+		static string GAME_SETTINGS_ASSET_PATH => Application.dataPath + "/Resources/";
+		const string GAME_SETTINGS_ASSET_NAME = "GameSettings.asset";
 
-        public const string AssetRef_PauseMenu = "Prefabs/UI/menus/ui-pausemenu";
-		public const string AssetRef_ConfirmationPopup = "Prefabs/UI/menus/ui-confirm popup";
-		
-		public bool CursorStartsHidden => this._cursorStartsHidden;
-		[SerializeField] protected bool _cursorStartsHidden;
+		public CUIViewBase PrefabPauseMenu;
+		public CUIViewBase PrefabConfirmationPopup;
 
 		#if FMOD
 		[Header("Default Sounds")]

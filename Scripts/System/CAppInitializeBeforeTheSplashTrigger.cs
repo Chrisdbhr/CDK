@@ -14,15 +14,15 @@ using Rewired;
 namespace CDK {
     public class CAppInitializeBeforeTheSplashTrigger : MonoBehaviour {
 
-        [SerializeField] private CSceneField _nextScene;
-        [SerializeField] private TextMeshProUGUI _textLoadState;
+        [SerializeField] CSceneField _nextScene;
+        [SerializeField] TextMeshProUGUI _textLoadState;
 
 
 
 
         #region <<---------- MonoBehaviour ---------->>
 
-        private IEnumerator Start() {
+        IEnumerator Start() {
             Debug.Log("Initializing scene that preloads initial assets.");
 
             this.CStartCoroutine(DelayedShowText());
