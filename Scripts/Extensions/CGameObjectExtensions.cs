@@ -50,13 +50,14 @@ namespace CDK {
         }
 
         public static GameObject CDontDestroyOnLoad(this GameObject go) {
-            GameObject.DontDestroyOnLoad(go);
+            Debug.Log($"Setting '{go.name}' to DontDestroyOnLoad");
+            Object.DontDestroyOnLoad(go);
             return go;
         }
         
         public static void CUnparentAllChildren(this GameObject go, bool worldPositionStays = true) {
             if (go == null) return;
-            foreach (var c in go.Children()) {
+            foreach (var c in go.Children().ToArray()) {
                 c.transform.SetParent(null, worldPositionStays);
                 c.transform.SetAsLastSibling();
             }
