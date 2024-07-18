@@ -48,7 +48,7 @@ namespace CDK
         
 
         private void CreateObjs() {
-            Instantiate(this.objToCreate, this.transform.position, this.transform.rotation);
+            this.CInstantiate(this.objToCreate, this.transform.position, this.transform.rotation);
         }
     }
 }

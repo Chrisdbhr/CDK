@@ -12,10 +12,27 @@ namespace CDK {
 
 		#if UNITY_EDITOR
 		void Awake() {
+			this.SignToEvents();
+		}
+
+		void Reset() {
+			this.SignToEvents();
+		}
+
+		void OnValidate() {
+			this.SignToEvents();
+		}
+
+		void SignToEvents() {
 			if (Application.isPlaying) return;
-			EditorSceneManager.sceneSaving += EditorSceneManagerOnSceneSaving; 
+			EditorSceneManager.sceneSaving -= EditorSceneManagerOnSceneSaving;
+			EditorSceneManager.sceneSaving += EditorSceneManagerOnSceneSaving;
+
+			EditorApplication.playModeStateChanged -= EditorApplicationOnPlayModeStateChanged;
 			EditorApplication.playModeStateChanged += EditorApplicationOnPlayModeStateChanged;
-            PrefabStage.prefabSaving += PrefabStageSaving;
+
+			PrefabStage.prefabSaving -= PrefabStageSaving;
+			PrefabStage.prefabSaving += PrefabStageSaving;
 		}
 
         private void PrefabStageSaving(GameObject go) {
@@ -25,8 +42,7 @@ namespace CDK {
         }
 
         private void OnDestroy() {
-			if (Application.isPlaying) return;
-			EditorSceneManager.sceneSaving -= EditorSceneManagerOnSceneSaving; 
+			EditorSceneManager.sceneSaving -= EditorSceneManagerOnSceneSaving;
 			EditorApplication.playModeStateChanged -= EditorApplicationOnPlayModeStateChanged;
             PrefabStage.prefabSaving -= PrefabStageSaving;
 		}

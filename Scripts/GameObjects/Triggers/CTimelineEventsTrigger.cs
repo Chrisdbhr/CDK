@@ -1,4 +1,5 @@
 ﻿using System;
+using Reflex.Attributes;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.Playables;
@@ -30,7 +31,7 @@ namespace CDK {
         [SerializeField] protected UnityEvent _cutsceneStopped;
         [SerializeField] protected CUnityEventBool _cutscenePlayingStateChanged;
 		
-        protected CBlockingEventsManager _blockingEventsManager;
+        [Inject] protected readonly CBlockingEventsManager _blockingEventsManager;
 
 		#endregion <<---------- Properties ---------->>
 
@@ -40,7 +41,6 @@ namespace CDK {
 		#region <<---------- MonoBehaviour ---------->>
 
 		protected virtual void Awake() {
-            this._blockingEventsManager = CBlockingEventsManager.get;
             if (this._playableDirector.extrapolationMode != DirectorWrapMode.None) {
                 Debug.LogError($"PlayableDirector {this._playableDirector.name} extrapolationMode must be set to None.");
             }
