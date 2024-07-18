@@ -8,6 +8,7 @@ using Newtonsoft.Json;
 #endif
 
 namespace CDK {
+    [JsonObject(MemberSerialization.OptIn)]
     public abstract class CGameProgressBase : CPersistentData {
 
         #region <<---------- Initializers ---------->>
@@ -17,6 +18,7 @@ namespace CDK {
             this.SaveIdentifier = Guid.NewGuid().ToString();
             if (!name.CIsNullOrEmpty()) this.SaveDescriptiveName = name;
             this.SaveDate = DateTime.UtcNow;
+            AppVersionWhenCreated = new Version(Application.version);
         }
 
         #endregion <<---------- Initializers ---------->>
@@ -31,23 +33,26 @@ namespace CDK {
                 _onNotifyForExternalModifiedSaveFile -= value;
                 _onNotifyForExternalModifiedSaveFile += value;
             }
-            remove {
-                _onNotifyForExternalModifiedSaveFile -= value;
-            }
+            remove => _onNotifyForExternalModifiedSaveFile -= value;
         }
-        [JsonIgnore]
         private static Action _onNotifyForExternalModifiedSaveFile;
 
         [JsonProperty("_appVersionWhenCreated")]
-        public string AppVersionWhenCreated = Application.version;
+        string _appVersionWhenCreated;
+        public Version AppVersionWhenCreated {
+            get => Version.TryParse(_appVersionWhenCreated, out var version) ? version : default;
+            set => _appVersionWhenCreated = value.ToString();
+        }
 
         [JsonProperty("_appVersionOnLastSave")]
-        public string AppVersionOnLastSave;
+        string _appVersionOnLastSave;
+        public Version AppVersionOnLastSave {
+            get => Version.TryParse(_appVersionOnLastSave, out var version) ? version : default;
+            set => _appVersionOnLastSave = value.ToString();
+        }
 
-        [JsonIgnore]
         public bool WasLoadedAutomatically { get; }
 
-        [JsonIgnore]
         public const string SavesDirectoryName = "SavesDir";
 
         [JsonProperty("_saveIdentifier")]
@@ -76,8 +81,9 @@ namespace CDK {
         private bool SaveJson() {
             this.SaveDate = DateTime.UtcNow;
             this.SaveHash = String.Empty;
-            this.AppVersionOnLastSave = Application.version;
-
+            if (Version.TryParse(Application.version, out var version)) {
+                this.AppVersionOnLastSave = version;
+            }
             // serialized json without hash
             this.SaveHash = Animator.StringToHash(this.GetSerializedJson()).ToString();
             // then serialize again and save with hash
