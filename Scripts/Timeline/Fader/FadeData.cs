@@ -14,10 +14,10 @@ namespace CDK.Timeline {
     [System.Serializable]
     public class FadeData : PlayableAsset, ITimelineClipAsset {
 
-        public FadeDataPlayable fadeData = new FadeDataPlayable();
+        public FadeDataPlayable data = new();
 
         public override Playable CreatePlayable (PlayableGraph graph, GameObject owner) {
-            return ScriptPlayable<FadeDataPlayable>.Create(graph, fadeData);
+            return ScriptPlayable<FadeDataPlayable>.Create(graph, data);
         }
 
         public ClipCaps clipCaps => ClipCaps.Blending;

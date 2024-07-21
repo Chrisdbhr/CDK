@@ -10,8 +10,8 @@ namespace CDK.Timeline {
             var fade = (FadeData) clip.asset;
             var clipOptions = base.GetClipOptions(clip);
             if (fade != null) {
-                var c = fade.fadeData.Color;
-                c.a = fade.fadeData.MaxAlpha;
+                var c = fade.data.Color;
+                c.a = fade.data.MaxAlpha;
                 clipOptions.highlightColor = c;
             }
             return clipOptions;
