@@ -2,12 +2,18 @@
 using UnityEngine;
 
 namespace CDK.Renderers {
+    [ExecuteInEditMode]
+    [RequireComponent(typeof(SkinnedMeshRenderer))]
     public class CRealtimeCopyBlendShapeValues : MonoBehaviour {
 
-        [SerializeField] private SkinnedMeshRenderer _sourceMeshRenderer;
-        [SerializeField] private SkinnedMeshRenderer _targetMeshRenderer;
-        [SerializeField] private uint _timeSplit = 0;
+        [SerializeField] SkinnedMeshRenderer _sourceMeshRenderer;
+        SkinnedMeshRenderer _targetMeshRenderer;
+        [SerializeField] uint _timeSplit = 2;
 
+
+        void Awake() {
+            TryGetComponent(out _targetMeshRenderer);
+        }
 
         private void LateUpdate() {
             if (_timeSplit > 0 && Time.frameCount % _timeSplit != 0) return;
