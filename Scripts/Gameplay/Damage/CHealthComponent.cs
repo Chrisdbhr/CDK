@@ -205,7 +205,7 @@ namespace CDK {
 		/// <summary>
 		/// Returns the amount of damage taken. If the target is already dead, returns 0. If the damage is bigger than the health before, returns the health before.
 		/// </summary>
-		public float TakeHit(CHitInfoData attack, Transform attacker, float damageMultiplier) {
+		public override float TakeHit(CHitInfoData attack, Transform attacker, float damageMultiplier) {
 			if (this.IsDead) return 0f;
 			if (this._immuneTimer > 0f) return 0f;
 			var hitScriptObj = attack;
