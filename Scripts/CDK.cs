@@ -23,8 +23,6 @@ namespace CDK
 			CGameSettings.EditorCreateGameSettingsResourceIfNeeded();
 			#endif
 		} 
-		
-		public static readonly Version VERSION = new (4,0,0);
-
+		public static readonly Version VERSION = new (4,0,1);
 	}
 }
