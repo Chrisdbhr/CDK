@@ -13,9 +13,12 @@ namespace CDK {
         public void OnPostprocessBuild(BuildReport report) {
             if (report.summary.result != BuildResult.Succeeded && report.summary.result != BuildResult.Unknown) return;
             CEditorPlayerSettings.RaiseBuildVersion();
+
+            #if !UNITY_WEBGL
             var outputPath = report.summary.outputPath.Replace($"/{Application.productName}.exe", string.Empty);
             // Create Shortcut to application Logs Directory
             CreateShortcut(outputPath);
+            #endif
         }
 
         static void CreateShortcut(string outputPath)
