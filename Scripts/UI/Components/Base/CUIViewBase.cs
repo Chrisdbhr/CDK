@@ -1,14 +1,10 @@
 using System;
 using System.Collections;
-using System.Threading.Tasks;
 using R3;
 using Reflex.Attributes;
-using Reflex.Extensions;
-using Reflex.Injectors;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
-using UnityEngine.UI;
 
 #if FMOD
 using FMODUnity;
@@ -63,7 +59,7 @@ namespace CDK.UI {
 		protected UnityEvent OnOpenEvent;
 		protected UnityEvent OnCloseEvent;
 
-		protected CGameSettings _gameSettings;
+		[Inject] protected CGameSettings _gameSettings;
 		[Inject] protected readonly CBlockingEventsManager _blockingEventsManager;
 		[Inject] protected CUINavigationManager _navigationManager;
         protected CompositeDisposable _disposeOnDisable;
@@ -76,8 +72,7 @@ namespace CDK.UI {
 		#region <<---------- MonoBehaviour ---------->>
 
 		protected virtual void Awake() {
-			GameObjectInjector.InjectRecursive(gameObject, gameObject.scene.GetSceneContainer());
-			this._gameSettings = CGameSettings.get;
+			gameObject.Inject();
 			this._canvas = this.GetComponentInChildren<Canvas>(true);
         }
 

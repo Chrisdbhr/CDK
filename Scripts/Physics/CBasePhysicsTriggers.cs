@@ -37,7 +37,8 @@ namespace CDK {
 
 
         protected virtual void Awake() {
-            this._collider = this.GetComponent<Collider>();
+			gameObject.Inject();
+	        TryGetComponent(out _collider);
         }
 
         protected virtual void Reset() { }

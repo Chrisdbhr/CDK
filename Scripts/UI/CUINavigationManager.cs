@@ -63,7 +63,7 @@ namespace CDK.UI {
 
             if (IsAlreadyOnNavigation(uiPrefab)) return null;
 
-            var uiGameObject = CAssets.CInstantiate(uiPrefab);
+            var uiGameObject = Object.Instantiate(uiPrefab);
             if (uiGameObject == null) {
                 Debug.LogError($"Could not open menu '{uiPrefab}'");
                 return null;

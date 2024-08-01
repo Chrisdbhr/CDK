@@ -4,33 +4,6 @@ using Object = UnityEngine.Object;
 namespace CDK {
     public static class CAssets {
 
-        #region <<---------- Instantiation ---------->>
-
-        public static T CInstantiate<T>(T original, Transform parent = null) where T : Object
-        {
-            return CInstantiate(original, Vector3.zero, Quaternion.identity, parent);
-        }
-
-        public static T CInstantiate<T>(T original, Vector3 position, Quaternion rotation, Transform parent = null) where T : Object
-        {
-            return Object.Instantiate(original, position, rotation, parent);
-        }
-
-        public static T CInstantiate<T>(this Object source, T original, Transform parent = null) where T : Object
-        {
-            return CInstantiate(source, original, Vector3.zero, Quaternion.identity, parent);
-        }
-
-        public static T CInstantiate<T>(this Object source, T original, Vector3 position, Quaternion rotation, Transform parent = null) where T : Object
-        {
-            return CInstantiate(original, position, rotation, parent);
-        }
-
-        #endregion <<---------- Instantiation ---------->>
-
-        
-
-
         #region <<---------- Load From Resources ---------->>
 
         /// <summary>

@@ -7,25 +7,6 @@ namespace CDK {
 	[Obsolete("Use Fader on timeline instead")]
 	public class CFader : MonoBehaviour {
 
-        #region <<---------- Singleton ---------->>
-
-        public static CFader Instance {
-            get {
-                if (CApplication.IsQuitting || _instance != null) return _instance;
-                var go = new GameObject("Fader");
-                #if UNITY_EDITOR
-                go.hideFlags = HideFlags.DontSaveInEditor;
-                #endif
-                return _instance = go.AddComponent<CFader>();
-            }
-        }
-        static CFader _instance;
-
-        #endregion <<---------- Singleton ---------->>
-
-
-
-
 		#region <<---------- Properties ---------->>
 		
 		CanvasGroup _fadeCanvasGroup;
@@ -41,10 +22,6 @@ namespace CDK {
 		#region <<---------- MonoBehaviour ---------->>
 
 		void Awake() {
-			if (_instance != null && _instance != this) {
-				gameObject.CDestroy(true);
-				return;
-			}
 			gameObject.layer = 5; // UI
 			gameObject.CDontDestroyOnLoad();
 

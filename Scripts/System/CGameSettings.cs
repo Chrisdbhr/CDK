@@ -12,22 +12,7 @@ using FMODUnity;
 
 namespace CDK {
 	public class CGameSettings : ScriptableObject {
-    
-        #region <<---------- Resource Singleton ---------->>
 
-        public static CGameSettings get {
-            get {
-                if (CSingletonHelper.CannotCreateAnyInstance() || _instance != null) return _instance;
-                return (_instance = Resources.Load<CGameSettings>("GameSettings"));
-            }
-        }
-        static CGameSettings _instance;
-
-        #endregion <<---------- Resource Singleton ---------->>
-        
-       
-		
-		
 		#region <<---------- Properties ---------->>
 
 		static string GAME_SETTINGS_ASSET_FULL_PATH => GAME_SETTINGS_ASSET_PATH + GAME_SETTINGS_ASSET_NAME;

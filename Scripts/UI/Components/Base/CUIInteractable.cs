@@ -1,6 +1,8 @@
 using System;
 using R3;
 using Reflex.Attributes;
+using Reflex.Extensions;
+using Reflex.Injectors;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -26,7 +28,8 @@ namespace CDK.UI {
 
         protected readonly CompositeDisposable _disposeOnDisable = new CompositeDisposable();
         protected readonly CompositeDisposable _disposeOnDestroy = new CompositeDisposable();
-        [Inject] protected readonly CUINavigationManager navigationManager;
+        [Inject] protected CUINavigationManager _navigationManager;
+        [Inject] protected CGameSettings _gameSettings;
 
         #endregion <<---------- Properties and Fields ---------->>
 
@@ -35,7 +38,9 @@ namespace CDK.UI {
         
         #region <<---------- Mono Behaviour ---------->>
 
-        protected virtual void Awake() { }
+        protected virtual void Awake() {
+	        gameObject.Inject();
+        }
 
         protected virtual void OnEnable() { }
         
@@ -68,7 +73,7 @@ namespace CDK.UI {
 		public virtual void Selected(bool playSound = true) {
 			if(this._debug) Debug.Log($"Selected: CUIInteractable '{this.gameObject.name}'", this);
 			#if FMOD
-			if(playSound) this.PlaySound(CGameSettings.get.SoundSelect);
+			if(playSound) this.PlaySound(_gameSettings.SoundSelect);
 			#endif
 		}
 
@@ -76,7 +81,7 @@ namespace CDK.UI {
 			if(this._debug) Debug.Log($"SUBMIT: CUIInteractable '{this.gameObject.name}'", this);
 			#if FMOD
             if (!(this is CUIButton b && !b.Button.interactable)) {
-                this.PlaySound(CGameSettings.get.SoundSubmit);
+                this.PlaySound(_gameSettings.SoundSubmit);
             }
 			#endif
 		}
@@ -84,7 +89,7 @@ namespace CDK.UI {
 		public virtual void Canceled() {
 			if(this._debug) Debug.Log($"CANCEL: CUIInteractable '{this.gameObject.name}'", this);
 			#if FMOD
-			this.PlaySound(CGameSettings.get.SoundCancel);
+			this.PlaySound(_gameSettings.SoundCancel);
 			#endif
 		}
 		
@@ -102,7 +107,7 @@ namespace CDK.UI {
 		
 		public void OnCancel(BaseEventData eventData) {
 			if (!this.gameObject.activeInHierarchy) return;
-            if (navigationManager.CloseLastMenu(true)) {
+            if (_navigationManager.CloseLastMenu(true)) {
                 this.Canceled();
             }
         }
