@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections;
-using FMODUnity;
 using UnityEngine;
 using UnityEngine.Serialization;
 using Random = UnityEngine.Random;
+
+#if FMOD
+using FMODUnity;
+#endif
 
 #if UNITY_EDITOR
 using UnityEditor;

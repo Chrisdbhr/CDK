@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEditor;
 #endif
 
-#if NEWTONSOFT_JSON_FOR_UNITY
+#if NEWTONSOFT_JSON
 using Newtonsoft.Json;
 #endif
 

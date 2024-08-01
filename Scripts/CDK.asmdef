@@ -27,7 +27,7 @@
         {
             "name": "com.unity.nuget.newtonsoft-json",
             "expression": "0.0.0",
-            "define": "NEWTONSOFT_JSON_FOR_UNITY"
+            "define": "NEWTONSOFT_JSON"
         },
         {
             "name": "com.unity.addressables",
