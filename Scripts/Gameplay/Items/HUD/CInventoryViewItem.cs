@@ -52,7 +52,7 @@ namespace CDK {
 
 		private void OpenItemOptionsMenu() {
 			if (this._itemHere == null) return;
-			var optionMenu = this.CInstantiate(this._itemOptionsPrefab, this.transform.parent.parent).GetComponent<CInventoryViewItemOptionsMenu>();
+			var optionMenu = Instantiate(this._itemOptionsPrefab, this.transform.parent.parent).GetComponent<CInventoryViewItemOptionsMenu>();
 			optionMenu.Open(this._itemHere, this.transform.GetSiblingIndex(), this.transform.position);
 		}
 		

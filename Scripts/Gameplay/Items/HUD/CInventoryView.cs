@@ -59,7 +59,7 @@ namespace CDK {
 			this._inventoryViewItemList.Clear();
 			// create new child game objects
 			for (int i = 0; i < this._inventory.Size; i++) {
-				this._inventoryViewItemList.Add(this.CInstantiate(this._prefabInventoryViewItem.gameObject, this._itemsGridParent).GetComponent<CInventoryViewItem>());
+				this._inventoryViewItemList.Add(Instantiate(this._prefabInventoryViewItem.gameObject, this._itemsGridParent).GetComponent<CInventoryViewItem>());
 			}
 			this.UpdateInventoryView();
 		}
