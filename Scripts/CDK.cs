@@ -5,17 +5,20 @@
 // Also check my website for my projects! https://chrisjogos.com
 
 using System;
+
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
 
-namespace CDK {
+namespace CDK 
+{
 	#if UNITY_EDITOR
 	[InitializeOnLoad]
 	#endif
-	public static class CDK {
-
-		static CDK() {
+	public static class CDK 
+	{
+		static CDK() 
+		{
 			#if UNITY_EDITOR
 			CGameSettings.EditorCreateGameSettingsResourceIfNeeded();
 			#endif
