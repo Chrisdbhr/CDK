@@ -1,5 +1,10 @@
+using System.Linq;
 using Unity.Linq;
 using UnityEngine;
+
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace CDK {
     public static class CGameObjectExtensions {
@@ -60,6 +65,19 @@ namespace CDK {
             foreach (var c in go.Children().ToArray()) {
                 c.transform.SetParent(null, worldPositionStays);
                 c.transform.SetAsLastSibling();
+            }
+        }
+
+        public static void CDestroyAllChildren(this GameObject go)
+        {
+            if (go == null) return;
+            var allChild = go.Children().Where(g=>g!= null);
+            #if UNITY_EDITOR
+            Undo.RecordObjects(allChild.ToArray(), go.name + "_child");
+            #endif
+            foreach (var child in allChild) {
+                if(child == null) continue;
+                child.gameObject.CDestroy();
             }
         }
         

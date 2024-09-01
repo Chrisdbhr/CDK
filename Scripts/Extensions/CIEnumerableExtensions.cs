@@ -40,6 +40,7 @@ namespace CDK {
         public static IEnumerable<T> CRemoveNulls<T>(this IEnumerable<T> enumerable) {
             if (enumerable == null) yield break;
             foreach (var o in enumerable) {
+	            if (o is UnityEngine.Object uObj && uObj == null) continue;
                 if (o == null) continue;
                 yield return o;
             }

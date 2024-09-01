@@ -19,16 +19,11 @@ namespace CDK {
                 maxDegreesDelta * timeScale
             );
         }
-        
-		public static void CDeleteAllChildren(this Transform parentGameObject) {
-			var allChild = parentGameObject.GetComponentsInChildren<Transform>();
-            #if UNITY_EDITOR
-            Undo.RecordObjects(allChild, parentGameObject.name + "_child");
-            #endif
-			foreach (var child in allChild) {
-				if(child == null || child.transform == parentGameObject) continue;
-				UnityEngine.Object.DestroyImmediate(child.gameObject);
-			}
+
+		public static void CDestroyAllChildren(this Transform t)
+        {
+            if (t == null) return;
+			t.gameObject.CDestroyAllChildren();
 		}
 
         public static Transform CGetParentOrSelf(this Transform t) {
