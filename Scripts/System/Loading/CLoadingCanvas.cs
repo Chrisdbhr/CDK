@@ -7,24 +7,7 @@ using UnityEngine.UI;
 
 namespace CDK {
 	public class CLoadingCanvas : MonoBehaviour {
-        
-        #region <<---------- Singleton ---------->>
 
-        public static CLoadingCanvas get {
-            get {
-                if (CSingletonHelper.CannotCreateAnyInstance() || _instance != null) {
-                    return _instance;
-                }
-                return (_instance = CAssets.LoadResourceAndInstantiate<CLoadingCanvas>("System/Loading Canvas"));
-            }
-        }
-        private static CLoadingCanvas _instance;
-
-        #endregion <<---------- Singleton ---------->>
-
-        
-        
-        
         #region <<---------- Properties and Fields ---------->>
         
         [SerializeField] private Canvas _loadingUI;

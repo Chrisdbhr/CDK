@@ -26,7 +26,7 @@ namespace CDK {
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSplashScreen)]
         static void InitializeBeforeSceneLoad() {
-            Debug.Log($"CDK v{CDK.VERSION} -> Initializing Application");
+            Debug.Log($"CDK v{CDK.Version} -> Initializing Application");
 
             Screen.sleepTimeout = SleepTimeout.NeverSleep;
 

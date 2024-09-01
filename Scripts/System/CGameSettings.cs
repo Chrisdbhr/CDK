@@ -11,13 +11,33 @@ using FMODUnity;
 #endif
 
 namespace CDK {
-	public class CGameSettings : ScriptableObject {
+	public class CGameSettings : ScriptableObject
+	{
+
+		#region Singleton
+
+		public static CGameSettings Instance {
+			get {
+				if (_instance != null) return _instance;
+				_instance = Resources.Load<CGameSettings>("GameSettings");
+				#if UNITY_EDITOR
+				if (_instance == null) {
+					_instance = EditorCreateGameSettingsAsset();
+				}
+				#endif
+				return _instance;
+			}
+		}
+		static CGameSettings _instance;
+
+		#endregion Singleton
+
 
 		#region <<---------- Properties ---------->>
 
-		static string GAME_SETTINGS_ASSET_FULL_PATH => GAME_SETTINGS_ASSET_PATH + GAME_SETTINGS_ASSET_NAME;
-		static string GAME_SETTINGS_ASSET_PATH => Application.dataPath + "/Resources/";
-		const string GAME_SETTINGS_ASSET_NAME = "GameSettings.asset";
+		static string DefaultFullPath => DefaultFolder + DefaultName;
+		static string DefaultFolder => Application.dataPath + "/Resources/";
+		const string DefaultName = "GameSettings.asset";
 
 		public CUIViewBase PrefabPauseMenu;
 		public CUIViewBase PrefabConfirmationPopup;
@@ -53,33 +73,24 @@ namespace CDK {
 		public static void EditorOpenGameSettingsData() {
 			var gameSettings = EditorTryLoadingGameSettings();
 			if (!gameSettings) {
-				gameSettings = EditorCreateGameSettingsResourceIfNeeded();
+				gameSettings = EditorCreateGameSettingsAsset();
 			}
 			Selection.activeObject = gameSettings;
 			AssetDatabase.OpenAsset(gameSettings);
 		}
 
 		public static CGameSettings EditorTryLoadingGameSettings() {
-            AssetDatabase.Refresh();
+            if(!Application.isPlaying) AssetDatabase.Refresh();
 			var gameSettingsScriptObj = Resources.Load<CGameSettings>("GameSettings");
 			if (gameSettingsScriptObj != null) return gameSettingsScriptObj;
-			return AssetDatabase.LoadAssetAtPath<CGameSettings>(GAME_SETTINGS_ASSET_FULL_PATH);
+			return AssetDatabase.LoadAssetAtPath<CGameSettings>(DefaultFullPath);
 		}
 
-		public static CGameSettings EditorCreateGameSettingsResourceIfNeeded() {
-			var gameSettingsScriptObj = EditorTryLoadingGameSettings();
-			if (gameSettingsScriptObj != null) return gameSettingsScriptObj;
-
-			Debug.Log($"Cant find GameSettings asset, will try to create at: '{GAME_SETTINGS_ASSET_FULL_PATH}'");
-
-            if(!Directory.Exists(GAME_SETTINGS_ASSET_PATH)) Directory.CreateDirectory(GAME_SETTINGS_ASSET_PATH);
-
-			gameSettingsScriptObj = CreateInstance<CGameSettings>();
-
-			AssetDatabase.CreateAsset(gameSettingsScriptObj, "Assets/Resources/" + GAME_SETTINGS_ASSET_NAME);
-			
-            Debug.Log($"Created GameSettings scriptable object at path: '{GAME_SETTINGS_ASSET_FULL_PATH}'");
-			
+		public static CGameSettings EditorCreateGameSettingsAsset() {
+            if(!Directory.Exists(DefaultFolder)) Directory.CreateDirectory(DefaultFolder);
+			var gameSettingsScriptObj = CreateInstance<CGameSettings>();
+			AssetDatabase.CreateAsset(gameSettingsScriptObj, "Assets/Resources/" + DefaultName);
+            Debug.Log($"Created Default GameSettings at path: '{DefaultFullPath}'", gameSettingsScriptObj);
             return gameSettingsScriptObj;
 		}
 		
