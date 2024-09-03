@@ -166,8 +166,8 @@ namespace CDK {
 			this.DrawDefaultInspector();
 
 			if (!(target is CChildrenPositionAndRotationRandomizer myScript)) return;
-			if(GUILayout.Button(nameof(CTransformExtensions.CDeleteAllChildren))) {
-				myScript.transform.CDeleteAllChildren();
+			if(GUILayout.Button(nameof(CTransformExtensions.CDestroyAllChildren))) {
+				myScript.transform.CDestroyAllChildren();
 			}
             if(GUILayout.Button(nameof(CChildrenPositionAndRotationRandomizer.RandomizeScalesEditor))) {
                 myScript.RandomizeScalesEditor();

@@ -32,7 +32,6 @@ namespace CDK.UI {
 		
 		private CUIViewBase _previousUI;
 		private CUIInteractable _previousButton;
-		private Canvas _canvas;
 		
 		public event Action OnOpen {
 			add {
@@ -73,7 +72,6 @@ namespace CDK.UI {
 
 		protected virtual void Awake() {
 			gameObject.Inject();
-			this._canvas = this.GetComponentInChildren<Canvas>(true);
         }
 
 		protected virtual IEnumerator Start() {
@@ -131,7 +129,6 @@ namespace CDK.UI {
 
 		public void Open(int sortOrder, CUIViewBase originUI, CUIInteractable originButton, bool canCloseByReturnButton = true) {
 			Debug.Log($"Open UI {this.gameObject.name}");
-            this.Awake();
 			this._previousUI = originUI;
 			this._previousButton = originButton;
 
@@ -139,12 +136,12 @@ namespace CDK.UI {
             
 			this._onOpen?.Invoke();
 
-			this._canvas.sortingOrder = sortOrder;
-
 			this.UpdateCTime();
 
 			OnOpenEvent?.Invoke();
             
+			GetComponentInChildren<Canvas>(true).sortingOrder = sortOrder;
+
             this.gameObject.SetActive(true);
 		}
 

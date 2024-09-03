@@ -11,6 +11,7 @@ namespace CDK {
             builder
                 .AddSingleton(container => Resources.Load<CGameSettings>("GameSettings"), typeof(CGameSettings))
                 .AddSingleton(container => new CBlockingEventsManager(), typeof(CBlockingEventsManager))
+                .AddSingleton(container => CAssets.LoadResourceAndInstantiate<CLoadingCanvas>("System/Loading Canvas"))
                 .AddSingleton(container => new CInputManager(container), typeof(CInputManager))
                 .AddSingleton(container => new CCursorManager(container), typeof(CCursorManager))
                 .AddSingleton(container => new CUINavigationManager(container), typeof(CUINavigationManager))
