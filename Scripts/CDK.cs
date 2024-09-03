@@ -5,6 +5,7 @@
 // Also check my website for my projects! https://chrisjogos.com
 
 using System;
+using UnityEngine;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -19,10 +20,8 @@ namespace CDK
 	{
 		static CDK() 
 		{
-			#if UNITY_EDITOR
-			CGameSettings.EditorCreateGameSettingsResourceIfNeeded();
-			#endif
+			Debug.Log($"CDK Version {Version}");
 		} 
-		public static readonly Version VERSION = new (4,0,1);
+		public static readonly Version Version = new (4,0,2);
 	}
 }
