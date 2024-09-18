@@ -5,5 +5,6 @@ namespace CDK {
         public static readonly StringBuilder Builder = new StringBuilder();
         public const string PrefixCdkScripts = "CDK/";
         public const string DontDestroyOnLoad = "DontDestroyOnLoad";
+        public const string ResourcesPath = "Assets/Resources/";
     }
 }
