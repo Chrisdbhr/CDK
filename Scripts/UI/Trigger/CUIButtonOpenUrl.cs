@@ -17,18 +17,19 @@ namespace CDK.UI.Trigger {
         }
         #endif
 
-        private Button button;
-        [SerializeField] private string urlToOpen = "https://chrisjogos.com";
+        [SerializeField] string urlToOpen = "https://chrisjogos.com";
+        Button button;
 
 
-        private void Awake() {
-            button = this.GetComponent<Button>();
+        void Awake()
+        {
+            if (!TryGetComponent(out button)) {
+                Debug.LogError($"Error getting Button component on '{name}'");
+            }
             button.onClick.AddListener(() => {
                 CApplication.OpenURL(urlToOpen);
             });
         }
-
-
 
     }
 }
