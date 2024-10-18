@@ -1,8 +1,14 @@
 ![Project Thumbnail](https://chrisdbhr.github.io/images/thumbs/cdk.png)
 
-CDK (Chris Development Kit) is a useful set of tools to speedup development of core Unity games mechanics. 
+![GitHub package.json version](https://img.shields.io/github/package-json/v/chrisdbhr/cdk)
+[![GitHub license](https://img.shields.io/github/license/chrisdbhr/cdk)](https://github.com/chrisdbhr/cdk/blob/master/LICENSE)
+![GitHub package.json dynamic](https://img.shields.io/github/package-json/unity/chrisdbhr/cdk)
+![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/chrisdbhr/cdk)
 
-It's being used in my main current game project "[resultarias](https://chrisjogos.com/resultarias)", a surrealist game about dream exploration.
+
+CDK (Chris Development Kit) is a useful set of tools to speedup development of core Unity games mechanics.
+
+It's being used in my main current game project "[Resultarias](https://chrisjogos.com/resultarias)", a surrealist game about dream exploration.
 Check more information about my other projects on [my website](https://chrisjogos.com)!
 
 ### What is this repository for? ###
@@ -12,7 +18,8 @@ Check more information about my other projects on [my website](https://chrisjogo
 
 ### How do I get set up? ###
 
-* Import this as a submodule inside **Assets/CDK/** folder OR download [this](https://github.com/Chrisdbhr/CDK/archive/master.zip) and put inside **Assets/CDK/** folder.
+* [Recommended] Install from UPM using the git URL ``https://github.com/Chrisdbhr/CDK.git``
+* Import this as a submodule inside ``Assets/CDK/`` folder OR download [this](https://github.com/Chrisdbhr/CDK/archive/master.zip) and put inside ``Assets/CDK/`` folder.
 
 ### Dependencies
 
