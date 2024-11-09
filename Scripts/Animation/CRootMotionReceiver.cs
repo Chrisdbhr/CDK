@@ -6,8 +6,8 @@ namespace CDK {
 	[RequireComponent(typeof(Animator))]
 	public class CRootMotionReceiver : MonoBehaviour {
 
-        public SerializableReactiveProperty<Vector3> DeltaPositionRx { get; private set; }
-        public SerializableReactiveProperty<Quaternion> DeltaRotationRx { get; private set; }
+        public ReactiveProperty<Vector3> DeltaPositionRx { get; private set; }
+        public ReactiveProperty<Quaternion> DeltaRotationRx { get; private set; }
         private Animator _animator;
 
 
