@@ -9,6 +9,7 @@ namespace CDK {
         static void InitializeAfterSceneLoad() {
             Observable.EveryUpdate(CApplication.QuittingCancellationTokenSource.Token).Subscribe(_ => {
                 if (Screen.fullScreenMode == FullScreenMode.Windowed && (Screen.width < 1024 || Screen.height < 768)) {
+                    Debug.Log($"{nameof(CDK)}.{nameof(CQualitySettings)}: Setting Screen Resolution to 1024x768 and fullscreen mode to false.");
                     Screen.SetResolution(1024, 768, false);
                 }
             });
