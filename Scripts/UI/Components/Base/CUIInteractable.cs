@@ -4,6 +4,7 @@ using Reflex.Attributes;
 using Reflex.Extensions;
 using Reflex.Injectors;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
@@ -30,6 +31,8 @@ namespace CDK.UI {
         protected readonly CompositeDisposable _disposeOnDestroy = new CompositeDisposable();
         [Inject] protected CUINavigationManager _navigationManager;
         [Inject] protected CGameSettings _gameSettings;
+
+        [SerializeField] UnityEvent _interactEvent;
 
         #endregion <<---------- Properties and Fields ---------->>
 
@@ -70,6 +73,15 @@ namespace CDK.UI {
 		}
 		#endif
 
+		bool IsThisAValidInteractionTarget(BaseEventData eventData)
+		{
+			if (!gameObject.activeInHierarchy) return false;
+			if (eventData is PointerEventData pointerEventData) {
+				if (pointerEventData.pointerEnter != gameObject) return false;
+			}
+			return true;
+		}
+
 		public virtual void Selected(bool playSound = true) {
 			if(this._debug) Debug.Log($"Selected: CUIInteractable '{this.gameObject.name}'", this);
 			#if FMOD
@@ -78,6 +90,7 @@ namespace CDK.UI {
 		}
 
 		public virtual void Submited() {
+			_interactEvent?.Invoke();
 			if(this._debug) Debug.Log($"SUBMIT: CUIInteractable '{this.gameObject.name}'", this);
 			#if FMOD
             if (!(this is CUIButton b && !b.Button.interactable)) {
@@ -95,18 +108,19 @@ namespace CDK.UI {
 		
 		#region <<---------- IHandlers ---------->>
 		
-		public void OnSelect(BaseEventData eventData) {
-			if (!this.gameObject.activeInHierarchy) return;
+		public void OnSelect(BaseEventData eventData)
+		{
+			if (!IsThisAValidInteractionTarget(eventData)) return;
 			this.Selected();
 		}
 
 		public void OnSubmit(BaseEventData eventData) {
-			if (!this.gameObject.activeInHierarchy) return;
+			if (!IsThisAValidInteractionTarget(eventData)) return;
 			this.Submited();
 		}
 		
 		public void OnCancel(BaseEventData eventData) {
-			if (!this.gameObject.activeInHierarchy) return;
+			if (!IsThisAValidInteractionTarget(eventData)) return;
             if (_navigationManager.CloseLastMenu(true)) {
                 this.Canceled();
             }
@@ -114,7 +128,7 @@ namespace CDK.UI {
 
 		// Pointer
 		public virtual void OnPointerEnter(PointerEventData eventData) {
-			if (!this.gameObject.activeInHierarchy) return;
+			if (!IsThisAValidInteractionTarget(eventData)) return;
 			var selectable = this.GetComponent<Selectable>();
 			if (selectable == null) return;
 			selectable.Select();
@@ -126,7 +140,7 @@ namespace CDK.UI {
         }
 		
 		public void OnPointerClick(PointerEventData eventData) {
-			if (!this.gameObject.activeInHierarchy) return;
+			if (!IsThisAValidInteractionTarget(eventData)) return;
             if (eventData.button == PointerEventData.InputButton.Right) return;
             this.Submited();
 		}
