@@ -70,6 +70,20 @@ namespace CDK {
             t.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
             t.localScale = Vector3.one;
         }
-        
+
+        public static Vector3 CGetRelative3dPlanarDirection(this Transform t, Vector3 dir)
+        {
+            var forward = t.forward;
+            var right = t.right;
+
+            // project forward and right vectors on the horizontal plane (y = 0)
+            forward.y = 0f;
+            right.y = 0f;
+            forward.Normalize();
+            right.Normalize();
+
+            return (forward * dir.z) + (right * dir.x);
+        }
+
     }
 }
