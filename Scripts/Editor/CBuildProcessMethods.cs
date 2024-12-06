@@ -9,16 +9,26 @@ namespace CDK {
     public class CBuildProcessMethods : IPostprocessBuildWithReport {
 
         public int callbackOrder => 1;
-        
+
         public void OnPostprocessBuild(BuildReport report) {
             if (report.summary.result != BuildResult.Succeeded && report.summary.result != BuildResult.Unknown) return;
-            CEditorPlayerSettings.RaiseBuildVersion();
 
-            #if !UNITY_WEBGL
-            var outputPath = report.summary.outputPath.Replace($"/{Application.productName}.exe", string.Empty);
-            // Create Shortcut to application Logs Directory
+            string buildPath = report.summary.outputPath;
+
+            #if UNITY_WEBGL
+            string netlifyFolder = Path.Combine(buildPath, ".netlify");
+            if (Directory.Exists(netlifyFolder))
+            {
+                Debug.Log($".netlify folder found in: {netlifyFolder}. Executing cmd 'netlify build --prod'...");
+                RunCmd(netlifyFolder, "netlify build --prod");
+            }
+            #elif UNITY_EDITOR_WIN
+            var outputPath = buildPath.Replace($"/{Application.productName}.exe", string.Empty);
+            // Create Shortcut to application Logs Directory on Windows
             CreateShortcut(outputPath);
             #endif
+
+            CEditorPlayerSettings.RaiseBuildVersion();
         }
 
         static void CreateShortcut(string outputPath)
@@ -28,22 +38,32 @@ namespace CDK {
 
             string cmd = $"/c powershell -Command \"$WshShell = New-Object -ComObject WScript.Shell; $Shortcut = $WshShell.CreateShortcut('{shortcutPath}'); $Shortcut.TargetPath = '{targetPath}'; $Shortcut.Save()\"";
 
-            ProcessStartInfo startInfo = new ProcessStartInfo
-            {
-                FileName = "cmd.exe",
-                Arguments = cmd,
-                RedirectStandardOutput = true,
-                UseShellExecute = false,
-                CreateNoWindow = true
-            };
+            RunCmd("", cmd);
+        }
 
-            using (Process process = new Process())
+        static void RunCmd(string cdToPath, string cmd)
+        {
+            try
             {
-                process.StartInfo = startInfo;
+                using var process = new Process();
+                process.StartInfo = new ProcessStartInfo
+                {
+                    FileName = "cmd.exe",
+                    Arguments = $"/C cd \"{cdToPath}\" && {cmd}",
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    CreateNoWindow = true
+                };
+                process.OutputDataReceived += (sender, e) => Debug.Log(e.Data);
+                process.ErrorDataReceived += (sender, e) => Debug.LogError(e.Data);
                 process.Start();
-                string output = process.StandardOutput.ReadToEnd();
                 process.WaitForExit();
-                UnityEngine.Debug.Log($"Shortcut creation output: {output}");
+                Debug.Log($"Command '{cmd}' completed.");
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogError($"Error executing '{cmd}': {ex.Message}");
             }
         }
 
