@@ -16,7 +16,7 @@ namespace CDK {
             string buildPath = report.summary.outputPath;
 
             #if UNITY_WEBGL
-            string netlifyFolder = Path.Combine(buildPath, ".netlify");
+            string netlifyFolder = Path.Combine(buildPath, ".netlify").Replace("\\", "/");
             if (Directory.Exists(netlifyFolder))
             {
                 Debug.Log($".netlify folder found in: {netlifyFolder}. Executing cmd 'netlify build --prod'...");
