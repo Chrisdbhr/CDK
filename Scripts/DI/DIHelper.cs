@@ -17,7 +17,7 @@ namespace CDK {
         public static Container Inject(this GameObject gameObject) {
             if (gameObject == null) {
                 Debug.LogError($"GameObject to inject is null, returning null Container");
-                return default;
+                return null;
             }
             var scene = gameObject.scene;
             if (scene.name == CStrings.DontDestroyOnLoad) scene = SceneManager.GetActiveScene();
