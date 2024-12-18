@@ -7,10 +7,6 @@ using UnityEngine.SceneManagement;
 using FMODUnity;
 #endif
 
-#if REWIRED
-using Rewired;
-#endif
-
 namespace CDK {
     public class CAppInitializeBeforeTheSplashTrigger : MonoBehaviour {
 

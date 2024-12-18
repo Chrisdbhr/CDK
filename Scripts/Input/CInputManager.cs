@@ -1,15 +1,10 @@
 using System;
-using System.Linq;
 using R3;
-using Reflex.Attributes;
 using Reflex.Core;
 using UnityEngine;
 
-#if REWIRED
-using Rewired;
-#endif
-
 namespace CDK {
+	[Obsolete("This class will be removed in future versions, was only used with Rewired.")]
 	public class CInputManager {
 
         #region <<---------- Enums ---------->>
@@ -171,7 +166,7 @@ namespace CDK {
             Debug.Log($"Player '{rePlayer.id}' controllers maps onMenu changed to '{onMenu}'\nCustom Controllers: {customControllersCount}, JoystickControllers: {joystickControllersCount}");
         }
         #endif
-        
+
 	}
     
     public static class InputTypeExtension {

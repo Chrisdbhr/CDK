@@ -33,7 +33,6 @@ Check more information about my other projects on [my website](https://chrisjogo
 * [DOTween](https://assetstore.unity.com/packages/tools/animation/dotween-hotween-v2-27676), include **DOTWEEN** on define symbols.
 * Unity Addressables system (install via package manager), include **UNITY_ADDRESSABLES_EXIST** on define symbols.
 * [FMOD](https://www.fmod.com) (for audio processing), include **FMOD** on define symbols.
-* [Rewired](https://assetstore.unity.com/packages/tools/utilities/rewired-21676) for input handling, **REWIRED** on define symbols.
 
 ### Contribution guidelines ###
 

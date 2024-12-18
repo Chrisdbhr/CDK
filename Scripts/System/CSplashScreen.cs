@@ -6,7 +6,7 @@ using UnityEngine.Playables;
 using UnityEngine.SceneManagement;
 
 #if REWIRED
-using Rewired;
+using UnityEngine.InputSystem;
 #endif
 
 #if FMOD

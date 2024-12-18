@@ -65,8 +65,6 @@ namespace CDK {
             }
             #endif
 
-            InitializeInputManager();
-
             ApplicationInitialized?.Invoke();
 
             var isMobile = CPlayerPlatformTrigger.IsMobilePlatform();
@@ -118,34 +116,6 @@ namespace CDK {
         private static Version _version;
 
         #endregion <<---------- Properties and Fields ---------->>
-
-
-
-
-        #region <<---------- Input ---------->>
-
-        static void InitializeInputManager() {
-            #if REWIRED
-            var rInputManager = GameObject.FindObjectOfType<InputManager_Base>();
-            if (rInputManager) {
-                Debug.Log("Will not Instantiate a new <b>Rewired Input Manager</b> because one is already in the scene.");
-                return;
-            }
-
-            var rw = CAssets.LoadResourceAndInstantiate<InputManager_Base>("System/Input Manager");
-            if (!rw) {
-                Debug.LogError("<b>Rewired Input Manager</b> could not be Instantiated.");
-                return;
-            }
-
-            Debug.Log("<b>Rewired Input Manager</b> instantiated.");
-            rw.name = rw.name.Replace("(Clone)", string.Empty) + " (Instantiated BeforeSplashScreen)";
-            #else
-            Debug.LogError("No input manager setup on initialization.");
-			#endif
-        }
-
-        #endregion <<---------- Input ---------->>
 
 
 
