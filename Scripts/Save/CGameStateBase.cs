@@ -6,13 +6,18 @@ using UnityEngine;
 
 using Newtonsoft.Json;
 
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
+
 namespace CDK {
     [JsonObject(MemberSerialization.OptIn)]
-    public abstract class CGameProgressBase : CPersistentData {
+    [Serializable]
+    public abstract class CGameStateBase : CPersistentData {
 
         #region <<---------- Initializers ---------->>
 
-        protected CGameProgressBase(string name = null, bool isAutoInitialized = false) {
+        protected CGameStateBase(string name = null, bool isAutoInitialized = false) {
             this.WasLoadedAutomatically = isAutoInitialized;
             this.SaveIdentifier = Guid.NewGuid().ToString();
             if (!name.CIsNullOrEmpty()) this.SaveDescriptiveName = name;
@@ -34,16 +39,16 @@ namespace CDK {
             }
             remove => _onNotifyForExternalModifiedSaveFile -= value;
         }
-        private static Action _onNotifyForExternalModifiedSaveFile;
+        [NonSerialized] static Action _onNotifyForExternalModifiedSaveFile;
 
-        [JsonProperty("_appVersionWhenCreated")]
+        [JsonProperty("_appVersionWhenCreated"), SerializeField]
         string _appVersionWhenCreated;
         public Version AppVersionWhenCreated {
             get => Version.TryParse(_appVersionWhenCreated, out var version) ? version : default;
             set => _appVersionWhenCreated = value.ToString();
         }
 
-        [JsonProperty("_appVersionOnLastSave")]
+        [JsonProperty("_appVersionOnLastSave"), SerializeField]
         string _appVersionOnLastSave;
         public Version AppVersionOnLastSave {
             get => Version.TryParse(_appVersionOnLastSave, out var version) ? version : default;
@@ -77,7 +82,7 @@ namespace CDK {
             return this.SaveJson();
         }
 
-        private bool SaveJson() {
+        bool SaveJson() {
             this.SaveDate = DateTime.UtcNow;
             this.SaveHash = String.Empty;
             if (Version.TryParse(Application.version, out var version)) {
@@ -86,10 +91,10 @@ namespace CDK {
             // serialized json without hash
             this.SaveHash = Animator.StringToHash(this.GetSerializedJson()).ToString();
             // then serialize again and save with hash
-            return SaveJsonTextToFile(this.GetSerializedJson(), GetGameProgressFilePath(this.SaveIdentifier));
+            return SaveJsonTextToFile(this.GetSerializedJson(), GetGameStateFilePath(this.SaveIdentifier));
         }
 
-        private string GetSerializedJson() {
+        string GetSerializedJson() {
             #if NEWTONSOFT_JSON
             return JsonConvert.SerializeObject(this, CJsonExtensions.DefaultSettings);
             #else
@@ -106,7 +111,7 @@ namespace CDK {
 
         public static T LoadFromId<T>(string saveId) where T : CPersistentData {
             try {
-                var filePath = GetGameProgressFilePath(saveId);
+                var filePath = GetGameStateFilePath(saveId);
 				
                 Debug.Log($"Trying to LoadGameProgress with file '{filePath}'");
 
@@ -146,7 +151,7 @@ namespace CDK {
             return null;
         }
 
-        private static T DeserializeFile<T>(string fileContent) where T : CPersistentData {
+        static T DeserializeFile<T>(string fileContent) where T : CPersistentData {
             #if NEWTONSOFT_JSON
             return JsonConvert.DeserializeObject<T>(fileContent, CJsonExtensions.DefaultSettings);
             #else
@@ -157,10 +162,10 @@ namespace CDK {
         /// <summary>
         /// Never returns a null list.
         /// </summary>
-        public static List<T> GetAllSaveFiles<T>() where T : CGameProgressBase {
+        public static List<T> GetAllSaveFiles<T>() where T : CGameStateBase {
             List<T> saves = new List<T>();
             try {
-                var filesPaths = Directory.GetFiles(GetGameProgressFolder(), "*.json");
+                var filesPaths = Directory.GetFiles(GetGameStateFolder(), "*.json");
                 foreach (var filePath in filesPaths) {
                     try {
                         var save = LoadFromPath<T>(filePath);
@@ -187,7 +192,7 @@ namespace CDK {
 
         public bool DeleteSave() {
             try {
-                var filePath = GetGameProgressFilePath(this.SaveIdentifier);
+                var filePath = GetGameStateFilePath(this.SaveIdentifier);
                 if (!File.Exists(filePath)) return false;
                 File.Delete(filePath);
                 return true;
@@ -205,16 +210,16 @@ namespace CDK {
 
         #region <<---------- Paths ---------->>
 
-        public static string GetGameProgressFolder() {
+        public static string GetGameStateFolder() {
             var folderPath = Path.Combine(GetApplicationPersistentDataFolder(), SavesDirectoryName).Replace('\\', '/');
             if (!Directory.Exists(folderPath)) {
                 Directory.CreateDirectory(folderPath);
             }
-            Debug.Log($"{nameof(GetGameProgressFolder)} returned: '{folderPath}'");
+            Debug.Log($"{nameof(GetGameStateFolder)} returned: '{folderPath}'");
             return folderPath;
         }
-        public static string GetGameProgressFilePath(string fileName) {
-            return Path.Combine(GetGameProgressFolder(), $"{fileName}.json");
+        public static string GetGameStateFilePath(string fileName) {
+            return Path.Combine(GetGameStateFolder(), $"{fileName}.json");
         }
 
         #endregion <<---------- Paths ---------->>
@@ -225,7 +230,7 @@ namespace CDK {
         #region <<---------- General ---------->>
 
         public static bool CheckForModifiedFile<T>(T dataT) {
-            if (!(dataT is CGameProgressBase data)) return true;
+            if (!(dataT is CGameStateBase data)) return true;
             var originalHash = data.SaveHash;
             data.SaveHash = string.Empty;
             var newHash = Animator.StringToHash(data.GetSerializedJson()).ToString();
