@@ -45,7 +45,7 @@ namespace CDK {
 		}
 		InputType _activeInputType;
 
-		public EventHandler<InputType> InputTypeChanged;
+		public EventHandler<InputType> InputTypeChanged = delegate { };
 
 		readonly CBlockingEventsManager blockingEventsManager;
 
