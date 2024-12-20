@@ -26,8 +26,8 @@ namespace CDK.UI {
 		#region <<---------- Properties ---------->>
 		public CUIViewBase[] NavigationHistoryToArray => this._navigationHistory.ToArray();
 		
-		int LastFrameAMenuClosed;
-		IDisposable _disposableIsNavigating;
+		[NonSerialized] int LastFrameAMenuClosed;
+		[NonSerialized] IDisposable _disposableIsNavigating;
 
         readonly HashSet<CUIViewBase> _navigationHistory;
         readonly CBlockingEventsManager _blockingEventsManager;

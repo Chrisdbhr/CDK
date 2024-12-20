@@ -11,27 +11,27 @@ using FMODUnity;
 #endif
 
 namespace CDK.UI {
-	public abstract class CUIViewBase : MonoBehaviour {
+	public abstract class CUIViewBase : CMonoBehaviour {
 
 		#region <<---------- Properties and Fields ---------->>
 
 		public GameObject FirstSelectedObject => this._eventSystem.firstSelectedGameObject;
 		
 		[Header("Setup")]
-		[SerializeField] protected EventSystem _eventSystem;
+		[NonSerialized, GetComponentInChildren] protected EventSystem _eventSystem;
         protected CUIButton ButtonReturn => _buttonReturn;
         [SerializeField] CUIButton _buttonReturn;
 
         public bool ShouldPauseTheGame = true;
 
 		[Obsolete("Trigger audio using OnOpen/OnClose unity events")]
-		protected bool _shouldPlayOpenAndCloseMenuSound;
+		[NonSerialized] protected bool _shouldPlayOpenAndCloseMenuSound;
 
 		public bool CanCloseByReturnButton => this._canCloseByReturnButton;
         protected bool _canCloseByReturnButton = true;
 		
-		private CUIViewBase _previousUI;
-		private CUIInteractable _previousButton;
+		[NonSerialized] CUIViewBase _previousUI;
+		[NonSerialized] CUIInteractable _previousButton;
 		
 		public event Action OnOpen {
 			add {
@@ -42,7 +42,7 @@ namespace CDK.UI {
 				this._onOpen -= value;
 			}
 		}
-		private Action _onOpen;
+		[NonSerialized] Action _onOpen;
 		
 		public event Action<CUIViewBase> OnClose {
 			add {
@@ -53,15 +53,15 @@ namespace CDK.UI {
 				this._onClose -= value;
 			}
 		}
-		private Action<CUIViewBase> _onClose;
+		[NonSerialized] Action<CUIViewBase> _onClose;
 
-		protected UnityEvent OnOpenEvent;
-		protected UnityEvent OnCloseEvent;
+		[NonSerialized] protected UnityEvent OnOpenEvent;
+		[NonSerialized] protected UnityEvent OnCloseEvent;
 
-		[Inject] protected CGameSettings _gameSettings;
-		[Inject] protected readonly CBlockingEventsManager _blockingEventsManager;
-		[Inject] protected CUINavigationManager _navigationManager;
-        protected CompositeDisposable _disposeOnDisable;
+		[Inject][NonSerialized] protected CGameSettings _gameSettings;
+		[Inject][NonSerialized] protected readonly CBlockingEventsManager _blockingEventsManager;
+		[Inject][NonSerialized] protected CUINavigationManager _navigationManager;
+		[NonSerialized] protected CompositeDisposable _disposeOnDisable = new ();
 
 		#endregion <<---------- Properties and Fields ---------->>
 
@@ -70,44 +70,33 @@ namespace CDK.UI {
 
 		#region <<---------- MonoBehaviour ---------->>
 
-		protected virtual void Awake() {
-			gameObject.Inject();
-        }
-
-		protected virtual IEnumerator Start() {
-            yield return null;
-        }
-		
 		protected virtual void OnEnable() {
-			_disposeOnDisable = new CompositeDisposable();
 			this.UpdateEventSystemAndCheckForObjectSelection(this._eventSystem.firstSelectedGameObject);
-
-            Observable.TimerFrame(1, 1, UnityFrameProvider.PostLateUpdate)
-                .Subscribe(_ => {
-                    if (this == null) return;
-                    if (this._eventSystem == null || (this._eventSystem.currentSelectedGameObject != null && this._eventSystem.currentSelectedGameObject.GetComponent<CUIInteractable>() != null)) return;
-                    var toSelect = this.GetComponentInChildren<CUIInteractable>();
-                    if (toSelect == null) {
-                        Debug.LogError($"Could not find object to select with a '{nameof(CUIInteractable)}' in '{this.name}', this will lead to non functional UI on controllers.", this);
-                        return;
-                    }
-                    Debug.Log($"Auto selecting item '{toSelect.name}' on menu '{this.name}'", toSelect);
-                    this._eventSystem.SetSelectedGameObject(toSelect.gameObject);
-                })
-                .AddTo(this);
 
             if(this._buttonReturn != null){
                 this._buttonReturn.Button.OnClickAsObservable()
                     .Subscribe(_ => {
                         this._navigationManager.CloseLastMenu();
                     })
-                    .AddTo(this);
+                    .AddTo(_disposeOnDisable);
             }
             
             this._blockingEventsManager.OnMenuRetainable.Retain(this);
         }
 
-        protected virtual void OnDisable() {
+		void LateUpdate()
+		{
+			if (this._eventSystem == null || (this._eventSystem.currentSelectedGameObject != null && this._eventSystem.currentSelectedGameObject.GetComponent<CUIInteractable>() != null)) return;
+			var toSelect = this.GetComponentInChildren<CUIInteractable>();
+			if (toSelect == null) {
+				Debug.LogError($"Could not find object to select with a '{nameof(CUIInteractable)}' in '{this.name}', this will lead to non functional UI on controllers.", this);
+				return;
+			}
+			Debug.Log($"Auto selecting item '{toSelect.name}' on menu '{this.name}'", toSelect);
+			this._eventSystem.SetSelectedGameObject(toSelect.gameObject);
+		}
+
+		protected virtual void OnDisable() {
 			this._disposeOnDisable?.Dispose();
             this._blockingEventsManager.OnMenuRetainable.Release(this);
 		}
