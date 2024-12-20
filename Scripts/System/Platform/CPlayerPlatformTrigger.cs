@@ -3,24 +3,24 @@
 namespace CDK {
     public class CPlayerPlatformTrigger : CAutoTriggerCompBase {
 
-        [SerializeField] private CUnityEventBool _isWebgl;
-        [SerializeField] private CUnityEventBool _isMobile;
-        [SerializeField] private CUnityEventBool _isConsole;
+        [SerializeField] CUnityEvent _isWebgl;
+        [SerializeField] CUnityEvent _isMobile;
+        [SerializeField] CUnityEvent _isConsole;
         
         
         
         
         protected override void TriggerEvent() {
-            this._isWebgl?.Invoke(Application.platform == RuntimePlatform.WebGLPlayer);
-            this._isMobile?.Invoke(IsMobilePlatform());
-            this._isConsole?.Invoke(IsConsolePlatform());
+            if(Application.platform == RuntimePlatform.WebGLPlayer) this._isWebgl?.Invoke();
+            if(IsMobilePlatform()) this._isMobile?.Invoke();
+            if(IsConsolePlatform()) this._isConsole?.Invoke();
         }
 
         public static bool IsMobilePlatform() {
             return Application.platform == RuntimePlatform.Android || Application.platform == RuntimePlatform.IPhonePlayer;
         }
         
-        public static bool IsConsolePlatform() {
+        static bool IsConsolePlatform() {
             return Application.platform == RuntimePlatform.XboxOne 
                 || Application.platform == RuntimePlatform.PS4
                 || Application.platform == RuntimePlatform.PS5
