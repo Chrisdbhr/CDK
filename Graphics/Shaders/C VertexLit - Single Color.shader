@@ -1,4 +1,4 @@
-﻿// From VLukianenko https://forum.unity.com/threads/mobile-diffuse-with-color.333964/#post-3530533
+﻿// From VLukianenko https://discussions.unity.com/t/mobile-diffuse-with-color/585257#post-3530533
 Shader "CDK/C VertexLit - Single color" {
 Properties {
     _Color ("Color", color) = (1,1,1,1)
