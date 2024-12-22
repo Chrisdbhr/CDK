@@ -1,6 +1,6 @@
 using System;
 using TMPro;
-using R3;
+
 using UnityEngine;
 
 namespace CDK.UI {
@@ -14,14 +14,14 @@ namespace CDK.UI {
 		
 		public void SetupPopup(EventHandler onConfirm, string title) {
 			// confirm exit
-			this._buttonConfirm.Button.interactable = true;
-			this._buttonConfirm.Button.OnClickAsObservable().Subscribe(_ => {
-				Debug.Log($"SUBMIT: Confirm Popup '{this.gameObject.name}'", this);
-				this._navigationManager.CloseLastMenu();
+			_buttonConfirm.Button.interactable = true;
+			_buttonConfirm.Button.OnClickAsObservable().Subscribe(_ => {
+				Debug.Log($"SUBMIT: Confirm Popup '{gameObject.name}'", this);
+				_navigationManager.CloseLastMenu();
 				onConfirm?.Invoke(this, EventArgs.Empty);
 			}).AddTo(this);
 					
-			this._eventSystem.SetSelectedGameObject(this._buttonConfirm.gameObject);
+			_eventSystem.SetSelectedGameObject(_buttonConfirm.gameObject);
             
             _title.text = title;
 		}

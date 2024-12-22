@@ -11,28 +11,28 @@ namespace CDK {
         #region <<---------- MonoBehaviour ---------->>
         
         private void Awake() {
-            this.CheckReferences();
+            CheckReferences();
         }
 
         private void Reset() {
-            this.CheckReferences();
+            CheckReferences();
         }
 
         private void OnValidate() {
-            this.CheckReferences();
+            CheckReferences();
         }
 
         private void OnAnimatorMove() {
-            if (!this._sourceAnimator.applyRootMotion) return;
-            this.TargetRigidbody.MovePosition(this.TargetRigidbody.position + this._sourceAnimator.deltaPosition);
-            this.TargetRigidbody.MoveRotation(this.TargetRigidbody.rotation * this._sourceAnimator.deltaRotation);
+            if (!_sourceAnimator.applyRootMotion) return;
+            TargetRigidbody.MovePosition(TargetRigidbody.position + _sourceAnimator.deltaPosition);
+            TargetRigidbody.MoveRotation(TargetRigidbody.rotation * _sourceAnimator.deltaRotation);
         }
 
         #endregion <<---------- MonoBehaviour ---------->>
 
 
         private void CheckReferences() {
-            if (this._sourceAnimator == null) this._sourceAnimator = this.GetComponent<Animator>();
+            if (_sourceAnimator == null) _sourceAnimator = GetComponent<Animator>();
         }
     }
 }

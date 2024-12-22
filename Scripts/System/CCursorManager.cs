@@ -1,5 +1,4 @@
 using UnityEngine;
-using R3;
 using Reflex.Core;
 
 namespace CDK {
@@ -9,7 +8,6 @@ namespace CDK {
 
         readonly CBlockingEventsManager _blockingEventsManager;
         readonly CInputManager _inputManager;
-		CompositeDisposable _disposeOnDestroy = new CompositeDisposable();
 
         #endregion <<---------- Properties and Fields ---------->>
 
@@ -23,16 +21,13 @@ namespace CDK {
 	        _blockingEventsManager = container.Resolve<CBlockingEventsManager>();
 	        _inputManager = container.Resolve<CInputManager>();
 
-			_disposeOnDestroy.Clear();
-
-            _blockingEventsManager.OnMenuRetainable.IsRetainedAsObservable().Subscribe(onMenu => {
+            _blockingEventsManager.OnMenuRetainable.OnRetainedStateChanged += (sender, onMenu) => {
                 if (!onMenu) {
                     SetCursorState(false);
                     return;
                 }
                 ShowMouseIfNeeded();
-            })
-			.AddTo(_disposeOnDestroy);
+            };
 
             _inputManager.InputTypeChanged += OnInputTypeChanged;
         }
@@ -40,7 +35,6 @@ namespace CDK {
         #if UNITY_EDITOR
 		~CCursorManager() {
 			SetCursorState(true);
-			_disposeOnDestroy?.Dispose();
 		}
 		#endif
 
@@ -51,15 +45,10 @@ namespace CDK {
 			SetCursorState(_inputManager.ActiveInputType.IsMouseOrKeyboard() && _blockingEventsManager.IsOnMenu);
 		}
 
-		static void SetCursorState(bool visible) {
+		static void SetCursorState(bool visible)
+		{
 			Cursor.visible = visible;
-			
-			if (visible) {
-				Cursor.lockState = CursorLockMode.None;
-			}
-			else {
-				Cursor.lockState = CursorLockMode.Locked;
-			}
+			Cursor.lockState = visible ? CursorLockMode.None : CursorLockMode.Locked;
 		}
 
         public void ShowMouseIfNeeded() {

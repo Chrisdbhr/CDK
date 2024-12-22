@@ -4,27 +4,27 @@ namespace CDK {
 	public class CTimeTriggers : MonoBehaviour {
 
 		[Header("Booleans")]
-		[SerializeField] private CUnityEventBool _timeStoppedEvent;
-		[SerializeField] private CUnityEventBool _timeResumedEvent;
+		[SerializeField] CUnityEventBool _timeStoppedEvent;
+		[SerializeField] CUnityEventBool _timeResumedEvent;
 		
 		[Header("Floats")]
-		[SerializeField] private CUnityEventFloat _timeScaleValueEvent;
-		
+		[SerializeField] CUnityEventFloat _timeScaleValueEvent;
 
-		private void OnEnable() {
-			CTime.OnTimeScaleChanged += this.TimeScaleChanged;
+
+		void OnEnable() {
+			CTime.OnTimeScaleChanged += TimeScaleChanged;
 		}
-		private void OnDisable() {
-			CTime.OnTimeScaleChanged -= this.TimeScaleChanged;
+		void OnDisable() {
+			CTime.OnTimeScaleChanged -= TimeScaleChanged;
 		}
 
 
-		private void TimeScaleChanged(float oldTimeScale, float newTimeScale) {
+		void TimeScaleChanged(float oldTimeScale, float newTimeScale) {
 			bool timeStopped = newTimeScale <= 0f;
-			this._timeResumedEvent?.Invoke(!timeStopped);
-			this._timeStoppedEvent?.Invoke(timeStopped);
+			_timeResumedEvent?.Invoke(!timeStopped);
+			_timeStoppedEvent?.Invoke(timeStopped);
 			
-			this._timeScaleValueEvent?.Invoke(newTimeScale);
+			_timeScaleValueEvent?.Invoke(newTimeScale);
 		}
 	}
 }

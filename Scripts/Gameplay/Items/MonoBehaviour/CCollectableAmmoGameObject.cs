@@ -4,7 +4,7 @@ using UnityEngine;
 namespace CDK {
 	public class CCollectableAmmoGameObject : CCollectableItemGameObject{
 	
-		[SerializeField] private CAmmoData AmmoHere;
+		[SerializeField] CAmmoData AmmoHere;
 		
 		
 		
@@ -13,9 +13,9 @@ namespace CDK {
 		
 		protected override void Awake() {
             base.Awake();
-			if (this.AmmoHere == null) {
-				Debug.LogError($"{this.GetType()} has no data set, destroying game object.");
-				Destroy(this.gameObject);
+			if (AmmoHere == null) {
+				Debug.LogError($"{GetType()} has no data set, destroying game object.");
+				Destroy(gameObject);
 			}
 		}
 
@@ -27,11 +27,11 @@ namespace CDK {
 		#region <<---------- CCollectableItemGameObject ---------->>
 
 		public override void SetItemHere(CIItemBase itemData) {
-			this.AmmoHere = itemData as CAmmoData;
+			AmmoHere = itemData as CAmmoData;
 		}
 		
 		public override CIItemBase GetItemHere() {
-			return this.AmmoHere;
+			return AmmoHere;
 		}
 		
 		#endregion <<---------- CCollectableItemGameObject ---------->>

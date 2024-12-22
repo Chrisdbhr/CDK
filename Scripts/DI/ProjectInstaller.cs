@@ -14,7 +14,7 @@ namespace CDK {
                 .AddSingleton(container => CAssets.LoadResourceAndInstantiate<CLoadingCanvas>("System/Loading Canvas"))
                 .AddSingleton(container => new CInputManager(container), typeof(CInputManager))
                 .AddSingleton(container => new CCursorManager(container), typeof(CCursorManager))
-                .AddSingleton(container => new CUINavigationManager(container), typeof(CUINavigationManager))
+                .AddSingleton(container => new GameObject("UI Navigation Manager").AddComponent<CUINavigationManager>().Init(container), typeof(CUINavigationManager))
             ;
         }
     }

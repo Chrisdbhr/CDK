@@ -1,4 +1,4 @@
-﻿using R3;
+﻿using System;
 using Reflex.Extensions;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -47,18 +47,20 @@ namespace CDK {
         #endif
         [FormerlySerializedAs("NotOnMenuOrNotPlayingCutsceneEvent")] [SerializeField] CUnityEventBool NotOnMenuAndNotPlayingCutsceneEvent;
 
-        CBlockingEventsManager b;
+        [NonSerialized] CBlockingEventsManager _blockingEventsManager;
 
         void Awake() {
-            b = this.gameObject.scene.GetSceneContainer().Resolve<CBlockingEventsManager>();
-            OnBlockingEvent(b.IsOnMenu, b.IsPlayingCutscene);
+            _blockingEventsManager = gameObject.scene.GetSceneContainer().Resolve<CBlockingEventsManager>();
+            OnBlockingEvent(_blockingEventsManager.IsOnMenu, _blockingEventsManager.IsPlayingCutscene);
 
             Observable.CombineLatest(
-                b.OnMenuRetainable.IsRetainedAsObservable(),
-                b.PlayingCutsceneRetainable.IsRetainedAsObservable()
+                _blockingEventsManager.OnMenuRetainable.IsRetainedAsObservable(),
+                _blockingEventsManager.PlayingCutsceneRetainable.IsRetainedAsObservable()
             )
             .Subscribe(x => OnBlockingEvent(x[0], x[1]))
             .AddTo(this);
+
+
         }
 
         void OnBlockingEvent(bool isOnMenu, bool isPlayingCutscene) {

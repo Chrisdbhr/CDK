@@ -7,11 +7,11 @@ namespace CDK {
 
 		#region <<---------- Properties and Fields ---------->>
 		
-		[SerializeField] private CInventoryViewItem _prefabInventoryViewItem;
-		[SerializeField] private Transform _itemsGridParent;
+		[SerializeField] CInventoryViewItem _prefabInventoryViewItem;
+		[SerializeField] Transform _itemsGridParent;
 
-		[NonSerialized] private List<CInventoryViewItem> _inventoryViewItemList = new List<CInventoryViewItem>();
-		[NonSerialized] private CInventory _inventory;
+		[NonSerialized] List<CInventoryViewItem> _inventoryViewItemList = new List<CInventoryViewItem>();
+		[NonSerialized] CInventory _inventory;
 		[NonSerialized] public Action OnInventoryClose;
 		
 		#endregion <<---------- Properties and Fields ---------->>
@@ -20,17 +20,18 @@ namespace CDK {
 		
 		
 		#region <<---------- MonoBehaviour ---------->>
-		private void Awake() {
+
+		void Awake() {
 			// destroy all child on item grid parent
-			foreach (var child in this._itemsGridParent.GetComponentsInChildren<Transform>()) {
-				if (child == this._itemsGridParent.transform) continue;
+			foreach (var child in _itemsGridParent.GetComponentsInChildren<Transform>()) {
+				if (child == _itemsGridParent.transform) continue;
 				child.gameObject.CDestroy();
 			}
 		}
 
-		private void Update() {
+		void Update() {
 			if (Input.GetButtonDown(CInputKeys.MENU_PAUSE)) {
-				this.Unpause();
+				Unpause();
 			}
 		}
 
@@ -42,8 +43,8 @@ namespace CDK {
 		#region <<---------- Managment ---------->>
 
 		public void Unpause() {
-			this.OnInventoryClose?.Invoke();
-			Destroy(this.gameObject);
+			OnInventoryClose?.Invoke();
+			Destroy(gameObject);
 		}
 		
 		#endregion <<---------- Managment ---------->>
@@ -54,23 +55,23 @@ namespace CDK {
 		#region <<---------- Inventory Update ---------->>
 
 		public void CreateInventoryViewItens(CInventory inventory) {
-			this._inventory = inventory;
+			_inventory = inventory;
 			
-			this._inventoryViewItemList.Clear();
+			_inventoryViewItemList.Clear();
 			// create new child game objects
-			for (int i = 0; i < this._inventory.Size; i++) {
-				this._inventoryViewItemList.Add(Instantiate(this._prefabInventoryViewItem.gameObject, this._itemsGridParent).GetComponent<CInventoryViewItem>());
+			for (int i = 0; i < _inventory.Size; i++) {
+				_inventoryViewItemList.Add(Instantiate(_prefabInventoryViewItem.gameObject, _itemsGridParent).GetComponent<CInventoryViewItem>());
 			}
-			this.UpdateInventoryView();
+			UpdateInventoryView();
 		}
 		
 		public void UpdateInventoryView() {
 			
 			// update itens on grid
-			for (int i = 0; i < this._inventory.Size; i++) {
+			for (int i = 0; i < _inventory.Size; i++) {
 
-				var item = this._inventory.InventoryItems[i];
-				this._inventoryViewItemList[i].UpdateSlotInfo(item != null ? this._inventory.InventoryItems[i] : null);
+				var item = _inventory.InventoryItems[i];
+				_inventoryViewItemList[i].UpdateSlotInfo(item != null ? _inventory.InventoryItems[i] : null);
 			}
 		}
 		

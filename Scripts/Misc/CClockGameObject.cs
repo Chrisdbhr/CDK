@@ -1,12 +1,10 @@
 using System;
+using System.Collections;
 using UnityEngine;
-using R3;
 
 namespace CDK {
 	public class CClockGameObject : MonoBehaviour {
 	
-		#region <<---------- Properties and Fields ---------->>
-		
 		public int seconds = 0;
 		public int minutes = 0;
 		public int hour = 0;
@@ -18,70 +16,61 @@ namespace CDK {
 
 		public float clockSpeed = 1.0f; // 1.0f = realtime, < 1.0f = slower, > 1.0f = faster
 
-		[NonSerialized] private float msecs = 0;
-	
-		#endregion <<---------- Properties and Fields ---------->>
+		[NonSerialized] float msecs = 0;
 
 		
 		
 		
-		#region <<---------- MonoBehaviour ---------->>
-	
-		private void Awake() {
-			this.UpdateTime();
-            Observable.Timer(TimeSpan.FromSeconds(1),TimeSpan.FromSeconds(1))
-            .Subscribe(_ => {
-                this.UpdateTime();
-            })
-            .AddTo(this);
+		void Awake() {
+			UpdateTime();
+			this.CStartCoroutine(ClockTickRoutine());
 		}
 
-		#endregion <<---------- MonoBehaviour ---------->>
+		IEnumerator ClockTickRoutine() {
+			var wait = new WaitForSeconds(1.0f);
+			while (enabled) {
+				yield return wait;
+				UpdateTime();
+			}
+		}
 
-		
-		
-		
-		#region <<---------- General ---------->>
-
-		private void UpdateTime() {
-			if (this.realTime) {
+		void UpdateTime() {
+			if (realTime) {
 				//-- set real time
 				var dateNow = DateTime.Now;
-				this.hour = dateNow.Hour;
-				this.minutes = dateNow.Minute;
-				this.seconds = dateNow.Second;
+				hour = dateNow.Hour;
+				minutes = dateNow.Minute;
+				seconds = dateNow.Second;
 			}
 			else {
 				//-- calculate time
-				this.msecs += 1f * this.clockSpeed;
-				if (this.msecs >= 1.0f) {
-					this.msecs -= 1.0f;
-					this.seconds++;
-					if (this.seconds >= 60) {
-						this.seconds = 0;
-						this.minutes++;
-						if (this.minutes > 60) {
-							this.minutes = 0;
-							this.hour++;
-							if (this.hour >= 24) this.hour = 0;
+				msecs += 1f * clockSpeed;
+				if (msecs >= 1.0f) {
+					msecs -= 1.0f;
+					seconds++;
+					if (seconds >= 60) {
+						seconds = 0;
+						minutes++;
+						if (minutes > 60) {
+							minutes = 0;
+							hour++;
+							if (hour >= 24) hour = 0;
 						}
 					}
 				}
 			}
 
 			//-- calculate pointer angles
-			float rotationSeconds = (360.0f / 60.0f) * this.seconds;
-			float rotationMinutes = (360.0f / 60.0f) * this.minutes;
-			float rotationHours = ((360.0f / 12.0f) * this.hour) + ((360.0f / (60.0f * 12.0f)) * this.minutes);
+			float rotationSeconds = (360.0f / 60.0f) * seconds;
+			float rotationMinutes = (360.0f / 60.0f) * minutes;
+			float rotationHours = ((360.0f / 12.0f) * hour) + ((360.0f / (60.0f * 12.0f)) * minutes);
 
 			//-- draw pointers
-			if(this.pointerSeconds) this.pointerSeconds.localEulerAngles = new Vector3(0.0f, 0.0f, rotationSeconds);
-			if(this.pointerMinutes) this.pointerMinutes.localEulerAngles = new Vector3(0.0f, 0.0f, rotationMinutes);
-			if(this.pointerHours) this.pointerHours.localEulerAngles = new Vector3(0.0f, 0.0f, rotationHours);
+			if(pointerSeconds) pointerSeconds.localEulerAngles = new Vector3(0.0f, 0.0f, rotationSeconds);
+			if(pointerMinutes) pointerMinutes.localEulerAngles = new Vector3(0.0f, 0.0f, rotationMinutes);
+			if(pointerHours) pointerHours.localEulerAngles = new Vector3(0.0f, 0.0f, rotationHours);
 		}
 		
-		#endregion <<---------- General ---------->>
-
 	}
 
 }

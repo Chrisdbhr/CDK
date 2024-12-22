@@ -9,7 +9,7 @@ namespace CDK {
 
 		public const float CriticalMultiplier = 1.5f;
 
-		public virtual CHealthComponent Health => this._healthToNotify;
+		public virtual CHealthComponent Health => _healthToNotify;
 		[SerializeField] CHealthComponent _healthToNotify;
 		[FormerlySerializedAs("_takeDamageEvent")] [SerializeField] private CUnityEvent _takeHitEvent;
 		public bool IsCriticalHitbox => _isCriticalHitbox;
@@ -19,11 +19,11 @@ namespace CDK {
 		
 		public event Action<CHitInfoData> OnHit {
 			add {
-				this._onHit += value;
+				_onHit += value;
 			}
 			remove {
-				this._onHit -= value;
-				this._onHit += value;
+				_onHit -= value;
+				_onHit += value;
 			}
 		}
 		private Action<CHitInfoData> _onHit;
@@ -32,12 +32,12 @@ namespace CDK {
 		
 		
 		public virtual float TakeHit(CHitInfoData attack, Transform attacker, float damageMultiplier) {
-			this._onHit?.Invoke(attack);
+			_onHit?.Invoke(attack);
 			float damage = attack.RawDamage;
-			if (this.Health != null) {
-				damage = this.Health.TakeHit(attack, attacker, GetDamageMultiplierForHit(attack) * damageMultiplier);
+			if (Health != null) {
+				damage = Health.TakeHit(attack, attacker, GetDamageMultiplierForHit(attack) * damageMultiplier);
 			}
-			this._takeHitEvent?.Invoke();
+			_takeHitEvent?.Invoke();
 			return damage;
 		}
 

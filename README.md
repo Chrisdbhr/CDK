@@ -19,19 +19,17 @@ Check more information about my other projects on [my website](https://chrisjogo
 ### How do I get set up? ###
 
 * [Recommended] Install from UPM using the git URL ``https://github.com/Chrisdbhr/CDK.git``
+
 * Import this as a submodule inside ``Assets/CDK/`` folder OR download [this](https://github.com/Chrisdbhr/CDK/archive/master.zip) and put inside ``Assets/CDK/`` folder.
 
 ### Dependencies
 
 #### Required
-* [R3](https://github.com/Cysharp/R3) for reactive functions, instructions of how to install this package [here](https://github.com/Cysharp/R3?tab=readme-ov-file#unity)
 * [Reflex](https://github.com/gustavopsantos/Reflex) for Dependency Injection, instructions of how to install this package [here](https://github.com/gustavopsantos/Reflex?tab=readme-ov-file#-installation)
 
 #### Optional
 * [Newtonsoft-Json](https://docs.unity3d.com/Packages/com.unity.nuget.newtonsoft-json@3.0/manual/index.html), include **NEWTONSOFT_JSON_FOR_UNITY** on define symbols.
 * [Unity Converters for Newtonsoft.Json](https://github.com/jilleJr/Newtonsoft.Json-for-Unity.Converters) to fix some Unity Json Serialization issues. 
-* [DOTween](https://assetstore.unity.com/packages/tools/animation/dotween-hotween-v2-27676), include **DOTWEEN** on define symbols.
-* Unity Addressables system (install via package manager), include **UNITY_ADDRESSABLES_EXIST** on define symbols.
 * [FMOD](https://www.fmod.com) (for audio processing), include **FMOD** on define symbols.
 
 ### Contribution guidelines ###

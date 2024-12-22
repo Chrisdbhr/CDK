@@ -1,45 +1,30 @@
 using System;
-using R3;
 using UnityEngine;
 
-namespace CDK {
-	[RequireComponent(typeof(Animator))]
-	public class CRootMotionReceiver : MonoBehaviour {
+namespace CDK
+{
+    [RequireComponent(typeof(Animator))]
+    public class CRootMotionReceiver : MonoBehaviour
+    {
+        public Vector3 DeltaPosition { get; private set; }
+        public Quaternion DeltaRotation { get; private set; }
+        [NonSerialized] Animator _animator;
 
-        public ReactiveProperty<Vector3> DeltaPositionRx { get; private set; }
-        public ReactiveProperty<Quaternion> DeltaRotationRx { get; private set; }
-        private Animator _animator;
 
-
-        
-
-		private void Awake() {
-			this._animator = this.CGetComponentInChildrenOrInParent<Animator>();
-            
-            this.DeltaPositionRx = new ();
-            this.DeltaRotationRx = new ();
+        void Awake()
+        {
+            _animator = this.CGetComponentInChildrenOrInParent<Animator>();
         }
 
-		private void OnDestroy() {
-            this.DeltaPositionRx?.Dispose();
-            this.DeltaPositionRx = null;
-            this.DeltaRotationRx?.Dispose();
-            this.DeltaRotationRx = null;
-		}
-
-		private void OnAnimatorMove() {
-            this.DeltaPositionRx.Value = this._animator.deltaPosition;
-            this.DeltaRotationRx.Value = this._animator.deltaRotation;
-		}
-        
-                
-        #region <<---------- Animations State Machine Behaviours ---------->>
-		
-        public void SetAnimationRootMotionEnabledState(bool state) {
-            if(this._animator) this._animator.applyRootMotion = state;
+        void OnAnimatorMove()
+        {
+            DeltaPosition = _animator.deltaPosition;
+            DeltaRotation = _animator.deltaRotation;
         }
-		
-        #endregion <<---------- Animations State Machine Behaviours ---------->>
-		
-	}
+
+        public void SetAnimationRootMotionEnabledState(bool state)
+        {
+            if(_animator) _animator.applyRootMotion = state;
+        }
+    }
 }

@@ -3,30 +3,30 @@ using UnityEngine;
 namespace CDK {
 	public abstract class CItemBaseScriptableObject : ScriptableObject {
 		public string ItemName {
-			get { return this._itemName; }
+			get { return _itemName; }
 		}
 		[Header("Item information")]
-		[SerializeField] private string _itemName = "?";
+		[SerializeField] string _itemName = "?";
 
 		public string ItemDescription {
-			get { return this._itemDescription; }
+			get { return _itemDescription; }
 		}
-		[SerializeField] private string _itemDescription = "?";
+		[SerializeField] string _itemDescription = "?";
 		
 		public GameObject ItemMeshWhenDropped {
-			get { return this._itemMeshWhenDropped; }
+			get { return _itemMeshWhenDropped; }
 		}
-		[SerializeField] private GameObject _itemMeshWhenDropped;
+		[SerializeField] GameObject _itemMeshWhenDropped;
 		
 		public bool CanBeDropped {
-			get { return this._canBeDropped; }
+			get { return _canBeDropped; }
 		}
-		[SerializeField] private bool _canBeDropped = true;
+		[SerializeField] bool _canBeDropped = true;
 
 		public Sprite ItemThumbnail {
-			get { return this._itemThumbnail; }		
+			get { return _itemThumbnail; }		
 		}
-		[SerializeField] private Sprite _itemThumbnail;
+		[SerializeField] Sprite _itemThumbnail;
 
 	}
 

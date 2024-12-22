@@ -9,10 +9,10 @@ namespace CDK {
 
 		public AnimEquipStringType AnimEquipString {
 			get {
-				return this._animEquipString;
+				return _animEquipString;
 			}
 		}
 		[Header("Equipable")]
-		[SerializeField] private AnimEquipStringType _animEquipString;
+		[SerializeField] AnimEquipStringType _animEquipString;
 	}
 }

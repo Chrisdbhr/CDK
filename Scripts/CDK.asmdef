@@ -18,11 +18,6 @@
     "precompiledReferences": [],
     "autoReferenced": true,
     "defineConstraints": [],
-    "dependencies": [
-        "com.cysharp.r3",
-        "com.unity.nuget.newtonsoft-json",
-        "jillejr.newtonsoft.json-for-unity.converters"
-    ],
     "versionDefines": [
         {
             "name": "com.unity.nuget.newtonsoft-json",
@@ -38,6 +33,11 @@
             "name": "com.unity.cinemachine",
             "expression": "0.0.0",
             "define": "CINEMACHINE"
+        },
+        {
+            "name": "com.annulusgames.lit-motion",
+            "expression": "0.0.0",
+            "define": "LITMOTION"
         }
     ],
     "noEngineReferences": false

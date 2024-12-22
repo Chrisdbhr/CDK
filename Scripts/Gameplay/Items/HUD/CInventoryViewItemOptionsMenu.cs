@@ -5,28 +5,29 @@ using UnityEngine.UI;
 namespace CDK {
 	public class CInventoryViewItemOptionsMenu : MonoBehaviour {
 
-		[SerializeField] private RectTransform _viewItensParent;
-		[SerializeField] private Button _useItemButton;
-		[SerializeField] private Button _equipItemButton;
-		[SerializeField] private Button _examineButton;
-		[SerializeField] private Button _discardItemButton;
+		[SerializeField] RectTransform _viewItensParent;
+		[SerializeField] Button _useItemButton;
+		[SerializeField] Button _equipItemButton;
+		[SerializeField] Button _examineButton;
+		[SerializeField] Button _discardItemButton;
 		
-		[NonSerialized] private CIItemBase _item;
-		[NonSerialized] private int _itemIndex;
-		[NonSerialized] private CInventory _inventory;
+		[NonSerialized] CIItemBase _item;
+		[NonSerialized] int _itemIndex;
+		[NonSerialized] CInventory _inventory;
 		
 
 		#region <<---------- MonoBehaviour ---------->>
-		private void Awake() {
-			this._inventory = this.transform.root.GetComponent<CInventory>();
-			if (this._inventory == null) {
+
+		void Awake() {
+			_inventory = transform.root.GetComponent<CInventory>();
+			if (_inventory == null) {
 				Debug.LogError($"ViewItemOption Could not find its root inventory.");
 			}
 		}
 
-		private void Update() {
+		void Update() {
 			if (Input.GetButtonDown(CInputKeys.INTERACT)) {
-				this.Close();
+				Close();
 			}
 		}
 		#endregion <<---------- MonoBehaviour ---------->>
@@ -37,23 +38,23 @@ namespace CDK {
 		#region <<---------- Visibility ---------->>
 
 		public void Open(CIItemBase itemBase, int itemIndex, Vector2 position) {
-			this._viewItensParent.transform.position = position;
+			_viewItensParent.transform.position = position;
 			
-			this._item = itemBase;
-			this._itemIndex = itemIndex;
+			_item = itemBase;
+			_itemIndex = itemIndex;
 			Debug.Log($"Opening {itemBase.GetScriptableObject().name} options. Itemindex is {itemIndex}.");
 			
 			// set visible buttons
-			this._useItemButton.gameObject.SetActive(itemBase.GetScriptableObject().IsConsumable());
-			this._equipItemButton.gameObject.SetActive(itemBase.GetScriptableObject() is CWeaponScriptableObject);
-			this._examineButton.gameObject.SetActive(false);// TODO //this._examineButton.gameObject.SetActive(itemData.ItemMeshGameObject != null);
-			this._discardItemButton.gameObject.SetActive(itemBase.GetScriptableObject().CanBeDropped);
+			_useItemButton.gameObject.SetActive(itemBase.GetScriptableObject().IsConsumable());
+			_equipItemButton.gameObject.SetActive(itemBase.GetScriptableObject() is CWeaponScriptableObject);
+			_examineButton.gameObject.SetActive(false);// TODO //this._examineButton.gameObject.SetActive(itemData.ItemMeshGameObject != null);
+			_discardItemButton.gameObject.SetActive(itemBase.GetScriptableObject().CanBeDropped);
 			
-			this.gameObject.SetActive(true);
+			gameObject.SetActive(true);
 		}
 
-		private void Close() {
-			Destroy(this.gameObject);
+		void Close() {
+			Destroy(gameObject);
 		}
 
 		#endregion <<---------- Visibility ---------->>
@@ -64,15 +65,15 @@ namespace CDK {
 		#region <<---------- Actions ---------->>
 
 		public void UseItem() {
-			this._inventory.UseOrEquipItem(this._itemIndex);
+			_inventory.UseOrEquipItem(_itemIndex);
 		}
 
 		public  void ExamineItem() {
-			this._inventory.ExamineItem(this._itemIndex);
+			_inventory.ExamineItem(_itemIndex);
 		}
 
 		public  void DropItem() {
-			this._inventory.DiscardOrDropItem(this._itemIndex, true);
+			_inventory.DiscardOrDropItem(_itemIndex, true);
 		}
 		
 		#endregion <<---------- Actions ---------->>

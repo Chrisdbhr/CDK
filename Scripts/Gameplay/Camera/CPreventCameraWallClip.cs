@@ -25,66 +25,66 @@ namespace CDK {
 		#region <<---------- MonoBehaviour ---------->>
 		
 		private void Awake() {
-			this._transform = this.transform;
-			this._cameraTransform = this._targetChildCamera.transform;
-			this._defaultDistanceX = this._cameraTransform.localPosition.x;
-			this._defaultDistanceZ = this._cameraTransform.localPosition.z;
+			_transform = transform;
+			_cameraTransform = _targetChildCamera.transform;
+			_defaultDistanceX = _cameraTransform.localPosition.x;
+			_defaultDistanceZ = _cameraTransform.localPosition.z;
 		}
 
 		private void LateUpdate() {
-			this._cameraTransform.localPosition = new Vector3(this._defaultDistanceX, this._cameraTransform.localPosition.y, this._defaultDistanceZ);
+			_cameraTransform.localPosition = new Vector3(_defaultDistanceX, _cameraTransform.localPosition.y, _defaultDistanceZ);
 			/*this._cameraTransform.localPosition = Vector3.Lerp(
 				this._cameraTransform.localPosition,
 				new Vector3(this._defaultDistanceX, this._cameraTransform.localPosition.y, this._defaultDistanceZ),
 				this._cameraRecoverSpeed * Time.deltaTime
 			);*/
-			this.FixPositionWallCollision();
+			FixPositionWallCollision();
 		}
 		
 		#endregion <<---------- MonoBehaviour ---------->>
 
 		private void FixPositionWallCollision() {
-			var camNearPlane = this._targetChildCamera.nearClipPlane;
+			var camNearPlane = _targetChildCamera.nearClipPlane;
 			
-			var camPos = this._cameraTransform.position;
+			var camPos = _cameraTransform.position;
 
 			// check for something in front of the camera
-			var camFwd = this._cameraTransform.forward;
+			var camFwd = _cameraTransform.forward;
 			var camFwdInverted = camFwd * -1f;
-			var origin = camPos + camFwd * this._cameraTransform.localPosition.z.CAbs();
+			var origin = camPos + camFwd * _cameraTransform.localPosition.z.CAbs();
 			bool hitSomethingInFrontOfCamera = Physics.SphereCast(
 				origin,
 				camNearPlane,
 				camFwdInverted,
-				out this._raycastHit,
-				this._cameraTransform.localPosition.z.CAbs(),
-				this._collisionLayers,
+				out _raycastHit,
+				_cameraTransform.localPosition.z.CAbs(),
+				_collisionLayers,
 				QueryTriggerInteraction.Ignore
 			);
 
 			if (hitSomethingInFrontOfCamera) {
-				this._cameraTransform.position = origin + (camFwdInverted * (this._raycastHit.distance));
+				_cameraTransform.position = origin + (camFwdInverted * (_raycastHit.distance));
 				return;
 			}
 
 			// check for something between cam and pivot
-			var thisPos = this._transform.position;
-			camPos = this._cameraTransform.position;
+			var thisPos = _transform.position;
+			camPos = _cameraTransform.position;
 			var dir = (camPos - thisPos).normalized;
 			bool hitSomethingBetweenCamAndThis = Physics.SphereCast(
 				thisPos,
 				camNearPlane,
 				dir,
-				out this._raycastHit,
+				out _raycastHit,
 				Vector3.Distance(thisPos, camPos),
-				this._collisionLayers,
+				_collisionLayers,
 				QueryTriggerInteraction.Ignore
 			);
 
 			
 			// fix position
 			if (hitSomethingBetweenCamAndThis) {
-				this._cameraTransform.position = thisPos + (dir * (this._raycastHit.distance));
+				_cameraTransform.position = thisPos + (dir * (_raycastHit.distance));
 			}
 
 		}

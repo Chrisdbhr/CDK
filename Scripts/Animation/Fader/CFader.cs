@@ -36,9 +36,9 @@ namespace CDK {
 			}
 
 			// canvas group
-			this._fadeCanvasGroup = gameObject.AddComponent<CanvasGroup>();
-			this._fadeCanvasGroup.blocksRaycasts = false;
-			this._fadeCanvasGroup.interactable = false;
+			_fadeCanvasGroup = gameObject.AddComponent<CanvasGroup>();
+			_fadeCanvasGroup.blocksRaycasts = false;
+			_fadeCanvasGroup.interactable = false;
 
 			// image black
 			var imgComp = gameObject.AddComponent<Image>();
@@ -58,31 +58,31 @@ namespace CDK {
 		
 		public void FadeToBlack(float fadeTime, bool ignoreTimeScale = true) {
             //Debug.Log($"Requesting fade to black, time '{fadeTime}' seconds with ignoreTimeScale set to '{ignoreTimeScale}'");
-			this.TargetAlpha = 1f;
-			this.TargetFadeTime = fadeTime;
-			this.IgnoreTimeScale = ignoreTimeScale;
-            this.UpdateOpacity();
+			TargetAlpha = 1f;
+			TargetFadeTime = fadeTime;
+			IgnoreTimeScale = ignoreTimeScale;
+            UpdateOpacity();
         }
 
 		public void FadeToTransparent(float fadeTime, bool ignoreTimeScale = true) {
             //Debug.Log($"Requesting fade to transparent, time '{fadeTime}' seconds with ignoreTimeScale set to '{ignoreTimeScale}'");
-			this.TargetAlpha = 0f;
-			this.TargetFadeTime = fadeTime;
-			this.IgnoreTimeScale = ignoreTimeScale;
-            this.UpdateOpacity();
+			TargetAlpha = 0f;
+			TargetFadeTime = fadeTime;
+			IgnoreTimeScale = ignoreTimeScale;
+            UpdateOpacity();
 		}
 
 		private void UpdateOpacity() {
-            if (this.TargetFadeTime <= 0f) {
-                this._fadeCanvasGroup.alpha = this.TargetAlpha;
+            if (TargetFadeTime <= 0f) {
+                _fadeCanvasGroup.alpha = TargetAlpha;
                 return;
             }
-            float currentAlpha = this._fadeCanvasGroup.alpha.CImprecise();
-			if (Mathf.Approximately(this.TargetAlpha, currentAlpha)) return;
-			float delta = this.IgnoreTimeScale ? Time.unscaledDeltaTime : CTime.DeltaTimeScaled;
-			float step = delta / this.TargetFadeTime;
-			if (currentAlpha > this.TargetAlpha) step *= -1f;
-			this._fadeCanvasGroup.alpha = currentAlpha + step;
+            float currentAlpha = _fadeCanvasGroup.alpha.CImprecise();
+			if (Mathf.Approximately(TargetAlpha, currentAlpha)) return;
+			float delta = IgnoreTimeScale ? Time.unscaledDeltaTime : CTime.DeltaTimeScaled;
+			float step = delta / TargetFadeTime;
+			if (currentAlpha > TargetAlpha) step *= -1f;
+			_fadeCanvasGroup.alpha = currentAlpha + step;
 		}
         
         #endregion <<---------- General ---------->>
@@ -93,11 +93,11 @@ namespace CDK {
         #region <<---------- Debug ---------->>
 
         public void DebugEnableFader() {
-            this._fadeCanvasGroup.enabled = true;
+            _fadeCanvasGroup.enabled = true;
         }
         
         public void DebugDisableFader() {
-            this._fadeCanvasGroup.enabled = false;
+            _fadeCanvasGroup.enabled = false;
         }
 
         #endregion <<---------- Debug ---------->>

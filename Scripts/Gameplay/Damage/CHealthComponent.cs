@@ -1,7 +1,7 @@
 using System;
+using System.Collections;
 using CDK.Damage;
 using CDK.Data;
-using R3;
 using UnityEngine;
 
 namespace CDK {
@@ -19,7 +19,7 @@ namespace CDK {
 		[SerializeField] private CTransformShake _transformShake;
 
 		private Transform _transform;
-		public Transform LastAttacker => this._lastAttacker;
+		public Transform LastAttacker => _lastAttacker;
 		private Transform _lastAttacker;
 
 		#endregion <<---------- References ---------->>
@@ -43,7 +43,7 @@ namespace CDK {
 		[SerializeField] protected float _maxHealth = 3f;
 		public float MaxHealth {
 			get {
-				return this._maxHealth;
+				return _maxHealth;
 			}
 			set {
 				_maxHealth = Mathf.Max(0f, value);
@@ -51,52 +51,52 @@ namespace CDK {
 		}
 
 		public float CurrentHealth {
-			get { return this._currentHealth; }
+			get { return _currentHealth; }
 			private set {
-				var clampedValue = value.CClamp(0f, this.MaxHealth);
-				if (clampedValue == this._currentHealth || clampedValue == this.MaxHealth && this._currentHealth == this.MaxHealth) return;
+				var clampedValue = value.CClamp(0f, MaxHealth);
+				if (clampedValue == _currentHealth || clampedValue == MaxHealth && _currentHealth == MaxHealth) return;
 
-				float oldHealth = this._currentHealth;
-				this._currentHealth = clampedValue;
+				float oldHealth = _currentHealth;
+				_currentHealth = clampedValue;
 
 				if (oldHealth <= 0f) {
-					this.OnRevive?.Invoke();
-					this._isAliveEvent?.Invoke(true);
+					OnRevive?.Invoke();
+					_isAliveEvent?.Invoke(true);
 				}
 
-				this.OnHealthChanged?.Invoke(this._currentHealth);
-				this.HealthChangedAsStringEvent?.Invoke(this._currentHealth.ToString("0"));
-				this.HealthChangedPercentageEvent?.Invoke(this.MaxHealth != 0 ? this._currentHealth / this.MaxHealth : 0);
+				OnHealthChanged?.Invoke(_currentHealth);
+				HealthChangedAsStringEvent?.Invoke(_currentHealth.ToString("0"));
+				HealthChangedPercentageEvent?.Invoke(MaxHealth != 0 ? _currentHealth / MaxHealth : 0);
 
-				if (this._currentHealth > oldHealth) {
-					this.OnRecoverHealth?.Invoke(this._currentHealth);
+				if (_currentHealth > oldHealth) {
+					OnRecoverHealth?.Invoke(_currentHealth);
 				}
 				else {
-					this._lastDamageTakenTime = Time.timeSinceLevelLoad;
+					_lastDamageTakenTime = Time.timeSinceLevelLoad;
 				}
 
-				if (this._currentHealth <= 0f) {
-					foreach (var obj in this._unparentOnDie) {
+				if (_currentHealth <= 0f) {
+					foreach (var obj in _unparentOnDie) {
 						obj.parent = null;
 					}
-					foreach (var obj in this._activateOnDie) {
+					foreach (var obj in _activateOnDie) {
 						obj.SetActive(true);
 					}
-					foreach (var obj in this._destroyOnDie) {
+					foreach (var obj in _destroyOnDie) {
 						Destroy(obj.gameObject);
 					}
-					this.OnDie?.Invoke();
+					OnDie?.Invoke();
 					OnDieEvent?.Invoke();
-					this._isAliveEvent?.Invoke(false);
+					_isAliveEvent?.Invoke(false);
 				}
 			}
 		}
 		[SerializeField] private float _currentHealth;
 
-		public float CurrentHealthNormalized => this.MaxHealth != 0f ? this._currentHealth / this.MaxHealth : 0f;
+		public float CurrentHealthNormalized => MaxHealth != 0f ? _currentHealth / MaxHealth : 0f;
 
 		public bool IsDead {
-			get { return this._currentHealth <= 0f; }
+			get { return _currentHealth <= 0f; }
 		}
 
 		#endregion <<---------- Health ---------->>
@@ -148,28 +148,13 @@ namespace CDK {
 		#region <<---------- MonoBehaviour ---------->>
 
 		protected virtual void Awake() {
-			this._transform = this.transform;
-			this.FullCure();
-            // regen only one hearth
-            Observable.Timer(TimeSpan.FromSeconds(1f), TimeSpan.FromSeconds(1f)).Subscribe(_ => {
-                if (this.IsDead) return;
-                if (Time.timeSinceLevelLoad < (this._lastDamageTakenTime + this._regenDelayAfterHit)) return;
+			_transform = transform;
+			FullCure();
+		}
 
-                int healthInt = (int)this.CurrentHealth;
-
-                // dont heal if full hearth.
-                if (healthInt == this.CurrentHealth) return;
-
-                // check if will heal all
-                float nextHealth = this.CurrentHealth + this._regenAmountPerTick;
-                if (nextHealth > healthInt + 1) {
-                    // will heal more than necessary, fix it
-                    nextHealth = healthInt + 1;
-                }
-
-                this.CurrentHealth = nextHealth;
-            })
-            .AddTo(this);
+		void OnEnable()
+		{
+			this.CStartCoroutine(HealthRegenRoutine());
 		}
 
 		protected virtual void Update() {
@@ -181,15 +166,38 @@ namespace CDK {
 		#endregion <<---------- MonoBehaviour ---------->>
 
 
+		IEnumerator HealthRegenRoutine()
+		{
+			var wait = new WaitForSeconds(1f);
+			while (enabled) {
+				yield return wait;
+				if(IsDead) continue;
+				if (Time.timeSinceLevelLoad < (_lastDamageTakenTime + _regenDelayAfterHit)) continue;
+
+				int healthInt = (int)CurrentHealth;
+
+				// dont heal if full hearth.
+				if (healthInt == CurrentHealth) continue;
+
+				// check if will heal all
+				float nextHealth = CurrentHealth + _regenAmountPerTick;
+				if (nextHealth > healthInt + 1) {
+					// will heal more than necessary, fix it
+					nextHealth = healthInt + 1;
+				}
+
+				CurrentHealth = nextHealth;
+			}
+		}
 
 		public void SetImmunityTime(float time) {
-			var newTime = Mathf.Max(this._immuneTimer, time);
+			var newTime = Mathf.Max(_immuneTimer, time);
 			Debug.Log($"Setting immune time to {newTime}");
-			this._immuneTimer = newTime;
+			_immuneTimer = newTime;
 		}
 
 		public void FullCure() {
-			this.CurrentHealth = this.MaxHealth;
+			CurrentHealth = MaxHealth;
 		}
 
         public void Kill() {
@@ -197,7 +205,7 @@ namespace CDK {
         }
 
         public void RecoverHealth(float recoverAmount) {
-	        this.CurrentHealth += recoverAmount;
+	        CurrentHealth += recoverAmount;
         }
 
         #region ICDamageable
@@ -206,12 +214,12 @@ namespace CDK {
 		/// Returns the amount of damage taken. If the target is already dead, returns 0. If the damage is bigger than the health before, returns the health before.
 		/// </summary>
 		public override float TakeHit(CHitInfoData attack, Transform attacker, float damageMultiplier) {
-			if (this.IsDead) return 0f;
-			if (this._immuneTimer > 0f) return 0f;
+			if (IsDead) return 0f;
+			if (_immuneTimer > 0f) return 0f;
 			var hitScriptObj = attack;
 			if (hitScriptObj.RawDamage <= 0f) return 0f;
 
-			this._lastAttacker = attacker;
+			_lastAttacker = attacker;
 
 			// Start total damage calculation.
 			float multipliedDamage = hitScriptObj.RawDamage * damageMultiplier;
@@ -223,25 +231,25 @@ namespace CDK {
 			//todo play damage animation if apply
 
 			if (hitScriptObj.LookAtAttacker) {
-				this._transform.LookAt(attacker);
-				this._transform.eulerAngles = new Vector3(0f, this._transform.eulerAngles.y, 0f);
+				_transform.LookAt(attacker);
+				_transform.eulerAngles = new Vector3(0f, _transform.eulerAngles.y, 0f);
 			}
 
-			if (finalDamage >= this._currentHealth) {
-				finalDamage = this._currentHealth;
-				this.CurrentHealth = 0f;
+			if (finalDamage >= _currentHealth) {
+				finalDamage = _currentHealth;
+				CurrentHealth = 0f;
 			}
-			else this.CurrentHealth -= finalDamage;
+			else CurrentHealth -= finalDamage;
 
 			if (finalDamage > 0f) {
-				this.OnDamageTaken?.Invoke(finalDamage, attack, attacker);
-				this.TokeDamageEvent?.Invoke();
+				OnDamageTaken?.Invoke(finalDamage, attack, attacker);
+				TokeDamageEvent?.Invoke();
 			}
 
 			// camera shake
-			if (this._transformShake != null && attacker != null) {
-				this._transformShake.RequestShake(
-					(attacker.position - this._transform.position).normalized * (finalDamage * 0.01f),
+			if (_transformShake != null && attacker != null) {
+				_transformShake.RequestShake(
+					(attacker.position - _transform.position).normalized * (finalDamage * 0.01f),
 					hitScriptObj.DamageShakePattern,
 					hitScriptObj.ShakeMultiplier
 				);

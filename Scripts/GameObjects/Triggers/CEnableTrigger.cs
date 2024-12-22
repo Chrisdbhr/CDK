@@ -7,24 +7,25 @@ using Sirenix.OdinInspector;
 
 namespace CDK {
 	public class CEnableTrigger : MonoBehaviour {
-        [SerializeField, Min(0f)] private float _delayInSeconds;
+        [SerializeField, Min(0f)] float _delayInSeconds;
         #if ODIN_INSPECTOR
         [ShowIf("@_delayInSeconds > 0f")]
         #endif
-        [SerializeField] private bool _ignoreTimescale = true;
-		[SerializeField] private UnityEvent TriggerEvent;
-		
-		private void OnEnable() {
-            if (this._delayInSeconds > 0f) {
-                this.CStartCoroutine(this.EnableRoutine());
+        [SerializeField]
+        bool _ignoreTimescale = true;
+		[SerializeField] UnityEvent TriggerEvent;
+
+		void OnEnable() {
+            if (_delayInSeconds > 0f) {
+                this.CStartCoroutine(EnableRoutine());
                 return;
             }
-            this.TriggerEvent?.Invoke();
+            TriggerEvent?.Invoke();
 		}
 
         IEnumerator EnableRoutine() {
             yield return (_ignoreTimescale ? new WaitForSecondsRealtime(_delayInSeconds) : new WaitForSeconds(_delayInSeconds));
-            this.TriggerEvent?.Invoke();
+            TriggerEvent?.Invoke();
         }
 		
 	}

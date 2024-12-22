@@ -7,45 +7,46 @@ namespace CDK {
 	[CreateAssetMenu(fileName = "ammo_", menuName = CConst.EDITOR_SCRIPTABLEOBJECT_CREATION_PREFIX + "Ammo data", order = 51)]
 	public class CAmmoScriptableObject : CItemBaseScriptableObject, ICDamageDealer {
 		public CAttackData AttackData {
-			get { return this.attackData; }
+			get { return attackData; }
 		}
-		[FormerlySerializedAs("attack")] [FormerlySerializedAs("hitInfo")] [SerializeField] private CAttackData attackData;
+		[FormerlySerializedAs("attack")] [FormerlySerializedAs("hitInfo")] [SerializeField]
+		CAttackData attackData;
 
 		public CAmmoType CAmmoType {
-			get { return this._ammoType; }
+			get { return _ammoType; }
 		}
-		[SerializeField] private CAmmoType _ammoType;
+		[SerializeField] CAmmoType _ammoType;
 
 
 		public CProjectileType CProjectileType {
-			get { return this.cProjectileType; }
+			get { return cProjectileType; }
 		}
-		[SerializeField] private CProjectileType cProjectileType;
+		[SerializeField] CProjectileType cProjectileType;
 
 		public GameObject ProjectilePrefabToSpawn {
-			get { return this._projectilePrefabToSpawn;  }
+			get { return _projectilePrefabToSpawn;  }
 		}
-		[SerializeField] private GameObject _projectilePrefabToSpawn;
+		[SerializeField] GameObject _projectilePrefabToSpawn;
 
 		public float ProjectileInitialSpeed {
-			get { return this._projectileInitialSpeed; }
+			get { return _projectileInitialSpeed; }
 		}
-		[SerializeField] private float _projectileInitialSpeed = 1f;
+		[SerializeField] float _projectileInitialSpeed = 1f;
 	
 		public float ProjectileLifetime {
-			get { return this._projectileLifetime; }
+			get { return _projectileLifetime; }
 		}
-		[SerializeField] private float _projectileLifetime = 0.1f;
+		[SerializeField] float _projectileLifetime = 0.1f;
 
 		public bool IsInfinite {
-			get { return this._isInfinite; }
+			get { return _isInfinite; }
 		}
-		[SerializeField] private bool _isInfinite;
+		[SerializeField] bool _isInfinite;
 
 		public float SelfRepulsionMultiplier {
-			get { return this._selfRepulsionMultiplier; }
+			get { return _selfRepulsionMultiplier; }
 		}
-		[SerializeField] private float _selfRepulsionMultiplier = 10f;
+		[SerializeField] float _selfRepulsionMultiplier = 10f;
 
 	}
 }

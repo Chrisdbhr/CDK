@@ -1,5 +1,4 @@
 using System;
-using R3;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -13,85 +12,63 @@ namespace CDK {
 		#region <<---------- Properties and Fields ---------->>
 
 		// animation
-		[SerializeField] private Animator _characterAnimator;
+		[SerializeField] Animator _characterAnimator;
 		
 		// items
 		#if UNITY_ADDRESSABLES_EXIST
 		[SerializeField] private AssetReference _inventoryViewRef;
 		#endif
-		[NonSerialized] private CInventoryView _inventoryViewSpawned;
+		[NonSerialized] CInventoryView _inventoryViewSpawned;
 	
 		public int Size {
-			get { return this._size; }
+			get { return _size; }
 		}
-		[SerializeField] private int _size = 8;
+		[SerializeField] int _size = 8;
 
 		[field: NonSerialized]
 		public CIItemBase[] InventoryItems { get; private set; }
 
 		// equipament
-		[SerializeField] private CWeaponData _firstEquipedWeapon;
-		[SerializeField] private Transform _handTransform;
-		[SerializeField] private UnityEvent _onAttackEvent;
-		[SerializeField] private CUnityEventFloat _onAttackRecoilEvent;
+		[SerializeField] CWeaponData _firstEquipedWeapon;
+		[SerializeField] Transform _handTransform;
+		[SerializeField] UnityEvent _onAttackEvent;
+		[SerializeField] CUnityEventFloat _onAttackRecoilEvent;
 		
-		[NonSerialized] private CWeaponGameObject _currentSpawnedWeapon;
-		
-		public CWeaponData EquippedWeapon {
-			get { return this._equippedWeaponRx.Value; }
-		}
-		[NonSerialized] private ReactiveProperty<CWeaponData> _equippedWeaponRx;
-		[NonSerialized] private CWeaponScriptableObject[] _quickSlotWeapons = new CWeaponScriptableObject[4];
+		[NonSerialized] CWeaponGameObject _currentSpawnedWeapon;
 
-		[NonSerialized] protected CompositeDisposable _disposeOnDisable = new CompositeDisposable();
-		
-		
+		public CWeaponData EquippedWeapon {
+			get { return _equippedWeapon; }
+			set {
+				if(_equippedWeapon == value) return;
+				_equippedWeapon = value;
+				OnEquippedWeaponChanged(this, value);
+			}
+		}
+		[NonSerialized] CWeaponData _equippedWeapon;
+		public event EventHandler<CWeaponData> OnEquippedWeaponChanged = delegate { };
+		[NonSerialized] CWeaponScriptableObject[] _quickSlotWeapons = new CWeaponScriptableObject[4];
+
 		#endregion <<---------- Properties and Fields ---------->>
 
 
 		
 
 		#region <<---------- MonoBehaviour ---------->>
-		private void Awake() {
-			this._equippedWeaponRx = new ReactiveProperty<CWeaponData>();
-			if (this._handTransform) {
+
+		void Awake() {
+			if (_handTransform) {
 				Debug.Log($"HandTransform object is null!");
 			}
-			this.InventoryItems = new CIItemBase[this.Size];
+			InventoryItems = new CIItemBase[Size];
 		}
 
-		private void OnEnable() {
-			this._equippedWeaponRx.Value = this._firstEquipedWeapon;
-
-			this._equippedWeaponRx.Subscribe(newWeapon => {
-				if(this._currentSpawnedWeapon != null) this._currentSpawnedWeapon.gameObject.CDestroy();
-				
-				// reset animator parameters
-				foreach (var animEquipString in Enum.GetNames(typeof(CEquipableBaseScriptableObject.AnimEquipStringType))) {
-					this._characterAnimator.SetBool(animEquipString, false);
-				}
-
-				if (newWeapon == null) {
-					// no equipment
-					return;
-				}
-				if (newWeapon.GetScriptableObject() is CWeaponScriptableObject weaponScripObj) {
-					if (weaponScripObj.EquippedWeaponPrefab != null) {
-						// create world object representation
-						this._currentSpawnedWeapon = Instantiate(weaponScripObj.EquippedWeaponPrefab, this._handTransform);
-					
-						// set animator parameters
-						this._characterAnimator.SetBool(weaponScripObj.AnimEquipString.ToString(), true);
-					}
-				}
-				else {
-					Debug.LogError($"New weapon is not a weapon of type {nameof(CWeaponScriptableObject)}");
-				}
-			}).AddTo(this._disposeOnDisable);
+		void OnEnable() {
+			EquippedWeapon = _firstEquipedWeapon;
+			OnEquippedWeaponChanged += EquippedWeaponChanged;
 		}
 
-		private void OnDisable() {
-			this._disposeOnDisable?.Dispose();
+		void OnDisable() {
+			OnEquippedWeaponChanged -= EquippedWeaponChanged;
 		}
 
 		#endregion <<---------- MonoBehaviour ---------->>
@@ -101,8 +78,8 @@ namespace CDK {
 		
 		#region <<---------- Managment ---------->>
 
-		private void UpdateView() {
-			if(this._inventoryViewSpawned != null) this._inventoryViewSpawned.UpdateInventoryView();
+		void UpdateView() {
+			if(_inventoryViewSpawned != null) _inventoryViewSpawned.UpdateInventoryView();
 		}
 
 		/// <summary>
@@ -121,43 +98,43 @@ namespace CDK {
 			bool alreadyHasThisItem = false;
 
 			// check if already has item to stack
-			for (int i = 0; i < this.InventoryItems.Length; i++) {
-				if (this.InventoryItems[i] == null) continue;
-				alreadyHasThisItem = this.InventoryItems[i].GetScriptableObject() == item.GetScriptableObject();
+			for (int i = 0; i < InventoryItems.Length; i++) {
+				if (InventoryItems[i] == null) continue;
+				alreadyHasThisItem = InventoryItems[i].GetScriptableObject() == item.GetScriptableObject();
 				if (alreadyHasThisItem) {
 					// item exists, increase it quantity
-					this.InventoryItems[i].Add(item.Count);
-					this.UpdateView();
+					InventoryItems[i].Add(item.Count);
+					UpdateView();
 					return true;
 				}
 			}
 			
 			// check for a null space to fill
-			for (int i = 0; i < this.InventoryItems.Length; i++) {
-				if (this.InventoryItems[i] != null) continue;
+			for (int i = 0; i < InventoryItems.Length; i++) {
+				if (InventoryItems[i] != null) continue;
 
 				Debug.Log($"Collected null item o empty space.");
-				this.InventoryItems[i] = item;
+				InventoryItems[i] = item;
 
 				if (item is CWeaponData weapon) {
 					// auto equip gun
 					Debug.Log($"Auto equipping collected weapon.");
-					this._equippedWeaponRx.Value = weapon;
+					EquippedWeapon = weapon;
 				}
 
-				this.UpdateView();
+				UpdateView();
 				return true;
 			}
 
 			// inventory is full
 			Debug.Log($"Inventory is full.");
-			this.UpdateView();
+			UpdateView();
 			return false;
 		}
 
 		public void DropItem(CItemBaseScriptableObject item) {
 			
-			this.UpdateView();
+			UpdateView();
 		}
 		
 		#endregion <<---------- Managment ---------->>
@@ -168,12 +145,12 @@ namespace CDK {
 		#region <<---------- Actions ---------->>
 
 		public void UseOrEquipItem(int itemIndex) {
-			var rootInventory = this.transform.root.GetComponent<CInventory>();
+			var rootInventory = transform.root.GetComponent<CInventory>();
 			if (rootInventory == null) {
 				Debug.LogError($"Could not find root inventory.");
 			}
 
-			var item = this.InventoryItems[itemIndex];
+			var item = InventoryItems[itemIndex];
 			if (item == null) {
 				Debug.LogError($"Could not equip or use item at inventory index {itemIndex} because itemData is null");
 				return;
@@ -181,65 +158,96 @@ namespace CDK {
 
 			if (item is CWeaponData weapon) {
 				// equip
-				this._equippedWeaponRx.Value = weapon;
+				EquippedWeapon = weapon;
 			}
 			else {
 				// use
-				print($"TODO implement usage of item {this.InventoryItems[itemIndex].GetScriptableObject().ItemName}");
+				print($"TODO implement usage of item {InventoryItems[itemIndex].GetScriptableObject().ItemName}");
 			}
 			
-			this.UpdateView();
+			UpdateView();
 		}
 		
 		public  void ExamineItem(int itemIndex) {
-			print($"TODO implement Examine on item {this.InventoryItems[itemIndex].GetScriptableObject().ItemName}");
-			this.UpdateView();
+			print($"TODO implement Examine on item {InventoryItems[itemIndex].GetScriptableObject().ItemName}");
+			UpdateView();
 		}
 		
 		public void DiscardOrDropItem(int itemIndex, bool drop = false) {
 			if (drop) {
-				var posToDrop = this.transform.position + Vector3.up * 0.5f;
-				var itemScriptObj = this.InventoryItems[itemIndex].GetScriptableObject();
+				var posToDrop = transform.position + Vector3.up * 0.5f;
+				var itemScriptObj = InventoryItems[itemIndex].GetScriptableObject();
 				var droppedItem = Instantiate(itemScriptObj.ItemMeshWhenDropped, posToDrop, itemScriptObj.ItemMeshWhenDropped.transform.rotation);
 				var collectable = droppedItem.GetComponent<CCollectableItemGameObject>(); 
-				collectable.SetItemHere(this.InventoryItems[itemIndex]);
+				collectable.SetItemHere(InventoryItems[itemIndex]);
 			}
 			
 			// unequip weapon when dropped
-			if (this.InventoryItems[itemIndex] as CWeaponData == this.EquippedWeapon) { 
-				this._equippedWeaponRx.Value = null;
+			if (InventoryItems[itemIndex] as CWeaponData == EquippedWeapon) { 
+				EquippedWeapon = null;
 			}
-			this.InventoryItems[itemIndex] = null;
-			this.UpdateView();
+			InventoryItems[itemIndex] = null;
+			UpdateView();
 		}
 
 		#endregion <<---------- Actions ---------->>
 
-		private void OnAttack(float damage) {
-			this._onAttackEvent?.Invoke();
+		#region Callbacks
+
+		void EquippedWeaponChanged(object sender, CWeaponData newWeapon)
+		{
+			if(_currentSpawnedWeapon != null) _currentSpawnedWeapon.gameObject.CDestroy();
+
+			// reset animator parameters
+			foreach (var animEquipString in Enum.GetNames(typeof(CEquipableBaseScriptableObject.AnimEquipStringType))) {
+				_characterAnimator.SetBool(animEquipString, false);
+			}
+
+			if (newWeapon == null) {
+				// no equipment
+				return;
+			}
+			if (newWeapon.GetScriptableObject() is CWeaponScriptableObject weaponScripObj) {
+				if (weaponScripObj.EquippedWeaponPrefab != null) {
+					// create world object representation
+					_currentSpawnedWeapon = Instantiate(weaponScripObj.EquippedWeaponPrefab, _handTransform);
+
+					// set animator parameters
+					_characterAnimator.SetBool(weaponScripObj.AnimEquipString.ToString(), true);
+				}
+			}
+			else {
+				Debug.LogError($"New weapon is not a weapon of type {nameof(CWeaponScriptableObject)}");
+			}
+		}
+
+		void OnAttack(float damage) {
+			_onAttackEvent?.Invoke();
 			Debug.Log($"Camera shake");
 		}
+
+		#endregion Callbacks
 
 		/// <summary>
 		/// Returns ammo data consumed by the weapon.
 		/// </summary>
 		public CAmmoData GunShootConsumeAmmo() {
-			if (this.EquippedWeapon == null) {
+			if (EquippedWeapon == null) {
 				Debug.LogError($"Could not fire Weapon because it is not a Gun!");
 				return null;
 			}
 
-			if (this.EquippedWeapon.EquippedAmmoData.Count <= 0) {
+			if (EquippedWeapon.EquippedAmmoData.Count <= 0) {
 				Debug.Log($"Cant fire gun because its has no more ammo.");
 				return null;
 			}
-			float damage = ((CAmmoScriptableObject) this.EquippedWeapon.EquippedAmmoData.GetScriptableObject()).AttackData.data.RawDamage;
+			float damage = ((CAmmoScriptableObject) EquippedWeapon.EquippedAmmoData.GetScriptableObject()).AttackData.data.RawDamage;
 
-			this._onAttackRecoilEvent?.Invoke(damage * 0.1f);
+			_onAttackRecoilEvent?.Invoke(damage * 0.1f);
 			
-			this.OnAttack(damage);
-			this.EquippedWeapon.EquippedAmmoData.ConsumeAmmo();
-			return this.EquippedWeapon.EquippedAmmoData;
+			OnAttack(damage);
+			EquippedWeapon.EquippedAmmoData.ConsumeAmmo();
+			return EquippedWeapon.EquippedAmmoData;
 		}
 
 	}

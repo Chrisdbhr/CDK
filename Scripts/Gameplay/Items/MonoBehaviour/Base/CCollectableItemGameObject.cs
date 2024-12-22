@@ -10,7 +10,7 @@ namespace CDK {
 
 		#region <<---------- Properties and Fields ---------->>
 
-		[SerializeField] private bool _collectOnCollision;
+		[SerializeField] bool _collectOnCollision;
 
 		#endregion <<---------- Properties and Fields ---------->>
 
@@ -19,14 +19,14 @@ namespace CDK {
 
 		#region <<---------- MonoBehaviour ---------->>
 
-		private void OnCollisionEnter(Collision other) {
-			if (!this._collectOnCollision) return;
-			this.OnInteract(other.transform);
+		void OnCollisionEnter(Collision other) {
+			if (!_collectOnCollision) return;
+			OnInteract(other.transform);
 		}
 
-		private void OnCollisionEnter2D(Collision2D other) {
-			if (!this._collectOnCollision) return;
-			this.OnInteract(other.transform);
+		void OnCollisionEnter2D(Collision2D other) {
+			if (!_collectOnCollision) return;
+			OnInteract(other.transform);
 		}
 		
 		#endregion <<---------- MonoBehaviour ---------->>
@@ -50,7 +50,7 @@ namespace CDK {
 
 			bool itemCollected = false;
 
-			switch (this.GetItemHere()) {
+			switch (GetItemHere()) {
 				case CWeaponData gun:
 					itemCollected = inventory.AddItem(gun);
 					break;
@@ -62,7 +62,7 @@ namespace CDK {
 					break;
 			}
 			if (!itemCollected) return false;
-			Destroy(this.gameObject);
+			Destroy(gameObject);
 			return true;
 		}
 

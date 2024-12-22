@@ -4,14 +4,14 @@ using UnityEngine;
 
 namespace CDK {
     public class CDestroyIfNotEditor : MonoBehaviour {
-        private void Awake() {
+        void Awake() {
             if (Application.isEditor) return;
-            this.DestroyItselfAndLog();
+            DestroyItselfAndLog();
         }
 
         void DestroyItselfAndLog() {
-            Debug.Log($"Destroying {this.name} and all its children: {string.Join(", ", this.gameObject.Children().Select(c=>c.name))}");
-            this.gameObject.CDestroy();
+            Debug.Log($"Destroying {name} and all its children: {string.Join(", ", gameObject.Children().Select(c=>c.name))}");
+            gameObject.CDestroy();
         }
     }
 }

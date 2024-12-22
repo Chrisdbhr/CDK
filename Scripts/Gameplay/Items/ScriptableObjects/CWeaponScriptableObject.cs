@@ -6,65 +6,65 @@ namespace CDK {
 	public class CWeaponScriptableObject : CEquipableBaseScriptableObject {
 		
 		public CWeaponGameObject EquippedWeaponPrefab {
-			get { return this._equippedWeaponPrefab; }
+			get { return _equippedWeaponPrefab; }
 		}
-		[SerializeField] private CWeaponGameObject _equippedWeaponPrefab;
+		[SerializeField] CWeaponGameObject _equippedWeaponPrefab;
 	
 		
 		// ammo
 		public CAmmoType SupportedAmmo {
-			get { return this.supportedAmmo; }
+			get { return supportedAmmo; }
 		}
 		[Header("Ammo")]
-		[SerializeField] private CAmmoType supportedAmmo;
+		[SerializeField] CAmmoType supportedAmmo;
 
 		public CAmmoScriptableObject InitiallyLoadedAmmo {
-			get { return this._initiallyLoadedAmmoData; }	
+			get { return _initiallyLoadedAmmoData; }	
 		}
-		[SerializeField] private CAmmoScriptableObject _initiallyLoadedAmmoData;
+		[SerializeField] CAmmoScriptableObject _initiallyLoadedAmmoData;
 	
 		public float AmmoRateOfFire {
-			get { return this._ammoRateOfFire; }
+			get { return _ammoRateOfFire; }
 		}
-		[SerializeField] private float _ammoRateOfFire;
+		[SerializeField] float _ammoRateOfFire;
 		
 		public int MaxAmmo {
-			get { return this._maxAmmo; }
+			get { return _maxAmmo; }
 		}
-		[SerializeField] private int _maxAmmo;
+		[SerializeField] int _maxAmmo;
 		
 		public bool IsAutoFire {
 			get { return _isAutoFire; }
 		}
 		
-		[SerializeField] private bool _isAutoFire;
+		[SerializeField] bool _isAutoFire;
 
 		public bool AmmoSpawnAsChild {
-			get { return this.ammoSpawnAsChild; }
+			get { return ammoSpawnAsChild; }
 		}
-		[SerializeField] private bool ammoSpawnAsChild;
+		[SerializeField] bool ammoSpawnAsChild;
 
 		// recoil
 		public float RecoilDefault {
-			get { return this._recoilDefault; }
+			get { return _recoilDefault; }
 		}
 		[Header("Recoil")]
-		[SerializeField] private float _recoilDefault;
+		[SerializeField] float _recoilDefault;
 		
 		public float RecoilChangeOnFire {
-			get { return this._recoilChangeOnFire; }
+			get { return _recoilChangeOnFire; }
 		}
-		[SerializeField] private float _recoilChangeOnFire;
+		[SerializeField] float _recoilChangeOnFire;
 
 		public float RecoilMaxValue {
-			get { return this._recoilMaxValue; }
+			get { return _recoilMaxValue; }
 		}
-		[SerializeField] private float _recoilMaxValue;
+		[SerializeField] float _recoilMaxValue;
 		
 		public float RecoilRecoverRate {
-			get { return this._recoilRecoverRate; }
+			get { return _recoilRecoverRate; }
 		}
-		[SerializeField] private float _recoilRecoverRate;
+		[SerializeField] float _recoilRecoverRate;
 
 	}
 }

@@ -3,16 +3,16 @@
 namespace CDK {
 	public class COnEditorTrigger : CAutoTriggerCompBase {
 
-		[SerializeField] private CUnityEventBool _isOnEditorEvent;
-		[SerializeField] private CUnityEventBool _isNotOnEditorEvent;
+		[SerializeField] CUnityEventBool _isOnEditorEvent;
+		[SerializeField] CUnityEventBool _isNotOnEditorEvent;
 		
 		
 		
 		
 		protected override void TriggerEvent() {
 			var isEditor = Application.isEditor;
-			this._isOnEditorEvent?.Invoke(isEditor);
-			this._isNotOnEditorEvent?.Invoke(!isEditor);
+			_isOnEditorEvent?.Invoke(isEditor);
+			_isNotOnEditorEvent?.Invoke(!isEditor);
 		}
 	}
 }

@@ -9,13 +9,13 @@ namespace CDK {
 
 		#region <<---------- Properties and Fields ---------->>
 		
-		[SerializeField] private CInventoryViewItemOptionsMenu _itemOptionsPrefab;
-		[SerializeField] private TextMeshProUGUI _nameText;
-		[SerializeField] private TextMeshProUGUI _quantityText;
-		[SerializeField] private Image _thumbnailSprite;
+		[SerializeField] CInventoryViewItemOptionsMenu _itemOptionsPrefab;
+		[SerializeField] TextMeshProUGUI _nameText;
+		[SerializeField] TextMeshProUGUI _quantityText;
+		[SerializeField] Image _thumbnailSprite;
 	
-		[NonSerialized] private readonly Color _thumbColor = new Color(1,1,1, 0.9f);
-		[NonSerialized] private CIItemBase _itemHere;
+		[NonSerialized] readonly Color _thumbColor = new Color(1,1,1, 0.9f);
+		[NonSerialized] CIItemBase _itemHere;
 		
 		#endregion <<---------- Properties and Fields ---------->>
 
@@ -23,44 +23,44 @@ namespace CDK {
 
 
 		public void UpdateSlotInfo(CIItemBase item) {
-			this._itemHere = item;
+			_itemHere = item;
 
 			bool slotEmpty = item == null;
 			
-			if (this._quantityText != null) {
+			if (_quantityText != null) {
 				if (item == null) {
-					this._quantityText.text = string.Empty;
+					_quantityText.text = string.Empty;
 				}
 				else {
 					if (item is CWeaponData weaponData) {
-						this._quantityText.text = weaponData.IsLoadedWithInfiniteAmmo() ? string.Empty : weaponData.GetAmmoCount().ToString();
+						_quantityText.text = weaponData.IsLoadedWithInfiniteAmmo() ? string.Empty : weaponData.GetAmmoCount().ToString();
 					}
 					else {
-						this._quantityText.text = item.Count.ToString();
+						_quantityText.text = item.Count.ToString();
 					}
 				}
 			}
-			if (this._thumbnailSprite) {
-				this._thumbnailSprite.color = slotEmpty ? Color.clear : this._thumbColor;
-				this._thumbnailSprite.sprite = !slotEmpty && item.GetScriptableObject() ? item.GetScriptableObject().ItemThumbnail : null;
+			if (_thumbnailSprite) {
+				_thumbnailSprite.color = slotEmpty ? Color.clear : _thumbColor;
+				_thumbnailSprite.sprite = !slotEmpty && item.GetScriptableObject() ? item.GetScriptableObject().ItemThumbnail : null;
 			}
-			if (this._nameText != null) {
-				this._nameText.text = !slotEmpty  && item.GetScriptableObject() ? item.GetScriptableObject().ItemName : string.Empty;
-				this._nameText.gameObject.SetActive(!slotEmpty);
+			if (_nameText != null) {
+				_nameText.text = !slotEmpty  && item.GetScriptableObject() ? item.GetScriptableObject().ItemName : string.Empty;
+				_nameText.gameObject.SetActive(!slotEmpty);
 			}
 		}
 
-		private void OpenItemOptionsMenu() {
-			if (this._itemHere == null) return;
-			var optionMenu = Instantiate(this._itemOptionsPrefab, this.transform.parent.parent).GetComponent<CInventoryViewItemOptionsMenu>();
-			optionMenu.Open(this._itemHere, this.transform.GetSiblingIndex(), this.transform.position);
+		void OpenItemOptionsMenu() {
+			if (_itemHere == null) return;
+			var optionMenu = Instantiate(_itemOptionsPrefab, transform.parent.parent).GetComponent<CInventoryViewItemOptionsMenu>();
+			optionMenu.Open(_itemHere, transform.GetSiblingIndex(), transform.position);
 		}
 		
 
 		#region <<---------- Event Handlers ---------->>
 
 		public void OnSubmit(BaseEventData eventData) {
-			this.OpenItemOptionsMenu();
+			OpenItemOptionsMenu();
 		}
 		
 		#endregion <<---------- Event Handlers ---------->>

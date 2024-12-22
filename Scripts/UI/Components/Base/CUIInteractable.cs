@@ -1,5 +1,5 @@
 using System;
-using R3;
+
 using Reflex.Attributes;
 using Reflex.Extensions;
 using Reflex.Injectors;
@@ -24,11 +24,9 @@ namespace CDK.UI {
         [SerializeField] bool _playInteractionSound = true;
         
 		#if FMOD
-        private EventInstance _soundEventInstance;
+		EventInstance _soundEventInstance;
 		#endif
 
-        protected readonly CompositeDisposable _disposeOnDisable = new CompositeDisposable();
-        protected readonly CompositeDisposable _disposeOnDestroy = new CompositeDisposable();
         [Inject] protected CUINavigationManager _navigationManager;
         [Inject] protected CGameSettings _gameSettings;
 
@@ -46,25 +44,17 @@ namespace CDK.UI {
         }
 
         protected virtual void OnEnable() { }
-        
-        protected virtual void OnDisable() {
-            this._disposeOnDisable?.Dispose();
-        }
-
-        protected virtual void OnDestroy() {
-            this._disposeOnDestroy?.Dispose();
-        }
 
         #endregion <<---------- Mono Behaviour ---------->>
 
 
 		#if FMOD
-		private void PlaySound(EventReference sound) {
+		void PlaySound(EventReference sound) {
 			try {
-				if (this._playInteractionSound && !sound.IsNull) {
-					this._soundEventInstance.stop(STOP_MODE.IMMEDIATE);
-					this._soundEventInstance = FMODUnity.RuntimeManager.CreateInstance(sound);
-					this._soundEventInstance.start();
+				if (_playInteractionSound && !sound.IsNull) {
+					_soundEventInstance.stop(STOP_MODE.IMMEDIATE);
+					_soundEventInstance = RuntimeManager.CreateInstance(sound);
+					_soundEventInstance.start();
 				}
 			}
 			catch (Exception e) {
@@ -83,26 +73,26 @@ namespace CDK.UI {
 		}
 
 		public virtual void Selected(bool playSound = true) {
-			if(this._debug) Debug.Log($"Selected: CUIInteractable '{this.gameObject.name}'", this);
+			if(_debug) Debug.Log($"Selected: CUIInteractable '{gameObject.name}'", this);
 			#if FMOD
-			if(playSound) this.PlaySound(_gameSettings.SoundSelect);
+			if(playSound) PlaySound(_gameSettings.SoundSelect);
 			#endif
 		}
 
 		public virtual void Submited() {
 			_interactEvent?.Invoke();
-			if(this._debug) Debug.Log($"SUBMIT: CUIInteractable '{this.gameObject.name}'", this);
+			if(_debug) Debug.Log($"SUBMIT: CUIInteractable '{gameObject.name}'", this);
 			#if FMOD
             if (!(this is CUIButton b && !b.Button.interactable)) {
-                this.PlaySound(_gameSettings.SoundSubmit);
+                PlaySound(_gameSettings.SoundSubmit);
             }
 			#endif
 		}
 
 		public virtual void Canceled() {
-			if(this._debug) Debug.Log($"CANCEL: CUIInteractable '{this.gameObject.name}'", this);
+			if(_debug) Debug.Log($"CANCEL: CUIInteractable '{gameObject.name}'", this);
 			#if FMOD
-			this.PlaySound(_gameSettings.SoundCancel);
+			PlaySound(_gameSettings.SoundCancel);
 			#endif
 		}
 		
@@ -111,28 +101,28 @@ namespace CDK.UI {
 		public void OnSelect(BaseEventData eventData)
 		{
 			if (!IsThisAValidInteractionTarget(eventData)) return;
-			this.Selected();
+			Selected();
 		}
 
 		public void OnSubmit(BaseEventData eventData) {
 			if (!IsThisAValidInteractionTarget(eventData)) return;
-			this.Submited();
+			Submited();
 		}
 		
 		public void OnCancel(BaseEventData eventData) {
 			if (!IsThisAValidInteractionTarget(eventData)) return;
             if (_navigationManager.CloseLastMenu(true)) {
-                this.Canceled();
+                Canceled();
             }
         }
 
 		// Pointer
 		public virtual void OnPointerEnter(PointerEventData eventData) {
 			if (!IsThisAValidInteractionTarget(eventData)) return;
-			var selectable = this.GetComponent<Selectable>();
+			var selectable = GetComponent<Selectable>();
 			if (selectable == null) return;
 			selectable.Select();
-			this.Selected(false);
+			Selected(false);
 		}
         
         public virtual void OnDeselect(BaseEventData eventData) {
@@ -142,7 +132,7 @@ namespace CDK.UI {
 		public void OnPointerClick(PointerEventData eventData) {
 			if (!IsThisAValidInteractionTarget(eventData)) return;
             if (eventData.button == PointerEventData.InputButton.Right) return;
-            this.Submited();
+            Submited();
 		}
 		
 		#endregion <<---------- IHandlers ---------->>

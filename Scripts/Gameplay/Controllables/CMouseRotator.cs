@@ -20,43 +20,43 @@ namespace CDK {
 
 		#region <<---------- MonoBehaviour ---------->>
 		protected void Awake() {
-			this._transform = this.transform;
-			this._initialRotation = this._transform.rotation;
+			_transform = transform;
+			_initialRotation = _transform.rotation;
 		}
 
 		private void Update() {
-			if (this._blockingEventsManager.IsAnyHappening) return;
+			if (_blockingEventsManager.IsAnyHappening) return;
 			
-			this._inputLook = new Vector2(Input.GetAxisRaw(CInputKeys.LOOK_X), Input.GetAxisRaw(CInputKeys.LOOK_Y));
+			_inputLook = new Vector2(Input.GetAxisRaw(CInputKeys.LOOK_X), Input.GetAxisRaw(CInputKeys.LOOK_Y));
 
 			// rotate camera
-			this._transform.Rotate(Vector3.up,
-				this._inputLook.x * this._rotationSpeed.x * CTime.DeltaTimeScaled,
+			_transform.Rotate(Vector3.up,
+				_inputLook.x * _rotationSpeed.x * CTime.DeltaTimeScaled,
 				Space.World);
-			this._transform.Rotate(this._transform.right,
-				this._inputLook.y * -1 * this._rotationSpeed.y * CTime.DeltaTimeScaled,
+			_transform.Rotate(_transform.right,
+				_inputLook.y * -1 * _rotationSpeed.y * CTime.DeltaTimeScaled,
 				Space.World);
 
 			// clamp rotation
-			this._eulerRotation = this._transform.eulerAngles;
-			this._eulerRotation.z = 0f;
+			_eulerRotation = _transform.eulerAngles;
+			_eulerRotation.z = 0f;
 			// vertical rotation
-			if (this._eulerRotation.x.CIsInRange(this._rotationXRange.x, 360 - this._rotationXRange.y)) {
-				this._eulerRotation.x = this._eulerRotation.x.CGetCloserValue(this._rotationXRange.x, 360 - this._rotationXRange.y);
+			if (_eulerRotation.x.CIsInRange(_rotationXRange.x, 360 - _rotationXRange.y)) {
+				_eulerRotation.x = _eulerRotation.x.CGetCloserValue(_rotationXRange.x, 360 - _rotationXRange.y);
 			}
 			
 			// horizontal rotation
-			if (this._eulerRotation.y.CIsInRange(this._rotationYRange.x, 360 - this._rotationYRange.y)) {
-				this._eulerRotation.y = this._eulerRotation.y.CGetCloserValue(this._rotationYRange.x, 360 - this._rotationYRange.y);
+			if (_eulerRotation.y.CIsInRange(_rotationYRange.x, 360 - _rotationYRange.y)) {
+				_eulerRotation.y = _eulerRotation.y.CGetCloserValue(_rotationYRange.x, 360 - _rotationYRange.y);
 			}
-			this._transform.eulerAngles = this._eulerRotation;
+			_transform.eulerAngles = _eulerRotation;
 		}
 		#endregion <<---------- MonoBehaviour ---------->>
 
 
 
 		public void ResetRotation() {
-			this._transform.rotation = this._initialRotation;
+			_transform.rotation = _initialRotation;
 		}
 		
 	}

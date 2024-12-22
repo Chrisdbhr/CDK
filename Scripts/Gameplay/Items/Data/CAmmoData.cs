@@ -8,8 +8,8 @@ namespace CDK {
 		#region <<---------- Initializers ---------->>
 		
 		public CAmmoData(CAmmoScriptableObject item, int quantity) {
-			this._ammoScriptableObject = item;
-			this.Count = quantity;
+			_ammoScriptableObject = item;
+			Count = quantity;
 		}
 		
 		#endregion <<---------- Initializers ---------->>
@@ -19,15 +19,15 @@ namespace CDK {
 		
 		#region <<---------- Properties and Fields ---------->>
 		
-		[SerializeField] private CAmmoScriptableObject _ammoScriptableObject;
+		[SerializeField] CAmmoScriptableObject _ammoScriptableObject;
 		
 		public int Count {
-			get { return this._count; }
+			get { return _count; }
 			private set {
-				this._count = value < 0 ? 0 : value;
+				_count = value < 0 ? 0 : value;
 			}
 		}
-		private int _count;
+		int _count;
 
 		#endregion <<---------- Properties and Fields ---------->>
 
@@ -37,14 +37,14 @@ namespace CDK {
 		#region <<---------- CIItemBase ---------->>
 		
 		public CItemBaseScriptableObject GetScriptableObject() {
-			return this._ammoScriptableObject;
+			return _ammoScriptableObject;
 		}
 		public int Add(int quantity) {
-			return this.Count += quantity;
+			return Count += quantity;
 		}
 
 		public int Remove(int quantity) {
-			return this.Count -= quantity;
+			return Count -= quantity;
 		}
 		#endregion <<---------- CIItemBase ---------->>
 		
@@ -52,7 +52,7 @@ namespace CDK {
 		
 		
 		public void ConsumeAmmo() {
-			this.Count -= 1;
+			Count -= 1;
 		}
 
 	}

@@ -9,31 +9,30 @@ namespace CDK.UI {
 	public class CUISlider : CUIInteractable, IMoveHandler {
 
 		public Slider Slider;
-        [SerializeField, Min(0.001f)] private float _inputMovementMultiplier = 0.5f;
-		[SerializeField] private TextMeshProUGUI _valueTmp;
-		[SerializeField] private string _toStringParams = "0";
+        [SerializeField, Min(0.001f)] float _inputMovementMultiplier = 0.5f;
+		[SerializeField] TextMeshProUGUI _valueTmp;
+		[SerializeField] string _toStringParams = "0";
 
         protected override void OnEnable() { 
             base.OnEnable();
-			this.Slider.onValueChanged.AddListener(this.SliderValueChanged);
+			Slider.onValueChanged.AddListener(SliderValueChanged);
 		}
 
-        protected override void OnDisable() { 
-            base.OnDisable();
-			this.Slider.onValueChanged.RemoveListener(this.SliderValueChanged);
+        protected void OnDisable() {
+			Slider.onValueChanged.RemoveListener(SliderValueChanged);
 		}
 
-		private void SliderValueChanged(float newValue) {
-			if (this._valueTmp) this._valueTmp.text = newValue.ToString(this._toStringParams);
+		void SliderValueChanged(float newValue) {
+			if (_valueTmp) _valueTmp.text = newValue.ToString(_toStringParams);
 		}
 
 		public void OnMove(AxisEventData eventData) {
-			this.Slider.value += (eventData.moveVector.x * this._inputMovementMultiplier) * Time.deltaTime;
-			this.Selected();
+			Slider.value += (eventData.moveVector.x * _inputMovementMultiplier) * Time.deltaTime;
+			Selected();
 		}
 
-		private void Reset() {
-			if(!Slider) this.Slider = this.GetComponent<Slider>();
+		void Reset() {
+			if(!Slider) Slider = GetComponent<Slider>();
 		}
 
 	}

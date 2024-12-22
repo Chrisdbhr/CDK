@@ -5,9 +5,9 @@ using UnityEngine.Events;
 namespace CDK {
 	public class CRenderVisibilityTriggers : MonoBehaviour {
 
-		[SerializeField] private UnityEvent _becameVisibleEvent;
-		[SerializeField] private UnityEvent _becameInvisibleEvent;
-		[NonSerialized] private bool _isVisible;
+		[SerializeField] UnityEvent _becameVisibleEvent;
+		[SerializeField] UnityEvent _becameInvisibleEvent;
+		[NonSerialized] bool _isVisible;
 		
 		public Action BecameVisibleAction;
 		public Action BecameInvisibleAction;
@@ -16,26 +16,26 @@ namespace CDK {
 		
 		
 		#region <<---------- MonoBehaviour ---------->>
-		
-		private void OnEnable() {
-			if (this._isVisible) {
-				this.BecameVisibleInvoke();
+
+		void OnEnable() {
+			if (_isVisible) {
+				BecameVisibleInvoke();
 			}
 			else {
-				this.BecameInvisibleInvoke();
+				BecameInvisibleInvoke();
 			}
 		}
-		
-		private void OnBecameVisible() {
-			this._isVisible = true;
-			if (!this.enabled) return;
-			this.BecameVisibleInvoke();
+
+		void OnBecameVisible() {
+			_isVisible = true;
+			if (!enabled) return;
+			BecameVisibleInvoke();
 		}
 
-		private void OnBecameInvisible() {
-			this._isVisible = false;
-			if (!this.enabled) return;
-			this.BecameInvisibleInvoke();
+		void OnBecameInvisible() {
+			_isVisible = false;
+			if (!enabled) return;
+			BecameInvisibleInvoke();
 		}
 
 		#endregion <<---------- MonoBehaviour ---------->>
@@ -44,15 +44,15 @@ namespace CDK {
 		
 		
 		#region <<---------- Events Invoke ---------->>
-		
-		private void BecameVisibleInvoke() {
-			this._becameVisibleEvent?.Invoke();
-			this.BecameVisibleAction?.Invoke();
+
+		void BecameVisibleInvoke() {
+			_becameVisibleEvent?.Invoke();
+			BecameVisibleAction?.Invoke();
 		}
-		
-		private void BecameInvisibleInvoke() {
-			this._becameInvisibleEvent?.Invoke();
-			this.BecameInvisibleAction?.Invoke();
+
+		void BecameInvisibleInvoke() {
+			_becameInvisibleEvent?.Invoke();
+			BecameInvisibleAction?.Invoke();
 		}
 		
 		#endregion <<---------- Events Invoke ---------->>

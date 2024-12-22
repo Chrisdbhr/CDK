@@ -16,8 +16,8 @@ namespace CDK {
         }
 
         void Update() {
-            this.previousPosition = this.transform.position;
-            this.transform.position += this.transform.forward * (moveSpeed * CTime.DeltaTimeScaled);
+            previousPosition = transform.position;
+            transform.position += transform.forward * (moveSpeed * CTime.DeltaTimeScaled);
         }
 
         void LateUpdate() {
@@ -31,7 +31,7 @@ namespace CDK {
                 )) return;
             var damageable = hit.collider.GetComponent<ICDamageable>();
             damageable?.TakeHit(AttackData.data, AttackData.AttackerTransform);
-            this.DestroyBullet(hit.point);
+            DestroyBullet(hit.point);
         }
 
         void DestroyBullet(Vector3 hitPoint) {
@@ -41,7 +41,7 @@ namespace CDK {
         #if UNITY_EDITOR
         void OnDrawGizmos() {
             Gizmos.color = Color.red;
-            Gizmos.DrawWireSphere(this.transform.position, bulletSize);
+            Gizmos.DrawWireSphere(transform.position, bulletSize);
         }
         #endif
     }

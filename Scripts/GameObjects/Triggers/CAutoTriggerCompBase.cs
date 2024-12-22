@@ -3,23 +3,23 @@ using UnityEngine;
 namespace CDK {
 	public abstract class CAutoTriggerCompBase : MonoBehaviour {
 
-		[SerializeField] private CMonobehaviourExecutionTime executionTime = CMonobehaviourExecutionTime.Awake;
+		[SerializeField] CMonobehaviourExecutionTime executionTime = CMonobehaviourExecutionTime.Awake;
 
 		protected virtual void Awake() {
-			if (this.executionTime != CMonobehaviourExecutionTime.Awake) return;
-			this.TriggerEvent();
+			if (executionTime != CMonobehaviourExecutionTime.Awake) return;
+			TriggerEvent();
 		}
 
 		protected virtual  void Start() {
-			if (!this.enabled) return;
-			if (this.executionTime != CMonobehaviourExecutionTime.Start) return;
-			this.TriggerEvent();
+			if (!enabled) return;
+			if (executionTime != CMonobehaviourExecutionTime.Start) return;
+			TriggerEvent();
 		}
 
 		protected virtual  void OnEnable() {
-			if (!this.enabled) return;
-			if (this.executionTime != CMonobehaviourExecutionTime.OnEnable) return;
-			this.TriggerEvent();
+			if (!enabled) return;
+			if (executionTime != CMonobehaviourExecutionTime.OnEnable) return;
+			TriggerEvent();
 		}
 
 		protected abstract void TriggerEvent();

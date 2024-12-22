@@ -10,13 +10,14 @@ using Sirenix.OdinInspector;
 namespace CDK {
 	public class CStartTrigger : MonoBehaviour{
         
-        [SerializeField, Min(0f)] private float _delay;
+        [SerializeField, Min(0f)] float _delay;
         #if ODIN_INSPECTOR
         [ShowIf("@_delay > 0f")]
         #endif
-        [SerializeField] private bool _ignoreTimescale = true;
-		[SerializeField] private UnityEvent Event;
-        private bool alreadyCalled;
+        [SerializeField]
+        bool _ignoreTimescale = true;
+		[SerializeField] UnityEvent Event;
+        bool alreadyCalled;
 
         IEnumerator Start() {
             if(_delay > 0f) yield return (_ignoreTimescale ? new WaitForSecondsRealtime(_delay) : new WaitForSeconds(_delay));
@@ -24,13 +25,13 @@ namespace CDK {
             yield break;
         }
 
-        private void OnEnable() {
-            if (this.alreadyCalled && _delay > 0f) {
-                Debug.LogWarning($"This {nameof(CStartTrigger)} has already been called its Start() and has a delay. Its possible that the {this.Event.GetPersistentEventCount()} events have been not triggered.");
+        void OnEnable() {
+            if (alreadyCalled && _delay > 0f) {
+                Debug.LogWarning($"This {nameof(CStartTrigger)} has already been called its Start() and has a delay. Its possible that the {Event.GetPersistentEventCount()} events have been not triggered.");
             }
         }
 
-        private void OnDisable() {
+        void OnDisable() {
             alreadyCalled = true;
         }
     }

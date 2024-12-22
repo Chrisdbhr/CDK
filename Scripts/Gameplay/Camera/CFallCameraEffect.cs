@@ -16,46 +16,46 @@ public class CFallCameraEffect : MonoBehaviour {
 	[SerializeField] private float _pitchMultiplier = 10f;
 
 	private float YSpeed {
-		get { return this._ySpeed; }
+		get { return _ySpeed; }
 		set {
-			if (this._ySpeed == value) return;
+			if (_ySpeed == value) return;
 			if (value == 0) {
-				this.TimeFalling = 0;
-				this._audioSource.Stop();
-			}else if (!this._audioSource.isPlaying) {
-				this._audioSource.Play();
+				TimeFalling = 0;
+				_audioSource.Stop();
+			}else if (!_audioSource.isPlaying) {
+				_audioSource.Play();
 			}
 			
-			this._ySpeed = value;
+			_ySpeed = value;
 			
-			if (this._ySpeed < 0) {
+			if (_ySpeed < 0) {
 				// was falling
-				if (value > this._ySpeed) {
+				if (value > _ySpeed) {
 					// landed
-					this.TimeFalling = 0;
+					TimeFalling = 0;
 				}
 				else {
 					// continued falling
-					this.TimeFalling += CTime.DeltaTimeScaled;
+					TimeFalling += CTime.DeltaTimeScaled;
 				}
 			}
 			
-			this._ySpeed = value;
+			_ySpeed = value;
 		}
 	}
 	[SerializeField] private float _ySpeed;
 
 	private float TimeFalling {
-		get { return this._timeFalling; }
+		get { return _timeFalling; }
 		set {
-			if (this._timeFalling == value) return;
+			if (_timeFalling == value) return;
 
-			float factor = value + (this.YSpeed).CAbs();
-			this._animator.SetFloat(this.ANIM_FALLTIME, factor * this._animTimeMultiplier);
-			this._audioSource.volume = (factor.CAbs() * this._volumeMultiplier).CClamp01();
-			this._audioSource.pitch = 1 + (factor * this._pitchMultiplier);
+			float factor = value + (YSpeed).CAbs();
+			_animator.SetFloat(ANIM_FALLTIME, factor * _animTimeMultiplier);
+			_audioSource.volume = (factor.CAbs() * _volumeMultiplier).CClamp01();
+			_audioSource.pitch = 1 + (factor * _pitchMultiplier);
 
-			this._timeFalling = value;
+			_timeFalling = value;
 		}
 	}
 	[SerializeField] private float _timeFalling;
@@ -68,17 +68,17 @@ public class CFallCameraEffect : MonoBehaviour {
 	
 	
 	private void Awake() {
-		this._transform = this.transform;
+		_transform = transform;
 	}
 
 	private void Update() {
-		var currentYPos = this._transform.position.y;
-		this.YSpeed = (currentYPos - this._lastYPos).CImprecise();
-		this._lastYPos = currentYPos;
+		var currentYPos = _transform.position.y;
+		YSpeed = (currentYPos - _lastYPos).CImprecise();
+		_lastYPos = currentYPos;
 		
 		#if UNITY_EDITOR
 		if (Input.GetKeyDown(KeyCode.R)) {
-			SceneManager.LoadSceneAsync(this.gameObject.scene.buildIndex);
+			SceneManager.LoadSceneAsync(gameObject.scene.buildIndex);
 		}
 		#endif
 	}

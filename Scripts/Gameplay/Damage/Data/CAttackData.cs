@@ -16,8 +16,8 @@ namespace CDK.Data {
 				Debug.LogError("CAttackData: data is null");
 			}
 			this.data = data;
-			this.AttackerTransform = attackerTransform;
-			this.HitPointPosition = hitPointPosition;
+			AttackerTransform = attackerTransform;
+			HitPointPosition = hitPointPosition;
 		}
 		
 	}

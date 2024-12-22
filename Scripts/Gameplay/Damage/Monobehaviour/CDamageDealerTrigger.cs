@@ -10,7 +10,7 @@ namespace CDK {
 		#region <<---------- Initializers ---------->>
 		
 		public void Initialize(CAttackData attack, float damageMultiplier = 1f) {
-			this.attackData = attack;
+			attackData = attack;
 
 		}
 		
@@ -48,27 +48,27 @@ namespace CDK {
 		}
 
 		private void OnTriggerEnter(Collider other) {
-			if(_debug) Debug.Log($"'{this.name}' OnTriggerEnter '{other.name}'");
+			if(_debug) Debug.Log($"'{name}' OnTriggerEnter '{other.name}'");
 			DoDamageOnContact(other);
 		}
 
 		private void OnCollisionEnter(Collision other) {
-			if(_debug) Debug.Log($"'{this.name}' OnCollisionEnter '{other.transform.name}'");
+			if(_debug) Debug.Log($"'{name}' OnCollisionEnter '{other.transform.name}'");
 			DoDamageOnContact(other.collider);
 		}
 
 		private void OnTriggerEnter2D(Collider2D other) {
-			if(_debug) Debug.Log($"'{this.name}' OnTriggerEnter2D '{other.name}'");
+			if(_debug) Debug.Log($"'{name}' OnTriggerEnter2D '{other.name}'");
 			DoDamageOnContact(other);
 		}
 
 		private void OnCollisionEnter2D(Collision2D other) {
-			if(_debug) Debug.Log($"'{this.name}' OnCollisionEnter2D '{other.transform.name}'");
+			if(_debug) Debug.Log($"'{name}' OnCollisionEnter2D '{other.transform.name}'");
 			DoDamageOnContact(other.collider);
 		}
 
 		private void OnControllerColliderHit(ControllerColliderHit hit) {
-			if(_debug) Debug.Log($"'{this.name}' OnControllerColliderHit '{hit.transform.name}'");
+			if(_debug) Debug.Log($"'{name}' OnControllerColliderHit '{hit.transform.name}'");
 			DoDamageOnContact(hit.collider);
 		}
 		
@@ -78,10 +78,10 @@ namespace CDK {
 		
 		
 		private void DoDamageOnContact(Component go) {
-			if(_debug) Debug.Log($"'{this.name}' starting {nameof(DoDamageOnContact)} in '{go.name}'");
+			if(_debug) Debug.Log($"'{name}' starting {nameof(DoDamageOnContact)} in '{go.name}'");
 			if (!go.TryGetComponent<ICDamageable>(out var damageable)) {
 				if (_destroyType == DestroyType.onAnyCollisionOrTrigger) {
-					this.gameObject.CDestroy();
+					gameObject.CDestroy();
 				}
 				return;
 			}
@@ -92,7 +92,7 @@ namespace CDK {
 				_damageds.Add(damageable);
 				damageable.TakeHit(attackData.data, attackData.AttackerTransform, DamageMultiplier);
 				if (_destroyType == DestroyType.onlyIfDidDamage) {
-					this.gameObject.CDestroy();
+					gameObject.CDestroy();
 				}
 			}
 

@@ -1,6 +1,6 @@
 using System;
 using System.Collections;
-using R3;
+
 using Reflex.Attributes;
 using UnityEngine;
 using UnityEngine.Events;
@@ -15,8 +15,8 @@ namespace CDK.UI {
 
 		#region <<---------- Properties and Fields ---------->>
 
-		public GameObject FirstSelectedObject => this._eventSystem.firstSelectedGameObject;
-		
+		public GameObject FirstSelectedObject => _eventSystem.firstSelectedGameObject;
+
 		[Header("Setup")]
 		[NonSerialized, GetComponentInChildren] protected EventSystem _eventSystem;
         protected CUIButton ButtonReturn => _buttonReturn;
@@ -27,30 +27,30 @@ namespace CDK.UI {
 		[Obsolete("Trigger audio using OnOpen/OnClose unity events")]
 		[NonSerialized] protected bool _shouldPlayOpenAndCloseMenuSound;
 
-		public bool CanCloseByReturnButton => this._canCloseByReturnButton;
+		public bool CanCloseByReturnButton => _canCloseByReturnButton;
         protected bool _canCloseByReturnButton = true;
-		
+
 		[NonSerialized] CUIViewBase _previousUI;
 		[NonSerialized] CUIInteractable _previousButton;
-		
+
 		public event Action OnOpen {
 			add {
-				this._onOpen -= value;
-				this._onOpen += value;
+				_onOpen -= value;
+				_onOpen += value;
 			}
 			remove {
-				this._onOpen -= value;
+				_onOpen -= value;
 			}
 		}
 		[NonSerialized] Action _onOpen;
-		
+
 		public event Action<CUIViewBase> OnClose {
 			add {
-				this._onClose -= value;
-				this._onClose += value;
+				_onClose -= value;
+				_onClose += value;
 			}
 			remove {
-				this._onClose -= value;
+				_onClose -= value;
 			}
 		}
 		[NonSerialized] Action<CUIViewBase> _onClose;
@@ -61,103 +61,93 @@ namespace CDK.UI {
 		[Inject][NonSerialized] protected CGameSettings _gameSettings;
 		[Inject][NonSerialized] protected readonly CBlockingEventsManager _blockingEventsManager;
 		[Inject][NonSerialized] protected CUINavigationManager _navigationManager;
-		[NonSerialized] protected CompositeDisposable _disposeOnDisable = new ();
 
 		#endregion <<---------- Properties and Fields ---------->>
 
 
-		
+
 
 		#region <<---------- MonoBehaviour ---------->>
 
 		protected virtual void OnEnable() {
-			this.UpdateEventSystemAndCheckForObjectSelection(this._eventSystem.firstSelectedGameObject);
-
-            if(this._buttonReturn != null){
-                this._buttonReturn.Button.OnClickAsObservable()
-                    .Subscribe(_ => {
-                        this._navigationManager.CloseLastMenu();
-                    })
-                    .AddTo(_disposeOnDisable);
-            }
-            
-            this._blockingEventsManager.OnMenuRetainable.Retain(this);
+			UpdateEventSystemAndCheckForObjectSelection(_eventSystem.firstSelectedGameObject);
+            if(_buttonReturn) _buttonReturn.OnClick += NavigationRequestedClose;
+            _blockingEventsManager.OnMenuRetainable.Retain(this);
         }
 
 		void LateUpdate()
 		{
-			if (this._eventSystem == null || (this._eventSystem.currentSelectedGameObject != null && this._eventSystem.currentSelectedGameObject.GetComponent<CUIInteractable>() != null)) return;
-			var toSelect = this.GetComponentInChildren<CUIInteractable>();
+			if (_eventSystem == null || (_eventSystem.currentSelectedGameObject != null && _eventSystem.currentSelectedGameObject.GetComponent<CUIInteractable>() != null)) return;
+			var toSelect = GetComponentInChildren<CUIInteractable>();
 			if (toSelect == null) {
-				Debug.LogError($"Could not find object to select with a '{nameof(CUIInteractable)}' in '{this.name}', this will lead to non functional UI on controllers.", this);
+				Debug.LogError($"Could not find object to select with a '{nameof(CUIInteractable)}' in '{name}', this will lead to non functional UI on controllers.", this);
 				return;
 			}
-			Debug.Log($"Auto selecting item '{toSelect.name}' on menu '{this.name}'", toSelect);
-			this._eventSystem.SetSelectedGameObject(toSelect.gameObject);
+			Debug.Log($"Auto selecting item '{toSelect.name}' on menu '{name}'", toSelect);
+			_eventSystem.SetSelectedGameObject(toSelect.gameObject);
 		}
 
 		protected virtual void OnDisable() {
-			this._disposeOnDisable?.Dispose();
-            this._blockingEventsManager.OnMenuRetainable.Release(this);
+            _blockingEventsManager.OnMenuRetainable.Release(this);
+            if(_buttonReturn) _buttonReturn.OnClick -= NavigationRequestedClose;
 		}
 
         protected virtual void OnDestroy() { }
 
         protected virtual void Reset() {
-            if (this._eventSystem == null) {
-                this._eventSystem = this.GetComponentInChildren<EventSystem>();
+            if (_eventSystem == null) {
+                _eventSystem = GetComponentInChildren<EventSystem>();
             }
         }
-		
+
 		#endregion <<---------- MonoBehaviour ---------->>
-		
-		
-		
-		
+
+
+
+
 		#region <<---------- Open / Close ---------->>
 
 		public void Open(int sortOrder, CUIViewBase originUI, CUIInteractable originButton, bool canCloseByReturnButton = true) {
-			Debug.Log($"Open UI {this.gameObject.name}");
-			this._previousUI = originUI;
-			this._previousButton = originButton;
+			Debug.Log($"Open UI {gameObject.name}");
+			_previousUI = originUI;
+			_previousButton = originButton;
 
-            this._canCloseByReturnButton = canCloseByReturnButton;
-            
-			this._onOpen?.Invoke();
+            _canCloseByReturnButton = canCloseByReturnButton;
 
-			this.UpdateCTime();
+			_onOpen?.Invoke();
+
+			UpdateCTime();
 
 			OnOpenEvent?.Invoke();
-            
+
 			GetComponentInChildren<Canvas>(true).sortingOrder = sortOrder;
 
-            this.gameObject.SetActive(true);
+            gameObject.SetActive(true);
 		}
 
         /// <summary>
         /// Close the menu.
         /// </summary>
         /// <returns>Returns TRUE if the menu closed without errors.</returns>
-        public bool NavigationRequestedClose() {
-			Debug.Log($"Closing UI {this.gameObject.name}", this);
-			this._onClose?.Invoke(this);
+        public void NavigationRequestedClose() {
+			Debug.Log($"Closing UI {gameObject.name}", this);
+			_onClose?.Invoke(this);
 
-			if (this._previousUI != null) this._previousUI.ShowIfHidden(this._previousButton);
+			if (_previousUI != null) _previousUI.ShowIfHidden(_previousButton);
 
 			OnCloseEvent?.Invoke();
 
-			this._blockingEventsManager.OnMenuRetainable.Release(this);
-  
+			_blockingEventsManager.OnMenuRetainable.Release(this);
+
 			#if UNITY_ADDRESSABLES_EXIST
 			if (!CAssets.UnloadAsset(this.gameObject)) {
 				Debug.LogError($"Error releasing instance of object '{this.gameObject.name}'", this);
 			}
 			#else
-			this.gameObject.CDestroy();
+			gameObject.CDestroy();
 			#endif
-            return true;
         }
-		
+
 		#endregion <<---------- Open / Close ---------->>
 
 
@@ -165,33 +155,33 @@ namespace CDK.UI {
 
 		#region <<---------- Visibility ---------->>
 
-        private void UpdateEventSystemAndCheckForObjectSelection(GameObject gameObjectToSelect) {
+		void UpdateEventSystemAndCheckForObjectSelection(GameObject gameObjectToSelect) {
             if (gameObjectToSelect == null) return;
-			this.UpdateEventSystemAndCheckForObjectSelection(gameObjectToSelect.GetComponent<CUIInteractable>());
+			UpdateEventSystemAndCheckForObjectSelection(gameObjectToSelect.GetComponent<CUIInteractable>());
         }
 
 
-        private void UpdateEventSystemAndCheckForObjectSelection(CUIInteractable interactableToSelect) {
+		void UpdateEventSystemAndCheckForObjectSelection(CUIInteractable interactableToSelect) {
             if (interactableToSelect == null) {
                 Debug.LogError("Requested to select a null interactable! No object will be selected.");
                 return;
             }
-            
-            EventSystem.current = this._eventSystem;
 
-            this._eventSystem.SetSelectedGameObject(interactableToSelect.gameObject);
+            EventSystem.current = _eventSystem;
+
+            _eventSystem.SetSelectedGameObject(interactableToSelect.gameObject);
 		}
-		
+
 		public void HideIfSet() {
-			this.gameObject.SetActive(false);
+			gameObject.SetActive(false);
 		}
 
 		public void ShowIfHidden(CUIInteractable buttonToSelect) {
-			this.gameObject.SetActive(true);
-			if(buttonToSelect) this.UpdateEventSystemAndCheckForObjectSelection(buttonToSelect);
+			gameObject.SetActive(true);
+			if(buttonToSelect) UpdateEventSystemAndCheckForObjectSelection(buttonToSelect);
 			UpdateCTime();
 		}
-		
+
 		#endregion <<---------- Visibility ---------->>
 
 
@@ -199,8 +189,8 @@ namespace CDK.UI {
 
 		#region <<---------- Time ---------->>
 
-		private void UpdateCTime() {
-			CTime.TimeScale = this.ShouldPauseTheGame ? 0f : 1f;
+		void UpdateCTime() {
+			CTime.TimeScale = ShouldPauseTheGame ? 0f : 1f;
 		}
 		
 		#endregion <<---------- Time ---------->>

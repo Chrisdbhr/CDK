@@ -1,7 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using R3;
+
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -10,33 +10,33 @@ namespace CDK {
 
         #region <<---------- Properties and Fields ---------->>
         
-        [SerializeField] private Canvas _loadingUI;
-        [SerializeField] private Image _imageProgress;
-        private List<AsyncOperation> _activeAsyncOperations = new List<AsyncOperation>();
-        private IDisposable _timerDisposable;
-        
+        [SerializeField] Canvas _loadingUI;
+        [SerializeField] Image _imageProgress;
+        readonly List<AsyncOperation> _activeAsyncOperations = new ();
+        [NonSerialized] IDisposable _timerDisposable;
+
         #endregion <<---------- Properties and Fields ---------->>
 
 
 
 
         #region <<---------- MonoBehaviour ---------->>
-        
-        private void Awake() {
-            DontDestroyOnLoad(this.gameObject);
+
+        void Awake() {
+            DontDestroyOnLoad(gameObject);
             HideLoadingUI();
         }
 
-        private void LateUpdate() {
-            foreach (var op in this._activeAsyncOperations) {
+        void LateUpdate() {
+            foreach (var op in _activeAsyncOperations) {
                 if (op == null || op.isDone) continue;
-                this._imageProgress.fillAmount = (op.progress / 0.9f).CClamp01();
+                _imageProgress.fillAmount = (op.progress / 0.9f).CClamp01();
                 break;
             }
         }
 
-        private void OnDestroy() {
-            this._timerDisposable?.Dispose();
+        void OnDestroy() {
+            _timerDisposable?.Dispose();
         }
         
         #endregion <<---------- MonoBehaviour ---------->>
@@ -50,35 +50,35 @@ namespace CDK {
         /// Returns the same async operation for easier chained operations.
         /// </summary>
         public AsyncOperation MonitorAsyncOperation(AsyncOperation asyncOperation) {
-            if (this._activeAsyncOperations.Count <= 0) {
-                this._timerDisposable?.Dispose();
-                this._timerDisposable = Observable.Timer(TimeSpan.FromSeconds(1f))
+            if (_activeAsyncOperations.Count <= 0) {
+                _timerDisposable?.Dispose();
+                _timerDisposable = Observable.Timer(TimeSpan.FromSeconds(1f))
                 .Subscribe(_ => {
                     if (this == null) return;
-                    this.ShowLoadingUI();
+                    ShowLoadingUI();
                 });
             }
-            this._activeAsyncOperations.Add(asyncOperation);
+            _activeAsyncOperations.Add(asyncOperation);
             asyncOperation.completed += ActiveAsyncOperationCompleted;
             return asyncOperation;
         }
 
-        private void ActiveAsyncOperationCompleted(AsyncOperation op) {
-            this._activeAsyncOperations.Remove(op);
-            if (this._activeAsyncOperations.Count <= 0) {
+        void ActiveAsyncOperationCompleted(AsyncOperation op) {
+            _activeAsyncOperations.Remove(op);
+            if (_activeAsyncOperations.Count <= 0) {
                 HideLoadingUI();
             }
         }
 
-        public bool IsLoading => this._loadingUI != null && this._loadingUI.enabled;
+        public bool IsLoading => _loadingUI != null && _loadingUI.enabled;
 
         public void ShowLoadingUI() {
-            if(this._loadingUI) this._loadingUI.enabled = true;
+            if(_loadingUI) _loadingUI.enabled = true;
         }
 		
         public void HideLoadingUI() {
-            this._timerDisposable?.Dispose();
-            if(this._loadingUI) this._loadingUI.enabled = false;
+            _timerDisposable?.Dispose();
+            if(_loadingUI) _loadingUI.enabled = false;
         }
         
         #endregion <<---------- General ---------->>

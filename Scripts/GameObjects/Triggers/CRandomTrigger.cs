@@ -6,14 +6,15 @@ namespace CDK {
 
         #region <<---------- Properties and Fields ---------->>
 
-        public float ChanceToTrigger => this._chanceToTrigger;
-        [SerializeField, Tooltip("Chance in % to trigger event"), Range(1f, 99f)] private float _chanceToTrigger = 50f;
+        public float ChanceToTrigger => _chanceToTrigger;
+        [SerializeField, Tooltip("Chance in % to trigger event"), Range(1f, 99f)]
+        float _chanceToTrigger = 50f;
         [SerializeField] protected bool _triggerValue;
-        [SerializeField] private bool _triggerAffectsSelfActiveState = true;
-        [SerializeField] private CUnityEventBool _randomResultEvent;
-        [SerializeField] private CUnityEventBool _randomResultInvertedEvent;
-        [SerializeField] private UnityEvent _randomPositiveEvent;
-        [SerializeField] private UnityEvent _randomNegativeEvent;
+        [SerializeField] bool _triggerAffectsSelfActiveState = true;
+        [SerializeField] CUnityEventBool _randomResultEvent;
+        [SerializeField] CUnityEventBool _randomResultInvertedEvent;
+        [SerializeField] UnityEvent _randomPositiveEvent;
+        [SerializeField] UnityEvent _randomNegativeEvent;
 
         #endregion <<---------- Properties and Fields ---------->>
 
@@ -23,19 +24,19 @@ namespace CDK {
         #region <<---------- CAutoTriggerCompBase ---------->>
 
         protected override void TriggerEvent() {
-            this._triggerValue = GetRandomResult(this.GetChanceToTrigger());
+            _triggerValue = GetRandomResult(GetChanceToTrigger());
 
-            if (this._triggerAffectsSelfActiveState) {
-                this.gameObject.SetActive(this._triggerValue);
+            if (_triggerAffectsSelfActiveState) {
+                gameObject.SetActive(_triggerValue);
             }
 			
-            this._randomResultEvent?.Invoke(this._triggerValue);
-            this._randomResultInvertedEvent?.Invoke(!this._triggerValue);
-            if (this._triggerValue) {
-                this._randomPositiveEvent?.Invoke();
+            _randomResultEvent?.Invoke(_triggerValue);
+            _randomResultInvertedEvent?.Invoke(!_triggerValue);
+            if (_triggerValue) {
+                _randomPositiveEvent?.Invoke();
             }
             else {
-                this._randomNegativeEvent?.Invoke();
+                _randomNegativeEvent?.Invoke();
             }
         }
 
@@ -51,7 +52,7 @@ namespace CDK {
         }
 
         protected virtual float GetChanceToTrigger() {
-            return this._chanceToTrigger;
+            return _chanceToTrigger;
         }
         
         #endregion <<---------- Random ---------->>

@@ -7,8 +7,8 @@ namespace CDK {
 		#region <<---------- Initializers ---------->>
 
 		public CWeaponData(CWeaponScriptableObject item, int quantity) {
-			this._weaponScriptableObject = item;
-			this.Count = quantity;
+			_weaponScriptableObject = item;
+			Count = quantity;
 		}
 
 		#endregion <<---------- Initializers ---------->>
@@ -18,16 +18,16 @@ namespace CDK {
 		
 		#region <<---------- Properties and Fields ---------->>
 
-		[SerializeField] private CWeaponScriptableObject _weaponScriptableObject;
+		[SerializeField] CWeaponScriptableObject _weaponScriptableObject;
 		public CAmmoData EquippedAmmoData;
 
 		public int Count {
-			get { return this._count; }
+			get { return _count; }
 			private set {
-				this._count = value < 0 ? 0 : value;
+				_count = value < 0 ? 0 : value;
 			}
 		}
-		private int _count;
+		int _count;
 		
 
 		#endregion <<---------- Properties and Fields ---------->>
@@ -38,15 +38,15 @@ namespace CDK {
 		#region <<---------- CIItemBase ---------->>
 		
 		public CItemBaseScriptableObject GetScriptableObject() {
-			return this._weaponScriptableObject;
+			return _weaponScriptableObject;
 		}
 		
 		public int Add(int quantity) {
-			return this.Count += quantity;
+			return Count += quantity;
 		}
 
 		public int Remove(int quantity) {
-			return this.Count -= quantity;
+			return Count -= quantity;
 		}
 
 		#endregion <<---------- CIItemBase ---------->>
@@ -55,18 +55,18 @@ namespace CDK {
 		
 	
 		public bool HasAmmo() {
-			if (this.EquippedAmmoData == null) return false;
-			if (this.EquippedAmmoData.GetScriptableObject() is CAmmoScriptableObject ammoScriptObj && ammoScriptObj.IsInfinite) return true;
-			return this.EquippedAmmoData.Count > 0;
+			if (EquippedAmmoData == null) return false;
+			if (EquippedAmmoData.GetScriptableObject() is CAmmoScriptableObject ammoScriptObj && ammoScriptObj.IsInfinite) return true;
+			return EquippedAmmoData.Count > 0;
 		}
 
 		public bool IsLoadedWithInfiniteAmmo() {
-			if (this.EquippedAmmoData == null) return false;
-			return this.EquippedAmmoData.GetScriptableObject() is CAmmoScriptableObject ammoScriptObj && ammoScriptObj.IsInfinite;
+			if (EquippedAmmoData == null) return false;
+			return EquippedAmmoData.GetScriptableObject() is CAmmoScriptableObject ammoScriptObj && ammoScriptObj.IsInfinite;
 		}
 		
 		public int GetAmmoCount() {
-			return this.EquippedAmmoData?.Count ?? 0;
+			return EquippedAmmoData?.Count ?? 0;
 		}
 		
 	}

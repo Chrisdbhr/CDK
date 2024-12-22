@@ -7,18 +7,18 @@ namespace CDK {
 	public class CHitInfoData : ScriptableObject {
 		
 		public float RawDamage {
-			get { return this.rawDamage; }
+			get { return rawDamage; }
 		}
 		[FormerlySerializedAs("_damage")] [SerializeField] private float rawDamage = 1f;
 
 		public bool LookAtAttacker {
-			get { return this._lookAtAttacker; }
+			get { return _lookAtAttacker; }
 		}
 		[SerializeField] private bool _lookAtAttacker;
 
 		public AnimationCurve DamageShakePattern {
 			get {
-				return this._damageShakePattern;
+				return _damageShakePattern;
 			}	
 		}
 		[SerializeField] private AnimationCurve _damageShakePattern = new AnimationCurve(new [] {
@@ -28,7 +28,7 @@ namespace CDK {
 																								});
 
 		public float ShakeMultiplier {
-			get { return this._shakeMultiplier; }
+			get { return _shakeMultiplier; }
 		}
 		[SerializeField] private float _shakeMultiplier = 1f;
 

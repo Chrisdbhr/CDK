@@ -11,7 +11,7 @@ namespace CDK {
         }
 
         [SerializeField] UnityEvent _onCriticalHit;
-        public static EventHandler<CHealthComponent> OnCriticalHit;
+        public static event EventHandler<CHealthComponent> OnCriticalHit = delegate { };
 
         void OnEnable() {
             OnCriticalHit += CriticalHitCallback;

@@ -1,7 +1,6 @@
 using System;
-using CDK.Data;
+using System.Collections;
 using CDK.Enums;
-using R3;
 using UnityEngine;
 
 namespace CDK {
@@ -14,73 +13,73 @@ namespace CDK {
 		#region <<---------- Properties and Fields ---------->>
 		
 		// References
-		[NonSerialized] private CHitInfoData _lastAttackData;
-		[NonSerialized] private CHealthComponent _health;
+		[NonSerialized] CHitInfoData _lastAttackData;
+		[NonSerialized] CHealthComponent _health;
 		
 		// Animation
-		[NonSerialized] private Animator _animator;
-		[NonSerialized] private int ANIM_LIGHTSTUN = Animator.StringToHash("stunLight");
-		[NonSerialized] private int ANIM_MEDIUMSTUN = Animator.StringToHash("stunMedium");
-		[NonSerialized] private int ANIM_HEAVYSTUN = Animator.StringToHash("stunHeavy");
+		[NonSerialized] Animator _animator;
+		[NonSerialized] int ANIM_LIGHTSTUN = Animator.StringToHash("stunLight");
+		[NonSerialized] int ANIM_MEDIUMSTUN = Animator.StringToHash("stunMedium");
+		[NonSerialized] int ANIM_HEAVYSTUN = Animator.StringToHash("stunHeavy");
 		
 		// Stun
-		private const float LIGHT_STUN_FRACTION = 0.20f;
-		private const float MEDIUM_STUN_FRACTION = 0.60f;
-		[NonSerialized] private bool _stunned;
-		[SerializeField] private float _stunRecoveryRatePerSecond = 0.3f;
-		[SerializeField] private float _heavyStunResistance = 50f;
+		const float LIGHT_STUN_FRACTION = 0.20f;
+		const float MEDIUM_STUN_FRACTION = 0.60f;
+		[NonSerialized] bool _stunned;
+		[SerializeField, Min(0f)] float _stunRecoveryRatePerSecond = 0.3f;
+		[SerializeField] float _heavyStunResistance = 50f;
 		
 		public CStunStatus StunStatus {
-			get { return this._stunStatus; }
+			get { return _stunStatus; }
 			private set {
-				if (this._stunStatus == value) return;
-				this._stunStatus = value;
+				if (_stunStatus == value) return;
+				_stunStatus = value;
 
-				switch (this._stunStatus) {
+				switch (_stunStatus) {
 					case CStunStatus.lightStun: {
-						this._animator.CSetTriggerSafe(this.ANIM_LIGHTSTUN);
+						_animator.CSetTriggerSafe(ANIM_LIGHTSTUN);
 						break;
 					}
 					case CStunStatus.mediumStun: {
-						this._animator.CSetTriggerSafe(this.ANIM_MEDIUMSTUN);
+						_animator.CSetTriggerSafe(ANIM_MEDIUMSTUN);
 						break;
 					}
 					case CStunStatus.heavyStun: {
-						this._animator.CSetTriggerSafe(this.ANIM_HEAVYSTUN);
+						_animator.CSetTriggerSafe(ANIM_HEAVYSTUN);
 						break;
 					}
 				}
 
 			}
 		}
-		private CStunStatus _stunStatus;
-		
-		private float StunProgress {
-			get { return this._stunProgress; }
+		CStunStatus _stunStatus;
+
+		float StunProgress {
+			get { return _stunProgress; }
 			set {
-				if (this._stunProgress == value) return;
-				this._stunProgress = value;
-				if (this._stunProgress < 0) {
-					this._stunProgress = 0f;
+				if (_stunProgress == value) return;
+				_stunProgress = value;
+				if (_stunProgress < 0) {
+					_stunProgress = 0f;
 					return;
 				}
 
-				float stunPercentage = this._stunProgress / this._heavyStunResistance;
+				float stunPercentage = _stunProgress / _heavyStunResistance;
 
 				if (stunPercentage >= 1f) {
-					this.StunStatus = CStunStatus.heavyStun;
+					StunStatus = CStunStatus.heavyStun;
 				}else if (stunPercentage >= MEDIUM_STUN_FRACTION) {
-					this.StunStatus = CStunStatus.mediumStun;
+					StunStatus = CStunStatus.mediumStun;
 				}else if (stunPercentage >= LIGHT_STUN_FRACTION) {
-					this.StunStatus = CStunStatus.lightStun;
+					StunStatus = CStunStatus.lightStun;
 				}
 				else {
-					this.StunStatus = CStunStatus.none;
+					StunStatus = CStunStatus.none;
 				}
 				
 			}
 		}
-		[NonSerialized] private float _stunProgress;
+		[NonSerialized] float _stunProgress;
 		
 		#endregion <<---------- Properties and Fields ---------->>
 
@@ -88,47 +87,42 @@ namespace CDK {
 
 		
 		#region <<---------- MonBehaviour ---------->>
-		
-		private void Awake() {
-			this._health = this.GetComponent<CHealthComponent>();
-			this._animator = this.GetComponent<Animator>();
 
-            // stun
-            Observable.Timer(TimeSpan.FromSeconds(this._stunRecoveryRatePerSecond),TimeSpan.FromSeconds(this._stunRecoveryRatePerSecond))
-            .Subscribe(_ => {
-                if (this._health.IsDead) return;
-                this.StunProgress -= this._stunRecoveryRatePerSecond;
-            })
-            .AddTo(this);
+		void Awake() {
+			_health = GetComponent<CHealthComponent>();
+			_animator = GetComponent<Animator>();
 		}
 
-		private void OnEnable() {
-			this._health.OnDamageTaken += this.DamageTake;
-			this._health.OnRevive += this.Revived;
+		void OnEnable() {
+			_health.OnDamageTaken += DamageTake;
+			_health.OnRevive += Revived;
+			this.CStartCoroutine(StunRecoveryRoutine());
 		}
 
-		private void OnDisable() {
-			this._health.OnDamageTaken -= this.DamageTake;
-			this._health.OnRevive -= this.Revived;
+		void OnDisable() {
+			_health.OnDamageTaken -= DamageTake;
+			_health.OnRevive -= Revived;
 		}
 		
 		#endregion <<---------- MonBehaviour ---------->>
-		
-		
-		
-		
-		#region <<---------- Callbacks ---------->>
-		
-		private void DamageTake(float dmgAmount, CHitInfoData attack, Transform attacker) {
-			this.StunProgress += dmgAmount;
-			this._lastAttackData = attack;
+
+		IEnumerator StunRecoveryRoutine()
+		{
+			while (enabled) {
+				yield return new WaitForSeconds(_stunRecoveryRatePerSecond);
+				if (_health.IsDead) continue;
+				StunProgress -= _stunRecoveryRatePerSecond;
+			}
 		}
 
-		private void Revived() {
-			this._stunProgress = 0f;
+		void DamageTake(float dmgAmount, CHitInfoData attack, Transform attacker) {
+			StunProgress += dmgAmount;
+			_lastAttackData = attack;
 		}
 
-		#endregion <<---------- Callbacks ---------->>
-		
+		void Revived() {
+			_stunProgress = 0f;
+		}
+
 	}
 }

@@ -7,7 +7,7 @@ namespace CDK {
             if (transf == null) return;
             var w = transf.GetComponent<ICWaterInteractor>();
             if (w == null) return;
-            w.OnEnterWater(this.transform);
+            w.OnEnterWater(transform);
         }
 
         protected override void ExitedCollisionOrTrigger(Transform transf) {
@@ -15,7 +15,7 @@ namespace CDK {
             if (transf == null) return;
             var w = transf.GetComponent<ICWaterInteractor>();
             if (w == null) return;
-            w.OnExitWater(this.transform);
+            w.OnExitWater(transform);
         }
     }
 }

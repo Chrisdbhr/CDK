@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using R3;
+
 using Reflex.Attributes;
 using Reflex.Core;
 using UnityEngine;
@@ -9,28 +9,64 @@ using UnityEngine.EventSystems;
 using Object = UnityEngine.Object;
 
 namespace CDK.UI {
-	public class CUINavigationManager {
+	public class CUINavigationManager : CMonoBehaviour {
 
         #region <<---------- Initializers ---------->>
 
-		public CUINavigationManager(Container container) {
+		public CUINavigationManager Init(Container container) {
 			_navigationHistory = new HashSet<CUIViewBase>();
 			_blockingEventsManager = container.Resolve<CBlockingEventsManager>();
+			return this;
 		}
 		
 		#endregion <<---------- Initializers ---------->>
-		
+
+
+
+		#region MonoBehaviour
+
+		protected override void Awake()
+		{
+			base.Awake();
+
+		}
+
+		void Update()
+		{
+			//if (CInputManager.ActiveInputType != CInputManager.InputType.JoystickController) return;
+			RemoveNullFromNavigationHistory();
+			if (_navigationHistory.Count <= 0) return;
+			var current = EventSystem.current;
+			if (current == null) return;
+			if (current.currentSelectedGameObject != null && current.currentSelectedGameObject.activeInHierarchy && current.currentSelectedGameObject.TryGetComponent<CUIInteractable>(out var _)) {
+				return;
+			}
+			var activeUi = _navigationHistory.Last();
+			var objectToSelect = activeUi.FirstSelectedObject;
+			if (objectToSelect != null && objectToSelect.activeInHierarchy && objectToSelect.TryGetComponent<CUIInteractable>(out var interactable)) {
+				current.SetSelectedGameObject(interactable.gameObject);
+				return;
+			}
+			var firstInteractable = activeUi.GetComponentsInChildren<CUIInteractable>(false).FirstOrDefault();
+			if (firstInteractable == null) {
+				Debug.LogError("Could not find valid UI element to set cursor selection!");
+				return;
+			}
+			current.SetSelectedGameObject(firstInteractable.gameObject);
+		}
+
+		#endregion MonoBehaviour
 		
 		
 
 		#region <<---------- Properties ---------->>
-		public CUIViewBase[] NavigationHistoryToArray => this._navigationHistory.ToArray();
+		public CUIViewBase[] NavigationHistoryToArray => _navigationHistory.ToArray();
 		
 		[NonSerialized] int LastFrameAMenuClosed;
 		[NonSerialized] IDisposable _disposableIsNavigating;
 
-        readonly HashSet<CUIViewBase> _navigationHistory;
-        readonly CBlockingEventsManager _blockingEventsManager;
+		[NonSerialized] HashSet<CUIViewBase> _navigationHistory;
+		[NonSerialized] CBlockingEventsManager _blockingEventsManager;
 
 		#endregion <<---------- Properties ---------->>
 		
@@ -69,13 +105,13 @@ namespace CDK.UI {
                 return null;
             }
 
-            return this.ShowSpawnedMenu(uiGameObject, originUI, originButton, canCloseByReturnButton);
+            return ShowSpawnedMenu(uiGameObject, originUI, originButton, canCloseByReturnButton);
         }
 
         CUIViewBase ShowSpawnedMenu(CUIViewBase ui, CUIViewBase originUI, CUIInteractable originButton, bool canCloseByReturnButton = true) {
             if (CApplication.IsQuitting) return null;
 
-            bool alreadyOpened = this._navigationHistory.Any(x => x == ui);
+            bool alreadyOpened = _navigationHistory.Any(x => x == ui);
             if (alreadyOpened) {
 
                 CAssets.UnloadAsset(ui.gameObject);
@@ -84,13 +120,13 @@ namespace CDK.UI {
 			
             Debug.Log($"Requested navigation to '{ui.name}'");
             
-            this.HideLastMenuIfSet();
+            HideLastMenuIfSet();
 			
-            ui.Open(this._navigationHistory.Count, originUI, originButton, canCloseByReturnButton);
+            ui.Open(_navigationHistory.Count, originUI, originButton, canCloseByReturnButton);
 			
-            this.CheckIfIsFirstMenu();
+            CheckIfIsFirstMenu();
 			
-            this._navigationHistory.Add(ui);
+            _navigationHistory.Add(ui);
             
             return ui;
         }
@@ -100,12 +136,12 @@ namespace CDK.UI {
 		/// </summary>
 		/// <returns>returns TRUE if the menu closed.</returns>
 		public bool CloseLastMenu(bool closeRequestedByReturnButton = false) {
-            this.RemoveNullFromNavigationHistory();
-			if (this._navigationHistory.Count <= 0) {
+            RemoveNullFromNavigationHistory();
+			if (_navigationHistory.Count <= 0) {
 				return false;
 			}
 
-            var lastInHistory = this._navigationHistory.Last();
+            var lastInHistory = _navigationHistory.Last();
             if (lastInHistory == null) {
                 Debug.LogError("Last menu to close in navigation history was null.");
                 return false;
@@ -116,28 +152,29 @@ namespace CDK.UI {
                 return false;
             }
             
-			if (this.LastFrameAMenuClosed == Time.frameCount) {
+			if (LastFrameAMenuClosed == Time.frameCount) {
 				Debug.LogWarning($"Will not close menu '{lastInHistory.name}' because one already closed in this frame.", lastInHistory);
 				return false;
 			}
 
-            this._navigationHistory.Remove(lastInHistory);
+            _navigationHistory.Remove(lastInHistory);
 			
-			this.CheckIfIsLastMenu();
+			CheckIfIsLastMenu();
 
             Debug.Log($"Closing Menu '{lastInHistory.name}'", lastInHistory);
-            this.LastFrameAMenuClosed = Time.frameCount;
-            return lastInHistory.NavigationRequestedClose();
-        }
+            LastFrameAMenuClosed = Time.frameCount;
+            lastInHistory.NavigationRequestedClose();
+            return true;
+		}
         
 		public void EndNavigation() {
-			Debug.Log($"Requested EndNavigation of {this._navigationHistory.Count} Menus in history.");
+			Debug.Log($"Requested EndNavigation of {_navigationHistory.Count} Menus in history.");
             RemoveNullFromNavigationHistory();
-			foreach (var ui in this._navigationHistory) {
+			foreach (var ui in _navigationHistory) {
 				ui.NavigationRequestedClose();
 			}
-            this._disposableIsNavigating?.Dispose();
-			this._navigationHistory.Clear();
+            _disposableIsNavigating?.Dispose();
+			_navigationHistory.Clear();
             CTime.TimeScale = 1f;
 		}
 		
@@ -150,7 +187,7 @@ namespace CDK.UI {
 
 		/// <returns>true if removed some element</returns>
 		bool RemoveNullFromNavigationHistory() {
-            int removedCount = this._navigationHistory.RemoveWhere(x => x == null);
+            int removedCount = _navigationHistory.RemoveWhere(x => x == null);
             if (removedCount > 0) {
                 Debug.LogWarning($"<color=yellow>Removed {removedCount} null UI from navigation history.</color>");
                 return true;
@@ -159,50 +196,24 @@ namespace CDK.UI {
         }
 
 		bool CheckIfIsFirstMenu() {
-            this.RemoveNullFromNavigationHistory();
-			if (this._navigationHistory.Count > 0) return false;
-
-			this._disposableIsNavigating?.Dispose();
-            this._disposableIsNavigating = Observable.EveryUpdate(UnityFrameProvider.PostLateUpdate).Subscribe(_ => {
-				//if (CInputManager.ActiveInputType != CInputManager.InputType.JoystickController) return;
-                this.RemoveNullFromNavigationHistory();
-                if (this._navigationHistory.Count <= 0) return;
-				var current = EventSystem.current;
-				if (current == null) return;
-                if (current.currentSelectedGameObject != null && current.currentSelectedGameObject.activeInHierarchy && current.currentSelectedGameObject.TryGetComponent<CUIInteractable>(out var _)) {
-                    return;
-                }
-				var activeUi = this._navigationHistory.Last();
-                var objectToSelect = activeUi.FirstSelectedObject;
-                if (objectToSelect != null && objectToSelect.activeInHierarchy && objectToSelect.TryGetComponent<CUIInteractable>(out var interactable)) {
-                    current.SetSelectedGameObject(interactable.gameObject);
-                    return;
-                }
-                var firstInteractable = activeUi.GetComponentsInChildren<CUIInteractable>(false).FirstOrDefault();
-                if (firstInteractable == null) {
-                    Debug.LogError("Could not find valid UI element to set cursor selection!");
-                    return;
-                }
-                current.SetSelectedGameObject(firstInteractable.gameObject);
-            });
-
-            return true;
-        }
+            RemoveNullFromNavigationHistory();
+			return _navigationHistory.Count <= 0;
+		}
 
 		void CheckIfIsLastMenu() {
-            if (this.RemoveNullFromNavigationHistory() && this._navigationHistory.Count <= 0) {
+            if (RemoveNullFromNavigationHistory() && _navigationHistory.Count <= 0) {
                 // there was null UI on navigation history now it doesnt have anything, end navigation.
-                this.EndNavigation();
+                EndNavigation();
                 return;
             }
-            if (this._navigationHistory.Count > 0) return;
-            this.EndNavigation();
+            if (_navigationHistory.Count > 0) return;
+            EndNavigation();
         }
 
 		void HideLastMenuIfSet() {
-            this.RemoveNullFromNavigationHistory();
-			if (this._navigationHistory.Count <= 0) return;
-			var current = this._navigationHistory.Last();
+            RemoveNullFromNavigationHistory();
+			if (_navigationHistory.Count <= 0) return;
+			var current = _navigationHistory.Last();
             current.HideIfSet(); 
 		}
 		

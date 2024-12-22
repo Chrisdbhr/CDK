@@ -11,11 +11,11 @@ namespace CDK {
         
         
         public void OnEnterWater(Transform waterTransform) {
-            this._onEnterWater?.Invoke(waterTransform);
+            _onEnterWater?.Invoke(waterTransform);
         }
 
         public void OnExitWater(Transform waterTransform) {
-            this._onExitWater?.Invoke(waterTransform);
+            _onExitWater?.Invoke(waterTransform);
         }
     }
 }
