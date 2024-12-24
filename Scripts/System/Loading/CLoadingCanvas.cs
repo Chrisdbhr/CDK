@@ -1,7 +1,6 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
-
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -13,7 +12,8 @@ namespace CDK {
         [SerializeField] Canvas _loadingUI;
         [SerializeField] Image _imageProgress;
         readonly List<AsyncOperation> _activeAsyncOperations = new ();
-        [NonSerialized] IDisposable _timerDisposable;
+        [NonSerialized] float _delaySecondsToShowLoading = 1f;
+        [NonSerialized] float _lastTimeAsyncOpCountWasZero;
 
         #endregion <<---------- Properties and Fields ---------->>
 
@@ -22,23 +22,22 @@ namespace CDK {
 
         #region <<---------- MonoBehaviour ---------->>
 
-        void Awake() {
+        void Awake()
+        {
+            _loadingUI.CAssertIfNull("Loading Canvas has a null reference to the loading UI.");
             DontDestroyOnLoad(gameObject);
-            HideLoadingUI();
         }
 
-        void LateUpdate() {
-            foreach (var op in _activeAsyncOperations) {
-                if (op == null || op.isDone) continue;
-                _imageProgress.fillAmount = (op.progress / 0.9f).CClamp01();
-                break;
+        void LateUpdate()
+        {
+            bool shouldShow = (Time.time >= _lastTimeAsyncOpCountWasZero + _delaySecondsToShowLoading) && _activeAsyncOperations.Count > 0;
+            if(shouldShow) {
+                float acumulatedProgress = _activeAsyncOperations.Sum(op => op.progress);
+                _imageProgress.fillAmount = (acumulatedProgress / (_activeAsyncOperations.Count * 0.9f)).CClamp01();
             }
+            _loadingUI.enabled = shouldShow;
         }
 
-        void OnDestroy() {
-            _timerDisposable?.Dispose();
-        }
-        
         #endregion <<---------- MonoBehaviour ---------->>
 
 
@@ -50,13 +49,12 @@ namespace CDK {
         /// Returns the same async operation for easier chained operations.
         /// </summary>
         public AsyncOperation MonitorAsyncOperation(AsyncOperation asyncOperation) {
-            if (_activeAsyncOperations.Count <= 0) {
-                _timerDisposable?.Dispose();
-                _timerDisposable = Observable.Timer(TimeSpan.FromSeconds(1f))
-                .Subscribe(_ => {
-                    if (this == null) return;
-                    ShowLoadingUI();
-                });
+            if(asyncOperation == null) {
+                Debug.LogError("Skipping null AsyncOperation to monitor.");
+                return null;
+            }
+            if(_activeAsyncOperations.Count <= 0) {
+                _lastTimeAsyncOpCountWasZero = Time.time;
             }
             _activeAsyncOperations.Add(asyncOperation);
             asyncOperation.completed += ActiveAsyncOperationCompleted;
@@ -65,22 +63,8 @@ namespace CDK {
 
         void ActiveAsyncOperationCompleted(AsyncOperation op) {
             _activeAsyncOperations.Remove(op);
-            if (_activeAsyncOperations.Count <= 0) {
-                HideLoadingUI();
-            }
         }
 
-        public bool IsLoading => _loadingUI != null && _loadingUI.enabled;
-
-        public void ShowLoadingUI() {
-            if(_loadingUI) _loadingUI.enabled = true;
-        }
-		
-        public void HideLoadingUI() {
-            _timerDisposable?.Dispose();
-            if(_loadingUI) _loadingUI.enabled = false;
-        }
-        
         #endregion <<---------- General ---------->>
 	}
 }
