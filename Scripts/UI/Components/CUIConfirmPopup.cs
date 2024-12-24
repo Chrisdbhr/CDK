@@ -15,11 +15,11 @@ namespace CDK.UI {
 		public void SetupPopup(EventHandler onConfirm, string title) {
 			// confirm exit
 			_buttonConfirm.Button.interactable = true;
-			_buttonConfirm.Button.OnClickAsObservable().Subscribe(_ => {
-				Debug.Log($"SUBMIT: Confirm Popup '{gameObject.name}'", this);
+			_buttonConfirm.OnClick += () => {
+				Debug.Log($"SUBMIT: Confirm Popup '{gameObject.name}'",this);
 				_navigationManager.CloseLastMenu();
-				onConfirm?.Invoke(this, EventArgs.Empty);
-			}).AddTo(this);
+				onConfirm?.Invoke(this,EventArgs.Empty);
+			};
 					
 			_eventSystem.SetSelectedGameObject(_buttonConfirm.gameObject);
             

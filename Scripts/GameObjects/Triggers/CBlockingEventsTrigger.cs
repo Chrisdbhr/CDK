@@ -52,19 +52,23 @@ namespace CDK {
         void Awake() {
             _blockingEventsManager = gameObject.scene.GetSceneContainer().Resolve<CBlockingEventsManager>();
             OnBlockingEvent(_blockingEventsManager.IsOnMenu, _blockingEventsManager.IsPlayingCutscene);
-
-            Observable.CombineLatest(
-                _blockingEventsManager.OnMenuRetainable.IsRetainedAsObservable(),
-                _blockingEventsManager.PlayingCutsceneRetainable.IsRetainedAsObservable()
-            )
-            .Subscribe(x => OnBlockingEvent(x[0], x[1]))
-            .AddTo(this);
-
-
         }
 
-        void OnBlockingEvent(bool isOnMenu, bool isPlayingCutscene) {
-            AnyBlockingEvent.Invoke(isOnMenu || isPlayingCutscene);
+        void OnEnable()
+        {
+            _blockingEventsManager.OnAnyEventHappeningChanged += OnBlockingEvent;
+        }
+
+        void OnDisable()
+        {
+            _blockingEventsManager.OnAnyEventHappeningChanged -= OnBlockingEvent;
+        }
+
+        void OnBlockingEvent(object sender, bool anyHappening) {
+            var isOnMenu = _blockingEventsManager.IsOnMenu;
+            var isPlayingCutscene = _blockingEventsManager.IsPlayingCutscene;
+
+            AnyBlockingEvent.Invoke(anyHappening);
             OnMenuOrPlayingCutsceneEvent.Invoke(isOnMenu || isPlayingCutscene);
             OnMenuEvent.Invoke(isOnMenu);
             PlayingCutsceneEvent.Invoke(isPlayingCutscene);

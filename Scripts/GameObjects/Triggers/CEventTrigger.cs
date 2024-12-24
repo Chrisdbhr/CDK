@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -25,20 +26,18 @@ namespace CDK {
 			if(_triggerOnlyOneTime) _triggered = true;
 			
 			if (delayToTriggerEvent > 0f) {
-				Observable.Timer(TimeSpan.FromSeconds(delayToTriggerEvent)).Subscribe(_ => {
-					eventToTrigger?.Invoke();
-				});
-				
+				this.CStartCoroutine(DelayedTrigger(delayToTriggerEvent));
 				return;
 			}
 			// trigger now
 			eventToTrigger?.Invoke();
 		}
 
-		System.Collections.IEnumerator WaitTime(float timeInSeconds, Action onFinish) {
-			yield return new WaitForSeconds(timeInSeconds);
-			onFinish?.Invoke();
+		IEnumerator DelayedTrigger(float delayToTriggerEvent)
+		{
+			yield return new WaitForSeconds(delayToTriggerEvent);
+			eventToTrigger?.Invoke();
 		}
-		
+
 	}
 }
