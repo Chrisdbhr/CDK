@@ -10,7 +10,8 @@
         "url": "https://github.com/chrisdbhr"
     },
     "dependencies": {
-        "jillejr.newtonsoft.json-for-unity.converters" : "1.6.3"
+      "jillejr.newtonsoft.json-for-unity.converters": "1.6.3",
+      "com.gustavopsantos.reflex": "9.0.1"
     },
     "keywords": [
         "devkit",
