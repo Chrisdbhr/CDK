@@ -16,7 +16,7 @@ namespace CDK {
 		}
 
 		protected override void TriggerEvent() {
-			_rb.velocity = transform.TransformDirection(_setVelocityAmount);
+			_rb.linearVelocity = transform.TransformDirection(_setVelocityAmount);
 		}
 		
 	}
