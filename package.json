@@ -10,6 +10,7 @@
         "url": "https://github.com/chrisdbhr"
     },
     "dependencies": {
+      "com.unity.nuget.newtonsoft-json" : "3.2.1",
       "jillejr.newtonsoft.json-for-unity.converters": "1.6.3",
       "com.gustavopsantos.reflex": "9.0.1"
     },
