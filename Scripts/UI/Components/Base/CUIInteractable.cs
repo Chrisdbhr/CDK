@@ -28,7 +28,7 @@ namespace CDK.UI {
 		#endif
 
         [Inject] protected CUINavigationManager _navigationManager;
-        [Inject] protected CGameSettings _gameSettings;
+        [Inject] protected UISoundsBankSO _soundsBank;
 
         [SerializeField] UnityEvent _interactEvent;
 
@@ -75,7 +75,7 @@ namespace CDK.UI {
 		public virtual void Selected(bool playSound = true) {
 			if(_debug) Debug.Log($"Selected: CUIInteractable '{gameObject.name}'", this);
 			#if FMOD
-			if(playSound) PlaySound(_gameSettings.SoundSelect);
+			if(playSound) PlaySound(_soundsBank.SoundSelect);
 			#endif
 		}
 
@@ -84,7 +84,7 @@ namespace CDK.UI {
 			if(_debug) Debug.Log($"SUBMIT: CUIInteractable '{gameObject.name}'", this);
 			#if FMOD
             if (!(this is CUIButton b && !b.Button.interactable)) {
-                PlaySound(_gameSettings.SoundSubmit);
+                PlaySound(_soundsBank.SoundSubmit);
             }
 			#endif
 		}
@@ -92,7 +92,7 @@ namespace CDK.UI {
 		public virtual void Canceled() {
 			if(_debug) Debug.Log($"CANCEL: CUIInteractable '{gameObject.name}'", this);
 			#if FMOD
-			PlaySound(_gameSettings.SoundCancel);
+			PlaySound(_soundsBank.SoundCancel);
 			#endif
 		}
 		

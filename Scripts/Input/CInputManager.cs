@@ -21,9 +21,9 @@ namespace CDK {
         #endregion <<---------- Enums ---------->>
 
 
-        public CInputManager(Container container) {
-	        blockingEventsManager = container.Resolve<CBlockingEventsManager>();
-	        SetControllerTypeBasedOnPlatform();
+        public CInputManager(CBlockingEventsManager blockingEventsManager) {
+			this._blockingEventsManager = blockingEventsManager;
+			SetControllerTypeBasedOnPlatform();
 	        #if REWIRED
 	        if (ReInput.isReady) Initialize();
 	        else ReInput.InitializedEvent += Initialize;
@@ -46,7 +46,7 @@ namespace CDK {
 
 		public EventHandler<InputType> InputTypeChanged = delegate { };
 
-		readonly CBlockingEventsManager blockingEventsManager;
+		readonly CBlockingEventsManager _blockingEventsManager;
 
         #endregion <<---------- Properties and Fields ---------->>
 

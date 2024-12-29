@@ -58,7 +58,7 @@ namespace CDK.UI {
 		[NonSerialized] protected UnityEvent OnOpenEvent;
 		[NonSerialized] protected UnityEvent OnCloseEvent;
 
-		[Inject][NonSerialized] protected CGameSettings _gameSettings;
+		[Inject][NonSerialized] protected UISoundsBankSO _soundsBank;
 		[Inject][NonSerialized] protected readonly CBlockingEventsManager _blockingEventsManager;
 		[Inject][NonSerialized] protected CUINavigationManager _navigationManager;
 

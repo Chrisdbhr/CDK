@@ -1,4 +1,5 @@
-﻿using CDK.UI;
+﻿using System;
+using CDK.UI;
 using Reflex.Core;
 using UnityEngine;
 
@@ -9,11 +10,11 @@ namespace CDK {
         public void InstallBindings(ContainerBuilder builder)
         {
             builder
-                .AddSingleton(container => Resources.Load<CGameSettings>("GameSettings"), typeof(CGameSettings))
-                .AddSingleton(container => new CBlockingEventsManager(), typeof(CBlockingEventsManager))
+                .AddSingleton(container => Resources.LoadAll<UISoundsBankSO>(String.Empty)[0], typeof(UISoundsBankSO))
+                .AddSingleton(typeof(CBlockingEventsManager))
                 .AddSingleton(container => CAssets.LoadResourceAndInstantiate<CLoadingCanvas>("System/Loading Canvas"))
-                .AddSingleton(container => new CInputManager(container), typeof(CInputManager))
-                .AddSingleton(container => new CCursorManager(container), typeof(CCursorManager))
+                .AddSingleton(typeof(CInputManager))
+                .AddSingleton(typeof(CCursorManager))
                 .AddSingleton(container => new GameObject("UI Navigation Manager").AddComponent<CUINavigationManager>().Init(container), typeof(CUINavigationManager))
             ;
         }

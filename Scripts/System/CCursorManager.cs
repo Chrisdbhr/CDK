@@ -17,9 +17,9 @@ namespace CDK {
 
         #region <<---------- Initializers ---------->>
 
-        public CCursorManager(Container container) {
-	        _blockingEventsManager = container.Resolve<CBlockingEventsManager>();
-	        _inputManager = container.Resolve<CInputManager>();
+        public CCursorManager(CBlockingEventsManager blockingEventsManager, CInputManager inputManager) {
+			_blockingEventsManager = blockingEventsManager;
+			_inputManager = inputManager;
 
             _blockingEventsManager.MenuRetainable.StateEvent += (onMenu) => {
                 if (!onMenu) {
