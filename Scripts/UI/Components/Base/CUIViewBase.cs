@@ -71,8 +71,8 @@ namespace CDK.UI {
 
 		protected virtual void OnEnable() {
 			UpdateEventSystemAndCheckForObjectSelection(_eventSystem.firstSelectedGameObject);
-            if(_buttonReturn) _buttonReturn.OnClick += NavigationRequestedClose;
-            _blockingEventsManager.OnMenuRetainable.Retain(this);
+            if(_buttonReturn) _buttonReturn.ClickEvent += NavigationRequestedClose;
+            _blockingEventsManager.MenuRetainable.Retain(this);
         }
 
 		void LateUpdate()
@@ -88,8 +88,8 @@ namespace CDK.UI {
 		}
 
 		protected virtual void OnDisable() {
-            _blockingEventsManager.OnMenuRetainable.Release(this);
-            if(_buttonReturn) _buttonReturn.OnClick -= NavigationRequestedClose;
+            _blockingEventsManager.MenuRetainable.Release(this);
+            if(_buttonReturn) _buttonReturn.ClickEvent -= NavigationRequestedClose;
 		}
 
         protected virtual void OnDestroy() { }
@@ -137,7 +137,7 @@ namespace CDK.UI {
 
 			OnCloseEvent?.Invoke();
 
-			_blockingEventsManager.OnMenuRetainable.Release(this);
+			_blockingEventsManager.MenuRetainable.Release(this);
 
 			#if UNITY_ADDRESSABLES_EXIST
 			if (!CAssets.UnloadAsset(this.gameObject)) {

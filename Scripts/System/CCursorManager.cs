@@ -21,7 +21,7 @@ namespace CDK {
 	        _blockingEventsManager = container.Resolve<CBlockingEventsManager>();
 	        _inputManager = container.Resolve<CInputManager>();
 
-            _blockingEventsManager.OnMenuRetainable.OnRetainedStateChanged += (sender, onMenu) => {
+            _blockingEventsManager.MenuRetainable.StateEvent += (onMenu) => {
                 if (!onMenu) {
                     SetCursorState(false);
                     return;
@@ -42,7 +42,7 @@ namespace CDK {
 
 
 		void OnInputTypeChanged(object sender, CInputManager.InputType inputType) {
-			SetCursorState(_inputManager.ActiveInputType.IsMouseOrKeyboard() && _blockingEventsManager.IsOnMenu);
+			SetCursorState(_inputManager.ActiveInputType.IsMouseOrKeyboard() && _blockingEventsManager.IsInMenu);
 		}
 
 		static void SetCursorState(bool visible)

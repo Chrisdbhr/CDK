@@ -16,12 +16,12 @@ namespace CDK {
             set {
                 if(_isRetained == value) return;
                 _isRetained = value;
-                OnRetainedStateChanged.Invoke(this, value);
+                StateEvent.Invoke(value);
             }
         }
         [NonSerialized] bool _isRetained;
 
-        public event EventHandler<bool> OnRetainedStateChanged = delegate { };
+        public event Action<bool> StateEvent = delegate { };
 
         #if UNITY_EDITOR
         public IReadOnlyCollection<object> DebugRetainedObjectsCollection => _retainedObjects;

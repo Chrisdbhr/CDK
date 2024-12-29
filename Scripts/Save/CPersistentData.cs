@@ -15,6 +15,7 @@ using System.Runtime.InteropServices;
 #endif
 
 namespace CDK {
+	[JsonObject(MemberSerialization.OptIn)]
 	public abstract class CPersistentData {
 
 		#region <<---------- Saving ---------->>

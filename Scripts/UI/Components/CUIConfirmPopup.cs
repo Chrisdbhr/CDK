@@ -15,7 +15,7 @@ namespace CDK.UI {
 		public void SetupPopup(EventHandler onConfirm, string title) {
 			// confirm exit
 			_buttonConfirm.Button.interactable = true;
-			_buttonConfirm.OnClick += () => {
+			_buttonConfirm.ClickEvent += () => {
 				Debug.Log($"SUBMIT: Confirm Popup '{gameObject.name}'",this);
 				_navigationManager.CloseLastMenu();
 				onConfirm?.Invoke(this,EventArgs.Empty);

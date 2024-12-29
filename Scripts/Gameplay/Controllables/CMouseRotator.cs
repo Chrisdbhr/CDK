@@ -24,8 +24,8 @@ namespace CDK {
 			_initialRotation = _transform.rotation;
 		}
 
-		private void Update() {
-			if (_blockingEventsManager.IsAnyHappening) return;
+		void Update() {
+			if (_blockingEventsManager.InMenuOrPlayingCutscene) return;
 			
 			_inputLook = new Vector2(Input.GetAxisRaw(CInputKeys.LOOK_X), Input.GetAxisRaw(CInputKeys.LOOK_Y));
 

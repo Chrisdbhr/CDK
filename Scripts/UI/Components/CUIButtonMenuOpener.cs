@@ -10,13 +10,13 @@ namespace CDK.UI {
         protected override void OnEnable()
         {
             base.OnEnable();
-            OnClick += OnOnClick;
+            ClickEvent += OnOnClick;
         }
 
         protected override void OnDisable()
         {
             base.OnDisable();
-            OnClick -= OnOnClick;
+            ClickEvent -= OnOnClick;
         }
 
         void OnOnClick()

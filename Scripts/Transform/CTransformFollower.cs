@@ -10,141 +10,133 @@ namespace CDK {
 
 		#region <<---------- Properties and Fields ---------->>
         
-		[SerializeField] private CMonobehaviourExecutionLoop executionLoop = CMonobehaviourExecutionLoop.LateUpdate;
+		[SerializeField] CMonobehaviourExecutionLoop executionLoop = CMonobehaviourExecutionLoop.LateUpdate;
 		[Obsolete("OBSOLETE, use public property instead.")]
-		[SerializeField] private Transform _transformToFollow;
-        public Transform TransformToFollow => this._transformToFollow;
+		[SerializeField]
+		Transform _transformToFollow;
+        public Transform TransformToFollow => _transformToFollow;
 		[Header("Position")]
-		[SerializeField] private Vector3 _followOffset = Vector3.zero;
-		[SerializeField] private FollowTypeEnum _followType;
-		[SerializeField] private float _followSpeed = 10f;
-		[NonSerialized] private Transform _myTransform;
+		[SerializeField] Vector3 _followOffset = Vector3.zero;
+		[SerializeField] FollowTypeEnum _followType;
+		[SerializeField] float _followSpeed = 10f;
+		[NonSerialized] Transform _myTransform;
 
-        [SerializeField] private bool _ignoreTimeScale;
-		[SerializeField] private bool _ignoreXAxis;
-		[SerializeField] private bool _ignoreYAxis;
-		[SerializeField] private bool _ignoreZAxis;
-       
-        [SerializeField] private Vector3 _positionMultiplier = UnityEngine.Vector3.one;
+        [SerializeField] bool _ignoreTimeScale;
+		[SerializeField] bool _ignoreXAxis;
+		[SerializeField] bool _ignoreYAxis;
+		[SerializeField] bool _ignoreZAxis;
+
+        [SerializeField] Vector3 _positionMultiplier = Vector3.one;
 
 		[Header("Rotation")]
-		[SerializeField] private bool _followRotation;
-		
-        public event Action<Transform> TransformToFollowChanged {
-            add {
-                this._transformToFollowChanged -= value;
-                this._transformToFollowChanged += value;
-            }
-            remove {
-                this._transformToFollowChanged -= value;
-            }
-        }
-        private Action<Transform> _transformToFollowChanged;
+		[SerializeField] bool _followRotation;
+
+		public event Action<Transform> TransformToFollowChanged = delegate { };
 
 		#endregion <<---------- Properties and Fields ---------->>
 
-		
-		
-		
+
+
+
 		#region <<---------- Enums ---------->>
 
-		private enum FollowTypeEnum {
+		enum FollowTypeEnum {
 			instant, smooth
 		}
-		
+
 		#endregion <<---------- Enums ---------->>
 
-		
-		
+
+
 
 		#region <<---------- MonoBehaviour ---------->>
-		
+
 		protected virtual void Awake() {
-			this._myTransform = this.transform;
+			_myTransform = transform;
 		}
 
         protected virtual void OnEnable() {
-			this.CheckIfWillMove();
+			CheckIfWillMove();
 		}
 
         protected virtual void Update() {
-			if (this.executionLoop != CMonobehaviourExecutionLoop.Update) return;
-            Execute(this._ignoreTimeScale ? Time.unscaledDeltaTime : CTime.DeltaTimeScaled);
+			if (executionLoop != CMonobehaviourExecutionLoop.Update) return;
+            Execute(_ignoreTimeScale ? Time.unscaledDeltaTime : CTime.DeltaTimeScaled);
         }
 
 		protected virtual void FixedUpdate() {
-			if (this.executionLoop != CMonobehaviourExecutionLoop.FixedUpdate) return;
-            Execute(this._ignoreTimeScale ? Time.fixedUnscaledDeltaTime : CTime.DeltaTimeScaled);
+			if (executionLoop != CMonobehaviourExecutionLoop.FixedUpdate) return;
+            Execute(_ignoreTimeScale ? Time.fixedUnscaledDeltaTime : CTime.DeltaTimeScaled);
 		}
 
         protected virtual void LateUpdate() {
-			if (this.executionLoop != CMonobehaviourExecutionLoop.LateUpdate) return;
-            Execute(this._ignoreTimeScale ? Time.unscaledDeltaTime : CTime.DeltaTimeScaled);
+			if (executionLoop != CMonobehaviourExecutionLoop.LateUpdate) return;
+            Execute(_ignoreTimeScale ? Time.unscaledDeltaTime : CTime.DeltaTimeScaled);
 		}
 
 		#if UNITY_EDITOR
         protected virtual void OnDrawGizmosSelected() {
-			if (this._transformToFollow == null) {
-				Handles.Label(this.transform.position, $"Follow Target is null!");
+			if (_transformToFollow == null) {
+				Handles.Label(transform.position, $"Follow Target is null!");
 				return;
 			}
 			Handles.color = Gizmos.color = Color.cyan;
-			var targetPos = this._transformToFollow.position + this._followOffset;
-			Handles.Label(targetPos, $"Follow Target: {this._transformToFollow.name}");
-			Gizmos.DrawLine(this.transform.position, targetPos);
+			var targetPos = _transformToFollow.position + _followOffset;
+			Handles.Label(targetPos, $"Follow Target: {_transformToFollow.name}");
+			Gizmos.DrawLine(transform.position, targetPos);
 		}
 		#endif
- 
+
 		#endregion <<---------- MonoBehaviour ---------->>
 
 
-		
-		
+
+
 		#region <<---------- General ---------->>
 
         protected virtual void Execute(float deltaTime) {
-            this.FollowTarget(deltaTime);
+            FollowTarget(deltaTime);
         }
 
-		private void CheckIfWillMove() {
-			if (this._ignoreXAxis && this._ignoreYAxis && this._ignoreZAxis) {
-				Debug.LogError($"'{this.name}' is set to ignore all axis when following so it will remain stationary."); 
+        void CheckIfWillMove() {
+			if (_ignoreXAxis && _ignoreYAxis && _ignoreZAxis) {
+				Debug.LogError($"'{name}' is set to ignore all axis when following so it will remain stationary.");
 			}
 		}
-		
-		private void FollowTarget(float deltaTime) {
-			if (this._transformToFollow == null) return;
 
-			if (this._followRotation) {
-				this.transform.rotation = this._transformToFollow.rotation;
+		void FollowTarget(float deltaTime) {
+			if (_transformToFollow == null) return;
+
+			if (_followRotation) {
+				transform.rotation = _transformToFollow.rotation;
 			}
-			
-			if (this._ignoreXAxis && this._ignoreYAxis && this._ignoreZAxis) return;
-			
-			var targetPos = Vector3.Scale(this._transformToFollow.position, this._positionMultiplier);
-            if (!this._followOffset.CIsZero()) {
-                targetPos += this._transformToFollow.TransformVector(this._followOffset);
+
+			if (_ignoreXAxis && _ignoreYAxis && _ignoreZAxis) return;
+
+			var targetPos = Vector3.Scale(_transformToFollow.position, _positionMultiplier);
+            if (!_followOffset.CIsZero()) {
+                targetPos += _transformToFollow.TransformVector(_followOffset);
             }
-			if (this._ignoreXAxis) targetPos.x = this.transform.position.x;
-			if (this._ignoreYAxis) targetPos.y = this.transform.position.y;
-			if (this._ignoreZAxis) targetPos.z = this.transform.position.z;
-			
-			switch (this._followType) {
+			if (_ignoreXAxis) targetPos.x = transform.position.x;
+			if (_ignoreYAxis) targetPos.y = transform.position.y;
+			if (_ignoreZAxis) targetPos.z = transform.position.z;
+
+			switch (_followType) {
 				case FollowTypeEnum.instant:
-					this._myTransform.position = targetPos;
+					_myTransform.position = targetPos;
 					break;
 				case FollowTypeEnum.smooth:
-					this._myTransform.position = Vector3.Lerp(this._myTransform.position, targetPos, this._followSpeed * deltaTime);
+					_myTransform.position = Vector3.Lerp(_myTransform.position, targetPos, _followSpeed * deltaTime);
 					break;
 			}
 
 		}
 
         public void SetTransformToFollow(Transform t) {
-            if (this._transformToFollow == t) return;
-            this._transformToFollow = t;
-            this._transformToFollowChanged?.Invoke(t);
-            this.CheckIfWillMove();
+            if (_transformToFollow == t) return;
+            _transformToFollow = t;
+            TransformToFollowChanged?.Invoke(t);
+            CheckIfWillMove();
         }
 		
 		#endregion <<---------- General ---------->>

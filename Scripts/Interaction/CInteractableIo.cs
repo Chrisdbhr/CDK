@@ -9,18 +9,18 @@ namespace CDK.Interaction {
 		#region <<---------- Properties and Fields ---------->>
 		
 		public bool On {
-			get { return this._on; }
+			get { return _on; }
 			set {
-				if (this._on == value) return;
-				this._on = value;
-				this.NewStateEvent?.Invoke(this._on);
-				if (this._on) {
-					this.StateOnEvent?.Invoke();
+				if (_on == value) return;
+				_on = value;
+				NewStateEvent?.Invoke(_on);
+				if (_on) {
+					StateOnEvent?.Invoke();
 				}
 				else {
-					this.StateOffEvent?.Invoke();
+					StateOffEvent?.Invoke();
 				}
-				Debug.Log($"Interact {this._on}");
+				Debug.Log($"Interact {_on}");
 			}
 		}
 		[SerializeField] private bool _on;
@@ -28,16 +28,16 @@ namespace CDK.Interaction {
 		[SerializeField] private bool triggerOnStart = true;
 
 		private bool Locked {
-			get { return this._locked; }
+			get { return _locked; }
 			set {
-				if (this._locked == value) return;
-				this._locked = value;
-				this.LockStateChangedEvent?.Invoke(this._locked);
-				if (this._locked) {
-					this.LockEvent?.Invoke();
+				if (_locked == value) return;
+				_locked = value;
+				LockStateChangedEvent?.Invoke(_locked);
+				if (_locked) {
+					LockEvent?.Invoke();
 				}
 				else {
-					this.UnlockEvent?.Invoke();
+					UnlockEvent?.Invoke();
 				}
 			}
 		}
@@ -60,14 +60,14 @@ namespace CDK.Interaction {
 		#region <<---------- MonoBehaviour ---------->>
 
 		private void Start() {
-			if(this.triggerOnStart) this.NewStateEvent?.Invoke(this.On);
+			if(triggerOnStart) NewStateEvent?.Invoke(On);
 		}
 
 		#if UNITY_EDITOR
 		private void Reset() {
-			if (this.gameObject.layer != 15) {
-				Debug.Log($"Settings {this.name} layer to {LayerMask.LayerToName(15)}");
-				this.gameObject.layer = 15;
+			if (gameObject.layer != 15) {
+				Debug.Log($"Settings {name} layer to {LayerMask.LayerToName(15)}");
+				gameObject.layer = 15;
 			}
 		}
 		#endif
@@ -80,7 +80,7 @@ namespace CDK.Interaction {
 		#region <<---------- CInteractable ---------->>
 
         public override bool CanBeInteractedWith() {
-            return base.CanBeInteractedWith() && !this._locked;
+            return base.CanBeInteractedWith() && !_locked;
         }
 
 		public override void OnBecameInteractionTarget(Transform lookingTransform) {
@@ -89,11 +89,11 @@ namespace CDK.Interaction {
 
 		public override bool OnInteract(Transform interactingTransform) {
             if (!base.OnInteract(interactingTransform)) return false; 
-			if (this.Locked) {
-				this.TryToOpenWhenLocked(interactingTransform);
+			if (Locked) {
+				TryToOpenWhenLocked(interactingTransform);
 				return true;
 			}
-			this.SwitchState();
+			SwitchState();
             return true;
         }
 
@@ -102,33 +102,33 @@ namespace CDK.Interaction {
 		
 
 		public void SwitchState() {
-			if (this.Locked) return;
-			this.On = !this.On;
+			if (Locked) return;
+			On = !On;
 		}
 		
 		public void SetOnOffState(bool newState) {
-			if (this.Locked) return;
-			this.On = newState;
+			if (Locked) return;
+			On = newState;
 		}
 
 		public void TryToOpenWhenLocked(Transform interactingTransform) {
-			this.InteractedWhenLocked?.Invoke(interactingTransform);
+			InteractedWhenLocked?.Invoke(interactingTransform);
 		}
 		
 		public void Lock() {
-			this.Locked = true;
+			Locked = true;
 		}
 
 		public void Unlock() {
-			this.Locked = false;
+			Locked = false;
 		}
 
 		public void SwitchLockState() {
-			this.Locked = !this.Locked;
+			Locked = !Locked;
 		}
 
 		public void SetLockState(bool newState) {
-			this.Locked = newState;
+			Locked = newState;
 		}
 
 	}

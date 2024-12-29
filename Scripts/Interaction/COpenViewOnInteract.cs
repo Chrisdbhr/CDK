@@ -13,7 +13,7 @@ namespace CDK {
         
         public override bool OnInteract(Transform interactingTransform) {
             if (!base.OnInteract(interactingTransform)) return false;
-            navigationManager.OpenMenu(this._viewToOpen, null, null);
+            navigationManager.OpenMenu(_viewToOpen, null, null);
             return true;
         }
         

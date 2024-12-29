@@ -4,23 +4,21 @@ using UnityEngine;
 namespace CDK {
 	public class CTransformMove : MonoBehaviour {
 		
-		[SerializeField] private Vector3 _localDirectionAndSpeed = Vector3.forward;
-		[NonSerialized] private Transform _transform;
-		[NonSerialized] private Vector3 _newPosition;
+		[SerializeField] Vector3 _localDirectionAndSpeed = Vector3.forward;
+		[NonSerialized] Transform _transform;
+		[NonSerialized] Vector3 _newPosition;
 
-		
-		
-		
-		private void Awake() {
-			this._transform = this.transform;
+
+		void Awake() {
+			_transform = transform;
 		}
 
-		private void Update() {
-			this._newPosition = this._transform.position;
-			this._newPosition += this._transform.forward * (this._localDirectionAndSpeed.z * CTime.DeltaTimeScaled);
-			this._newPosition += this._transform.right * (this._localDirectionAndSpeed.x * CTime.DeltaTimeScaled);
-			this._newPosition += this._transform.up * (this._localDirectionAndSpeed.y * CTime.DeltaTimeScaled);
-			this._transform.position = this._newPosition;
+		void Update() {
+			_newPosition = _transform.position;
+			_newPosition += _transform.forward * (_localDirectionAndSpeed.z * CTime.DeltaTimeScaled);
+			_newPosition += _transform.right * (_localDirectionAndSpeed.x * CTime.DeltaTimeScaled);
+			_newPosition += _transform.up * (_localDirectionAndSpeed.y * CTime.DeltaTimeScaled);
+			_transform.position = _newPosition;
 		}
 		
 	}

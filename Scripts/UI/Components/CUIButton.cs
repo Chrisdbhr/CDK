@@ -11,7 +11,7 @@ namespace CDK.UI {
 	public class CUIButton : CUIInteractable {
 		public Button Button;
 
-		public event Action OnClick = delegate { };
+		public event Action ClickEvent = delegate { };
 
 		protected override void OnEnable()
 		{
@@ -26,7 +26,7 @@ namespace CDK.UI {
 
 		void ButtonOnClick()
 		{
-			OnClick?.Invoke();
+			ClickEvent?.Invoke();
 		}
 
 		#if UNITY_EDITOR

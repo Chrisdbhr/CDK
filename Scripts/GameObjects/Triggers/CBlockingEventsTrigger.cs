@@ -51,32 +51,32 @@ namespace CDK {
 
         void Awake() {
             _blockingEventsManager = gameObject.scene.GetSceneContainer().Resolve<CBlockingEventsManager>();
-            OnBlockingEvent(_blockingEventsManager.IsOnMenu, _blockingEventsManager.IsPlayingCutscene);
+            BlockingEvent(_blockingEventsManager.InMenuOrPlayingCutscene);
         }
 
         void OnEnable()
         {
-            _blockingEventsManager.OnAnyEventHappeningChanged += OnBlockingEvent;
+            _blockingEventsManager.InMenuOrPlayingCutsceneEvent += BlockingEvent;
         }
 
         void OnDisable()
         {
-            _blockingEventsManager.OnAnyEventHappeningChanged -= OnBlockingEvent;
+            _blockingEventsManager.InMenuOrPlayingCutsceneEvent -= BlockingEvent;
         }
 
-        void OnBlockingEvent(object sender, bool anyHappening) {
-            var isOnMenu = _blockingEventsManager.IsOnMenu;
+        void BlockingEvent(bool inMenuOrPlayingCutscene) {
+            var isInMenu = _blockingEventsManager.IsInMenu;
             var isPlayingCutscene = _blockingEventsManager.IsPlayingCutscene;
 
-            AnyBlockingEvent.Invoke(anyHappening);
-            OnMenuOrPlayingCutsceneEvent.Invoke(isOnMenu || isPlayingCutscene);
-            OnMenuEvent.Invoke(isOnMenu);
+            AnyBlockingEvent.Invoke(inMenuOrPlayingCutscene);
+            OnMenuOrPlayingCutsceneEvent.Invoke(isInMenu || isPlayingCutscene);
+            OnMenuEvent.Invoke(isInMenu);
             PlayingCutsceneEvent.Invoke(isPlayingCutscene);
 
             // inverted
-            NotOnMenuEvent.Invoke(!isOnMenu);
+            NotOnMenuEvent.Invoke(!isInMenu);
             NotPlayingCutsceneEvent.Invoke(!isPlayingCutscene);
-            NotOnMenuAndNotPlayingCutsceneEvent.Invoke(!isOnMenu && !isPlayingCutscene);
+            NotOnMenuAndNotPlayingCutsceneEvent.Invoke(!isInMenu && !isPlayingCutscene);
         }
 
     }
