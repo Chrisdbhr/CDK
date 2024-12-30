@@ -6,7 +6,7 @@ using UnityEditor;
 
 namespace CDK
 {
-    public class CGameObjectCreator : CAutoTriggerCompBase
+    public class GameObjectCreatorTrigger : CAutoTriggerCompBase
     {
         [SerializeField] private GameObject objToCreate;
 
