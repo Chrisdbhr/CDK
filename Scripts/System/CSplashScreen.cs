@@ -10,13 +10,14 @@ using FMODUnity;
 #endif
 
 namespace CDK {
+    [RequireComponent(typeof(PlayableDirector))]
     public class CSplashScreen : CMonoBehaviour {
 
         #region <<---------- Properties and Fields ---------->>
         
         [SerializeField] CSceneField _sceneToLoad;
-        [SerializeField] PlayableDirector _playableDirector;
         [SerializeField] GameObject _noHardwareAccelerationWarning;
+        [NonSerialized] [GetComponent] PlayableDirector _playableDirector;
         [NonSerialized] [Inject] readonly CCursorManager cursorManager;
         [NonSerialized] bool _splashEnded;
 
