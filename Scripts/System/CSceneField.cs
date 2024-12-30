@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 namespace CDK {
-	[System.Serializable]
+	[Serializable]
 	public class CSceneField : ISerializationCallbackReceiver {
         
         #region <<---------- Properties and Fields ---------->>
@@ -50,7 +50,7 @@ namespace CDK {
 
         public void OnBeforeSerialize() {
 			#if UNITY_EDITOR
-            this.sceneName = this;
+            sceneName = this;
 			#endif
         }
 
@@ -64,11 +64,11 @@ namespace CDK {
         #region <<---------- Public Methods ---------->>
         
         public void LoadScene() {
-            SceneManager.LoadScene(this.sceneName);
+            SceneManager.LoadScene(sceneName);
         }
 
         public void LoadSceneAdditive() {
-            SceneManager.LoadScene(this.sceneName, LoadSceneMode.Additive);
+            SceneManager.LoadScene(sceneName, LoadSceneMode.Additive);
         }
 
         #endregion <<---------- Public Methods ---------->>

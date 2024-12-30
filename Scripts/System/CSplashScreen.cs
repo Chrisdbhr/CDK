@@ -5,24 +5,20 @@ using UnityEngine;
 using UnityEngine.Playables;
 using UnityEngine.SceneManagement;
 
-#if REWIRED
-using UnityEngine.InputSystem;
-#endif
-
 #if FMOD
 using FMODUnity;
 #endif
 
 namespace CDK {
-    public class CSplashScreen : MonoBehaviour {
+    public class CSplashScreen : CMonoBehaviour {
 
         #region <<---------- Properties and Fields ---------->>
         
         [SerializeField] CSceneField _sceneToLoad;
         [SerializeField] PlayableDirector _playableDirector;
         [SerializeField] GameObject _noHardwareAccelerationWarning;
-        [Inject] readonly CCursorManager cursorManager;
-        bool _splashEnded;
+        [NonSerialized] [Inject] readonly CCursorManager cursorManager;
+        [NonSerialized] bool _splashEnded;
 
         #endregion <<---------- Properties and Fields ---------->>
 
@@ -31,7 +27,7 @@ namespace CDK {
         
         #region <<---------- MonoBehaviour ---------->>
         
-        private IEnumerator Start() {
+        IEnumerator Start() {
             yield return null;
 
             #if UNITY_WEBGL
@@ -43,30 +39,30 @@ namespace CDK {
             
             cursorManager.ShowMouseIfNeeded();
             
-            this._playableDirector.Play();
-            this._playableDirector.stopped += OnPlayableDirectorStopped;
+            _playableDirector.Play();
+            _playableDirector.stopped += OnPlayableDirectorStopped;
             
-            var asyncOp = SceneManager.LoadSceneAsync(this._sceneToLoad, LoadSceneMode.Single);
+            var asyncOp = SceneManager.LoadSceneAsync(_sceneToLoad, LoadSceneMode.Single);
             asyncOp.allowSceneActivation = false;
 
-            while (!this._splashEnded) yield return null;
+            while (!_splashEnded) yield return null;
 
             asyncOp.allowSceneActivation = true;
         }
 
-        private void Update() {
+        void Update() {
             if (Input.anyKeyDown) {
-                this._playableDirector.Stop();
+                _playableDirector.Stop();
             }
         }
 
         private void OnPlayableDirectorStopped(PlayableDirector pd) {
             Debug.Log("OnPlayableDirectorStopped.");
-            this._splashEnded = true;
+            _splashEnded = true;
         }
 
         private void Reset() {
-            if (this._playableDirector == null) TryGetComponent(out _playableDirector);
+            if (_playableDirector == null) TryGetComponent(out _playableDirector);
         }
 
         #endregion <<---------- MonoBehaviour ---------->>

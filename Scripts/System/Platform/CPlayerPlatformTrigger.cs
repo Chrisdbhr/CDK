@@ -11,9 +11,9 @@ namespace CDK {
         
         
         protected override void TriggerEvent() {
-            if(Application.platform == RuntimePlatform.WebGLPlayer) this._isWebgl?.Invoke();
-            if(IsMobilePlatform()) this._isMobile?.Invoke();
-            if(IsConsolePlatform()) this._isConsole?.Invoke();
+            if(Application.platform == RuntimePlatform.WebGLPlayer) _isWebgl?.Invoke();
+            if(IsMobilePlatform()) _isMobile?.Invoke();
+            if(IsConsolePlatform()) _isConsole?.Invoke();
         }
 
         public static bool IsMobilePlatform() {
