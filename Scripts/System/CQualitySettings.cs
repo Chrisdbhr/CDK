@@ -17,10 +17,15 @@ namespace CDK {
             	Debug.Log($"Starting monitoring for screen resolution smaller than 1024x768 to resize.");
             	while (true) {
                 	yield return null;
-              	  	if (Screen.fullScreenMode == FullScreenMode.Windowed && (Screen.width < 1024 || Screen.height < 768)) {
-                   	 	Debug.Log($"Setting Screen Resolution to 1024x768 and fullscreen mode to false.");
-                    	Screen.SetResolution(1024, 768, false);
-         	       	}
+	                const int targetWidth = 1024;
+	                const int targetHeight = 768;
+              	  	if (Screen.fullScreenMode == FullScreenMode.Windowed) {
+	                    bool setWidth = Screen.width < 1024;
+	                    bool setHeight = Screen.height < 768;
+	                    if(setWidth || setHeight) {
+		                    Screen.SetResolution(setWidth ? targetWidth : Screen.width, setHeight ? targetHeight : Screen.height,false);
+	                    }
+                    }
            	 	}
         	}
 			#endif
