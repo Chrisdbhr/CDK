@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace CDK.GameObjects
+namespace CDK
 {
     public static class GameObjectCreate
     {
