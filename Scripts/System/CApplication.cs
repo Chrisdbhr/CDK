@@ -10,8 +10,8 @@ using UnityEngine.AddressableAssets;
 using UnityEngine.AddressableAssets.ResourceLocators;
 #endif
 
-#if REWIRED
-using Rewired;
+#if UNITY_EDITOR
+using UnityEditor;
 #endif
 
 #if FMOD
@@ -27,11 +27,14 @@ namespace CDK {
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSplashScreen)]
         static void InitializeBeforeSceneLoad() {
             Debug.Log($"CDK v{CDK.Version} -> Initializing Application");
-
             Screen.sleepTimeout = SleepTimeout.NeverSleep;
-
             CreatePersistentDataPath();
+            AppQuitEvents();
+            InitializeApplicationAsync().CAwait();
+        }
 
+        static void AppQuitEvents()
+        {
             QuittingCancellationTokenSource?.Dispose();
             QuittingCancellationTokenSource = new CancellationTokenSource();
 
@@ -41,8 +44,16 @@ namespace CDK {
             Application.quitting += QuittingEvent;
             Application.quitting -= OnApplicationIsQuitting;
             Application.quitting += OnApplicationIsQuitting;
-
-            InitializeApplicationAsync().CAwait();
+            #if UNITY_EDITOR
+            EditorApplication.quitting -= OnApplicationIsQuitting;
+            EditorApplication.quitting += OnApplicationIsQuitting;
+            EditorApplication.playModeStateChanged -= EditorApplicationOnPlayModeStateChanged;
+            EditorApplication.playModeStateChanged += EditorApplicationOnPlayModeStateChanged;
+            static void EditorApplicationOnPlayModeStateChanged(PlayModeStateChange newState)
+            {
+                IsQuitting = newState == PlayModeStateChange.ExitingPlayMode;
+            }
+            #endif
         }
 
         static async Task InitializeApplicationAsync() {
@@ -97,6 +108,7 @@ namespace CDK {
 
         public static event Action QuittingEvent;
         public static event Action ApplicationInitialized;
+
         public static bool IsQuitting { get; private set; }
         public static CancellationTokenSource QuittingCancellationTokenSource;
 
@@ -176,7 +188,7 @@ namespace CDK {
 			Time.timeScale = 1f;
             UnityEditor.EditorApplication.isPlaying = false;
             #elif UNITY_WEBGL
-			Application.OpenURL("https://chrisjogos.com");
+			Application.OpenURL("https://enigmaticcomma.com");
 			#else
 			Application.Quit();			
 			#endif
