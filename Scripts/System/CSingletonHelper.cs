@@ -10,10 +10,6 @@ namespace CDK {
             return new GameObject(gameObjectName).CDontDestroyOnLoad().AddComponent<T>();
         }
         
-
-        
-        
-
         public static bool CannotCreateAnyInstance() {
             return CApplication.IsQuitting || !Application.isPlaying;
         }
