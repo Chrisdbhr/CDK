@@ -12,6 +12,7 @@ namespace CDK
         static void Init()
         {
             _instance = GameObjectCreate.WithComponent<StaticRoutinesRunner>();
+            DontDestroyOnLoad(_instance);
         }
 
         public static Coroutine RunRoutine(IEnumerator routine)
