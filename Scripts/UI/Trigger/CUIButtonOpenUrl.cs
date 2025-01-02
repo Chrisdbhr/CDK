@@ -5,7 +5,7 @@ using UnityEngine.UI;
 using UnityEditor;
 #endif
 
-namespace CDK.UI.Trigger {
+namespace CDK.UI {
     [RequireComponent(typeof(Button))]
     public class CUIButtonOpenUrl : MonoBehaviour {
 

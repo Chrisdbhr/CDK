@@ -181,16 +181,16 @@ namespace CDK {
             Application.focusChanged -= ApplicationOnfocusChanged;
         }
 
-		public static void Quit() {
+		public static void Quit(int exitCode = 0) {
 			Debug.Log("Requesting Application.Quit()");
-			
+
 			#if UNITY_EDITOR
 			Time.timeScale = 1f;
             UnityEditor.EditorApplication.isPlaying = false;
             #elif UNITY_WEBGL
 			Application.OpenURL("https://enigmaticcomma.com");
 			#else
-			Application.Quit();			
+			Application.Quit(exitCode);
 			#endif
 			
 		}
