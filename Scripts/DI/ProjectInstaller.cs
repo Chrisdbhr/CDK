@@ -21,6 +21,7 @@ namespace CDK {
                     if(!all.CIsNullOrEmpty()) return all.First();
                     return CScriptableObjectExtensions.EditorCreateInResourcesFolder<UISoundsBankSO>();
                     #endif
+                    return all.First();
                 }, typeof(UISoundsBankSO))
                 .AddSingleton(typeof(CBlockingEventsManager))
                 .AddSingleton(container => CAssets.LoadResourceAndInstantiate<CLoadingCanvas>("System/Loading Canvas"))
