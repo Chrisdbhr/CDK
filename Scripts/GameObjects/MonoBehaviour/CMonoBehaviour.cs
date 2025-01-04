@@ -9,7 +9,7 @@ namespace CDK
 {
     public class CMonoBehaviour : MonoBehaviour
     {
-        protected Transform transform;
+        protected new Transform transform;
 
         protected virtual void Awake()
         {
