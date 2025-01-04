@@ -1,14 +1,16 @@
 {
     "name": "CDK.Editor",
+    "rootNamespace": "",
     "references": [
-      "Unity.TextMeshPro",
-      "UniRx",
-      "FMODUnity",
-      "Unity.Localization",
-      "Unity.Localization.Editor",
-      "CDK",
-      "Unity.Timeline",
-      "Unity.Timeline.Editor"
+        "Unity.TextMeshPro",
+        "UniRx",
+        "FMODUnity",
+        "Unity.Localization",
+        "Unity.Localization.Editor",
+        "CDK",
+        "Unity.Timeline",
+        "Unity.Timeline.Editor",
+        "UnityEditor.PackageManager"
     ],
     "includePlatforms": [
         "Editor"
@@ -16,7 +18,9 @@
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": false,
-    "precompiledReferences": [],
+    "precompiledReferences": [
+        ""
+    ],
     "autoReferenced": true,
     "defineConstraints": [],
     "versionDefines": [],

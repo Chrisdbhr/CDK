@@ -5,6 +5,7 @@
 // Also check my website for my projects! https://chrisjogos.com
 
 using System;
+using UnityEditorInternal;
 using UnityEngine;
 
 #if UNITY_EDITOR
@@ -22,6 +23,6 @@ namespace CDK
 		{
 			Debug.Log($"CDK Version {Version}");
 		} 
-		public static readonly Version Version = new (5,0,1);
+		public static readonly Version Version = new (5,0,2);
 	}
 }
