@@ -23,6 +23,6 @@ namespace CDK
 		{
 			Debug.Log($"CDK Version {Version}");
 		} 
-		public static readonly Version Version = new (5,0,2);
+		public static readonly Version Version = new (5,0,3);
 	}
 }
