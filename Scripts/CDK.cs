@@ -5,11 +5,11 @@
 // Also check my website for my projects! https://chrisjogos.com
 
 using System;
-using UnityEditorInternal;
 using UnityEngine;
 
 #if UNITY_EDITOR
 using UnityEditor;
+using UnityEditorInternal;
 #endif
 
 namespace CDK 
