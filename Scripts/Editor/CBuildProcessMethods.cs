@@ -20,7 +20,7 @@ namespace CDK {
             if (Directory.Exists(netlifyFolder))
             {
                 Debug.Log($".netlify folder found in: {netlifyFolder}. Executing cmd 'netlify build --prod'...");
-                RunCmd(netlifyFolder, "netlify build --prod");
+                RunCmd(netlifyFolder, "netlify build --prod", true);
             }
             #elif UNITY_EDITOR_WIN
             var outputPath = buildPath.Replace($"/{Application.productName}.exe", string.Empty);
@@ -41,7 +41,7 @@ namespace CDK {
             RunCmd("", cmd);
         }
 
-        static void RunCmd(string cdToPath, string cmd)
+        static void RunCmd(string cdToPath, string cmd, bool createWindow = false)
         {
             try
             {
@@ -53,7 +53,7 @@ namespace CDK {
                     UseShellExecute = false,
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
-                    CreateNoWindow = true
+                    CreateNoWindow = !createWindow
                 };
                 process.OutputDataReceived += (sender, e) => Debug.Log(e.Data);
                 process.ErrorDataReceived += (sender, e) => Debug.LogError(e.Data);
