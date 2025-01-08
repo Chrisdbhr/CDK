@@ -5,6 +5,22 @@ using Object = UnityEngine.Object;
 
 namespace CDK {
 	public class CRetainable {
+        class ReleaseHelper : IDisposable {
+            readonly CRetainable _retainable;
+            readonly object _source;
+            bool _isDisposed;
+
+            public ReleaseHelper(CRetainable retainable, object source) {
+                _retainable = retainable;
+                _source = source;
+            }
+
+            public void Dispose() {
+                if (_isDisposed) return;
+                _isDisposed = true;
+                _retainable.Release(_source);
+            }
+        }
 
 		#region <<---------- Properties and Fields ---------->>
 
@@ -46,10 +62,11 @@ namespace CDK {
 
 		#region <<---------- General ---------->>
 
-		public void Retain(object source) {
-            if (_retainedObjects.Contains(source)) return;
+		public IDisposable Retain(object source) {
+            if (_retainedObjects.Contains(source)) return Disposables.Empty;
             _retainedObjects.Add(source);
             UpdateRetainedState();
+            return new ReleaseHelper(this, source);
 		}
 
 		public void Release(object source) {

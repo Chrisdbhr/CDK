@@ -11,7 +11,18 @@ namespace CDK.UI {
 	public class CUIButton : CUIInteractable {
 		public Button Button;
 
+		public bool Interactable {
+			get => Button.interactable;
+			set => Button.interactable = value;
+		}
+
 		public event Action ClickEvent = delegate { };
+
+		protected override void Awake()
+		{
+			base.Awake();
+			Button.CAssertIfNull("Button in a UIButton is null!");
+		}
 
 		protected override void OnEnable()
 		{
