@@ -1,7 +1,10 @@
 using System.Collections.Generic;
-using UnityEditor;
 using UnityEngine;
 using Object = UnityEngine.Object;
+
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace CDK {
     public static class CAssets {
@@ -70,7 +73,8 @@ namespace CDK {
 
 
 
-        public static IEnumerable<T> FindAssetsByType<T>() where T : Object {
+        #if UNITY_EDITOR
+        public static IEnumerable<T> EditorFindAssetsByType<T>() where T : Object {
             var guids = AssetDatabase.FindAssets($"t:{typeof(T)}");
             foreach (var t in guids) {
                 var assetPath = AssetDatabase.GUIDToAssetPath(t);
@@ -80,6 +84,7 @@ namespace CDK {
                 }
             }
         }
+        #endif
 
 	}
 }
