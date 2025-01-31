@@ -112,3 +112,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b2b5d2efdd9c4e71b76c78b85014839f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _fadeImage: {fileID: 2316152831607426312}
+  _canvas: {fileID: 7346180389191431311}
