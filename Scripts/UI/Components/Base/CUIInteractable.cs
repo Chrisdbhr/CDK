@@ -27,7 +27,6 @@ namespace CDK.UI {
 		EventInstance _soundEventInstance;
 		#endif
 
-        [Inject] protected CUINavigationManager _navigationManager;
         [Inject] protected UISoundsBankSO _soundsBank;
 
         [SerializeField] UnityEvent _interactEvent;
@@ -47,6 +46,15 @@ namespace CDK.UI {
 
         #endregion <<---------- Mono Behaviour ---------->>
 
+
+        protected void TryEndNavigation()
+        {
+	        if(transform.root == null || !transform.root.TryGetComponent(out View view)) {
+		        Debug.LogError("Could not get View from root to end navigation", this);
+		        return;
+	        }
+	        view.RecursiveCloseAllViews();
+        }
 
 		#if FMOD
 		void PlaySound(EventReference sound) {
@@ -111,7 +119,9 @@ namespace CDK.UI {
 		
 		public void OnCancel(BaseEventData eventData) {
 			if (!IsThisAValidInteractionTarget(eventData)) return;
-            if (_navigationManager.CloseLastMenu(true)) {
+			var rootT = transform.root;
+            if (rootT != null && rootT.TryGetComponent(out View view)) {
+	            view.CloseView();
                 Canceled();
             }
         }

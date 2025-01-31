@@ -1,17 +1,12 @@
 using System;
-using System.Collections;
 
 using Reflex.Attributes;
 using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.EventSystems;
-
-#if FMOD
-using FMODUnity;
-#endif
+using Object = UnityEngine.Object;
 
 namespace CDK.UI {
-	public abstract class CUIViewBase : CMonoBehaviour {
+	public abstract class View : CMonoBehaviour {
 
 		#region <<---------- Properties and Fields ---------->>
 
@@ -30,37 +25,14 @@ namespace CDK.UI {
 		public bool CanCloseByReturnButton => _canCloseByReturnButton;
         protected bool _canCloseByReturnButton = true;
 
-		[NonSerialized] CUIViewBase _previousUI;
+		[NonSerialized] View _previous;
 		[NonSerialized] CUIInteractable _previousButton;
 
-		public event Action OnOpen {
-			add {
-				_onOpen -= value;
-				_onOpen += value;
-			}
-			remove {
-				_onOpen -= value;
-			}
-		}
-		[NonSerialized] Action _onOpen;
-
-		public event Action<CUIViewBase> OnClose {
-			add {
-				_onClose -= value;
-				_onClose += value;
-			}
-			remove {
-				_onClose -= value;
-			}
-		}
-		[NonSerialized] Action<CUIViewBase> _onClose;
-
-		[NonSerialized] protected UnityEvent OnOpenEvent;
-		[NonSerialized] protected UnityEvent OnCloseEvent;
+		public event Action<View> OpenEvent;
+		public event Action<View> CloseEvent;
 
 		[Inject][NonSerialized] protected UISoundsBankSO _soundsBank;
 		[Inject][NonSerialized] protected readonly CBlockingEventsManager _blockingEventsManager;
-		[Inject][NonSerialized] protected CUINavigationManager _navigationManager;
 
 		#endregion <<---------- Properties and Fields ---------->>
 
@@ -71,7 +43,7 @@ namespace CDK.UI {
 
 		protected virtual void OnEnable() {
 			UpdateEventSystemAndCheckForObjectSelection(_eventSystem.firstSelectedGameObject);
-            if(_buttonReturn) _buttonReturn.ClickEvent += NavigationRequestedClose;
+            if(_buttonReturn) _buttonReturn.ClickEvent += CloseView;
             _blockingEventsManager.MenuRetainable.Retain(this);
         }
 
@@ -89,7 +61,7 @@ namespace CDK.UI {
 
 		protected virtual void OnDisable() {
             _blockingEventsManager.MenuRetainable.Release(this);
-            if(_buttonReturn) _buttonReturn.ClickEvent -= NavigationRequestedClose;
+            if(_buttonReturn) _buttonReturn.ClickEvent -= CloseView;
 		}
 
         protected virtual void OnDestroy() { }
@@ -107,38 +79,49 @@ namespace CDK.UI {
 
 		#region <<---------- Open / Close ---------->>
 
-		public void Open(int sortOrder, CUIViewBase originUI, CUIInteractable originButton, bool canCloseByReturnButton = true) {
-			Debug.Log($"Open UI {gameObject.name}");
-			_previousUI = originUI;
+		public static View InstantiateAndOpen(View prefab, View previous = null, CUIInteractable originButton = null, bool canCloseByReturnButton = true)
+		{
+			var view = Object.Instantiate(prefab);
+			view.Open(previous, originButton, canCloseByReturnButton);
+			return view;
+		}
+
+		void Open(View previous, CUIInteractable originButton, bool canCloseByReturnButton = true) {
+			Debug.Log($"Opening UI {gameObject.name}");
+			_previous = previous;
+			if(_previous != null) {
+				GetComponentInChildren<Canvas>(true).sortingOrder = 1 + _previous.GetComponentInChildren<Canvas>(true).sortingOrder;
+				_previous.gameObject.SetActive(false);
+			}
 			_previousButton = originButton;
-
             _canCloseByReturnButton = canCloseByReturnButton;
-
-			_onOpen?.Invoke();
-
-			UpdateCTime();
-
-			OnOpenEvent?.Invoke();
-
-			GetComponentInChildren<Canvas>(true).sortingOrder = sortOrder;
-
+            CTime.TimeScale = ShouldPauseTheGame ? 0f : 1f;
+			_blockingEventsManager.MenuRetainable.Retain(this);
+			OpenEvent?.Invoke(this);
             gameObject.SetActive(true);
 		}
 
-        /// <summary>
-        /// Close the menu.
-        /// </summary>
-        /// <returns>Returns TRUE if the menu closed without errors.</returns>
-        public void NavigationRequestedClose() {
+		public void CloseView()
+		{
+			CloseInternal(false);
+		}
+
+		public void RecursiveCloseAllViews()
+		{
+			CloseInternal(true);
+		}
+
+        void CloseInternal(bool closeAll = false) {
 			Debug.Log($"Closing UI {gameObject.name}", this);
-			_onClose?.Invoke(this);
-
-			if (_previousUI != null) _previousUI.ShowIfHidden(_previousButton);
-
-			OnCloseEvent?.Invoke();
-
+			CloseEvent?.Invoke(this);
+			if(_previous != null) {
+				if(closeAll) _previous.RecursiveCloseAllViews();
+				else _previous.ShowIfHidden(_previousButton);
+			}
+			else {
+				CTime.TimeScale = 1f;
+			}
 			_blockingEventsManager.MenuRetainable.Release(this);
-
 			#if UNITY_ADDRESSABLES_EXIST
 			if (!CAssets.UnloadAsset(this.gameObject)) {
 				Debug.LogError($"Error releasing instance of object '{this.gameObject.name}'", this);
@@ -172,28 +155,13 @@ namespace CDK.UI {
             _eventSystem.SetSelectedGameObject(interactableToSelect.gameObject);
 		}
 
-		public void HideIfSet() {
-			gameObject.SetActive(false);
-		}
-
 		public void ShowIfHidden(CUIInteractable buttonToSelect) {
 			gameObject.SetActive(true);
 			if(buttonToSelect) UpdateEventSystemAndCheckForObjectSelection(buttonToSelect);
-			UpdateCTime();
+			CTime.TimeScale = ShouldPauseTheGame ? 0f : 1f;
 		}
 
 		#endregion <<---------- Visibility ---------->>
 
-
-
-
-		#region <<---------- Time ---------->>
-
-		void UpdateCTime() {
-			CTime.TimeScale = ShouldPauseTheGame ? 0f : 1f;
-		}
-		
-		#endregion <<---------- Time ---------->>
-		
 	}
 }

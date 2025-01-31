@@ -7,7 +7,8 @@ namespace CDK {
 		
 		public static Coroutine CStartCoroutine(this MonoBehaviour monoBehaviour, IEnumerator coroutine) {
 			if(CApplication.IsQuitting) {
-				Debug.LogError("Tried to start a coroutine while application is quitting. This will lead to errors and possible memory leak.", monoBehaviour);
+				Debug.LogError("Tried to start a coroutine while application is quitting. Coroutine will not be started.", monoBehaviour);
+				return null;
 			}
 			if(monoBehaviour == null) {
 				Debug.LogError("Tried to start a coroutine on a null MonoBehaviour. Coroutine will not be started.");

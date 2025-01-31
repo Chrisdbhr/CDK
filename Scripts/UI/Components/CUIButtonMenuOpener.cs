@@ -4,7 +4,7 @@ using UnityEngine;
 namespace CDK.UI {
     public class CUIButtonMenuOpener : CUIButton {
 
-        [SerializeField] CUIViewBase _menuToOpen;
+        [SerializeField] View _menuToOpen;
 
 
         protected override void OnEnable()
@@ -21,7 +21,7 @@ namespace CDK.UI {
 
         void OnOnClick()
         {
-            _navigationManager.OpenMenu(_menuToOpen, GetComponentInParent<CUIViewBase>(), this);
+            View.InstantiateAndOpen(_menuToOpen, GetComponentInParent<View>(), this);
         }
     }
 }

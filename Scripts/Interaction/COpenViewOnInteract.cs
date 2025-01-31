@@ -6,14 +6,13 @@ using UnityEngine;
 namespace CDK {
     public class COpenViewOnInteract : CInteractable {
 
-        [SerializeField] CUIViewBase _viewToOpen;
-        [Inject] protected readonly CUINavigationManager navigationManager;
+        [SerializeField] View _viewToOpen;
         
         
         
         public override bool OnInteract(Transform interactingTransform) {
             if (!base.OnInteract(interactingTransform)) return false;
-            navigationManager.OpenMenu(_viewToOpen, null, null);
+            View.InstantiateAndOpen(_viewToOpen, null, null);
             return true;
         }
         

@@ -4,7 +4,7 @@ using TMPro;
 using UnityEngine;
 
 namespace CDK.UI {
-	public class CUIConfirmPopup : CUIViewBase {
+	public class ConfirmPopup : View {
 		
 		[Header("Confirmation")]
 		[SerializeField] CUIButton _buttonConfirm;
@@ -17,7 +17,7 @@ namespace CDK.UI {
 			_buttonConfirm.Button.interactable = true;
 			_buttonConfirm.ClickEvent += () => {
 				Debug.Log($"SUBMIT: Confirm Popup '{gameObject.name}'",this);
-				_navigationManager.CloseLastMenu();
+				this.CloseView();
 				onConfirm?.Invoke(this,EventArgs.Empty);
 			};
 					

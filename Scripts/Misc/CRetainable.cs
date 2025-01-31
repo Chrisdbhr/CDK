@@ -29,7 +29,7 @@ namespace CDK {
                 UpdateRetainedState();
                 return _isRetained;
             }
-            set {
+            private set {
                 if(_isRetained == value) return;
                 _isRetained = value;
                 StateEvent.Invoke(value);

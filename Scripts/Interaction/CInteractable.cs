@@ -12,7 +12,6 @@ namespace CDK.Interaction {
         [SerializeField] Transform _interactionPromptPoint;
 		[SerializeField] CUnityEventTransform InteractEvent;
 		[Inject] protected readonly CBlockingEventsManager _blockingEventsManager;
-		[Inject] protected readonly CUINavigationManager _navigationManager;
 
 		#endregion <<---------- Properties and Fields ---------->>
 
