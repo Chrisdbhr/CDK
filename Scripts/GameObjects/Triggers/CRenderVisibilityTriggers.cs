@@ -3,14 +3,17 @@ using UnityEngine;
 using UnityEngine.Events;
 
 namespace CDK {
-	public class CRenderVisibilityTriggers : MonoBehaviour {
-
+	public class CRenderVisibilityTriggers : MonoBehaviour
+	{
+		[SerializeField] bool _debug;
 		[SerializeField] UnityEvent _becameVisibleEvent;
 		[SerializeField] UnityEvent _becameInvisibleEvent;
+		[SerializeField] CUnityEventBool _visibleEvent;
+		[SerializeField] CUnityEventBool _invisibleEvent;
 		[NonSerialized] bool _isVisible;
 		
-		public Action BecameVisibleAction;
-		public Action BecameInvisibleAction;
+		[NonSerialized] public Action BecameVisibleAction;
+		[NonSerialized] public Action BecameInvisibleAction;
 		
 		
 		
@@ -48,11 +51,17 @@ namespace CDK {
 		void BecameVisibleInvoke() {
 			_becameVisibleEvent?.Invoke();
 			BecameVisibleAction?.Invoke();
+			_visibleEvent?.Invoke(true);
+			_invisibleEvent?.Invoke(false);
+			if(_debug) Debug.Log($"{this.name} became visible by some camera.");
 		}
 
 		void BecameInvisibleInvoke() {
 			_becameInvisibleEvent?.Invoke();
 			BecameInvisibleAction?.Invoke();
+			_visibleEvent?.Invoke(false);
+			_invisibleEvent?.Invoke(true);
+			if(_debug) Debug.Log($"{this.name} became invisible by all cameras.");
 		}
 		
 		#endregion <<---------- Events Invoke ---------->>
