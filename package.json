@@ -1,7 +1,7 @@
 {
     "name": "com.chrisdbhr.cdk",
     "displayName": "CDK - Chris Development Kit",
-    "version": "5.0.7",
+    "version": "5.0.8",
     "unity": "2022.3",
     "description": "Chris Development Kit is a useful set of tools to speedup development of core Unity games mechanics. This code is shared between all my projects and it is in active update and improvement.",
     "licensesUrl": "https://github.com/Chrisdbhr/CDK/blob/master/LICENSE",
